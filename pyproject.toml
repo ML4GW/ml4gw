@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "ml4gw"
+version = "0.0.1"
+description = "Tools for building training torch models on gravitational wave data"
+authors = [
+    "Alec Gunny <alec.gunny@ligo.org>",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+torch = "^1.10"
+bilby = "^1.1"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.16"
+pytest = "^7.0"
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.tox
+  | _build
+  | dist
+  | docs
+)/
+'''
+
+[tool.isort]
+known_first_party = ["ml4gw"]
+multi_line_output = 3
+include_trailing_comma = true
+
+[build-system]
+requires = ["poetry>=1.2"]
+build-backend = "poetry.masonry.api"
