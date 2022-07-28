@@ -86,6 +86,8 @@ def project_raw_gw(
             torch.cos(theta),
         ]
     ).t()
+    idx = torch.arange(waveform_size)[:, None].repeat((1, batch_size))
+    idx = idx.to(omega.device)
 
     rolled = []
     for i in range(num_ifos):
@@ -95,10 +97,10 @@ def project_raw_gw(
 
         # rolling by gathering implementation taken from
         # https://stackoverflow.com/a/68641864
-        idx = torch.arange(waveform_size)[None].repeat((batch_size, 1))
-        idx = (idx - delay) % waveform_size
+        gather_idx = (idx - delay) % waveform_size
+        gather_idx = gather_idx.t()
         ifo = projections[:, i]
-        ifo = torch.gather(ifo, 1, idx)
+        ifo = torch.gather(ifo, 1, gather_idx)
 
         rolled.append(ifo[:, None])
     return torch.cat(rolled, axis=1)
