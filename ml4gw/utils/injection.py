@@ -27,10 +27,12 @@ polarization_funcs = {
 
 
 def project_raw_gw(
+    sample_rate: float,
     dec: torch.Tensor,
     psi: torch.Tensor,
     phi: torch.Tensor,
     ifo_geometry: torch.Tensor,
+    ifo_vertices: torch.Tensor,
     **polarizations: torch.Tensor,
 ):
     modes = list(polarizations)
@@ -73,15 +75,43 @@ def project_raw_gw(
 
     # now sum along each polarization to get the projected
     # waveform for each interferometer: batch x ifos x time
-    projections = np.einsum("bpi,pbt->bit", ifo_responses, waveforms)
+    projections = torch.einsum("bpi,pbt->bit", ifo_responses, waveforms)
+    batch_size, num_ifos, waveform_size = projections.shape
 
-    # TODO: add in time shifts
-    return projections
+    dt = waveform_size / (2 * sample_rate)
+    omega = torch.stack(
+        [
+            torch.sin(theta) * torch.cos(phi),
+            torch.sin(theta) * torch.sin(phi),
+            torch.cos(theta),
+        ]
+    ).t()
+
+    rolled = []
+    for i in range(num_ifos):
+        vertex = ifo_vertices[i]
+        delay = dt + (omega * vertex).sum(axis=-1)
+        delay = torch.round(delay).type(torch.int64)
+
+        # rolling by gathering implementation taken from
+        # https://stackoverflow.com/a/68641864
+        idx = torch.arange(waveform_size)[None].repeat((batch_size, 1))
+        idx = (idx - delay) % waveform_size
+        ifo = projections[:, i]
+        ifo = torch.gather(ifo, 1, idx)
+
+        rolled.append(ifo[:, None])
+    return torch.cat(rolled, axis=1)
 
 
 def get_ifo_geometry(*ifos):
-    geometries = []
+    tensors, vertices = [], []
     for ifo in ifos:
         ifo = bilby.gw.detector.get_empty_interferometer(ifo)
-        geometries.append(ifo.detector_tensor.flatten())
-    return torch.Tensor(np.stack(geometries))
+
+        tensors.append(ifo.detector_tensor.flatten())
+        vertices.append(ifo.vertex.flatten())
+
+    tensors = np.stack(tensors)
+    vertices = np.stack(vertices)
+    return torch.Tensor(tensors), torch.Tensor(vertices)

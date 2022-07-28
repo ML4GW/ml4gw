@@ -22,7 +22,7 @@ def test_project_raw_gw():
     dec = torch.arange(0, np.pi, batch_size)
     psi = torch.arange(-np.pi / 2, np.pi / 2, batch_size)
     phi = torch.arange(0, 2 * np.pi, batch_size)
-    geometry = injection.get_ifo_geometry("H1", "L1")
+    tensors, vertices = injection.get_ifo_geometry("H1", "L1")
 
     t = torch.arange(0.0, 8.0, 1 / 1024)
     assert len(t) == (8 * 1024)
@@ -31,7 +31,7 @@ def test_project_raw_gw():
     cross = torch.stack([0.5 * torch.sin(20 * 2 * np.pi * t)] * batch_size)
 
     result = injection.project_raw_gw(
-        dec, psi, phi, geometry, plus=plus, cross=cross
+        1024, dec, psi, phi, tensors, vertices, plus=plus, cross=cross
     )
     assert result.shape == (batch_size, 2, len(t))
     # TODO: compare to bilby output. How to do this without
