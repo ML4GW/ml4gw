@@ -3,7 +3,7 @@ from typing import Optional, Union
 import torch
 from torchtyping import TensorType
 
-# need this for flake8 compatibility
+# need to define these for flake8 compatibility
 batch = time = channel = None  # noqa
 
 TimeSeriesTensor = Union[TensorType["time"], TensorType["channel", "time"]]
@@ -33,12 +33,28 @@ def slice_kernels(
         # this is a multi-channel timeseries and we want
         # to select a set of kernels from the channels
         # coincidentally
+
+        # 1 x kernel_size x 1
         kernels = torch.arange(kernel_size).view(1, kernel_size, 1)
+
+        # channels x kernel_size x batch_size
         kernels = kernels.repeat(len(x), 1, len(idx))
-        kernels = (kernels + idx).transpose(1, 2)
+        kernels += idx
+
+        # channels x batch_size x kernel_size
+        kernels = kernels.transpose(1, 2)
+
+        # channels x (batch_size * kernel_size)
         kernels = kernels.reshape(len(x), -1)
+
+        # channels x (batch_size * kernel_size)
+        # (only this time it's data from x)
         x = torch.take_along_dim(x, kernels, axis=1)
+
+        # channels x batch_size x kernel_size
         x = x.reshape(len(x), len(idx), kernel_size)
+
+        # batch_size x channels x kernel_size
         return x.transpose(0, 1).contiguous()
     elif x.ndim == 2 and idx.ndim == 2:
         # this is a multi-channel timeseries and we want
@@ -70,6 +86,12 @@ def sample_kernels(
     max_center_offset: Optional[int] = None,
     coincident: bool = True,
 ) -> BatchTimeSeriesTensor:
+    if X.shape[-1] < kernel_size:
+        raise ValueError(
+            "Can't sample kernels of size {} from "
+            "tensor with shape {}".format(kernel_size, X.shape)
+        )
+
     if X.ndim == 1:
         idx = torch.randint(len(X) - kernel_size, size=(N,))
         return slice_kernels(X, idx, kernel_size)
@@ -80,9 +102,14 @@ def sample_kernels(
     elif max_center_offset >= 0:
         min_val = center - max_center_offset - kernel_size
         max_val = center
+    elif kernel_size <= 2 * abs(max_center_offset):
+        raise ValueError(
+            "Negative center offset value {} is too large "
+            "for request kernel size {}".format(max_center_offset, kernel_size)
+        )
     else:
-        min_val = center + max_center_offset - kernel_size
-        max_val = center - max_center_offset
+        min_val = center - max_center_offset - kernel_size
+        max_val = center + max_center_offset
 
     if coincident:
         shape = (N,)
