@@ -88,7 +88,7 @@ def project_raw_gw(
             torch.cos(theta),
         ]
     )
-    dt = torch.einsum("jb,ji->bi", omega, ifo_vertices) + trigger_shift
+    dt = torch.einsum("jb,ij->bi", omega, ifo_vertices) + trigger_shift
     dt = torch.round(dt).type(torch.int64)
 
     # rolling by gathering implementation taken from
@@ -102,6 +102,7 @@ def project_raw_gw(
 
     idx -= dt
     idx %= waveform_size
+    idx = torch.transpose(idx, 1, 0)
 
     rolled = []
     for i in range(num_ifos):
