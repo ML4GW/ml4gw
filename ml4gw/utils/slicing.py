@@ -16,6 +16,38 @@ BatchTimeSeriesTensor = Union[
 def slice_kernels(
     x: TimeSeriesTensor, idx: TensorType[..., torch.int64], kernel_size: int
 ) -> BatchTimeSeriesTensor:
+    """Slice kernels from single or multichannel timeseries
+
+    Given a 1D timeseries or a 2D tensor representing a
+    multichannel timeseries, slice kernels of a given size
+    from the timeseries starting at the indicated indices.
+    Returns a batch of 1D or 2D kernels, and so will have
+    one more dimension than `x`.
+
+    Args:
+        x: The timeseries tensor to slice kernels from
+        idx:
+            The indices in `x` of the first sample of each
+            kernel. If `x` is 1D, `idx` must be 1D as well.
+            If `x` is 2D and `idx` is 1D, `idx` is assumed
+            to represent the first index of the kernels sliced
+            from _all_ channels (i.e. the channels are sliced
+            coincidentally). If `x` is 2D and `idx` is also 2D,
+            `idx` should have shape `(batch_size, num_channels)`,
+            and its values are assumed to represent the first index
+            of the kernel sliced from each channel _independently_.
+        kernel_size:
+            The length of the kernels to slice from the timeseries
+    Returns:
+        A tensor of shape `(batch_size, kernel_size)` if `x` is
+        1D and `(batch_size, num_channels, kernel_size)` if `x`
+        is 2D, where `batch_size = idx.shape[0]` and
+        `num_channels = x.shape[0]` if `x` is 2D.
+    """
+
+    # TODO: add try-catches aroud the actual slicing operations
+    # to catch out-of-range index errors and raise with a
+    # standardized error that's very explicit
     if x.ndim == 1:
         if idx.ndim != 1:
             raise ValueError(
@@ -55,7 +87,7 @@ def slice_kernels(
         x = x.reshape(len(x), len(idx), kernel_size)
 
         # batch_size x channels x kernel_size
-        return x.transpose(0, 1).contiguous()
+        return x.transpose(0, 1)
     elif x.ndim == 2 and idx.ndim == 2:
         # this is a multi-channel timeseries and we want
         # to select _different_ kernels from each channel
@@ -64,23 +96,38 @@ def slice_kernels(
                 "Can't slice array with shape {} with indices "
                 "with shape {}".format(x.shape, idx.shape)
             )
+
+        # kernel_size x 1 x 1
         kernels = torch.arange(kernel_size).view(kernel_size, 1, 1)
+
+        # kernel_size x batch_size x num_channels,
+        # since we're going to add idx and idx has shape
+        # batch_size x num_channels
         kernels = kernels.repeat(1, len(idx), len(x))
+
+        # num_channels x batch_size x kernel_size
         kernels = (kernels + idx).transpose(0, 2)
+
+        # num_channels x (batch_size * kernel_size)
         kernels = kernels.reshape(len(x), -1)
+
+        # num_channels x (batch_size * kernel_size)
+        # sample a batch's worth of kernels for each channel
         x = torch.take_along_dim(x, kernels, axis=1)
+
+        # num_channels x batch_size x kernel_size
         x = x.reshape(len(x), len(idx), kernel_size)
-        return x.transpose(0, 1).contiguous()
+
+        # batch_size x num_channels x kernel_size
+        return x.transpose(0, 1)
     elif x.ndim == 2:
         raise ValueError(
             f"Can't slice 2D array with indices with {idx.ndim} dimensions"
         )
-    elif x.ndim == 3:
-        if idx.ndim != 1:
-            raise ValueError(
-                f"idx tensor has {idx.ndim} dimensions for slicing "
-                "tensor with 3 dimensions, expected 1"
-            )
+    else:
+        raise ValueError(
+            f"Can't slice kernels from tensor with shape {x.shape}"
+        )
 
 
 def sample_kernels(
@@ -90,10 +137,57 @@ def sample_kernels(
     max_center_offset: Optional[int] = None,
     coincident: bool = True,
 ) -> BatchTimeSeriesTensor:
+    """Randomly sample kernels from a single or multichannel timeseries
+
+    For a tensor representing one or multiple channels of
+    timeseries data, randomly slice kernels of a fixed
+    length from the timeseries. If `X` is 1D, kernels will
+    be sampled uniformly from `X`. If `X` is 2D, kernels
+    will be sampled from the first dimension of `X` (assumed
+    to be the time dimension) in a manner that depends on the
+    values of the `max_center_offset` and `coincident` kwargs.
+
+    Args:
+        X: The timeseries tensor from which to sample kernels
+        N: The number of kernels to sample
+        kernel_size: The size of the kernels to sample
+        max_center_offeset:
+            If `X` is 2D, this indicates the maximum distance
+            from the center of the timeseries the edge of
+            sampled kernels may fall. If left as `None`, kernels
+            will be sampled uniformly across all of `X`'s time
+            dimension. If greater than 0, defines the maximum
+            distance that the rightmost edge of the kernel may
+            fall from the center of the timeseries (the leftmost
+            edge will always be sampled such that the center of
+            the timeseries falls within the kernel). If equal to
+            0, every kernel sampled will contain the center of
+            the timeseries, which may fall anywhere within the
+            kernel with uniform probability. If less than 0, defines
+            the minimum distance that the center of the timeseries
+            must fall from either edge of the kernel. If `X` is
+            1D, this argument is ignored.
+        coincident:
+            If `X` is 2D, determines whether the individual channels
+            of `X` sample the same kernels or different kernels
+            independently, i.e. whether the channels of each batch
+            element in the output will contain coincident data. If
+            `X` is 1D, this argument is ignored.
+    Returns:
+        A batch of sampled kernels. If `X` is 1D, this will have
+        shape `(N, kernel_size)`. If `X` is 2D, this will have
+        shape `(N, num_channels, kernel_size)`, where
+        `num_channels = X.shape[0]`.
+    """
+
     if X.shape[-1] < kernel_size:
         raise ValueError(
             "Can't sample kernels of size {} from "
             "tensor with shape {}".format(kernel_size, X.shape)
+        )
+    elif X.ndim > 2:
+        raise ValueError(
+            f"Can't sample kernels from tensor with {X.ndim} dimensions"
         )
 
     if X.ndim == 1:
@@ -102,22 +196,40 @@ def sample_kernels(
 
     center = int(X.shape[1] // 2)
     if max_center_offset is None:
-        min_val, max_val = 0, X.shape[1]
+        # sample uniformly from all of X's time dimension
+        min_val, max_val = 0, X.shape[1] - kernel_size
     elif max_center_offset >= 0:
+        # a positive max_center_offset means we're allowed
+        # to put some space between the center of the timeseries
+        # and the right edge of the kernel, but not the center
+        # and the left edge of the kernel
         min_val = center - max_center_offset - kernel_size
         max_val = center
-    elif kernel_size <= 2 * abs(max_center_offset):
-        raise ValueError(
-            "Negative center offset value {} is too large "
-            "for request kernel size {}".format(max_center_offset, kernel_size)
-        )
     else:
+        # a negative max_center_offset means that we want
+        # to enforce that the center of the timeseries is
+        # some distance away from the edge of the kernel
         min_val = center - max_center_offset - kernel_size
         max_val = center + max_center_offset
 
+        if max_val <= min_val:
+            # if our required offset value is more than half
+            # the kernel length, we won't be able to sample
+            # any kernels at all
+            raise ValueError(
+                "Negative center offset value {} is too large "
+                "for requested kernel size {}".format(
+                    max_center_offset, kernel_size
+                )
+            )
+
     if coincident:
+        # sampling coincidentally, so just need a single
+        # index for each element in the output batch
         shape = (N,)
     else:
+        # otherwise, each channel in each batch sample
+        # will require its own sampling index
         shape = (N, len(X))
 
     idx = torch.randint(min_val, max_val, size=shape)
