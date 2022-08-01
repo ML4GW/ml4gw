@@ -13,25 +13,6 @@ BatchTimeSeriesTensor = Union[
 ]
 
 
-def slice_kernels_via_concat(x, idx, kernel_size):
-    if x.ndim == 1:
-        output = torch.zeros((len(idx), kernel_size))
-        for i, j in enumerate(idx):
-            output[i] = x[j : j + kernel_size]
-        return output
-    elif x.ndim == 2 and idx.ndim == 1:
-        output = torch.zeros((len(idx), len(x), kernel_size))
-        for i, j in enumerate(idx):
-            output[i] = x[:, j : j + kernel_size]
-        return output
-    elif x.ndim == 2 and idx.ndim == 1:
-        output = torch.zeros((len(idx), len(x), kernel_size))
-        for i, row in enumerate(idx):
-            for j, val in enumerate(row):
-                output[i, j] = x[val : val + kernel_size]
-        return output
-
-
 def slice_kernels(
     x: TimeSeriesTensor, idx: TensorType[..., torch.int64], kernel_size: int
 ) -> BatchTimeSeriesTensor:
