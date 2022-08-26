@@ -73,7 +73,7 @@ def bilby_get_ifo_response(ifos, batch_size):
     return func
 
 
-def test_compute_ifo_response(
+def test_compute_antenna_responses(
     ifos,
     batch_size,
     sample_rate,
@@ -92,7 +92,7 @@ def test_compute_ifo_response(
     tensors, vertices = injection.get_ifo_geometry(*ifos)
     tensors = tensors.type(torch.float64)
 
-    result = injection.compute_ifo_responses(
+    result = injection.compute_antenna_responses(
         np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
     )
     assert result.shape == (batch_size, 2, len(ifos))
@@ -143,7 +143,7 @@ def test_project_waveforms(
     tensors, vertices = injection.get_ifo_geometry(*ifos)
     tensors = tensors.type(torch.float64)
 
-    responses = injection.compute_ifo_responses(
+    responses = injection.compute_antenna_responses(
         np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
     )
     result = injection.project_waveforms(responses, plus=plus, cross=cross)
