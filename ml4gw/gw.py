@@ -18,8 +18,6 @@ import torch
 from bilby.core.utils import speed_of_light
 from torchtyping import TensorType
 
-from ml4gw import fourier
-
 # define some tensor shapes we'll reuse a bit
 # up front. Need to assign these variables so
 # that static linters don't give us name errors
@@ -360,7 +358,7 @@ def compute_ifo_snr(
 
         integrand *= highpass
     elif highpass is not None:
-        freqs = fourier.get_freqs_from_size(responses.shape[-1], sample_rate)
+        freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
         mask = freqs >= highpass
         integrand *= mask
 

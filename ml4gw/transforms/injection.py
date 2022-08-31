@@ -8,23 +8,34 @@ from gwpy.frequencyseries import FrequencySeries
 from gwpy.timeseries import TimeSeries
 
 from ml4gw import gw
+from ml4gw.utils.slicing import sample_kernels
 
 Distribution = CallableType[int, np.ndarray]
 SourceParameter = Union[np.ndarray, Distribution]
 
 
-class WaveformSampler(torch.nn.Module):
+class RandomWaveformInjection(torch.nn.Module):
     def __init__(
         self,
-        sample_rate: float,
         dec: SourceParameter,
         psi: SourceParameter,
         phi: SourceParameter,
         snr: SourceParameter,
+        sample_rate: float,
         highpass: float = 0.0,
+        prob: float = 1.0,
+        trigger_offset: float = 0,
         **polarizations: np.ndarray
     ) -> None:
         super().__init__()
+
+        if not 0 < prob <= 1.0:
+            raise ValueError(
+                "Injection probability must be between 0 and 1, "
+                "got {}".format(prob)
+            )
+        self.prob = prob
+        self.trigger_offset = int(trigger_offset * sample_rate)
 
         # make sure we have the same number of waveforms
         # for all the different polarizations
@@ -39,6 +50,7 @@ class WaveformSampler(torch.nn.Module):
                 )
             elif num_waveforms is None:
                 num_waveforms, waveform_size = tensor.shape
+        self.polarizations = polarizations
 
         # confirm that the source parameters all either
         # are a callable or have a length equal to the
@@ -70,25 +82,28 @@ class WaveformSampler(torch.nn.Module):
         self.sample_rate = sample_rate
         self.df = sample_rate / waveform_size
 
-        highpass = highpass or 0
-        freqs = torch.arange(waveform_size // 2 + 1) * self.df
-        mask = freqs >= highpass
-        self.mask = torch.Parameter(mask, requires_grad=False)
+        if highpass is not None:
+            freqs = torch.fft.rfftfreq(waveform_size, 1 / sample_rate)
+            self.mask = freqs >= highpass
+        else:
+            self.mask = None
 
-        self.background = self.ifos = self.tensors = self.vertices = None
+        # initialize a bunch of properties we're
+        # going to have to fit later
+        self.background = self.tensors = self.vertices = None
 
     def fit(
         self,
         sample_rate: Optional[float] = None,
         **backgrounds: Union[np.ndarray, TimeSeries, FrequencySeries]
     ) -> None:
-        self.ifos = list(backgrounds)
-        tensors, vertices = gw.get_ifo_geometry(*self.ifos)
+        ifos = list(backgrounds)
+        tensors, vertices = gw.get_ifo_geometry(*ifos)
         self.tensors = torch.Parameter(tensors, requires_grad=False)
         self.vertices = torch.Parameter(vertices, requires_grad=False)
 
         sample_rate = sample_rate or self.sample_rate
-        asds = []
+        psds = []
         for ifo, background in backgrounds.items():
             if not isinstance(background, FrequencySeries):
                 if not isinstance(background, TimeSeries):
@@ -104,13 +119,13 @@ class WaveformSampler(torch.nn.Module):
             background = background.interpolate(self.df)
             if (background == 0).any():
                 raise ValueError(
-                    "Found 0 values in background ASD "
+                    "Found 0 values in background PSD "
                     "for interferometer {}".format(ifo)
                 )
-            asds.append(background.value)
+            psds.append(background.value)
 
         # save background as psd
-        background = np.stack(asds) ** 2
+        background = np.stack(psds)
         self.background = torch.Parameter(background, requires_grad=False)
 
     def _sample_source_param(
@@ -132,7 +147,8 @@ class WaveformSampler(torch.nn.Module):
             )
 
         if not isinstance(N_or_idx, torch.Tensor):
-            if not 0 < N_or_idx < self.num_waveforms or N_or_idx == -1:
+            if not 0 < N_or_idx <= self.num_waveforms or N_or_idx == -1:
+                # we asked for too many waveforms, can't return enough
                 raise ValueError(
                     "Can't sample {} waveforms from WaveformSampler "
                     "with {} waveforms associated with it".format(
@@ -140,11 +156,17 @@ class WaveformSampler(torch.nn.Module):
                     )
                 )
             elif N_or_idx == -1:
+                # we asked for all the waveforms we have
+                # TODO: should this be a randperm?
                 idx = torch.arange(self.num_waveforms)
+                N = self.num_waveforms
             else:
+                # we asked for some specific random number of waveforms
                 idx = torch.randperm(self.num_waveforms)[:N_or_idx]
-            N = N_or_idx
+                N = N_or_idx
         else:
+            # we provided specific waveform indices that
+            # we would like to project
             idx = N_or_idx
             N = len(idx)
 
@@ -157,9 +179,9 @@ class WaveformSampler(torch.nn.Module):
             dec,
             psi,
             phi,
-            self.tensors,
-            self.vertices,
-            self.sample_rate,
+            detector_tensors=self.tensors,
+            detector_vertices=self.vertices,
+            sample_rate=self.sample_rate,
             **polarizations
         )
 
@@ -167,8 +189,28 @@ class WaveformSampler(torch.nn.Module):
         ifo_responses = gw.reweight_snrs(
             ifo_responses,
             target_snrs,
-            self.background,
-            self.sample_rate,
-            self.mask,
+            backgrounds=self.background,
+            sample_rate=self.sample_rate,
+            highpass=self.mask,
         )
-        return ifo_responses
+
+        sampled_params = (dec, psi, phi, target_snrs)
+        return ifo_responses, sampled_params
+
+    def forward(self, X: gw.WaveformTensor, y: gw.ScalarTensor):
+        if not self.training:
+            return X, y
+
+        mask = torch.rand(size=X.shape[:1]) < self.prob
+        N = mask.sum().item()
+        waveforms, _ = self.sample(N)
+        waveforms = sample_kernels(
+            waveforms,
+            kernel_size=X.shape[-1],
+            max_center_offset=self.trigger_offset,
+            coincident=True,
+        )
+
+        X[mask] += waveforms
+        y[mask] = 1
+        return X, y
