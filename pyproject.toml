@@ -36,5 +36,5 @@ multi_line_output = 3
 include_trailing_comma = true
 
 [build-system]
-requires = ["poetry>=1.2"]
+requires = ["poetry>=1.2.0a2"]
 build-backend = "poetry.masonry.api"
