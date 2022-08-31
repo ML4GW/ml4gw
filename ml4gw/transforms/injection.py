@@ -9,9 +9,6 @@ from gwpy.timeseries import TimeSeries
 
 from ml4gw import gw
 
-# from torchtyping import TensorType
-
-
 Distribution = CallableType[int, np.ndarray]
 SourceParameter = Union[np.ndarray, Distribution]
 
