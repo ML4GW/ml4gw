@@ -7,22 +7,23 @@ import torch
 from gwpy.frequencyseries import FrequencySeries
 from gwpy.timeseries import TimeSeries
 
-from ml4gw.utils import injection
+from ml4gw import gw
 
 # from torchtyping import TensorType
 
 
 Distribution = CallableType[int, np.ndarray]
+SourceParameter = Union[np.ndarray, Distribution]
 
 
 class WaveformSampler(torch.nn.Module):
     def __init__(
         self,
         sample_rate: float,
-        dec: Union[np.ndarray, Distribution],
-        psi: Union[np.ndarray, Distribution],
-        phi: Union[np.ndarray, Distribution],
-        snr: Union[np.ndarray, Distribution],
+        dec: SourceParameter,
+        psi: SourceParameter,
+        phi: SourceParameter,
+        snr: SourceParameter,
         highpass: float = 0.0,
         **polarizations: np.ndarray
     ) -> None:
@@ -65,13 +66,10 @@ class WaveformSampler(torch.nn.Module):
                             name, length, num_waveforms
                         )
                     )
+                param = torch.Tensor(param)
+            setattr(self, name, param)
 
-        self.dec = dec
-        self.psi = psi
-        self.phi = phi
-        self.snr = snr
         self.num_waveforms = num_waveforms
-
         self.sample_rate = sample_rate
         self.df = sample_rate / waveform_size
 
@@ -88,7 +86,7 @@ class WaveformSampler(torch.nn.Module):
         **backgrounds: Union[np.ndarray, TimeSeries, FrequencySeries]
     ) -> None:
         self.ifos = list(backgrounds)
-        tensors, vertices = injection.get_ifo_geometry(*self.ifos)
+        tensors, vertices = gw.get_ifo_geometry(*self.ifos)
         self.tensors = torch.Parameter(tensors, requires_grad=False)
         self.vertices = torch.Parameter(vertices, requires_grad=False)
 
@@ -118,51 +116,17 @@ class WaveformSampler(torch.nn.Module):
         background = np.stack(asds) ** 2
         self.background = torch.Parameter(background, requires_grad=False)
 
-    def compute_per_ifo_squared_snrs(
-        self, responses: torch.Tensor
-    ) -> torch.Tensor:
-        # compute frequency power in units of Hz^-1
-        fft = torch.fft.rfft(responses, axis=-1) / self.sample_rate
-
-        # multiply with complex conjugate to get magnitude**2
-        # then divide by the background to bring units back to Hz^-1
-        integrand = (fft * fft.conj()) / self.background
-
-        # sum over the desired frequency range and multiply
-        # by df to turn it into an integration (and get
-        # our units to drop out). 4 is for mystical reasons
-        return 4 * (integrand * self.mask).sum(axis=-1) * self.df
-
-    def reweight_snrs(
-        self,
-        ifo_responses: injection.DetectorResponses,
-        target_snrs: injection.ScalarTensor,
-    ) -> torch.Tensor:
-        ifo_snrs = self.compute_per_ifo_squared_snrs(ifo_responses)
-
-        # compute the total SNR of each waveform as
-        # the root mean square of its SNR at each IFO
-        total_snrs = ifo_snrs.sum(axis=-1) ** 0.5
-
-        # now scale down the waveforms by the ratio
-        # of their current to their desired SNR
-        weights = total_snrs / target_snrs
-
-        # weights will have shape batch_size, while
-        # ifo_responses will have shape
-        # batch_size x num_ifos x waveform_size,
-        # so add dummy dimensions so we can multiply them
-        return ifo_responses * weights[:, None, None]
-
-    def _sample_source_param(self, param, idx, N):
+    def _sample_source_param(
+        self, param: SourceParameter, idx: gw.ScalarTensor, N: int
+    ):
         if isinstance(param, Callable):
             return param(N)
         else:
             return param[idx]
 
     def sample(
-        self, N_or_idx: Union[int, injection.ScalarTensor]
-    ) -> injection.DetectorResponses:
+        self, N_or_idx: Union[int, gw.ScalarTensor]
+    ) -> gw.WaveformTensor:
         if self.background is None:
             raise TypeError(
                 "WaveformSampler can't sample waveforms until "
@@ -192,16 +156,22 @@ class WaveformSampler(torch.nn.Module):
         phi = self._sample_source_param(self.phi, idx, N)
 
         polarizations = {k: v[idx] for k, v in self.polarizations.items()}
-        ifo_responses = injection.project_raw_gw(
-            self.sample_rate,
+        ifo_responses = gw.compute_observed_strain(
             dec,
             psi,
             phi,
             self.tensors,
             self.vertices,
+            self.sample_rate,
             **polarizations
         )
 
         target_snrs = self._sample_source_param(self.snr)
-        ifo_responses = self.reweight_snrs(ifo_responses, target_snrs)
+        ifo_responses = gw.reweight_snrs(
+            ifo_responses,
+            target_snrs,
+            self.background,
+            self.sample_rate,
+            self.mask,
+        )
         return ifo_responses
