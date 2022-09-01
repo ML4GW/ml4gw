@@ -96,7 +96,7 @@ def test_compute_antenna_responses(
         np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
     )
     assert result.shape == (batch_size, 2, len(ifos))
-    assert np.isclose(result, expected, rtol=1e-6).all()
+    assert np.isclose(result, expected, rtol=1e-5).all()
 
 
 @pytest.fixture
@@ -171,15 +171,13 @@ def test_shift_responses(
     tensors, vertices = injection.get_ifo_geometry(*ifos)
     vertices = vertices.type(torch.float64)
 
-    result = (
-        injection.shift_responses(
-            projections, np.pi / 2 - dec, phi, vertices, sample_rate
-        )
-        .cpu()
-        .numpy()
+    result = injection.shift_responses(
+        projections, np.pi / 2 - dec, phi, vertices, sample_rate
     )
+    result = result.cpu().numpy()
+
     assert result.shape == projections.shape
-    assert np.isclose(result, expected, rtol=1e-6).all()
+    assert np.isclose(result, expected, rtol=1e-5).all()
 
 
 @pytest.fixture
