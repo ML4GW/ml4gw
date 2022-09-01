@@ -217,23 +217,21 @@ def test_compute_observed_strain(
     tensors = tensors.type(torch.float64)
     vertices = vertices.type(torch.float64)
 
-    result = (
-        injection.compute_observed_strain(
-            dec,
-            psi,
-            phi,
-            tensors,
-            vertices,
-            sample_rate,
-            plus=plus,
-            cross=cross,
-        )
-        .cpu()
-        .numpy()
+    result = injection.compute_observed_strain(
+        dec,
+        psi,
+        phi,
+        tensors,
+        vertices,
+        sample_rate,
+        plus=plus,
+        cross=cross,
     )
+    result = result.cpu().numpy()
+
     assert result.shape == (
         batch_size,
         len(ifos),
         waveform_duration * sample_rate,
     )
-    assert np.isclose(result, expected, rtol=1e-6).all()
+    assert np.isclose(result, expected, rtol=1e-5).all()
