@@ -8,13 +8,21 @@ authors = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
+
+# torch deps
 torch = "^1.10"
 torchtyping = "^0.1"
+
+# gw deps
 bilby = "^1.1"
+gwpy = "^2.1"
+# astropy = "<5.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.16"
 pytest = "^7.0"
+
+# need lalsuite for compute gmst in injection testing
 lalsuite = "^7.0"
 
 [tool.black]
@@ -36,5 +44,5 @@ multi_line_output = 3
 include_trailing_comma = true
 
 [build-system]
-requires = ["poetry>=1.2"]
+requires = ["poetry>=1.2.0a2"]
 build-backend = "poetry.masonry.api"

@@ -4,19 +4,19 @@ import pytest
 import torch
 from lal import GreenwichMeanSiderealTime
 
-from ml4gw.utils import injection
+from ml4gw import gw as injection
 
 
 def test_outer():
-    x = torch.randn(3, 10)
-    y = torch.randn(3, 10)
+    x = torch.randn(10, 3)
+    y = torch.randn(10, 3)
     output = injection.outer(x, y)
 
     x, y = x.cpu().numpy(), y.cpu().numpy()
     for i, matrix in enumerate(output.cpu().numpy()):
         for j, row in enumerate(matrix):
             for k, value in enumerate(row):
-                assert value == x[j, i] * y[k, i], (i, j, k)
+                assert value == x[i, j] * y[i, k], (i, j, k)
 
 
 @pytest.fixture(params=[["H1"], ["H1", "L1"], ["H1", "L1", "V1"]])
@@ -73,7 +73,7 @@ def bilby_get_ifo_response(ifos, batch_size):
     return func
 
 
-def test_compute_ifo_response(
+def test_compute_antenna_responses(
     ifos,
     batch_size,
     sample_rate,
@@ -92,11 +92,11 @@ def test_compute_ifo_response(
     tensors, vertices = injection.get_ifo_geometry(*ifos)
     tensors = tensors.type(torch.float64)
 
-    result = injection.compute_ifo_responses(
+    result = injection.compute_antenna_responses(
         np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
     )
     assert result.shape == (batch_size, 2, len(ifos))
-    assert np.isclose(result, expected, rtol=1e-6).all()
+    assert np.isclose(result, expected, rtol=1e-5).all()
 
 
 @pytest.fixture
@@ -122,53 +122,18 @@ def bilby_get_projections(
     return func
 
 
-def test_project_waveforms(
-    ifos,
-    batch_size,
-    sample_rate,
-    waveform_duration,
-    bilby_get_projections,
-    data,
-):
-    ra, dec, psi, phi, gps_times, plus, cross = data
-    expected = bilby_get_projections(
-        ra, dec, psi, gps_times, plus=plus, cross=cross
-    )
-
-    phi = torch.tensor(phi)
-    dec = torch.tensor(dec)
-    psi = torch.tensor(psi)
-    plus = torch.tensor(plus)
-    cross = torch.tensor(cross)
-    tensors, vertices = injection.get_ifo_geometry(*ifos)
-    tensors = tensors.type(torch.float64)
-
-    responses = injection.compute_ifo_responses(
-        np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
-    )
-    result = injection.project_waveforms(responses, plus=plus, cross=cross)
-    assert result.shape == (
-        batch_size,
-        len(ifos),
-        sample_rate * waveform_duration,
-    )
-    assert np.isclose(result, expected, rtol=1e-6).all()
-
-
 @pytest.fixture
-def bilby_shift_projections(
+def bilby_shift_responses(
     ifos,
     batch_size,
     sample_rate,
     waveform_duration,
 ):
     ifos = [bilby.gw.detector.get_empty_interferometer(i) for i in ifos]
-    waveform_size = int(waveform_duration * sample_rate)
 
     def do_shift(ifo, ra, dec, geocent_time, response):
         shift = ifo.time_delay_from_geocenter(ra, dec, geocent_time)
         shift *= sample_rate
-        shift += waveform_size // 2
         response = np.roll(response, int(shift))
         return response
 
@@ -185,19 +150,19 @@ def bilby_shift_projections(
     return func
 
 
-def test_shift_projections(
+def test_shift_responses(
     ifos,
     batch_size,
     sample_rate,
     waveform_duration,
-    bilby_shift_projections,
+    bilby_shift_responses,
     data,
 ):
     ra, dec, psi, phi, gps_times, plus, cross = data
     projections = np.random.randn(
         batch_size, len(ifos), int(waveform_duration * sample_rate)
     )
-    expected = bilby_shift_projections(ra, dec, gps_times, projections)
+    expected = bilby_shift_responses(ra, dec, gps_times, projections)
 
     projections = torch.tensor(projections)
     phi = torch.tensor(phi)
@@ -206,34 +171,38 @@ def test_shift_projections(
     tensors, vertices = injection.get_ifo_geometry(*ifos)
     vertices = vertices.type(torch.float64)
 
-    result = injection.shift_projections(
-        projections, sample_rate, np.pi / 2 - dec, psi, phi, vertices
+    result = injection.shift_responses(
+        projections, np.pi / 2 - dec, phi, vertices, sample_rate
     )
+    result = result.cpu().numpy()
+
     assert result.shape == projections.shape
-    assert np.isclose(result, expected, rtol=1e-6).all()
+    assert np.isclose(result, expected, rtol=1e-5).all()
 
 
 @pytest.fixture
-def bilby_project_raw_gw(bilby_get_projections, bilby_shift_projections):
+def bilby_compute_observed_strain(
+    bilby_get_projections, bilby_shift_responses
+):
     def func(ra, dec, psi, gps_times, **polarizations):
         projections = bilby_get_projections(
             ra, dec, psi, gps_times, **polarizations
         )
-        return bilby_shift_projections(ra, dec, gps_times, projections)
+        return bilby_shift_responses(ra, dec, gps_times, projections)
 
     return func
 
 
-def test_project_raw_gw(
+def test_compute_observed_strain(
     ifos,
     batch_size,
     sample_rate,
     waveform_duration,
-    bilby_project_raw_gw,
+    bilby_compute_observed_strain,
     data,
 ):
     ra, dec, psi, phi, gps_times, plus, cross = data
-    expected = bilby_project_raw_gw(
+    expected = bilby_compute_observed_strain(
         ra, dec, psi, gps_times, plus=plus, cross=cross
     )
 
@@ -246,12 +215,21 @@ def test_project_raw_gw(
     tensors = tensors.type(torch.float64)
     vertices = vertices.type(torch.float64)
 
-    result = injection.project_raw_gw(
-        sample_rate, dec, psi, phi, tensors, vertices, plus=plus, cross=cross
+    result = injection.compute_observed_strain(
+        dec,
+        psi,
+        phi,
+        tensors,
+        vertices,
+        sample_rate,
+        plus=plus,
+        cross=cross,
     )
+    result = result.cpu().numpy()
+
     assert result.shape == (
         batch_size,
         len(ifos),
         waveform_duration * sample_rate,
     )
-    assert np.isclose(result, expected, rtol=1e-6).all()
+    assert np.isclose(result, expected, rtol=1e-5).all()
