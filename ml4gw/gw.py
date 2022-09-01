@@ -204,7 +204,7 @@ def compute_observed_strain(
     the indicated sky parameters.
 
     Args:
-        theta:
+        dec:
             Declination of each source in radians relative
             to the celestial north
         psi:
