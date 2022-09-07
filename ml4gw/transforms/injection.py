@@ -177,6 +177,12 @@ class RandomWaveformInjection(torch.nn.Module):
         # going to have to fit later
         self.background = self.tensors = self.vertices = None
 
+    def to(self, device):
+        super().to(device)
+        if self.mask is not None:
+            self.mask = self.mask.to(device)
+        return self
+
     def fit(
         self,
         sample_rate: Optional[float] = None,
@@ -272,7 +278,12 @@ class RandomWaveformInjection(torch.nn.Module):
             psds.append(background.value)
 
         # save background as psd
-        background = torch.Tensor(np.stack(psds))
+        background = torch.tensor(np.stack(psds), dtype=torch.float64)
+        if (background == 0).any().item():
+            raise ValueError(
+                "Conversion to torch tensor pushed "
+                "background ASD values to 0"
+            )
         self.background = torch.nn.Parameter(background, requires_grad=False)
 
     def _sample_source_param(
@@ -284,7 +295,7 @@ class RandomWaveformInjection(torch.nn.Module):
         slicing from it using `idx` otherwise.
         """
         if isinstance(param, Callable):
-            return param(N)
+            return param(N).to(self.tensors.device)
         else:
             return param[idx]
 
@@ -358,7 +369,7 @@ class RandomWaveformInjection(torch.nn.Module):
         )
 
         target_snrs = self._sample_source_param(self.snr, idx, N)
-        ifo_responses = gw.reweight_snrs(
+        rescaled_responses = gw.reweight_snrs(
             ifo_responses,
             target_snrs,
             backgrounds=self.background,
@@ -367,7 +378,7 @@ class RandomWaveformInjection(torch.nn.Module):
         )
 
         sampled_params = (dec, psi, phi, target_snrs)
-        return ifo_responses, sampled_params
+        return rescaled_responses, sampled_params
 
     def forward(
         self, X: gw.WaveformTensor, y: Optional[gw.ScalarTensor] = None

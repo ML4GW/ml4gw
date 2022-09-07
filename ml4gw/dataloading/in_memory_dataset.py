@@ -73,11 +73,11 @@ class InMemoryDataset:
                 perm_idx = np.random.permutation(len(idx))
                 idx = idx[perm_idx]
 
-            self._idx = torch.Tensor(idx).type(torch.int64)
+            self._idx = torch.Tensor(idx).type(torch.int64).to(self.X.device)
         elif self.shuffle:
-            self._idx = torch.randperm(self.num_kernels)
+            self._idx = torch.randperm(self.num_kernels).to(self.X.device)
         else:
-            self._idx = torch.arange(self.num_kernels)
+            self._idx = torch.arange(self.num_kernels).to(self.X.device)
 
         self._i = 0
         return self
