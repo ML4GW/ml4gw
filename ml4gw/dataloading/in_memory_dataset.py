@@ -40,6 +40,7 @@ class InMemoryDataset:
         self.stride = stride
         self.shuffle = shuffle
         self.coincident = coincident
+        self._i = None
 
     @property
     def num_kernels(self) -> int:
@@ -72,16 +73,18 @@ class InMemoryDataset:
                 perm_idx = np.random.permutation(len(idx))
                 idx = idx[perm_idx]
 
-            self._idx = torch.Tensor(idx)
+            self._idx = torch.Tensor(idx).type(torch.int64)
         elif self.shuffle:
             self._idx = torch.randperm(self.num_kernels)
         else:
             self._idx = torch.arange(self.num_kernels)
 
         self._i = 0
+        return self
 
     def __next__(self):
         if self._i >= len(self):
+            self._i = None
             raise StopIteration
 
         slc = slice(self._i * self.batch_size, (self._i + 1) * self.batch_size)
@@ -90,10 +93,10 @@ class InMemoryDataset:
         if not self.coincident and self.y is not None:
             y = slice_kernels(self.y, self._idx[:, -1])
             idx = idx[:, :-1]
-        elif y is not None:
+        elif self.y is not None:
             y = slice_kernels(self.y, idx)
 
-        X = slice_kernels(self.X, idx)
+        X = slice_kernels(self.X, idx, self.kernel_size)
         self._i += 1
 
         if self.y is not None:
