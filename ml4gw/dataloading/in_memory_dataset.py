@@ -1,4 +1,5 @@
 import itertools
+import math
 from typing import Optional
 
 import numpy as np
@@ -26,6 +27,13 @@ class InMemoryDataset:
         else:
             self.y = None
 
+        if not coincident and batches_per_epoch is None:
+            # TODO: figure out how to accommodate this
+            raise ValueError(
+                "Must specify number of batches between validation "
+                "steps for non-coincident sampling"
+            )
+
         self.kernel_size = kernel_size
         self.batch_size = batch_size
         self.batches_per_epoch = batches_per_epoch
@@ -52,10 +60,13 @@ class InMemoryDataset:
 
     def __iter__(self) -> None:
         if not self.coincident:
-            idx = [np.arange(self.num_kernels) for _ in range(len(self.X))]
+            power = len(self.X)
             if self.y is not None:
-                idx.append(np.arange(self.num_kernels))
-            idx = np.stack(itertools.product(*idx))
+                power += 1
+            length = (self.batch_size * self.batches_per_epoch) ** (1 / power)
+            length = int(math.ceil(length))
+            idx = [range(length) for _ in range(power)]
+            idx = np.stack(list(itertools.product(*idx)))
 
             if self.shuffle:
                 perm_idx = np.random.permutation(len(idx))
@@ -65,7 +76,7 @@ class InMemoryDataset:
         elif self.shuffle:
             self._idx = torch.randperm(self.num_kernels)
         else:
-            self._idx = torch.arange(len(self))
+            self._idx = torch.arange(self.num_kernels)
 
         self._i = 0
 
