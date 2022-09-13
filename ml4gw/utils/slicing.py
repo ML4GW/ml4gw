@@ -75,6 +75,7 @@ def slice_kernels(
 
         # channels x batch_size x kernel_size
         kernels = torch.arange(kernel_size).view(1, 1, kernel_size)
+        kernels = kernels.to(x.device)
         kernels = kernels.repeat(len(x), len(idx), 1)
         kernels += idx.view(1, -1, 1)
 
@@ -101,6 +102,7 @@ def slice_kernels(
 
         # batch_size x num_channels x kernel_size
         kernels = torch.arange(kernel_size).view(1, 1, kernel_size)
+        kernels = kernels.to(x.device)
         kernels = kernels.repeat(len(idx), len(x), 1)
         kernels += idx[:, :, None]
 
@@ -132,6 +134,7 @@ def slice_kernels(
 
         # batch_size x kernel_size
         kernels = torch.arange(kernel_size).view(1, -1)
+        kernels = kernels.to(x.device)
         kernels = kernels.repeat(len(idx), 1)
         kernels += idx.view(-1, 1)
 
@@ -268,5 +271,5 @@ def sample_kernels(
         # will require its own sampling index
         shape = (N, len(X))
 
-    idx = torch.randint(min_val, max_val, size=shape)
+    idx = torch.randint(min_val, max_val, size=shape).to(X.device)
     return slice_kernels(X, idx, kernel_size)

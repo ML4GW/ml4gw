@@ -164,12 +164,12 @@ def shift_responses(
     # need to multiply the array by a single float
     dt = -(omega * vertices).sum(axis=-1)
     dt *= sample_rate / speed_of_light
-    dt = torch.trunc(dt)
+    dt = torch.trunc(dt).type(torch.int64)
 
     # rolling by gathering implementation based on
     # https://stackoverflow.com/a/68641864
     # start by just creating a big arange along the last axis
-    idx = torch.ones_like(responses)
+    idx = torch.ones_like(responses).type(torch.int64)
     idx = torch.cumsum(idx, axis=-1) - 1
 
     # apply the offset to the indices along the last axis,
@@ -177,7 +177,6 @@ def shift_responses(
     # specified indices legitimate and unique
     idx -= dt[:, :, None]
     idx %= idx.shape[-1]
-    idx = idx.type(torch.int64)
 
     # unfortunately I can't figure out how to do this
     # last step without doing looping over the ifos
@@ -337,8 +336,9 @@ def compute_ifo_snr(
 
     # multiply with complex conjugate to get magnitude**2
     # then divide by the background to bring units back to Hz^-1
-    integrand = (fft * fft.conj()) / backgrounds
-    integrand = integrand.real
+    fft_abs = fft.abs()
+    integrand = fft_abs / (backgrounds**0.5)
+    integrand = integrand.type(torch.float32) ** 2
 
     # sum over the desired frequency range and multiply
     # by df to turn it into an integration (and get
@@ -453,5 +453,5 @@ def reweight_snrs(
     """
 
     snrs = compute_network_snr(responses, backgrounds, sample_rate, highpass)
-    weights = snrs / target_snrs
+    weights = target_snrs / snrs
     return responses * weights[:, None, None]
