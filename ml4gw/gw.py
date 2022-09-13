@@ -337,7 +337,7 @@ def compute_ifo_snr(
     # multiply with complex conjugate to get magnitude**2
     # then divide by the background to bring units back to Hz^-1
     fft_abs = fft.abs()
-    integrand = fft_abs / (backgrounds ** 0.5)
+    integrand = fft_abs / (backgrounds**0.5)
     integrand = integrand.type(torch.float32) ** 2
 
     # sum over the desired frequency range and multiply
