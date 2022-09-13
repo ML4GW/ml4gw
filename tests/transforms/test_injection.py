@@ -71,8 +71,10 @@ def test_sample_source_param():
     result = result.cpu().numpy()
     assert (result == np.arange(12, 15)).all()
 
+    mock = MagicMock()
+    mock.tensors.device = "cpu"
     result = RandomWaveformInjection._sample_source_param(
-        None, lambda N: torch.arange(5, 5 + N), None, 4
+        mock, lambda N: torch.arange(5, 5 + N), None, 4
     )
     result = result.cpu().numpy()
     assert (result == np.arange(5, 9)).all()
@@ -193,6 +195,8 @@ def test_random_waveform_injection(prob, ifos):
 
     # make background not None so we can sample
     transform.background = MagicMock()
+    transform.tensors = MagicMock()
+    transform.tensors.device = "cpu"
 
     # create some fake data to inject into
     X = torch.zeros((16, len(ifos), 256))
@@ -246,6 +250,8 @@ def test_random_waveform_injection(prob, ifos):
         dec, psi, phi, snr, sample_rate=1024, prob=prob, **waveforms
     )
     assert len(list(transform.parameters())) == 3
+    transform.tensors = MagicMock()
+    transform.tensors.device = "cpu"
 
     transform.background = MagicMock()
     with rand_patch as rand_mock, perm_patch as perm_mock:
