@@ -181,7 +181,7 @@ def test_in_memory_dataset_non_coincident_deterministic(
     assert str(exc.value).startswith("Must specify number of batches")
 
     if num_kernels < (batch_size * batches_per_epoch):
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(ValueError):
             dataset = InMemoryDataset(
                 X,
                 kernel_size,
