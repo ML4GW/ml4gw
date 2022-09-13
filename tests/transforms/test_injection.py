@@ -108,6 +108,7 @@ def test_sample(sample_rate, ifos):
     mock._sample_source_param = lambda p, i, N: (
         RandomWaveformInjection._sample_source_param(mock, p, i, N)
     )
+    mock.tensors.device = "cpu"
 
     waveforms = {i: torch.randn(100, 1024) for i in ["plus", "cross"]}
     mock.polarizations = waveforms
