@@ -231,7 +231,7 @@ class InMemoryDataset:
         # slice our timeseries
         X = slice_kernels(self.X, idx, self.kernel_size)
         if self.y is not None:
-            y = slice_kernels(self.y, idx)
+            y = slice_kernels(self.y, idx, self.kernel_size)
 
         self._i += 1
         if self.y is not None:
