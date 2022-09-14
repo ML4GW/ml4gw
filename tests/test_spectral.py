@@ -7,7 +7,7 @@ import torch
 from packaging import version
 from scipy import signal
 
-from ml4gw.spectral import fast_spectral_density  # , spectral_density
+from ml4gw.spectral import fast_spectral_density, spectral_density
 
 
 @pytest.fixture(params=[1, 4, 8])
@@ -112,7 +112,6 @@ def test_fast_spectral_density(
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
         with pytest.raises(ValueError) as exc_info:
-            print(x.shape)
             fsd(torch.Tensor(x[None]))
         assert str(exc_info.value).startswith("Can't compute spectral")
 
@@ -270,3 +269,64 @@ def test_fast_spectral_density_with_y(
     assert np.isclose(torch_result, scipy_result, rtol=1e-9).all(), ratio
 
     _shape_checks(ndim, y_ndim, x, y, fsd)
+
+
+def test_spectral_density(
+    length, sample_rate, fftlength, overlap, average, ndim
+):
+    batch_size = 8
+    num_channels = 5
+    if overlap is not None and overlap >= fftlength:
+        return
+
+    shape = [int(length * sample_rate)]
+    if ndim > 1:
+        shape.insert(0, num_channels)
+    if ndim > 2:
+        shape.insert(0, batch_size)
+    x = np.random.randn(*shape)
+
+    nperseg = int(fftlength * sample_rate)
+    if overlap is None:
+        nstride = int(fftlength * sample_rate // 2)
+    else:
+        nstride = int((fftlength - overlap) * sample_rate)
+
+    window = torch.hann_window(nperseg)
+    sd = partial(
+        spectral_density,
+        nperseg=nperseg,
+        nstride=nstride,
+        window=window,
+        scale=1 / (sample_rate * (window**2).sum()),
+        average=average,
+    )
+    # make sure initial shape check works
+    if fftlength > length:
+        with pytest.raises(ValueError) as exc_info:
+            sd(torch.Tensor(x))
+        assert str(exc_info.value).startswith("Number of samples")
+        return
+
+    # perform the transform and confirm the shape is correct
+    torch_result = sd(torch.Tensor(x)).numpy()
+    num_freq_bins = int(fftlength * sample_rate) // 2 + 1
+    shape[-1] = num_freq_bins
+    assert torch_result.shape == tuple(shape)
+
+    # now verify against the result from scipy
+    _, scipy_result = signal.welch(
+        x,
+        fs=sample_rate,
+        nperseg=nperseg,
+        noverlap=nperseg - nstride,
+        window=signal.windows.hann(nperseg, False),
+        average=average,
+    )
+    assert np.isclose(torch_result, scipy_result, rtol=1e-9).all()
+
+    # make sure we catch any calls with too many dimensions
+    if ndim == 3:
+        with pytest.raises(ValueError) as exc_info:
+            sd(torch.Tensor(x[None]))
+        assert str(exc_info.value).startswith("Can't compute spectral")
