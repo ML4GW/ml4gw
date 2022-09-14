@@ -1,3 +1,14 @@
+"""
+Several implementation details are derived from the scipy csd and welch
+implementations. For more info, see
+
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html
+
+and
+
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
+"""
+
 from typing import Optional
 
 import torch
