@@ -7,6 +7,8 @@ from scipy import signal
 
 from ml4gw.transforms.spectral import SpectralDensity
 
+TOL = 1e-7
+
 
 @pytest.fixture(params=[1, 4, 8])
 def length(request):
@@ -121,7 +123,7 @@ def test_spectral_density(
     if fast:
         torch_result = torch_result[..., 2:]
         scipy_result = scipy_result[..., 2:]
-    assert np.isclose(torch_result, scipy_result, rtol=1e-9).all()
+    assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
 
 
 @pytest.fixture(params=[0, 1])
@@ -271,6 +273,6 @@ def test_transform_with_csd(
         scipy_result = scipy_result[..., 2:]
 
     ratio = torch_result / scipy_result
-    assert np.isclose(torch_result, scipy_result, rtol=1e-9).all(), ratio
+    assert np.isclose(torch_result, scipy_result, rtol=TOL).all(), ratio
 
     _shape_checks(ndim, y_ndim, x, y, transform)
