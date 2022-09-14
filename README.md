@@ -99,6 +99,8 @@ for i in range(NUM_EPOCHS):
 ```
 
 ## Development
-As this is a library which is still very much a work in progress, we anticipate that new users with new use cases will anticipate errors stemming from a lack of robustness.
-We encourage these users to file issues on GitHub and, if they have the inclincation, to try their hand at fixing themselves.
-Only by trying it on these new and exciting use cases will this develop into a truly general-purpose tool making DL more accessible for gravitational wave physicists everywhere.
+As this library is still very much a work in progress, we anticipate that novel use cases will encounter errors stemming from a lack of robustness.
+We encourage users who encounter these difficulties to file issues on GitHub, and we'll be happy to offer support to extend our coverage to new or improved functionality.
+We also strongly encourage ML users in the GW physics space to try their hand at working on these issues and joining on as collaborators!
+For more information about how to get involved, feel free to reach out to [alecg@mit.edu](mailto:alecg@mit.edu) .
+By bringing in new users with new use cases, we hope to develop this library into a truly general-purpose tool which makes DL more accessible for gravitational wave physicists everywhere.
