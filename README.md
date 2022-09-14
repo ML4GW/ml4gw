@@ -32,7 +32,7 @@ SAMPLE_RATE = 2048
 NUM_IFOS = 2
 DATA_LENGTH = 128
 KERNEL_LENGTH = 4
-DEVICE = "cpu"  # or "cpu", wherever you want to run
+DEVICE = "cuda"  # or "cpu", wherever you want to run
 
 BATCH_SIZE = 32
 LEARNING_RATE = 1e-3
