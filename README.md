@@ -31,21 +31,27 @@ from ml4gw.transforms import SpectralDensity
 SAMPLE_RATE = 2048
 NUM_IFOS = 2
 DATA_LENGTH = 128
+KERNEL_LENGTH = 4
+DEVICE = "cpu"  # or "cpu", wherever you want to run
+
+BATCH_SIZE = 32
+LEARNING_RATE = 1e-3
+NUM_EPOCHS = 10
 
 dummy_data = np.random.randn(NUM_IFOS, DATA_LENGTH * SAMPLE_RATE)
 
 # this will create a dataloader that iterates through your
-# timeseries data sampling 1s long windows of data randomly
+# timeseries data sampling 4s long windows of data randomly
 # and non-coincidentally: i.e. the background from each IFO
 # will be sampled independently
 dataset = InMemoryDataset(
     dummy_data,
-    kernel_size=1 * SAMPLE_RATE,
-    batch_size=32,
+    kernel_size=KERNEL_LENGTH * SAMPLE_RATE,
+    batch_size=BATCH_SIZE,
     batches_per_epoch=50,
     coincident=False,
     shuffle=True,
-    device="cuda"  # this will move your dataset to GPU up-front
+    device=DEVICE  # this will move your dataset to GPU up-front if "cuda"
 )
 
 
@@ -60,11 +66,11 @@ nn = torch.nn.Sequential(
         out_channels=2,
         kernel_size=7
     )
-)
+).to(DEVICE)
 
-optimizer = torch.optim.Adam(nn.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(nn.parameters(), lr=LEARNING_RATE)
 
-spectral_density = SpectralDensity(SAMPLE_RATE, fflength=2)
+spectral_density = SpectralDensity(SAMPLE_RATE, fftlength=2).to(DEVICE)
 
 def loss_function(X_psd, y_psd):
     # insert logic here about how you want to optimize your nn
@@ -72,17 +78,24 @@ def loss_function(X_psd, y_psd):
     # done in time space)
     return ((X_psd - y_psd)**2).mean()
 
-for X in dataset:
-    optimizer.zero_grad(set_to_none=True)
-    assert X.shape == (32, NUM_IFOS, SAMPLE_RATE)
-    y = nn(X)
 
-    X_psd = spectral_density(X)
-    y_psd = spectral_density(y)
+for i in range(NUM_EPOCHS):
+    epoch_loss = 0
+    for X in dataset:
+        optimizer.zero_grad(set_to_none=True)
+        assert X.shape == (32, NUM_IFOS, KERNEL_LENGTH * SAMPLE_RATE)
+        y = nn(X)
 
-    loss = loss_function(X_psd, y_psd)
-    loss.backward()
-    optimizer.step()
+        X_psd = spectral_density(X)
+        y_psd = spectral_density(y)
+
+        loss = loss_function(X_psd, y_psd)
+        loss.backward()
+        optimizer.step()
+
+        epoch_loss += loss.item()
+    epoch_loss /= len(dataset)
+    print(f"Epoch {i + 1}/{NUM_EPOCHS} Loss: {epoch_loss:0.3e}")
 ```
 
 ## Development
