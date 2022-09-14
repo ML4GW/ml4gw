@@ -6,13 +6,47 @@ from ml4gw.spectral import fast_spectral_density, spectral_density
 
 
 class SpectralDensity(torch.nn.Module):
+    """
+    Transform for computing either the power spectral density
+    of a batch of multichannel timeseries, or the cross spectral
+    density of two batches of multichannel timeseries.
+
+    On `SpectralDensity.forward` call, if only one tensor is provided,
+    this transform will compute its power spectral density. If a second
+    tensor is provided, the cross spectral density between the two
+    timeseries will be computed. For information about the allowed
+    relationships between these two tensors, see the documentation to
+    `ml4gw.spectral.fast_spectral_density`.
+
+    Note that the cross spectral density computation is currently
+    only available for the `fast_spectral_density` option. If
+    `fast=False` and a second tensor is passed to `SpectralDensity.forward`,
+    a `NotImplementedError` will be raised.
+
+    Args:
+        sample_rate:
+            Rate at which tensors passed to `forward` will be sampled
+        fftlength:
+            Length of the window, in seconds, to use for FFT estimates
+        overlap:
+            Overlap between windows used for FFT calculation. If left
+            as `None`, this will be set to `fftlength / 2`.
+        average:
+            Aggregation method to use for combining windowed FFTs.
+            Allowed values are `"mean"` and `"median"`.
+        fast:
+            Whether to use a faster spectral density computation that
+            support cross spectral density, or a slower one which does
+            not. The cost of the fast implementation is that it is not
+            exact for the two lowest frequency bins.
+    """
+
     def __init__(
         self,
         sample_rate: float,
         fftlength: float,
         overlap: Optional[float] = None,
         average: str = "mean",
-        device: str = "cpu",
         fast: bool = False,
     ) -> None:
         if overlap is None:
@@ -30,7 +64,7 @@ class SpectralDensity(torch.nn.Module):
         self.nstride = self.nperseg - int(overlap * sample_rate)
 
         # do we allow for arbitrary windows?
-        self.window = torch.hann_window(self.nperseg).to(device)
+        self.window = torch.hann_window(self.nperseg)
 
         # scale corresponds to "density" normalization, worth
         # considering adding this as a kwarg and changing this calc
@@ -41,8 +75,12 @@ class SpectralDensity(torch.nn.Module):
                 f'average must be "mean" or "median", got {average} instead'
             )
         self.average = average
-        self.device = device
         self.fast = fast
+
+    def to(self, device):
+        obj = super().to(device)
+        obj.window = obj.window.to(device)
+        return obj
 
     def forward(self, x: torch.Tensor, y: Optional[torch.Tensor] = None):
         if self.fast:
