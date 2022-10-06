@@ -17,11 +17,12 @@ SourceParameter = Union[np.ndarray, Distribution]
 class RandomWaveformInjection(torch.nn.Module):
     def __init__(
         self,
+        sample_rate: float,
         dec: SourceParameter,
         psi: SourceParameter,
         phi: SourceParameter,
-        snr: SourceParameter,
-        sample_rate: float,
+        snr: Optional[SourceParameter] = None,
+        intrinsic_parameters: Optional[np.ndarray] = None,
         highpass: Optional[float] = None,
         prob: float = 1.0,
         trigger_offset: float = 0,
@@ -136,12 +137,23 @@ class RandomWaveformInjection(torch.nn.Module):
                 torch.Tensor(tensor), requires_grad=False
             )
 
+        if intrinsic_parameters is not None:
+            if len(intrisic_parameters) != num_waveforms:
+                raise ValueError(
+                    "Waveform parameters has {} waveforms "
+                    "associated with it, expected {}".format(
+                        len(intrinsic_parameters), num_waveforms
+                    )
+            self.intrinsic_parameters = torch.nn.Parameter(torch.Tensor(intrinsic_parameter, requires_grad=False)
+        
         # confirm that the source parameters all either
         # are a callable or have a length equal to the
         # number of waveforms
         names = ["dec", "psi", "phi", "snr"]
+
         for name, param in zip(names, [dec, psi, phi, snr]):
-            if not isinstance(param, Callable):
+           
+            if not isinstance(param, Callable) and param is not None:
                 try:
                     length = len(param)
                 except AttributeError:
@@ -322,9 +334,9 @@ class RandomWaveformInjection(torch.nn.Module):
                 responses: `dec`, `psi`, `phi`, and the sampled SNRs.
         """
 
-        if self.background is None:
+        if self.background is None and self.snr is not None:
             raise TypeError(
-                "WaveformSampler can't sample waveforms until "
+                "WaveformSampler can't rescale waveform snr's until "
                 "it has been fit on detector background. Make sure "
                 "to call WaveformSampler.fit first"
             )
@@ -358,6 +370,8 @@ class RandomWaveformInjection(torch.nn.Module):
         phi = self._sample_source_param(self.phi, idx, N)
 
         polarizations = {k: v[idx] for k, v in self.polarizations.items()}
+        parameters = self.parameters[idx]
+        
         ifo_responses = gw.compute_observed_strain(
             dec,
             psi,
@@ -368,20 +382,25 @@ class RandomWaveformInjection(torch.nn.Module):
             **polarizations,
         )
 
-        target_snrs = self._sample_source_param(self.snr, idx, N)
-        rescaled_responses = gw.reweight_snrs(
-            ifo_responses,
-            target_snrs,
-            backgrounds=self.background,
-            sample_rate=self.sample_rate,
-            highpass=self.mask,
-        )
+        if self.snr is not None:
+            target_snrs = self._sample_source_param(self.snr, idx, N)
+            rescaled_responses = gw.reweight_snrs(
+                ifo_responses,
+                target_snrs,
+                backgrounds=self.background,
+                sample_rate=self.sample_rate,
+                highpass=self.mask,
+            )
 
-        sampled_params = (dec, psi, phi, target_snrs)
+            sampled_params = (dec, psi, phi, target_snrs)
+        else:
+            sampled_params = (dec, psi, phi)
+            rescaled_responses = ifo_responses 
+        
         return rescaled_responses, sampled_params
 
     def forward(
-        self, X: gw.WaveformTensor, y: Optional[gw.ScalarTensor] = None
+        self, X: gw.WaveformTensor, y: Optional[gw.ScalarTensor] = None,
     ) -> gw.WaveformTensor:
         """Sample waveforms and inject them into random batch elements
 
@@ -393,7 +412,7 @@ class RandomWaveformInjection(torch.nn.Module):
         if self.training:
             mask = torch.rand(size=X.shape[:1]) < self.prob
             N = mask.sum().item()
-            waveforms, _ = self.sample(N)
+            waveforms, sampled_params = self.sample(N)
             waveforms = sample_kernels(
                 waveforms,
                 kernel_size=X.shape[-1],
@@ -401,10 +420,11 @@ class RandomWaveformInjection(torch.nn.Module):
                 coincident=True,
             )
             X[mask] += waveforms
-
+        
             if y is not None:
                 y[mask] = 1
 
         if y is not None:
             return X, y
+        
         return X
