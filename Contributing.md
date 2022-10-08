@@ -2,7 +2,7 @@
 
 Just read the guidelines below, then peruse open issues, or create your own if you have ideas!
 
-Please read the [Code of Conduct]
+Please read the [Code of Conduct](https://github.com/OjashKush/ml4gw/blob/doc/CODE_OF_CONDUCT.md)
 
 ## Want to contribute?
 
@@ -58,7 +58,7 @@ where `this-is-you` is your GitHub username. Here you're copying the contents of
 Change to the repository directory on your computer (if you are not already there):
 
 ```
-cd TravelGo
+cd ml4gw
 ```
 
 Now create a branch using the `git switch` command:
