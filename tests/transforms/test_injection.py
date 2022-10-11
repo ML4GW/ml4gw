@@ -28,8 +28,7 @@ def test_fit(sample_rate, ifos, factor):
     fit_sample_rate = sample_rate * factor if factor is not None else None
     RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
 
-    assert mock.tensors.shape == (len(ifos), 3, 3)
-    assert mock.vertices.shape == (len(ifos), 3)
+    
     assert mock.background.shape == (len(ifos), 4 * sample_rate + 1)
 
     # use this background as our target for passing things
@@ -95,10 +94,25 @@ def reweight_snrs(*args, **kwargs):
 
 
 @patch("ml4gw.gw.reweight_snrs", new=reweight_snrs)
-def test_sample(sample_rate, ifos):
+def test_sample(sample_rate, ifos, distribution):
     mock = MagicMock()
+   
+    mock_dist = MagicMock()
+    mock_dist.__call__ = dist
+    
+    mock.dec =  mock_dist 
+    mock.phi =  mock_dist
+    mock.psi =  mock_dist
+    mock.snr =  mock_dist
 
+
+    # first test sampling without
+    # intrinsic parameters 
+    mock.intrinsic_parameters = None
+    
     # first make sure we enforce fitting
+    # if sampling with snr reweighting
+    mock.snr = MagicMock()
     mock.background = None
     with pytest.raises(TypeError) as exc:
         RandomWaveformInjection.sample(mock, 1)
@@ -123,8 +137,18 @@ def test_sample(sample_rate, ifos):
     # first test with passing indices
     idx = torch.arange(5, 50, 5)
     result, params = RandomWaveformInjection.sample(mock, idx)
+    assert len(params) == 4 # ra, dec, psi, snr 
     assert (result == summed[idx]).all()
     mock.dec.assert_called_with(len(idx))
+    
+    # now test when snr is None
+    # it doesn't get returned 
+    mock.snr = None
+    result, params = RandomWaveformInjection.sample(mock, idx)
+    assert len(params) == 3 # ra, dec, psi  
+    assert (result == summed[idx]).all()
+    mock.dec.assert_called_with(len(idx))
+
 
     # now test with calling -1 to make sure
     # we get everything back in order
@@ -145,58 +169,86 @@ def test_sample(sample_rate, ifos):
     assert (result == summed[idx]).all()
     mock.dec.assert_called_with(len(idx))
 
-
+    # now pass intrinsic parameters of waveform to mock,
+    # and ensure sampling returns them as expected
+    num_intrinsic = 5
+    intrinsic_parameters = np.column_stack([np.arange(1, mock.num_waveforms, 1) * i for i in range(num_intrinsic)])
+    mock.intrinsic_parameters = intrinsic_parameters 
+    result, params = RandomWaveformInjection.sample(mock, idx)
+    
+    assert (np.array( params[-num_intrinsic:]) == (intrinsic_parameters[idx].transpose(1,0)) ).all()
+    
 @pytest.fixture(params=[0.5, 1])
 def prob(request):
     return request.param
 
+@pytest.fixture
+def dist():
+    def f(N):
+        return torch.Tensor(np.random.normal(size=N))
+    return f
 
 @patch("ml4gw.gw.reweight_snrs", new=reweight_snrs)
-def test_random_waveform_injection(prob, ifos):
+def test_random_waveform_injection(prob, ifos, dist):
     waveforms = {i: torch.randn(100, 1024) for i in ["plus", "cross"]}
     waveform = waveforms["plus"] + waveforms["cross"]
     summed = torch.stack([waveform + i for i in range(len(ifos))], axis=1)
 
-    dec = MagicMock()
-    psi = MagicMock()
-    phi = MagicMock()
-    snr = MagicMock()
+    mock_dist = MagicMock()
+    mock_dist.__call__ = dist
+    
 
+    dec = mock_dist 
+    phi = mock_dist
+    psi = mock_dist
+    snr = mock_dist
+
+
+    sample_rate = 1024
     # enforce all polarizations have to be same length
     with pytest.raises(ValueError) as exc:
         wrong = {str(i): np.random.randn(i + 2, 1024) for i in range(2)}
         transform = RandomWaveformInjection(
-            dec, psi, phi, snr, sample_rate=1024, prob=prob, **wrong
+             sample_rate, ifos, dec, psi, phi, snr, prob=prob, **wrong
         )
     assert str(exc.value).startswith("Polarization")
 
     # enforce prob is greater than 0
     with pytest.raises(ValueError) as exc:
         transform = RandomWaveformInjection(
-            dec, psi, phi, snr, sample_rate=1024, prob=0, **waveforms
+            sample_rate, ifos, dec, psi, phi, snr, prob=0, **waveforms
         )
     assert str(exc.value).startswith("Injection probability")
 
     # same for leq 1
     with pytest.raises(ValueError) as exc:
         transform = RandomWaveformInjection(
-            dec, psi, phi, snr, sample_rate=1024, prob=1.2, **waveforms
+            sample_rate, ifos, dec, psi, phi, snr, prob=1.2, **waveforms
         )
     assert str(exc.value).startswith("Injection probability")
 
+    # enforce parameters has same length as waveforms
+    with pytest.raises(ValueError) as exc:
+        num_intrinsic = 5
+        intrinsic = np.zeros((len(waveforms)-1, num_intrinsic ))
+        transform = RandomWaveformInjection(
+            sample_rate, ifos, dec, psi, phi, snr, intrinsic_parameters = intrinsic, **waveforms
+        )
+    assert str(exc.value).startswith("Waveform parameters")
+    
     # now make it for real
     transform = RandomWaveformInjection(
-        dec, psi, phi, snr, sample_rate=1024, prob=prob, **waveforms
+        sample_rate, ifos, dec, psi, phi, snr, prob=prob, **waveforms
     )
-    assert len(list(transform.parameters())) == 2
+    assert len(list(transform.parameters())) == 4
     assert transform.num_waveforms == 100
     assert transform.df == 1
     assert transform.mask is None
-
+    assert transform.tensors.shape == (len(ifos), 3, 3)
+    assert transform.vertices.shape == (len(ifos), 3)
+    
     # make background not None so we can sample
     transform.background = MagicMock()
-    transform.tensors = MagicMock()
-    transform.tensors.device = "cpu"
 
     # create some fake data to inject into
     X = torch.zeros((16, len(ifos), 256))
@@ -241,17 +293,15 @@ def test_random_waveform_injection(prob, ifos):
     # too short raises an exception
     with pytest.raises(ValueError) as exc:
         transform = RandomWaveformInjection(
-            dec[:99], psi, phi, snr, sample_rate=1024, prob=prob, **waveforms
+            sample_rate, ifos, dec[:99], psi, phi, snr, prob=prob, **waveforms
         )
     assert str(exc.value).startswith("Source parameter 'dec' is not")
 
     # now verify that the tensor is added as a true parameter
     transform = RandomWaveformInjection(
-        dec, psi, phi, snr, sample_rate=1024, prob=prob, **waveforms
+        sample_rate, ifos, dec, psi, phi, snr, prob=prob, **waveforms
     )
-    assert len(list(transform.parameters())) == 3
-    transform.tensors = MagicMock()
-    transform.tensors.device = "cpu"
+    assert len(list(transform.parameters())) == 5
 
     transform.background = MagicMock()
     with rand_patch as rand_mock, perm_patch as perm_mock:
@@ -269,3 +319,35 @@ def test_random_waveform_injection(prob, ifos):
         else:
             assert (x_row == 2 * summed[i, :, i : i + 256]).all()
             assert (y_row == 1).all()
+
+    # now re-make transform passing intrinsic parameters
+    num_intrinsic = 5
+    intrinsic_parameters = np.ones((100, num_intrinsic ))
+    prob = 1.0 
+    transform = RandomWaveformInjection(
+        sample_rate, ifos, dec, psi, phi, prob = prob, intrinsic_parameters=intrinsic_parameters, **waveforms
+    )
+     
+    assert len(list(transform.parameters())) == 6 # additional intrinsic parameter
+    assert transform.num_waveforms == 100
+    assert transform.df == 1
+    assert transform.mask is None
+
+    # create some fake data to inject into
+    X = torch.zeros((16, len(ifos), 256))
+
+    # now patch a few torch random functions so
+    # we know what outputs to expect
+    expected_count = 16 
+    mask = torch.arange(0, 0.9, 0.9 / 16)
+    rand_patch = patch("torch.rand", return_value=mask)
+    perm_patch = patch("torch.randperm", return_value=torch.arange(16))
+    randint_patch = patch(
+        "torch.randint", return_value=torch.arange(expected_count)
+    )
+
+    # run the transform's forward method with the patchees
+    with rand_patch as rand_mock, perm_patch as perm_mock:
+        with randint_patch as randint_mock:
+            X_hat, params = transform(X)
+            assert (np.array( params[-num_intrinsic:] ) == (intrinsic_parameters[:16].transpose(1,0)) ).all()
