@@ -398,6 +398,7 @@ class RandomWaveformInjection(torch.nn.Module):
             **polarizations,
         )
 
+        
         if self.snr is not None:
             target_snrs = self._sample_source_param(self.snr, idx, N)
             rescaled_responses = gw.reweight_snrs(
@@ -408,15 +409,15 @@ class RandomWaveformInjection(torch.nn.Module):
                 highpass=self.mask,
             )
 
-            extrinsic_params = torch.column_stack((dec, psi, phi, target_snrs))
+            sampled_params = torch.column_stack((dec, psi, phi, target_snrs))
         else:
-            extrinsic_params = torch.column_stack((dec, psi, phi))
+            sampled_params = torch.column_stack((dec, psi, phi))
             rescaled_responses = ifo_responses 
         
         if self.intrinsic_parameters is not None: 
             intrinsic_parameters = self.intrinsic_parameters[idx]
-            sampled_params = torch.column_stack([extrinsic_params, intrinsic_parameters])
-        
+            sampled_params = torch.column_stack([sampled_params, intrinsic_parameters])
+       
         return rescaled_responses, sampled_params
 
     def forward(
@@ -441,6 +442,6 @@ class RandomWaveformInjection(torch.nn.Module):
             )
             X[mask] += waveforms
         
-            indices = torch.where(mask) 
+            indices = torch.where(mask)[0]
 
         return X, indices, sampled_params
