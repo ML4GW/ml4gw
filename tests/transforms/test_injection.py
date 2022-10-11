@@ -334,17 +334,15 @@ def test_random_waveform_injection(prob, ifos, dist):
     num_intrinsic = 5
     intrinsic_parameters = torch.randn((100, num_intrinsic ))
     
-    #waveforms = {i: torch.zeros(100, 1024) for i in ["plus", "cross"]}
-    #waveforms = {i: torch.stack([ torch.zeros(1024)+(2*j) for j in range(100)]) for i in ["plus", "cross"]}
     dec = torch.arange(0, 100, 1) * 1
     psi = torch.arange(0, 100, 1) * 2
     phi = torch.arange(0, 100, 1) * 3
     
     transform = RandomWaveformInjection(
-        sample_rate, ifos, dec, psi, phi, prob = 1.0, intrinsic_parameters=intrinsic_parameters, **waveforms
+        sample_rate, ifos, dec, psi, phi, prob = prob, intrinsic_parameters=intrinsic_parameters, **waveforms
     )
+    
     transform.background = MagicMock()
-    #assert len(list(transform.parameters())) == 6 # additional intrinsic parameter
     assert transform.num_waveforms == 100
     assert transform.df == 1
     assert transform.mask is None
@@ -353,7 +351,7 @@ def test_random_waveform_injection(prob, ifos, dist):
     perm_patch = patch("torch.randperm", return_value=torch.arange(16))
     rand_patch = patch("torch.rand", return_value=mask)
     randint_patch = patch(
-        "torch.randint", return_value=torch.arange(16)
+        "torch.randint", return_value=torch.arange(expected_count)
     )  
  
     X = torch.zeros((16, len(ifos), 256))
@@ -362,12 +360,15 @@ def test_random_waveform_injection(prob, ifos, dist):
             X_hat, indices, params = transform(X)
     
     # all indices should have injection
-    assert len(indices) == len(X_hat) 
+    assert len(indices) == expected_count
     
     # make sure we're sampling correct params
     # corresponding to waveforms
-    expected_params = torch.column_stack((dec[:16], psi[:16], phi[:16], intrinsic_parameters[:16]))
+    expected_params = torch.column_stack((dec[:expected_count], psi[:expected_count], phi[:expected_count], intrinsic_parameters[:expected_count]))
     assert (params == expected_params).all()
 
     for i, x_row in enumerate(X_hat):
-        assert (x_row == summed[i, :, i : i + 256]).all()
+        if i >= expected_count:
+            assert (x_row == 0).all()
+        else:
+            assert (x_row == summed[i, :, i : i + 256]).all() 
