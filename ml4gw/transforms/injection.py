@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from typing import Callable as CallableType
-from typing import Iterable, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -18,7 +18,7 @@ class RandomWaveformInjection(torch.nn.Module):
     def __init__(
         self,
         sample_rate: float,
-        ifos: Iterable[str],
+        ifos: List[str],
         dec: SourceParameter,
         psi: SourceParameter,
         phi: SourceParameter,
