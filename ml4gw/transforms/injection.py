@@ -416,7 +416,7 @@ class RandomWaveformInjection(torch.nn.Module):
         if self.intrinsic_parameters is not None:
             intrinsic_parameters = self.intrinsic_parameters[idx]
             sampled_params = torch.column_stack(
-                [sampled_params, intrinsic_parameters]
+                [intrinsic_parameters, sampled_params]
             )
 
         return rescaled_responses, sampled_params
