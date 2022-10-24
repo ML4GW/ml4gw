@@ -27,7 +27,6 @@ class RandomWaveformInjection(torch.nn.Module):
         highpass: Optional[float] = None,
         prob: float = 1.0,
         trigger_offset: float = 0,
-        fixed: bool = False,
         **polarizations: np.ndarray,
     ) -> None:
         """Randomly inject gravitational waveforms into time domain data
@@ -127,7 +126,6 @@ class RandomWaveformInjection(torch.nn.Module):
             )
         self.prob = prob
         self.trigger_offset = int(trigger_offset * sample_rate)
-        self.fixed = fixed
 
         # store ifo geometries
         self.ifos = ifos
@@ -443,7 +441,6 @@ class RandomWaveformInjection(torch.nn.Module):
                 kernel_size=X.shape[-1],
                 max_center_offset=self.trigger_offset,
                 coincident=True,
-                fixed=self.fixed,
             )
             X[mask] += waveforms
 
