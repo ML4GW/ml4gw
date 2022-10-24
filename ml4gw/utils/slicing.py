@@ -159,6 +159,7 @@ def sample_kernels(
     N: Optional[int] = None,
     max_center_offset: Optional[int] = None,
     coincident: bool = True,
+    fixed: bool = True,
 ) -> BatchTimeSeriesTensor:
     """Randomly sample kernels from a single or multichannel timeseries
 
@@ -229,11 +230,29 @@ def sample_kernels(
         )
 
     if X.ndim == 1:
+        if fixed: 
+            raise ValueError(   
+                "Can't sample kernels with fixed location"
+                "when X has 1 dimension"
+            )
         idx = torch.randint(len(X) - kernel_size, size=(N,))
         return slice_kernels(X, idx, kernel_size)
 
     center = int(X.shape[-1] // 2)
-    if max_center_offset is None:
+
+    if fixed:
+        # if taking kernels whose center is 
+        # specified location from sample center
+        if max_center_offset is None:
+            raise ValueError(
+                "Must specify max center offset when sampling"
+                "kernels with a fixed offset from center"
+            ) 
+        # randint will always sample min_val
+        min_val = max_center_offset
+        max_val = max_center_offset + 1
+    elif max_center_offset is None:
+        
         # sample uniformly from all of X's time dimension
         min_val, max_val = 0, X.shape[-1] - kernel_size
     elif max_center_offset >= 0:
