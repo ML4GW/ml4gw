@@ -443,7 +443,7 @@ class RandomWaveformInjection(torch.nn.Module):
                 kernel_size=X.shape[-1],
                 max_center_offset=self.trigger_offset,
                 coincident=True,
-                self.fixed,
+                fixed=self.fixed,
             )
             X[mask] += waveforms
 
