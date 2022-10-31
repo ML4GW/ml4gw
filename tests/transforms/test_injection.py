@@ -379,10 +379,10 @@ def test_random_waveform_injection(prob, ifos, dist):
     # corresponding to waveforms
     expected_params = torch.column_stack(
         (
+            intrinsic_parameters[:expected_count],
             dec[:expected_count],
             psi[:expected_count],
             phi[:expected_count],
-            intrinsic_parameters[:expected_count],
         )
     )
     assert (params == expected_params).all()
