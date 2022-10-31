@@ -331,12 +331,14 @@ def compute_ifo_snr(
         Batch of SNRs computed for each interferometer
     """
 
-    # compute frequency power in units of Hz^-1
-    fft = torch.fft.rfft(responses, axis=-1) / sample_rate
+    # compute frequency power, upsample precision so that
+    # computing absolute value doesn't accidentally zero some
+    # values out. Divide by sample rate to get units of Hz^-1
+    fft = torch.fft.rfft(responses, axis=-1).type(torch.complex128)
+    fft = fft.abs() / sample_rate
 
-    # multiply with complex conjugate to get magnitude**2
-    # then divide by the background to bring units back to Hz^-1
-    fft_abs = fft.abs()
+    # divide by background asd, then go back to FP32 precision
+    # and square now that values are back in a reasonable range
     integrand = fft_abs / (backgrounds**0.5)
     integrand = integrand.type(torch.float32) ** 2
 
