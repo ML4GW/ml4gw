@@ -339,7 +339,7 @@ def compute_ifo_snr(
 
     # divide by background asd, then go back to FP32 precision
     # and square now that values are back in a reasonable range
-    integrand = fft_abs / (backgrounds**0.5)
+    integrand = fft / (backgrounds**0.5)
     integrand = integrand.type(torch.float32) ** 2
 
     # sum over the desired frequency range and multiply
