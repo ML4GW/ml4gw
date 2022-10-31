@@ -189,7 +189,7 @@ def test_sample(sample_rate, ifos, dist):
     )
     mock.intrinsic_parameters = intrinsic_parameters
     result, params = RandomWaveformInjection.sample(mock, idx)
-    assert (params[:, -num_intrinsic:] == (intrinsic_parameters[idx])).all()
+    assert (params[:, :num_intrinsic] == (intrinsic_parameters[idx])).all()
 
 
 @pytest.fixture(params=[0.5, 1])
