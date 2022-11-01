@@ -331,18 +331,21 @@ def compute_ifo_snr(
         Batch of SNRs computed for each interferometer
     """
 
-    # compute frequency power in units of Hz^-1
-    fft = torch.fft.rfft(responses, axis=-1) / sample_rate
+    # TODO: should we do windowing here?
+    # compute frequency power, upsample precision so that
+    # computing absolute value doesn't accidentally zero some
+    # values out.
+    fft = torch.fft.rfft(responses, axis=-1).type(torch.complex128)
+    fft = fft.abs() / sample_rate
 
-    # multiply with complex conjugate to get magnitude**2
-    # then divide by the background to bring units back to Hz^-1
-    fft_abs = fft.abs()
-    integrand = fft_abs / (backgrounds**0.5)
+    # divide by background asd, then go back to FP32 precision
+    # and square now that values are back in a reasonable range
+    integrand = fft / (backgrounds**0.5)
     integrand = integrand.type(torch.float32) ** 2
 
     # sum over the desired frequency range and multiply
     # by df to turn it into an integration (and get
-    # our units to drop out). 4 is for mystical reasons
+    # our units to drop out)
     df = sample_rate / responses.shape[-1]
 
     # mask out low frequency components if a critical
@@ -371,7 +374,10 @@ def compute_ifo_snr(
     # need the sample rate to compute the mask, but if we
     # replace this with a `mask` argument instead we're in
     # the clear
-    return 4 * integrand.sum(axis=-1) * df
+    integrated = integrand.sum(axis=-1) * df
+
+    # multiply by 4 for mystical reasons
+    return 4 * integrated
 
 
 def compute_network_snr(
