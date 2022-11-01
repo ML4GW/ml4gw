@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from typing import Callable as CallableType
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -17,11 +17,13 @@ SourceParameter = Union[np.ndarray, Distribution]
 class RandomWaveformInjection(torch.nn.Module):
     def __init__(
         self,
+        sample_rate: float,
+        ifos: List[str],
         dec: SourceParameter,
         psi: SourceParameter,
         phi: SourceParameter,
-        snr: SourceParameter,
-        sample_rate: float,
+        snr: Optional[SourceParameter] = None,
+        intrinsic_parameters: Optional[np.ndarray] = None,
         highpass: Optional[float] = None,
         prob: float = 1.0,
         trigger_offset: float = 0,
@@ -32,8 +34,10 @@ class RandomWaveformInjection(torch.nn.Module):
         Transform that uses a bank of gravitational waveform
         polarizations and source parameters to generate interferometer
         responses which are randomly injected into background timeseries
-        data. If a target tensor is provided at call time, its value at
-        all the batch elements on which an injection is performed is set to 1.
+        data. The `forward` method returns the
+        combined background and injections tensor,
+        the indices at which these injections where made,
+        and the parameters used to generate the injections.
 
         Before this module can be used, it must be fit to the background
         PSDs of the interferometers whose responses to the raw gravitational
@@ -58,6 +62,10 @@ class RandomWaveformInjection(torch.nn.Module):
         on its own.
 
         Args:
+            sample_rate:
+                Rate at which data used at call-time will be sampled.
+            ifos:
+                Interferometers onto which polarizations will be projected.
             dec:
                 Source parameter specifying the declination of each
                 source in radians relative to the celestial north.
@@ -76,9 +84,11 @@ class RandomWaveformInjection(torch.nn.Module):
             snr:
                 Source parameter specifying the desired signal to noise
                 ratio of each injection. See description above about how
-                this can be specified.
-            sample_rate:
-                Rate at which data used at call-time will be sampled.
+                this can be specified. If left as `None`, no SNR reweighting
+                will be performed.
+            intrinsic_parameters:
+                Tensor containing the intrinsic parameters
+                used to produce the passed polarizations.
             highpass:
                 Frequency below which PSD data will not contribute
                 to the SNR calculation. If left as `None`, SNR will
@@ -117,6 +127,12 @@ class RandomWaveformInjection(torch.nn.Module):
         self.prob = prob
         self.trigger_offset = int(trigger_offset * sample_rate)
 
+        # store ifo geometries
+        self.ifos = ifos
+        tensors, vertices = gw.get_ifo_geometry(*ifos)
+        self.tensors = torch.nn.Parameter(tensors, requires_grad=False)
+        self.vertices = torch.nn.Parameter(vertices, requires_grad=False)
+
         # make sure we have the same number of waveforms
         # for all the different polarizations
         num_waveforms = waveform_size = None
@@ -136,12 +152,27 @@ class RandomWaveformInjection(torch.nn.Module):
                 torch.Tensor(tensor), requires_grad=False
             )
 
+        self.intrinsic_parameters = None
+        if intrinsic_parameters is not None:
+            if len(intrinsic_parameters) != num_waveforms:
+                raise ValueError(
+                    "Waveform parameters has {} waveforms "
+                    "associated with it, expected {}".format(
+                        len(intrinsic_parameters), num_waveforms
+                    )
+                )
+            self.intrinsic_parameters = torch.nn.Parameter(
+                torch.Tensor(intrinsic_parameters), requires_grad=False
+            )
+
         # confirm that the source parameters all either
         # are a callable or have a length equal to the
         # number of waveforms
         names = ["dec", "psi", "phi", "snr"]
+
         for name, param in zip(names, [dec, psi, phi, snr]):
-            if not isinstance(param, Callable):
+
+            if not isinstance(param, Callable) and param is not None:
                 try:
                     length = len(param)
                 except AttributeError:
@@ -175,7 +206,7 @@ class RandomWaveformInjection(torch.nn.Module):
 
         # initialize a bunch of properties we're
         # going to have to fit later
-        self.background = self.tensors = self.vertices = None
+        self.background = None
 
     def to(self, device):
         super().to(device)
@@ -230,10 +261,8 @@ class RandomWaveformInjection(torch.nn.Module):
                 seconds.
         """
 
-        ifos = list(backgrounds)
-        tensors, vertices = gw.get_ifo_geometry(*ifos)
-        self.tensors = torch.nn.Parameter(tensors, requires_grad=False)
-        self.vertices = torch.nn.Parameter(vertices, requires_grad=False)
+        if self.snr is None:
+            raise TypeError("Cannot fit to backgrounds if snr is None")
 
         sample_rate = sample_rate or self.sample_rate
         psds = []
@@ -322,9 +351,9 @@ class RandomWaveformInjection(torch.nn.Module):
                 responses: `dec`, `psi`, `phi`, and the sampled SNRs.
         """
 
-        if self.background is None:
+        if self.background is None and self.snr is not None:
             raise TypeError(
-                "WaveformSampler can't sample waveforms until "
+                "WaveformSampler can't rescale waveform snr's until "
                 "it has been fit on detector background. Make sure "
                 "to call WaveformSampler.fit first"
             )
@@ -358,6 +387,7 @@ class RandomWaveformInjection(torch.nn.Module):
         phi = self._sample_source_param(self.phi, idx, N)
 
         polarizations = {k: v[idx] for k, v in self.polarizations.items()}
+
         ifo_responses = gw.compute_observed_strain(
             dec,
             psi,
@@ -368,32 +398,44 @@ class RandomWaveformInjection(torch.nn.Module):
             **polarizations,
         )
 
-        target_snrs = self._sample_source_param(self.snr, idx, N)
-        rescaled_responses = gw.reweight_snrs(
-            ifo_responses,
-            target_snrs,
-            backgrounds=self.background,
-            sample_rate=self.sample_rate,
-            highpass=self.mask,
-        )
+        if self.snr is not None:
+            target_snrs = self._sample_source_param(self.snr, idx, N)
+            rescaled_responses = gw.reweight_snrs(
+                ifo_responses,
+                target_snrs,
+                backgrounds=self.background,
+                sample_rate=self.sample_rate,
+                highpass=self.mask,
+            )
 
-        sampled_params = (dec, psi, phi, target_snrs)
+            sampled_params = torch.column_stack((dec, psi, phi, target_snrs))
+        else:
+            sampled_params = torch.column_stack((dec, psi, phi))
+            rescaled_responses = ifo_responses
+
+        if self.intrinsic_parameters is not None:
+            intrinsic_parameters = self.intrinsic_parameters[idx]
+            sampled_params = torch.column_stack(
+                [intrinsic_parameters, sampled_params]
+            )
+
         return rescaled_responses, sampled_params
 
     def forward(
-        self, X: gw.WaveformTensor, y: Optional[gw.ScalarTensor] = None
+        self,
+        X: gw.WaveformTensor,
     ) -> gw.WaveformTensor:
         """Sample waveforms and inject them into random batch elements
 
         Batch elements from `X` will be selected at random for
-        injection. If `y` is specified, it will be assumed to
-        be a target tensor and the corresponding rows of `y`
-        will be set to `1`.
+        injection. Returns the tensor `X` with random injections,
+        the indices where injections were done, and the parameters
+        of the injections.
         """
         if self.training:
             mask = torch.rand(size=X.shape[:1]) < self.prob
             N = mask.sum().item()
-            waveforms, _ = self.sample(N)
+            waveforms, sampled_params = self.sample(N)
             waveforms = sample_kernels(
                 waveforms,
                 kernel_size=X.shape[-1],
@@ -402,9 +444,6 @@ class RandomWaveformInjection(torch.nn.Module):
             )
             X[mask] += waveforms
 
-            if y is not None:
-                y[mask] = 1
+            indices = torch.where(mask)[0]
 
-        if y is not None:
-            return X, y
-        return X
+        return X, indices, sampled_params

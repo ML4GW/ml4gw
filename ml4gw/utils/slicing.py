@@ -233,7 +233,9 @@ def sample_kernels(
         return slice_kernels(X, idx, kernel_size)
 
     center = int(X.shape[-1] // 2)
+
     if max_center_offset is None:
+
         # sample uniformly from all of X's time dimension
         min_val, max_val = 0, X.shape[-1] - kernel_size
     elif max_center_offset >= 0:
