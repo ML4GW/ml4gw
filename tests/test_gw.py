@@ -1,8 +1,9 @@
 import bilby
+import lal
+import lalsimulation
 import numpy as np
 import pytest
 import torch
-from lal import GreenwichMeanSiderealTime
 
 from ml4gw import gw as injection
 
@@ -42,7 +43,7 @@ def waveform_duration():
 @pytest.fixture
 def data(batch_size, sample_rate, waveform_duration):
     gps_times = [float(1234567890 + i) for i in range(batch_size)]
-    gmst = [GreenwichMeanSiderealTime(i) % (2 * np.pi) for i in gps_times]
+    gmst = [lal.GreenwichMeanSiderealTime(i) % (2 * np.pi) for i in gps_times]
     gmst = np.array(gmst)
 
     ra = np.random.uniform(0, 2 * np.pi, size=(batch_size,))
@@ -233,3 +234,60 @@ def test_compute_observed_strain(
         waveform_duration * sample_rate,
     )
     assert np.isclose(result, expected, rtol=1e-5).all()
+
+
+def test_compute_ifo_snr():
+    """Test a (30, 30) solar mass system against lalsimulation
+    with a relative tolerance.
+    """
+    params = dict(
+        m1=30 * lal.MSUN_SI,
+        m2=30 * lal.MSUN_SI,
+        s1x=0,
+        s1y=0,
+        s1z=0,
+        s2x=0,
+        s2y=0,
+        s2z=0,
+        distance=3.0857e24,  # 100 Mpc
+        inclination=0.3,
+        phiRef=0.0,
+        longAscNodes=0.0,
+        eccentricity=0.0,
+        meanPerAno=0.0,
+        deltaT=1.0 / 1024.0,
+        f_min=1.0,
+        f_ref=20.0,
+        approximant=lalsimulation.TaylorT4,
+        params=lal.CreateDict(),
+    )
+
+    hp, hc = lalsimulation.SimInspiralChooseTDWaveform(**params)
+    sample_rate = 1.0 / params["deltaT"]
+    df = sample_rate / hp.data.data.shape[-1]
+    psd = lal.CreateREAL8FrequencySeries(
+        "psd", 0, 1, df, "s^-1", len(hp.data.data)
+    )
+    lalsimulation.SimNoisePSDaLIGOaLIGO140MpcT1800545(psd, 1)
+    snr_hp_lal = lalsimulation.MeasureSNR(
+        hp, psd, 1, 100
+    )  # ISCO(30, 30) ~ 70Hz
+    snr_hc_lal = lalsimulation.MeasureSNR(hc, psd, 1, 100)
+
+    backgrounds = psd.data.data[: len(hp.data.data) // 2 + 1]
+    backgrounds = torch.from_numpy(backgrounds)
+    hp_torch = torch.from_numpy(hp.data.data)
+    hc_torch = torch.from_numpy(hc.data.data)
+    snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+        hp_torch, backgrounds, sample_rate=sample_rate
+    )
+    snr_hc_compute_ifo_snr = injection.compute_ifo_snr(
+        hc_torch, backgrounds, sample_rate=sample_rate
+    )
+
+    assert snr_hp_lal == pytest.approx(
+        snr_hp_compute_ifo_snr.numpy(), rel=1e-1
+    )
+    assert snr_hc_lal == pytest.approx(
+        snr_hc_compute_ifo_snr.numpy(), rel=1e-1
+    )

@@ -377,7 +377,8 @@ def compute_ifo_snr(
     integrated = integrand.sum(axis=-1) * df
 
     # multiply by 4 for mystical reasons
-    return 4 * integrated
+    integrated = 4 * integrated  # rho-squared
+    return torch.sqrt(integrated)
 
 
 def compute_network_snr(
