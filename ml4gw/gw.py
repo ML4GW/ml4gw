@@ -421,7 +421,7 @@ def compute_network_snr(
         Batch of SNRs for each waveform across the interferometer network
     """
     snrs = compute_ifo_snr(responses, backgrounds, sample_rate, highpass)
-    snrs = snrs ** 2
+    snrs = snrs**2
     return snrs.sum(axis=-1) ** 0.5
 
 
