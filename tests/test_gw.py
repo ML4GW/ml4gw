@@ -1,3 +1,5 @@
+from itertools import combinations
+
 import bilby
 import lal
 import lalsimulation
@@ -236,13 +238,12 @@ def test_compute_observed_strain(
     assert np.isclose(result, expected, rtol=1e-5).all()
 
 
-def test_compute_ifo_snr():
-    """Test a (30, 30) solar mass system against lalsimulation
-    with a relative tolerance.
-    """
+@pytest.fixture(params=combinations([25, 30, 35, 40], 2), scope="session")
+def _get_waveforms_from_lalsimulation(request):
+    m1, m2 = request.param
     params = dict(
-        m1=30 * lal.MSUN_SI,
-        m2=30 * lal.MSUN_SI,
+        m1=m1 * lal.MSUN_SI,
+        m2=m2 * lal.MSUN_SI,
         s1x=0,
         s1y=0,
         s1z=0,
@@ -261,17 +262,28 @@ def test_compute_ifo_snr():
         approximant=lalsimulation.TaylorT4,
         params=lal.CreateDict(),
     )
-
     hp, hc = lalsimulation.SimInspiralChooseTDWaveform(**params)
-    sample_rate = 1.0 / params["deltaT"]
-    df = sample_rate / hp.data.data.shape[-1]
-    psd = lal.CreateREAL8FrequencySeries(
-        "psd", 0, 1, df, "s^-1", len(hp.data.data)
-    )
-    lalsimulation.SimNoisePSDaLIGOaLIGO140MpcT1800545(psd, 1)
-    snr_hp_lal = lalsimulation.MeasureSNR(
-        hp, psd, 1, 100
-    )  # ISCO(30, 30) ~ 70Hz
+    return hp, hc
+
+
+def _get_O4_psd(
+    sample_rate, length, func=lalsimulation.SimNoisePSDaLIGOaLIGO140MpcT1800545
+):
+    df = sample_rate / length
+    psd = lal.CreateREAL8FrequencySeries("psd", 0, 1, df, "s^-1", length)
+    func(psd, 1)
+    return psd
+
+
+def test_compute_ifo_snr(_get_waveforms_from_lalsimulation):
+    """Test SNR for stellar mass system against lalsimulation
+    with a relative tolerance.
+    """
+    hp, hc = _get_waveforms_from_lalsimulation
+    sample_rate = 1024
+    psd = _get_O4_psd(sample_rate, hp.data.data.shape[-1])
+    # All systems in test have ISCO < 100
+    snr_hp_lal = lalsimulation.MeasureSNR(hp, psd, 1, 100)
     snr_hc_lal = lalsimulation.MeasureSNR(hc, psd, 1, 100)
 
     backgrounds = psd.data.data[: len(hp.data.data) // 2 + 1]
@@ -291,3 +303,83 @@ def test_compute_ifo_snr():
     assert snr_hc_lal == pytest.approx(
         snr_hc_compute_ifo_snr.numpy(), rel=1e-1
     )
+
+
+def test_compute_network_snr(_get_waveforms_from_lalsimulation):
+    """Test network SNR for stellar mass system against lalsimulation
+    for two different backgrounds, from two different instruments.
+    """
+    hp, hc = _get_waveforms_from_lalsimulation
+    sample_rate = 1024
+    # Consider aLIGO and aVirgo PSDs in T1800545
+    psd_1 = _get_O4_psd(
+        sample_rate,
+        hp.data.data.shape[-1],
+        func=lalsimulation.SimNoisePSDaLIGOaLIGO140MpcT1800545,
+    )
+    psd_2 = _get_O4_psd(
+        sample_rate,
+        hp.data.data.shape[-1],
+        func=lalsimulation.SimNoisePSDaLIGOAdVO4T1800545,
+    )
+    snr_hp_lal_1 = lalsimulation.MeasureSNR(hp, psd_1, 1, 100)
+    snr_hp_lal_2 = lalsimulation.MeasureSNR(hp, psd_2, 1, 100)
+    snr_network_lal = np.sqrt(snr_hp_lal_1**2 + snr_hp_lal_2**2)
+
+    background_1 = psd_1.data.data[: len(hp.data.data) // 2 + 1]
+    background_2 = psd_2.data.data[: len(hp.data.data) // 2 + 1]
+
+    backgrounds = torch.stack(
+        (torch.from_numpy(background_1), torch.from_numpy(background_2))
+    )
+    hp_torch = torch.from_numpy(hp.data.data)
+    # repeat same signal in two backgrounds
+    hp_torch = hp_torch.repeat((2, 1))
+    snr_hp_compute_network_snr = injection.compute_network_snr(
+        hp_torch, backgrounds, sample_rate=sample_rate
+    )
+
+    assert snr_network_lal == pytest.approx(
+        snr_hp_compute_network_snr.numpy(), rel=1e-1
+    )
+
+
+def test_reweight_snrs(_get_waveforms_from_lalsimulation):
+    """Test reweighting of strain against"""
+    hp, hc = _get_waveforms_from_lalsimulation
+    sample_rate = 1024
+    # Consider aLIGO and aVirgo PSDs in T1800545
+    psd_1 = _get_O4_psd(
+        sample_rate,
+        hp.data.data.shape[-1],
+        func=lalsimulation.SimNoisePSDaLIGOaLIGO140MpcT1800545,
+    )
+    psd_2 = _get_O4_psd(
+        sample_rate,
+        hp.data.data.shape[-1],
+        func=lalsimulation.SimNoisePSDaLIGOAdVO4T1800545,
+    )
+    background_1 = psd_1.data.data[: len(hp.data.data) // 2 + 1]
+    background_2 = psd_2.data.data[: len(hp.data.data) // 2 + 1]
+
+    backgrounds = torch.stack(
+        (torch.from_numpy(background_1), torch.from_numpy(background_2))
+    )
+    hp_torch = torch.from_numpy(hp.data.data)
+    # repeat same signal in two backgrounds
+    hp_torch = hp_torch.repeat((2, 1))
+
+    target_network_snr = torch.tensor(
+        [
+            10,
+        ]
+    )
+    reweighted_response = injection.reweight_snrs(
+        hp_torch, target_network_snr, backgrounds, sample_rate=sample_rate
+    )
+    # mutate data in the hp timeseries, and recompute snr using LAL
+    hp.data.data = reweighted_response[..., 0, :].numpy().flatten()
+
+    lalsimulation.MeasureSNR(hp, psd_1, 1, 100) == pytest.approx(
+        target_network_snr.numpy()
+    ) == pytest.approx(10)
