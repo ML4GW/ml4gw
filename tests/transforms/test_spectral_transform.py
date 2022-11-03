@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import numpy as np
 import pytest
 import scipy
@@ -39,6 +41,14 @@ def test_init(overlap, fftlength, sample_rate):
             overlap * sample_rate
         )
     assert transform.nstride == expected_stride
+    assert len(list(transform.buffers())) == 2
+
+    # test read/write
+    weights_io = BytesIO()
+    torch.save(transform.state_dict(), weights_io)
+
+    weights_io.seek(0)
+    transform.load_state_dict(torch.load(weights_io))
 
 
 @pytest.fixture(params=[0.5, 2, 4])
