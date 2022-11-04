@@ -1,3 +1,4 @@
+from io import BytesIO
 from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
@@ -28,7 +29,6 @@ def test_fit(sample_rate, ifos, factor):
     # first test that TypeError gets raised
     # if .fit is called with snr as None
     mock.snr = None
-
     with pytest.raises(TypeError):
         RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
 
@@ -38,8 +38,8 @@ def test_fit(sample_rate, ifos, factor):
     mock.df = 1 / 8
 
     RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
-
     assert mock.background.shape == (len(ifos), 4 * sample_rate + 1)
+    assert mock._has_fit
 
     # use this background as our target for passing things
     # other than numpy arrays
@@ -105,7 +105,6 @@ def reweight_snrs(*args, **kwargs):
 
 @patch("ml4gw.gw.reweight_snrs", new=reweight_snrs)
 def test_sample(sample_rate, ifos, dist):
-
     mock = MagicMock()
     mock_dist = MagicMock(side_effect=dist)
 
@@ -120,14 +119,14 @@ def test_sample(sample_rate, ifos, dist):
     # first make sure we enforce fitting
     # if sampling with snr reweighting
     mock.snr = mock_dist
-    mock.background = None
+    mock._has_fit = False
     with pytest.raises(TypeError) as exc:
         RandomWaveformInjection.sample(mock, 1)
     assert str(exc.value).endswith("WaveformSampler.fit first")
 
     # now set background as mock
     # to mimick having called .fit
-    mock.background = MagicMock()
+    mock._has_fit = True
 
     # now give our dummy sampler some waveforms to sample
     mock.num_waveforms = 100
@@ -256,19 +255,34 @@ def test_random_waveform_injection(prob, ifos, dist):
         )
     assert str(exc.value).startswith("Waveform parameters")
 
-    # now make it for real
+    # now make it for real. Start with snr=None to make sure
+    # we don't register a buffer for the background
+    transform = RandomWaveformInjection(
+        sample_rate, ifos, dec, psi, phi, snr=None, prob=prob, **waveforms
+    )
+
+    # should be no registerd parameters
+    assert len(list(transform.parameters())) == 0
+
+    # should have buffers for tensors, vertices
+    assert len(list(transform.buffers())) == 2
+    assert transform.background is None
+
+    # now with regular SNR
     transform = RandomWaveformInjection(
         sample_rate, ifos, dec, psi, phi, snr, prob=prob, **waveforms
     )
-    assert len(list(transform.parameters())) == 4
+    assert len(list(transform.parameters())) == 0
+    assert len(list(transform.buffers())) == 3
+
     assert transform.num_waveforms == 100
     assert transform.df == 1
     assert transform.mask is None
+    assert not transform._has_fit
+
     assert transform.tensors.shape == (len(ifos), 3, 3)
     assert transform.vertices.shape == (len(ifos), 3)
-
-    # make background not None so we can sample
-    transform.background = MagicMock()
+    assert transform.background.shape == (len(ifos), sample_rate // 2 + 1)
 
     # create some fake data to inject into
     X = torch.zeros((16, len(ifos), 256))
@@ -284,6 +298,7 @@ def test_random_waveform_injection(prob, ifos, dist):
     )
 
     # run the transform's forward method with the patchees
+    transform._has_fit = True
     with rand_patch as rand_mock, perm_patch as perm_mock:
         with randint_patch as randint_mock:
             X_hat, indices, params = transform(X)
@@ -297,12 +312,12 @@ def test_random_waveform_injection(prob, ifos, dist):
     # now verify that the data matches up: the first
     # `exepcted_count` rows should be injected, and
     # the rest should be all 0s
-    assert (indices == torch.arange(0, expected_count, 1)).all()
+    assert (indices == torch.arange(0, expected_count, 1)).all().item()
     for i, x_row in enumerate(X_hat):
         if i >= expected_count:
-            assert (x_row == 0).all()
+            assert (x_row == 0).all().item()
         else:
-            assert (x_row == summed[i, :, i : i + 256]).all()
+            assert (x_row == summed[i, :, i : i + 256]).all().item()
 
     # now try things with one of the parameters as a tensor
     dec = np.random.randn(100)
@@ -315,13 +330,13 @@ def test_random_waveform_injection(prob, ifos, dist):
         )
     assert str(exc.value).startswith("Source parameter 'dec' is not")
 
-    # now verify that the tensor is added as a true parameter
+    # now verify that the tensor is added as a buffer
     transform = RandomWaveformInjection(
         sample_rate, ifos, dec, psi, phi, snr, prob=prob, **waveforms
     )
-    assert len(list(transform.parameters())) == 5
+    assert len(list(transform.buffers())) == 4
 
-    transform.background = MagicMock()
+    transform._has_fit = True
     with rand_patch as rand_mock, perm_patch as perm_mock:
         with randint_patch as randint_mock:
             X_hat, indices, params = transform(X)
@@ -332,9 +347,9 @@ def test_random_waveform_injection(prob, ifos, dist):
 
     for i, x_row in enumerate(X_hat):
         if i >= expected_count:
-            assert (x_row == 0).all()
+            assert (x_row == 0).all().item()
         else:
-            assert (x_row == 2 * summed[i, :, i : i + 256]).all()
+            assert (x_row == 2 * summed[i, :, i : i + 256]).all().item()
 
     # now re-make transform passing intrinsic parameters
     num_intrinsic = 5
@@ -355,10 +370,8 @@ def test_random_waveform_injection(prob, ifos, dist):
         **waveforms
     )
 
-    transform.background = MagicMock()
-    assert transform.num_waveforms == 100
-    assert transform.df == 1
-    assert transform.mask is None
+    # tensors, vertices, instrinsic, 3 x extrinsic
+    assert len(list(transform.buffers())) == 6
 
     mask = torch.arange(0, 0.9, 0.9 / 16)
     perm_patch = patch("torch.randperm", return_value=torch.arange(16))
@@ -389,6 +402,20 @@ def test_random_waveform_injection(prob, ifos, dist):
 
     for i, x_row in enumerate(X_hat):
         if i >= expected_count:
-            assert (x_row == 0).all()
+            assert (x_row == 0).all().item()
         else:
-            assert (x_row == summed[i, :, i : i + 256]).all()
+            assert (x_row == summed[i, :, i : i + 256]).all().item()
+
+    # test that mask gets added as buffer
+    transform = RandomWaveformInjection(
+        sample_rate, ifos, dec, psi, phi, prob=prob, highpass=10, **waveforms
+    )
+    # no intrinsic, but includes mask
+    assert len(list(transform.buffers())) == 6
+
+    # now test IO
+    weights_io = BytesIO()
+    torch.save(transform.state_dict(), weights_io)
+
+    weights_io.seek(0)
+    transform.load_state_dict(torch.load(weights_io))

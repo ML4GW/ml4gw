@@ -63,12 +63,16 @@ class SpectralDensity(torch.nn.Module):
         self.nperseg = int(fftlength * sample_rate)
         self.nstride = self.nperseg - int(overlap * sample_rate)
 
-        # do we allow for arbitrary windows?
-        self.window = torch.hann_window(self.nperseg)
+        # TODOs: Do we allow for arbitrary windows?
+        # Making this buffer persistent in case we want
+        # to implement this down the line, so that custom
+        # windows can be loaded in.
+        self.register_buffer("window", torch.hann_window(self.nperseg))
 
         # scale corresponds to "density" normalization, worth
         # considering adding this as a kwarg and changing this calc
-        self.scale = 1.0 / (sample_rate * (self.window**2).sum())
+        scale = 1.0 / (sample_rate * (self.window**2).sum())
+        self.register_buffer("scale", scale)
 
         if average not in ("mean", "median"):
             raise ValueError(
@@ -76,11 +80,6 @@ class SpectralDensity(torch.nn.Module):
             )
         self.average = average
         self.fast = fast
-
-    def to(self, device):
-        obj = super().to(device)
-        obj.window = obj.window.to(device)
-        return obj
 
     def forward(self, x: torch.Tensor, y: Optional[torch.Tensor] = None):
         if self.fast:
