@@ -218,7 +218,7 @@ class RandomWaveformInjection(torch.nn.Module):
     def to(self, device, waveforms: bool = False):
         super().to(device)
         if waveforms:
-            for t in self.polarizations.values:
+            for t in self.polarizations.values():
                 t.to(device)
         return self
 
