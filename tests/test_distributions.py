@@ -2,8 +2,9 @@ from math import pi
 
 import numpy as np
 import pytest
-from bbhnet.data import distributions
 from scipy import optimize
+
+from ml4gw import distributions
 
 # TODO: for all tests, how to validate that
 # distribution has the expected shape?
