@@ -321,7 +321,7 @@ class RandomWaveformInjection(torch.nn.Module):
                 "Conversion to torch tensor pushed "
                 "background ASD values to 0"
             )
-        self.background = background
+        self.background.copy_(background)
         self._has_fit = True
 
     def _sample_source_param(

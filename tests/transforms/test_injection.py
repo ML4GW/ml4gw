@@ -33,12 +33,15 @@ def test_fit(sample_rate, ifos, factor):
         RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
 
     # reset mock
+    param = torch.zeros((len(ifos), 4 * sample_rate + 1)).type(torch.float32)
     mock = MagicMock()
     mock.sample_rate = sample_rate
     mock.df = 1 / 8
+    mock.background = param
 
     RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
-    assert mock.background.shape == (len(ifos), 4 * sample_rate + 1)
+    assert (mock.background != 0).all().item()
+    assert mock.background.dtype == torch.float32
     assert mock._has_fit
 
     # use this background as our target for passing things
@@ -55,6 +58,7 @@ def test_fit(sample_rate, ifos, factor):
     mock = MagicMock()
     mock.sample_rate = sample_rate
     mock.df = 1 / 8
+    mock.background = param * 0
     RandomWaveformInjection.fit(mock, **background)
     assert np.isclose(mock.background, target_background, rtol=1e-6).all()
 
@@ -67,6 +71,7 @@ def test_fit(sample_rate, ifos, factor):
     mock = MagicMock()
     mock.sample_rate = sample_rate
     mock.df = 1 / 8
+    mock.background = param * 0
     RandomWaveformInjection.fit(mock, **background)
     assert np.isclose(mock.background, target_background, rtol=1e-6).all()
 
