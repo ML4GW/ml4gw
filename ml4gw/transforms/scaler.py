@@ -5,6 +5,22 @@ import torch
 
 
 class ChannelWiseScaler(torch.nn.Module):
+    """Scale timeseries channels to be zero mean unit variance
+
+    Scales timeseries channels by the mean and standard
+    deviation of the channels of the timeseries used to
+    fit the module. To reverse the scaling, provide the
+    `reverse=True` keyword argument at call time.
+    By default, the scaling parameters are set to zero mean
+    and unit variance, amounting to an identity transform.
+
+    Args:
+        num_channels:
+            The number of channels of the target timeseries.
+            If left as `None`, the timeseries will be assumed
+            to be 1D (single channel).
+    """
+
     def __init__(self, num_channels: Optional[int] = None) -> None:
         super().__init__()
 
@@ -13,11 +29,18 @@ class ChannelWiseScaler(torch.nn.Module):
             shape += (1,)
 
         mean = torch.zeros(shape)
-        std = torch.zeros(shape)
+        std = torch.ones(shape)
         self.register_buffer("mean", mean)
         self.register_buffer("std", std)
 
     def fit(self, X: np.ndarray) -> None:
+        """Fit the scaling parameters to a timeseries
+
+        Computes the channel-wise mean and standard deviation
+        of the timeseries `X` and sets these values to the
+        `mean` and `std` parameters of the scaler.
+        """
+
         if X.ndim == 1:
             assert self.mean.ndim == self.std.ndim == 1
             mean = X.mean(keepdims=True)
