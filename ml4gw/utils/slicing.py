@@ -188,9 +188,9 @@ def sample_kernels(
             distance that the rightmost edge of the kernel may
             fall from the center of the timeseries (the leftmost
             edge will always be sampled such that the center of
-            the timeseries falls within the kernel). If equal to
-            0, every kernel sampled will contain the center of
-            the timeseries, which may fall anywhere within the
+            the timeseries falls within or afer the kernel). If
+            equal to 0, every kernel sampled will contain the center
+            of the timeseries, which may fall anywhere within the
             kernel with uniform probability. If less than 0, defines
             the minimum distance that the center of the timeseries
             must fall from either edge of the kernel. If `X` is
@@ -262,6 +262,14 @@ def sample_kernels(
                     max_center_offset, kernel_size
                 )
             )
+
+    if min_val < 0:
+        # if kernel_size > center - max_center_offset,
+        # we may end up with negative indices
+        raise ValueError(
+            "Kernel size {} is too large for requested center "
+            "offset value {}".format(kernel_size, max_center_offset)
+        )
 
     if X.ndim == 3 or coincident:
         # sampling coincidentally, so just need a single
