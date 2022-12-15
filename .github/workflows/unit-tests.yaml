@@ -29,18 +29,18 @@ jobs:
       with:
         poetry-version: ${{ matrix.poetry-version }}
 
+    -
+      name: Install tox
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox tox-gh-actions
+
     # oldest supported poetry version breaks with
     # newer versions of packaging
     -
       name: Manage packing version
       if: ${{ matrix.poetry-version == '1.2.0a2' }}
       run: python -m pip install -U 'packaging<22.0'
-
-    -
-      name: Install tox
-      run: |
-        python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
 
     # run the library's tests
     -
