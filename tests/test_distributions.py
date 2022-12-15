@@ -23,13 +23,13 @@ def test_uniform():
     assert ((-3 <= samples) & (samples <= 5)).all()
 
     # check that the mean is roughly correct
-    # (within two standard deviations)
-    samples = sampler(10000)
+    # (within three standard deviations)
+    samples = sampler(100000)
     mean = samples.mean().item()
     variance = 64 / 12
     sample_variance = variance / 10000
     sample_std = sample_variance**0.5
-    assert abs(mean - 1) < (2 * sample_std)
+    assert abs(mean - 1) < (3 * sample_std)
 
 
 def test_cosine():
@@ -60,17 +60,17 @@ def test_log_normal():
     sampler = distributions.LogNormal(10, 2)
     samples = sampler(10000)
     mean = samples.mean().item()
-    assert (abs(mean - 10) / 10) < (2 * 2 / 10000**0.5)
+    assert (abs(mean - 10) / 10) < (3 * 2 / 10000**0.5)
 
 
-def test_volume_distributed_snr():
+def test_power_law():
     """Test PowerLaw distribution against expected distribution of SNRs"""
     ref_snr = 8
     sampler = distributions.PowerLaw(
         x_min=ref_snr, x_max=float("inf"), alpha=4
     )
     samples = sampler(10000).numpy()
-    # check 1/rho^4 behavior
+    # check x^-4 behavior
     counts, ebins = np.histogram(samples, bins=100)
     bins = ebins[1:] + ebins[:-1]
     bins *= 0.5
@@ -78,6 +78,6 @@ def test_volume_distributed_snr():
     def foo(x, a, b):
         return a * x ** (-b)
 
-    popt, pcov = optimize.curve_fit(foo, bins, counts, (20, 3))
+    popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
     # popt[1] is the index
     assert popt[1] == pytest.approx(4, rel=1e-1)
