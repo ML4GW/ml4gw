@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10']
-        poetry-version: ['1.2.0a2', '1.2.0b2']
+        poetry-version: ['1.2.0a2', '1.2.0b2', '1.2.0b3']
     steps:
     - uses: actions/checkout@v2
 
@@ -28,11 +28,19 @@ jobs:
       uses: abatilo/actions-poetry@v2.0.0
       with:
         poetry-version: ${{ matrix.poetry-version }}
+
     -
       name: Install tox
       run: |
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
+
+    # oldest supported poetry version breaks with
+    # newer versions of packaging
+    -
+      name: Manage packing version
+      if: ${{ matrix.poetry-version == '1.2.0a2' }}
+      run: python -m pip install -U 'packaging<21.0'
 
     # run the library's tests
     -

@@ -25,6 +25,7 @@ pytest = "^7.0"
 # need lalsuite for compute gmst in injection testing
 lalsuite = "^7.0"
 
+
 [tool.black]
 line-length = 79
 include = '\.pyi?$'
@@ -38,10 +39,38 @@ exclude = '''
 )/
 '''
 
+
 [tool.isort]
 known_first_party = ["ml4gw"]
 multi_line_output = 3
 include_trailing_comma = true
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{38,39,310}-{pip,poetry}
+isolated_build = true
+
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+
+[testenv:py{38,39,310}-poetry]
+allowlist_externals = poetry
+skip_install = true
+commands_pre = poetry install
+commands = poetry run pytest tests
+
+[testenv:py{38,39,310}-pip]
+deps = 
+    pytest>=7,<8
+    lalsuite>=7,<8
+commands = pytest tests
+"""
+
 
 [build-system]
 requires = ["poetry>=1.2.0a2"]
