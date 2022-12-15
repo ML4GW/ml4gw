@@ -34,7 +34,7 @@ jobs:
     -
       name: Manage packing version
       if: ${{ matrix.poetry-version == '1.2.0a2' }}
-      run: python -m pip -U install packaging<22.0
+      run: python -m pip install -U 'packaging<22.0'
 
     -
       name: Install tox
