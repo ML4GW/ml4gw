@@ -152,6 +152,13 @@ def test_sample_kernels_2D(
         slicing.sample_kernels(X, kernel_size)
     assert str(exc.value).startswith("Must specify number of kernels")
 
+    # make sure we enforce that min_val is not negative
+    if max_center_offset is not None:
+        with pytest.raises(ValueError) as exc:
+            bad_kernel_size = int(X.shape[-1] // 2) - max_center_offset + 1
+            slicing.sample_kernels(X, bad_kernel_size, N, max_center_offset)
+        assert str(exc.value).startswith("Kernel size")
+
     # for non-coincident sampling, we'll request a 2D
     # matrix of sample indices from `torch.randint`
     # rather than 1, and we'll make sure to create a
@@ -233,6 +240,13 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
     with pytest.raises(ValueError) as exc:
         slicing.sample_kernels(X, kernel_size, batch_size - 1)
     assert str(exc.value).startswith(f"Can't sample {batch_size - 1} kernels")
+
+    # make sure we enforce that min_val is not negative
+    if max_center_offset is not None:
+        with pytest.raises(ValueError) as exc:
+            bad_kernel_size = int(X.shape[-1] // 2) - max_center_offset + 1
+            slicing.sample_kernels(X, bad_kernel_size, N, max_center_offset)
+        assert str(exc.value).startswith("Kernel size")
 
     # if we requested some padding between the
     # edge of the kernel and the center of the
