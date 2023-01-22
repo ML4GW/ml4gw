@@ -4,10 +4,9 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch
-from gwpy.frequencyseries import FrequencySeries
-from gwpy.timeseries import TimeSeries
 
 from ml4gw import gw
+from ml4gw.spectral import Background, normalize_psd
 from ml4gw.utils.slicing import sample_kernels
 
 Distribution = CallableType[[int], np.ndarray]
@@ -226,7 +225,7 @@ class RandomWaveformInjection(torch.nn.Module):
         self,
         sample_rate: Optional[float] = None,
         fftlength: float = 2,
-        **backgrounds: Union[np.ndarray, TimeSeries, FrequencySeries],
+        **backgrounds: Background,
     ) -> None:
         """Fit the transform to a specific set of interferometer PSDs
 
@@ -275,44 +274,19 @@ class RandomWaveformInjection(torch.nn.Module):
         sample_rate = sample_rate or self.sample_rate
         psds = []
         for ifo, background in backgrounds.items():
-            if not isinstance(background, FrequencySeries):
-                # this is not already a frequency series, so we'll
-                # assume it's a timeseries of some sort and convert
-                # it to frequency space via psd
-                if not isinstance(background, TimeSeries):
-                    # if it's also not a TimeSeries object, then we'll
-                    # assume that it's a numpy array which is sampled
-                    # at the specified sample rate
-                    background = TimeSeries(background, dt=1 / sample_rate)
-
-                if background.dt != (1 / self.sample_rate):
-                    # if the passed timeseries or specified sample
-                    # rate doesn't match our sample rate here, resample
-                    # so that we have the correct number of frequency bins
-                    background = background.resample(self.sample_rate)
-
-                # now convert to frequency space
-                background = background.psd(
-                    fftlength, method="median", window="hann"
-                )
-
-            # since the FFT length used to compute this PSD
-            # won't, in general, match the length of waveforms
-            # we're sampling, we'll interpolate the frequencies
-            # to the expected frequency resolution
-            background = background.interpolate(self.df)
+            psd = normalize_psd(background, self.df, sample_rate, fftlength)
 
             # since this is presumably real data, there shouldn't be
             # any 0s in the PSD. Otherwise this will lead to NaN SNR
             # values at reweighting time. TODO: is this really a
             # constraint we want to enforce, or should we leave this
             # to the user to catch?
-            if (background == 0).any():
+            if (psd == 0).any():
                 raise ValueError(
                     "Found 0 values in background PSD "
                     "for interferometer {}".format(ifo)
                 )
-            psds.append(background.value)
+            psds.append(psd)
 
         # save background as psd
         background = torch.tensor(np.stack(psds), dtype=torch.float64)
