@@ -64,11 +64,28 @@ class Whitening(FittableTransform):
         fduration: float,
         dtype: torch.dtype = torch.float32,
     ) -> None:
-        """Torch module for performing whitening. The first and last
-        (fduration / 2) seconds of data are corrupted by the whitening
-        and will be cropped. Thus, the output length
-        that is ultimately passed to the network will be
-        (kernel_length - fduration)
+        """Whiten time domain data to background
+
+        Whitens time domain data by some background to
+        set the power across all frequency bins roughly
+        to 0. Background data is passed to its `fit` method
+        to create a time domain filter which is convolved with
+        input data at call time.
+
+        Args:
+            num_channels: The number of timeseries channels to whiten
+            sample_rate:
+                The rate at which data on which this transform
+                will be called will be sampled
+            fduration:
+                The length of the time domain filter in seconds.
+                `fduration / 2` seconds will be cropped from either
+                side of data passed to this transform, so that the
+                output length, in seconds, of input timeseries of
+                length `kernel_length` seconds will be
+                `kernel_length - fduration`
+            dtype:
+                The datatype desired for the time domain filter
         """
 
         super().__init__()
@@ -125,19 +142,49 @@ class Whitening(FittableTransform):
     def fit(
         self,
         kernel_length: float,
-        fftlength: float = 2,
+        fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
         sample_rate: Optional[float] = None,
-        **channels: Background,
+        **backgrounds: Background,
     ) -> None:
+        """Compute a time domain filter from background
+
+        Args:
+            kernel_length:
+                The length in seconds of the timeseries data
+                on which this transform will be applied after
+                fitting.
+            fftlength:
+                If background data is passed as timeseries data,
+                the length of the FFT to use to compute the PSD
+                of the background data, in seconds. If left as `None`,
+                will default to `1 / kernel_length`.
+            highpass:
+                Cutoff high-pass frequency for the frequency response
+                of the fit time domain filter, in Hz. If left as `None`,
+                frequency response will be the inverse of the background
+                PSD across all bins.
+            sample_rate:
+                If background ata is passed as timeseries data,
+                the rate at which it is sampled. If left as `None`,
+                will default to the sample rate of the data on which
+                this transform is meant to be applied.
+            **chanels:
+                Background data to use to fit the whitening time
+                domain filter, whose frequency response in each
+                channel will be the inverse of the corresponding
+                background data's PSD. Should be passed in the
+                same order these channels are expected to fall
+                along the channel dimension of the data this
+                transform is called on. Can be passed either as
+                time domain or frequency domain data.
         """
-        Build a whitening time domain filter
-        """
-        if len(channels) != self.num_channels:
+
+        if len(backgrounds) != self.num_channels:
             raise ValueError(
                 "Expected to fit whitening transform on {} background "
                 "timeseries, but was passed {}".format(
-                    self.num_channels, len(channels)
+                    self.num_channels, len(backgrounds)
                 )
             )
 
@@ -146,7 +193,7 @@ class Whitening(FittableTransform):
         ncorner = int(highpass / df) if highpass else 0
 
         tdfs = np.zeros((self.num_channels, 1, self.ntaps - 1))
-        for i, (channel, x) in enumerate(channels.items()):
+        for i, (channel, x) in enumerate(backgrounds.items()):
             psd = normalize_psd(
                 x, df, self.sample_rate, sample_rate, fftlength
             )
