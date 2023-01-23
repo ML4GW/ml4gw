@@ -213,6 +213,15 @@ class Whitening(FittableTransform):
         super().build(time_domain_filter=tdf, kernel_length=kernel_length)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
+        expected_dim = int(self.kernel_length.item() * self.sample_rate)
+        if X.size(-1) != expected_dim:
+            raise ValueError(
+                "Whitening transform was fit using a kernel length "
+                "of {}s, but was passed data of length {}s".format(
+                    self.kernel_length.item(), X.size(-1) / self.sample_rate
+                )
+            )
+
         # do a constant detrend along the time axis,
         X = X - X.mean(axis=-1, keepdims=True)
 
