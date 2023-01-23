@@ -66,8 +66,15 @@ def test_whitening_transform(
         tform.fit(fduration, fftlength, highpass, **backgrounds)
     assert str(exc_info.value).startswith("Whitening pad size")
 
-    # now fit to background and actually do the whitening
+    # now fit to background
     tform.fit(kernel_length, fftlength, highpass, **backgrounds)
+
+    # make sure shape has to match
+    with pytest.raises(ValueError) as exc_info:
+        tform(X[:, :, :-1])
+    assert f"kernel length of {kernel_length:0.1f}s" in str(exc_info.value)
+
+    # apply transform
     results = tform(X).cpu().numpy()
 
     # check to make sure that whitened data is 0 mean unit variance
