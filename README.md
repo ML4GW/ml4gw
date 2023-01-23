@@ -3,18 +3,37 @@
 Torch utilities for training neural networks in gravitational wave physics applications.
 
 ## Installation
-At present, the only way to install this library is via [Poetry](https://python-poetry.org/). Start by cloning this repository (or adding as a submodule to your repository), then adding it as a local dependency in your `pyproject.toml`:
+### Pip installation
+If have [Poetry](https://python-poetry.org/) installed as a pip build backend, you can install `ml4gw` by pointing `pip` at this repo:
+
+```console
+pip install git+https://github.com/ML4GW/ml4gw.git
+```
+
+If you have a specific version of CUDA you need to build `torch` against, please see the PyTorch installation instructions [here](https://pytorch.org/) (specifically you can include a `--extra-index-url` kwarg pointing to the location of the desired `torch` wheels).
+
+### Poetry installation
+`ml4gw` is also fully compatible with use in Poetry, with your `pyproject.toml` set up like
 
 ```toml
 [tool.poetry.dependencies]
 python = "^3.8"  # python versions 3.8-3.10 are supported
-ml4gw = {path = "path/to/ml4gw", develop = true}
+ml4gw = {git = "https://github.com/ml4gw/ml4gw.git", branch = "main"}
 ```
 
-You can then update your lockfile/environment via
+If, for example, you need to build against CUDA 11.6, you can up your `pyproject.toml` to use a secondary source for `torch`
 
-```console
-poetry update
+```toml
+[tool.poetry.dependencies]
+python = "^3.8"
+ml4gw = {git = "https://github.com/ml4gw/ml4gw.git", branch = "main"}
+torch = {version = "^1.12", source = "torch"}
+
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cu116"
+secondary = true
+default = false
 ```
 
 ## Use cases
@@ -72,11 +91,15 @@ optimizer = torch.optim.Adam(nn.parameters(), lr=LEARNING_RATE)
 
 spectral_density = SpectralDensity(SAMPLE_RATE, fftlength=2).to(DEVICE)
 
-def loss_function(X_psd, y_psd):
-    # insert logic here about how you want to optimize your nn
-    # here's a simple MSE (which you obviously could have also
-    # done in time space)
-    return ((X_psd - y_psd)**2).mean()
+def fd_mse(X, y):
+    """
+    MSE in frequency domain. Obviously this doesn't
+    give you much on its own, but you can imagine doing
+    something like masking to just the bins you care about.
+    """
+    X = spectral_density(X)
+    y = spectral_density(y)
+    return ((X - y)**2).mean()
 
 
 for i in range(NUM_EPOCHS):
@@ -86,10 +109,7 @@ for i in range(NUM_EPOCHS):
         assert X.shape == (32, NUM_IFOS, KERNEL_LENGTH * SAMPLE_RATE)
         y = nn(X)
 
-        X_psd = spectral_density(X)
-        y_psd = spectral_density(y)
-
-        loss = loss_function(X_psd, y_psd)
+        loss = loss_function(X, y)
         loss.backward()
         optimizer.step()
 
