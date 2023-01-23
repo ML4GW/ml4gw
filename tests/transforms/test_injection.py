@@ -21,7 +21,6 @@ def ifos(request):
 
 @pytest.mark.parametrize("factor", [None, 1, 2, 0.5])
 def test_fit(sample_rate, ifos, factor):
-
     mock = MagicMock()
     background = {i: np.random.randn(2048) for i in ifos}
     fit_sample_rate = sample_rate * factor if factor is not None else None
@@ -32,21 +31,29 @@ def test_fit(sample_rate, ifos, factor):
     with pytest.raises(TypeError):
         RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
 
-    # reset mock
-    param = torch.zeros((len(ifos), 4 * sample_rate + 1)).type(torch.float32)
-    mock = MagicMock()
-    mock.sample_rate = sample_rate
-    mock.df = 1 / 8
-    mock.background = param
+    # now use a "real" transform
+    def initialize_tform():
+        param = torch.zeros((len(ifos), 4 * sample_rate + 1))
+        with patch(
+            "ml4gw.transforms.RandomWaveformInjection.__init__",
+            new=lambda obj: torch.nn.Module.__init__(obj),
+        ):
+            tform = RandomWaveformInjection()
+        tform.sample_rate = sample_rate
+        tform.df = 1 / 8
+        tform.snr = 1
+        tform.register_buffer("background", param)
+        return tform
 
-    RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
-    assert (mock.background != 0).all().item()
-    assert mock.background.dtype == torch.float32
-    assert mock._has_fit
+    tform = initialize_tform()
+    tform.fit(fit_sample_rate, **background)
+    assert (tform.background != 0).all().item()
+    assert tform.background.dtype == torch.float32
+    assert tform.built
 
     # use this background as our target for passing things
     # other than numpy arrays
-    target_background = mock.background.cpu().numpy()
+    target_background = tform.background.cpu().numpy()
 
     # now try passing in TimeSeries objects with differing sample rates
     ts_sample_rate = fit_sample_rate or sample_rate
@@ -54,13 +61,9 @@ def test_fit(sample_rate, ifos, factor):
         i: TimeSeries(x, dt=1 / ts_sample_rate) for i, x in background.items()
     }
 
-    # be extra safe by creating a new mock
-    mock = MagicMock()
-    mock.sample_rate = sample_rate
-    mock.df = 1 / 8
-    mock.background = param * 0
-    RandomWaveformInjection.fit(mock, **background)
-    assert np.isclose(mock.background, target_background, rtol=1e-6).all()
+    tform = initialize_tform()
+    tform.fit(**background)
+    assert np.isclose(tform.background, target_background, rtol=1e-6).all()
 
     # now try passing in pre-computed psds
     background = {
@@ -68,12 +71,9 @@ def test_fit(sample_rate, ifos, factor):
         for i, x in background.items()
     }
 
-    mock = MagicMock()
-    mock.sample_rate = sample_rate
-    mock.df = 1 / 8
-    mock.background = param * 0
-    RandomWaveformInjection.fit(mock, **background)
-    assert np.isclose(mock.background, target_background, rtol=1e-6).all()
+    tform = initialize_tform()
+    tform.fit(**background)
+    assert np.isclose(tform.background, target_background, rtol=1e-6).all()
 
 
 def test_sample_source_param():
@@ -110,38 +110,45 @@ def reweight_snrs(*args, **kwargs):
 
 @patch("ml4gw.gw.reweight_snrs", new=reweight_snrs)
 def test_sample(sample_rate, ifos, dist):
-    mock = MagicMock()
+    with patch(
+        "ml4gw.transforms.RandomWaveformInjection.__init__",
+        new=lambda obj: torch.nn.Module.__init__(obj),
+    ):
+        tform = RandomWaveformInjection()
+    tform.sample_rate = sample_rate
+    param = torch.zeros((1, 4 * sample_rate + 1))
+    tform.register_buffer("background", param)
+    tform.mask = None
+
     mock_dist = MagicMock(side_effect=dist)
 
-    mock.dec = mock_dist
-    mock.phi = mock_dist
-    mock.psi = mock_dist
+    tform.dec = mock_dist
+    tform.phi = mock_dist
+    tform.psi = mock_dist
 
     # first test sampling without
     # intrinsic parameters
-    mock.intrinsic_parameters = None
+    tform.intrinsic_parameters = None
 
     # first make sure we enforce fitting
     # if sampling with snr reweighting
-    mock.snr = mock_dist
-    mock._has_fit = False
-    with pytest.raises(TypeError) as exc:
-        RandomWaveformInjection.sample(mock, 1)
-    assert str(exc.value).endswith("WaveformSampler.fit first")
+    tform.snr = mock_dist
+    tform.built = False
+    with pytest.raises(ValueError) as exc:
+        tform.sample(1)
+    assert str(exc.value).startswith("Must fit parameters")
 
     # now set background as mock
     # to mimick having called .fit
-    mock._has_fit = True
+    tform.built = True
 
     # now give our dummy sampler some waveforms to sample
-    mock.num_waveforms = 100
-    mock._sample_source_param = lambda p, i, N: (
-        RandomWaveformInjection._sample_source_param(mock, p, i, N)
-    )
-    mock.tensors.device = "cpu"
+    tform.num_waveforms = 100
+    tform.tensors = torch.zeros((2, 3, 3))
+    tform.vertices = torch.zeros((2, 3))
 
     waveforms = {i: torch.randn(100, 1024) for i in ["plus", "cross"]}
-    mock.polarizations = waveforms
+    tform.polarizations = waveforms
 
     # since our patched functions just add the polarizations,
     # we'll create an array of expected outputs up front
@@ -150,49 +157,51 @@ def test_sample(sample_rate, ifos, dist):
 
     # first test with passing indices
     idx = torch.arange(5, 50, 5)
-    result, params = RandomWaveformInjection.sample(mock, idx)
+    result, params = tform.sample(idx)
     assert params.shape == (len(idx), 4)  # ra, dec, psi, snr
     assert (result == summed[idx]).all()
-    mock.dec.assert_called_with(len(idx))
+    tform.dec.assert_called_with(len(idx))
 
     # now test when snr is None
     # it doesn't get returned
-    mock.snr = None
-    result, params = RandomWaveformInjection.sample(mock, idx)
+    tform.snr = None
+    result, params = tform.sample(idx)
     assert params.shape == (len(idx), 3)  # ra, dec, psi
     assert (result == summed[idx]).all()
-    mock.dec.assert_called_with(len(idx))
+    tform.dec.assert_called_with(len(idx))
 
     # now test with calling -1 to make sure
     # we get everything back in order
-    result, params = RandomWaveformInjection.sample(mock, -1)
+    result, params = tform.sample(-1)
     assert len(result) == len(summed)
     assert (result == summed).all()
-    mock.dec.assert_called_with(100)
+    tform.dec.assert_called_with(100)
 
     # make sure if we ask for too many waveforms we get yelled at
     with pytest.raises(ValueError):
-        RandomWaveformInjection.sample(mock, 101)
+        tform.sample(101)
+    with pytest.raises(ValueError):
+        tform.sample(0)
 
     # now supply a regular allowed integer and patch
     # torch.randperm so we know what we're getting
     idx = torch.arange(10, 40, 5)
     with patch("torch.randperm", return_value=idx):
-        result, params = RandomWaveformInjection.sample(mock, len(idx))
+        result, params = tform.sample(len(idx))
     assert (result == summed[idx]).all()
-    mock.dec.assert_called_with(len(idx))
+    tform.dec.assert_called_with(len(idx))
 
     # now pass intrinsic parameters of waveform to mock,
     # and ensure sampling returns them as expected
     num_intrinsic = 5
     intrinsic_parameters = torch.column_stack(
         [
-            torch.arange(1, mock.num_waveforms, 1) * i
+            torch.arange(1, tform.num_waveforms, 1) * i
             for i in range(num_intrinsic)
         ]
     )
-    mock.intrinsic_parameters = intrinsic_parameters
-    result, params = RandomWaveformInjection.sample(mock, idx)
+    tform.intrinsic_parameters = intrinsic_parameters
+    result, params = tform.sample(idx)
     assert (params[:, :num_intrinsic] == (intrinsic_parameters[idx])).all()
 
 
@@ -283,7 +292,7 @@ def test_random_waveform_injection(prob, ifos, dist):
     assert transform.num_waveforms == 100
     assert transform.df == 1
     assert transform.mask is None
-    assert not transform._has_fit
+    assert not transform.built
 
     assert transform.tensors.shape == (len(ifos), 3, 3)
     assert transform.vertices.shape == (len(ifos), 3)
@@ -303,7 +312,7 @@ def test_random_waveform_injection(prob, ifos, dist):
     )
 
     # run the transform's forward method with the patchees
-    transform._has_fit = True
+    transform.built = True
     with rand_patch as rand_mock, perm_patch as perm_mock:
         with randint_patch as randint_mock:
             X_hat, indices, params = transform(X)
@@ -341,7 +350,7 @@ def test_random_waveform_injection(prob, ifos, dist):
     )
     assert len(list(transform.buffers())) == 4
 
-    transform._has_fit = True
+    transform.built = True
     with rand_patch as rand_mock, perm_patch as perm_mock:
         with randint_patch as randint_mock:
             X_hat, indices, params = transform(X)

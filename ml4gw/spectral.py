@@ -51,6 +51,9 @@ def normalize_psd(
             # at the specified sample rate
             x = TimeSeries(x, sample_rate=sample_rate or target_sample_rate)
 
+        if x.sample_rate.value != target_sample_rate:
+            x = x.resample(target_sample_rate)
+
         # now convert to frequency space
         fftlength = fftlength or 1 / df
         default_psd_kwargs = dict(method="median", window="hann")

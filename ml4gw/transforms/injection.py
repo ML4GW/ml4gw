@@ -7,13 +7,14 @@ import torch
 
 from ml4gw import gw
 from ml4gw.spectral import Background, normalize_psd
+from ml4gw.transforms.transform import FittableTransform
 from ml4gw.utils.slicing import sample_kernels
 
 Distribution = CallableType[[int], np.ndarray]
 SourceParameter = Union[np.ndarray, Distribution]
 
 
-class RandomWaveformInjection(torch.nn.Module):
+class RandomWaveformInjection(FittableTransform):
     def __init__(
         self,
         sample_rate: float,
@@ -212,7 +213,7 @@ class RandomWaveformInjection(torch.nn.Module):
             self.register_buffer("background", buff)
         else:
             self.background = None
-        self._has_fit = False
+            self.built = True
 
     def to(self, device, waveforms: bool = False):
         super().to(device)
@@ -271,10 +272,11 @@ class RandomWaveformInjection(torch.nn.Module):
         if self.snr is None:
             raise TypeError("Cannot fit to backgrounds if snr is None")
 
-        sample_rate = sample_rate or self.sample_rate
         psds = []
         for ifo, background in backgrounds.items():
-            psd = normalize_psd(background, self.df, sample_rate, fftlength)
+            psd = normalize_psd(
+                background, self.df, self.sample_rate, sample_rate, fftlength
+            )
 
             # since this is presumably real data, there shouldn't be
             # any 0s in the PSD. Otherwise this will lead to NaN SNR
@@ -295,8 +297,7 @@ class RandomWaveformInjection(torch.nn.Module):
                 "Conversion to torch tensor pushed "
                 "background ASD values to 0"
             )
-        self.background.copy_(background)
-        self._has_fit = True
+        super().build(background=background)
 
     def _sample_source_param(
         self, param: SourceParameter, idx: gw.ScalarTensor, N: int
@@ -310,6 +311,13 @@ class RandomWaveformInjection(torch.nn.Module):
             return param(N).to(self.tensors.device)
         else:
             return param[idx]
+
+    def __call__(self, *args, **kwargs):
+        """
+        Override __call__ method to original Module call
+        since we do the `built` check in `sample`, not `forward`
+        """
+        return torch.nn.Module.__call__(self, *args, **kwargs)
 
     def sample(
         self,
@@ -337,13 +345,8 @@ class RandomWaveformInjection(torch.nn.Module):
             The sampled source parameters used to generate the
                 responses: `dec`, `psi`, `phi`, and the sampled SNRs.
         """
-
-        if not self._has_fit and self.snr is not None:
-            raise TypeError(
-                "WaveformSampler can't rescale waveform snr's until "
-                "it has been fit on detector background. Make sure "
-                "to call WaveformSampler.fit first"
-            )
+        if self.snr is not None:
+            self._check_built()
 
         if not isinstance(N_or_idx, torch.Tensor):
             if not (0 < N_or_idx <= self.num_waveforms or N_or_idx == -1):
@@ -429,6 +432,17 @@ class RandomWaveformInjection(torch.nn.Module):
         if self.training:
             mask = torch.rand(size=X.shape[:1]) < self.prob
             N = mask.sum().item()
+
+            if N == 0:
+                # return empty parameters if our roll
+                # of the dice didn't turn up any waveforms
+                param_shape = 3
+                if self.snr is not None:
+                    param_shape += 1
+                if self.intrinsic_parameters is not None:
+                    param_shape += self.intrinsic_parameters.size(-1)
+                return X, torch.zeros((0,)), torch.zeros((0, param_shape))
+
             waveforms, sampled_params = self.sample(N, X.device)
             waveforms = sample_kernels(
                 waveforms,
