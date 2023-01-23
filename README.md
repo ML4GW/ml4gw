@@ -4,13 +4,13 @@ Torch utilities for training neural networks in gravitational wave physics appli
 
 ## Installation
 ### Pip installation
-If have [Poetry](https://python-poetry.org/) installed as a pip build backend, you can install `ml4gw` by pointing `pip` at this repo:
+You can install `ml4gw` by pointing `pip` at this repo:
 
 ```console
 pip install git+https://github.com/ML4GW/ml4gw.git
 ```
 
-If you have a specific version of CUDA you need to build `torch` against, please see the PyTorch installation instructions [here](https://pytorch.org/) (specifically you can include a `--extra-index-url` kwarg pointing to the location of the desired `torch` wheels).
+To build with a specific version of PyTorch/CUDA, please see the PyTorch installation instructions [here](https://pytorch.org/get-started/previous-versions/) to see how to specify the desired torch version and `--extra-index-url` flag.
 
 ### Poetry installation
 `ml4gw` is also fully compatible with use in Poetry, with your `pyproject.toml` set up like
@@ -21,7 +21,7 @@ python = "^3.8"  # python versions 3.8-3.10 are supported
 ml4gw = {git = "https://github.com/ml4gw/ml4gw.git", branch = "main"}
 ```
 
-If, for example, you need to build against CUDA 11.6, you can up your `pyproject.toml` to use a secondary source for `torch`
+To build against a specific PyTorch/CUDA combination, consult the PyTorch installation documentation above and specify the `extra-index-url` via the `tool.poetry.source` table in your `pyproject.toml`. For example, to build against CUDA 11.6, you would do something like:
 
 ```toml
 [tool.poetry.dependencies]
@@ -91,7 +91,7 @@ optimizer = torch.optim.Adam(nn.parameters(), lr=LEARNING_RATE)
 
 spectral_density = SpectralDensity(SAMPLE_RATE, fftlength=2).to(DEVICE)
 
-def fd_mse(X, y):
+def loss_function(X, y):
     """
     MSE in frequency domain. Obviously this doesn't
     give you much on its own, but you can imagine doing
