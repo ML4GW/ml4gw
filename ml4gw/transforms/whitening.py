@@ -204,7 +204,7 @@ class Whitening(FittableTransform):
                 window="hann",
                 ncorner=ncorner,
             )
-            tdfs.append(tdf)
+            tdfs.append(tdf[:-1])
 
         tdfs = np.stack(tdfs)[:, None]
         tdf = torch.tensor(tdfs, dtype=self.time_domain_filter.dtype)
