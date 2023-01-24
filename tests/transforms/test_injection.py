@@ -22,14 +22,16 @@ def ifos(request):
 @pytest.mark.parametrize("factor", [None, 1, 2, 0.5])
 def test_fit(sample_rate, ifos, factor):
     mock = MagicMock()
-    background = {i: np.random.randn(2048) for i in ifos}
+    background = [np.random.randn(2048) for _ in ifos]
     fit_sample_rate = sample_rate * factor if factor is not None else None
 
     # first test that TypeError gets raised
     # if .fit is called with snr as None
     mock.snr = None
     with pytest.raises(TypeError):
-        RandomWaveformInjection.fit(mock, fit_sample_rate, **background)
+        RandomWaveformInjection.fit(
+            mock, *background, sample_rate=fit_sample_rate
+        )
 
     # now use a "real" transform
     def initialize_tform():
@@ -46,7 +48,7 @@ def test_fit(sample_rate, ifos, factor):
         return tform
 
     tform = initialize_tform()
-    tform.fit(fit_sample_rate, **background)
+    tform.fit(*background, sample_rate=fit_sample_rate)
     assert (tform.background != 0).all().item()
     assert tform.background.dtype == torch.float32
     assert tform.built
@@ -57,22 +59,19 @@ def test_fit(sample_rate, ifos, factor):
 
     # now try passing in TimeSeries objects with differing sample rates
     ts_sample_rate = fit_sample_rate or sample_rate
-    background = {
-        i: TimeSeries(x, dt=1 / ts_sample_rate) for i, x in background.items()
-    }
+    background = [TimeSeries(x, dt=1 / ts_sample_rate) for x in background]
 
     tform = initialize_tform()
-    tform.fit(**background)
+    tform.fit(*background)
     assert np.isclose(tform.background, target_background, rtol=1e-6).all()
 
     # now try passing in pre-computed psds
-    background = {
-        i: x.resample(sample_rate).psd(2, method="median", window="hann")
-        for i, x in background.items()
-    }
-
+    background = [
+        x.resample(sample_rate).psd(2, method="median", window="hann")
+        for x in background
+    ]
     tform = initialize_tform()
-    tform.fit(**background)
+    tform.fit(*background)
     assert np.isclose(tform.background, target_background, rtol=1e-6).all()
 
 

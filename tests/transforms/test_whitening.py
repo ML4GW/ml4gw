@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import numpy as np
 import pytest
 import torch
@@ -54,20 +52,21 @@ def test_whitening_transform(
     assert str(exc_info.value).startswith("Must fit parameters")
 
     # fit to some random background
-    ifos = "hlv"[:num_ifos]
-    backgrounds = OrderedDict(
-        [(i, np.random.randn(100 * sample_rate)) for i in ifos]
-    )
-    backgrounds = {k: 1e-19 + 1e-20 * v for k, v in backgrounds.items()}
+    backgrounds = [np.random.randn(100 * sample_rate) for _ in range(num_ifos)]
+    backgrounds = [1e-19 + 1e-20 * x for x in backgrounds]
 
     # verify that if our kernel length isn't greater
     # than the length of fduration we raise an error
     with pytest.raises(ValueError) as exc_info:
-        tform.fit(fduration, fftlength, highpass, **backgrounds)
+        tform.fit(
+            fduration, *backgrounds, fftlength=fftlength, highpass=highpass
+        )
     assert str(exc_info.value).startswith("Whitening pad size")
 
     # now fit to background
-    tform.fit(kernel_length, fftlength, highpass, **backgrounds)
+    tform.fit(
+        kernel_length, *backgrounds, fftlength=fftlength, highpass=highpass
+    )
 
     # make sure shape has to match
     with pytest.raises(ValueError) as exc_info:
@@ -87,18 +86,17 @@ def test_whitening_transform(
     assert np.isclose(std, 1, atol=0.1)
 
     # pre-compute the background asds for comparison
-    asds = {}
-    for ifo, x in backgrounds.items():
+    asds = []
+    for x in backgrounds:
         x = TimeSeries(x, sample_rate=sample_rate)
         x = x.asd(fftlength, method="median", window="hann")
-        asds[ifo] = x
+        asds.append(x)
 
     # for each ifo in each batch element, verify that whitening
     # with gwpy produces roughly the same result
     pad = int(sample_rate * fduration / 2)
     for x, y in zip(X.cpu().numpy(), results):
-        for input, result, ifo in zip(x, y, ifos):
-            asd = asds[ifo]
+        for input, result, asd in zip(x, y, asds):
             ts = TimeSeries(input, sample_rate=sample_rate)
             ts = ts.whiten(
                 asd=asd, fduration=fduration, highpass=highpass, window="hann"
@@ -117,7 +115,7 @@ def test_whitening_save_and_load(dtype, tmp_path):
     tform = Whitening(2, 512, 1, dtype)
     h1 = torch.randn(512 * 10)
     l1 = torch.randn(512 * 10)
-    tform.fit(2, 2, h1=h1, l1=l1)
+    tform.fit(2, h1, l1, fftlength=2)
 
     assert (tform.kernel_length == 2).all().item()
     assert tform.built

@@ -224,9 +224,9 @@ class RandomWaveformInjection(FittableTransform):
 
     def fit(
         self,
+        *backgrounds: Background,
         sample_rate: Optional[float] = None,
         fftlength: float = 2,
-        **backgrounds: Background,
     ) -> None:
         """Fit the transform to a specific set of interferometer PSDs
 
@@ -273,30 +273,14 @@ class RandomWaveformInjection(FittableTransform):
             raise TypeError("Cannot fit to backgrounds if snr is None")
 
         psds = []
-        for ifo, background in backgrounds.items():
+        for background in backgrounds:
             psd = normalize_psd(
                 background, self.df, self.sample_rate, sample_rate, fftlength
             )
-
-            # since this is presumably real data, there shouldn't be
-            # any 0s in the PSD. Otherwise this will lead to NaN SNR
-            # values at reweighting time. TODO: is this really a
-            # constraint we want to enforce, or should we leave this
-            # to the user to catch?
-            if (psd == 0).any():
-                raise ValueError(
-                    "Found 0 values in background PSD "
-                    "for interferometer {}".format(ifo)
-                )
             psds.append(psd)
 
         # save background as psd
         background = torch.tensor(np.stack(psds), dtype=torch.float64)
-        if (background == 0).any().item():
-            raise ValueError(
-                "Conversion to torch tensor pushed "
-                "background ASD values to 0"
-            )
         super().build(background=background)
 
     def _sample_source_param(

@@ -117,8 +117,8 @@ class Whitening(FittableTransform):
         window[:-1] = torch.hann_window(self.ntaps - 1)
         self.register_buffer("window", window, persistent=False)
 
-        self._has_fit = False
-        self._use_overlap_add = None
+        # this will be set at fit time and will help us
+        # decide which convolution implementation to use
         self.nfft = None
 
     def _check_kernel_length(self, kernel_length: float):
@@ -142,10 +142,10 @@ class Whitening(FittableTransform):
     def fit(
         self,
         kernel_length: float,
+        *backgrounds: Background,
         fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
         sample_rate: Optional[float] = None,
-        **backgrounds: Background,
     ) -> None:
         """Compute a time domain filter from background
 
@@ -169,7 +169,7 @@ class Whitening(FittableTransform):
                 the rate at which it is sampled. If left as `None`,
                 will default to the sample rate of the data on which
                 this transform is meant to be applied.
-            **chanels:
+            *backgrounds:
                 Background data to use to fit the whitening time
                 domain filter, whose frequency response in each
                 channel will be the inverse of the corresponding
@@ -192,13 +192,11 @@ class Whitening(FittableTransform):
         df = 1 / kernel_length
         ncorner = int(highpass / df) if highpass else 0
 
-        tdfs = np.zeros((self.num_channels, 1, self.ntaps - 1))
-        for i, (channel, x) in enumerate(backgrounds.items()):
+        tdfs = []
+        for x in backgrounds:
             psd = normalize_psd(
                 x, df, self.sample_rate, sample_rate, fftlength
             )
-            if (psd == 0).any():
-                raise ValueError(f"Found 0 values in {channel} background asd")
 
             tdf = fir_from_transfer(
                 1 / psd**0.5,
@@ -206,8 +204,9 @@ class Whitening(FittableTransform):
                 window="hann",
                 ncorner=ncorner,
             )
-            tdfs[i, 0] = tdf[:-1]
+            tdfs.append(tdf)
 
+        tdfs = np.stack(tdfs)[:, None]
         tdf = torch.tensor(tdfs, dtype=self.time_domain_filter.dtype)
         kernel_length = torch.tensor((kernel_length,))
         super().build(time_domain_filter=tdf, kernel_length=kernel_length)
