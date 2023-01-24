@@ -4,17 +4,17 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch
-from gwpy.frequencyseries import FrequencySeries
-from gwpy.timeseries import TimeSeries
 
 from ml4gw import gw
+from ml4gw.spectral import Background, normalize_psd
+from ml4gw.transforms.transform import FittableTransform
 from ml4gw.utils.slicing import sample_kernels
 
 Distribution = CallableType[[int], np.ndarray]
 SourceParameter = Union[np.ndarray, Distribution]
 
 
-class RandomWaveformInjection(torch.nn.Module):
+class RandomWaveformInjection(FittableTransform):
     def __init__(
         self,
         sample_rate: float,
@@ -213,7 +213,7 @@ class RandomWaveformInjection(torch.nn.Module):
             self.register_buffer("background", buff)
         else:
             self.background = None
-        self._has_fit = False
+            self.built = True
 
     def to(self, device, waveforms: bool = False):
         super().to(device)
@@ -224,9 +224,9 @@ class RandomWaveformInjection(torch.nn.Module):
 
     def fit(
         self,
+        *backgrounds: Background,
         sample_rate: Optional[float] = None,
         fftlength: float = 2,
-        **backgrounds: Union[np.ndarray, TimeSeries, FrequencySeries],
     ) -> None:
         """Fit the transform to a specific set of interferometer PSDs
 
@@ -272,57 +272,16 @@ class RandomWaveformInjection(torch.nn.Module):
         if self.snr is None:
             raise TypeError("Cannot fit to backgrounds if snr is None")
 
-        sample_rate = sample_rate or self.sample_rate
         psds = []
-        for ifo, background in backgrounds.items():
-            if not isinstance(background, FrequencySeries):
-                # this is not already a frequency series, so we'll
-                # assume it's a timeseries of some sort and convert
-                # it to frequency space via psd
-                if not isinstance(background, TimeSeries):
-                    # if it's also not a TimeSeries object, then we'll
-                    # assume that it's a numpy array which is sampled
-                    # at the specified sample rate
-                    background = TimeSeries(background, dt=1 / sample_rate)
-
-                if background.dt != (1 / self.sample_rate):
-                    # if the passed timeseries or specified sample
-                    # rate doesn't match our sample rate here, resample
-                    # so that we have the correct number of frequency bins
-                    background = background.resample(self.sample_rate)
-
-                # now convert to frequency space
-                background = background.psd(
-                    fftlength, method="median", window="hann"
-                )
-
-            # since the FFT length used to compute this PSD
-            # won't, in general, match the length of waveforms
-            # we're sampling, we'll interpolate the frequencies
-            # to the expected frequency resolution
-            background = background.interpolate(self.df)
-
-            # since this is presumably real data, there shouldn't be
-            # any 0s in the PSD. Otherwise this will lead to NaN SNR
-            # values at reweighting time. TODO: is this really a
-            # constraint we want to enforce, or should we leave this
-            # to the user to catch?
-            if (background == 0).any():
-                raise ValueError(
-                    "Found 0 values in background PSD "
-                    "for interferometer {}".format(ifo)
-                )
-            psds.append(background.value)
+        for background in backgrounds:
+            psd = normalize_psd(
+                background, self.df, self.sample_rate, sample_rate, fftlength
+            )
+            psds.append(psd)
 
         # save background as psd
         background = torch.tensor(np.stack(psds), dtype=torch.float64)
-        if (background == 0).any().item():
-            raise ValueError(
-                "Conversion to torch tensor pushed "
-                "background ASD values to 0"
-            )
-        self.background.copy_(background)
-        self._has_fit = True
+        super().build(background=background)
 
     def _sample_source_param(
         self, param: SourceParameter, idx: gw.ScalarTensor, N: int
@@ -336,6 +295,13 @@ class RandomWaveformInjection(torch.nn.Module):
             return param(N).to(self.tensors.device)
         else:
             return param[idx]
+
+    def __call__(self, *args, **kwargs):
+        """
+        Override __call__ method to original Module call
+        since we do the `built` check in `sample`, not `forward`
+        """
+        return torch.nn.Module.__call__(self, *args, **kwargs)
 
     def sample(
         self,
@@ -363,13 +329,8 @@ class RandomWaveformInjection(torch.nn.Module):
             The sampled source parameters used to generate the
                 responses: `dec`, `psi`, `phi`, and the sampled SNRs.
         """
-
-        if not self._has_fit and self.snr is not None:
-            raise TypeError(
-                "WaveformSampler can't rescale waveform snr's until "
-                "it has been fit on detector background. Make sure "
-                "to call WaveformSampler.fit first"
-            )
+        if self.snr is not None:
+            self._check_built()
 
         if not isinstance(N_or_idx, torch.Tensor):
             if not (0 < N_or_idx <= self.num_waveforms or N_or_idx == -1):
@@ -455,6 +416,17 @@ class RandomWaveformInjection(torch.nn.Module):
         if self.training:
             mask = torch.rand(size=X.shape[:1]) < self.prob
             N = mask.sum().item()
+
+            if N == 0:
+                # return empty parameters if our roll
+                # of the dice didn't turn up any waveforms
+                param_shape = 3
+                if self.snr is not None:
+                    param_shape += 1
+                if self.intrinsic_parameters is not None:
+                    param_shape += self.intrinsic_parameters.size(-1)
+                return X, torch.zeros((0,)), torch.zeros((0, param_shape))
+
             waveforms, sampled_params = self.sample(N, X.device)
             waveforms = sample_kernels(
                 waveforms,
