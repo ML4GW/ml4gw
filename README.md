@@ -4,6 +4,7 @@ Torch utilities for training neural networks in gravitational wave physics appli
 
 ## Installation
 ### Pip installation
+<<<<<<< HEAD
 You can install `ml4gw` with pip:
 
 ```console
@@ -15,6 +16,15 @@ To build with a specific version of PyTorch/CUDA, please see the PyTorch install
 ```console
 pip install ml4gw torch==1.12.0 --extra-index-url=https://download.pytorch.org/whl/cu116
 ```
+=======
+You can install `ml4gw` by pointing `pip` at this repo:
+
+```console
+pip install git+https://github.com/ML4GW/ml4gw.git
+```
+
+To build with a specific version of PyTorch/CUDA, please see the PyTorch installation instructions [here](https://pytorch.org/get-started/previous-versions/) to see how to specify the desired torch version and `--extra-index-url` flag.
+>>>>>>> b3fb5018a4eb25a5a04aa72c3bca641c7b6253c8
 
 ### Poetry installation
 `ml4gw` is also fully compatible with use in Poetry, with your `pyproject.toml` set up like
