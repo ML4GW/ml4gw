@@ -41,9 +41,9 @@ jobs:
       name: run tests
       run: |
         if [[ -z "${{ matrix.poetry-version }}" ]]; then
-            tox -e py{38,39,310}-pip
+            tox -e 'py{38,39,310}'-pip
         else
-            tox -e py{38,39,310}-poetry
+            tox -e 'py{38,39,310}'-poetry
         fi
 
   # if all the tests pass on a push to main,
