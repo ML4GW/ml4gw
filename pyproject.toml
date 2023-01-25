@@ -1,7 +1,8 @@
 [tool.poetry]
 name = "ml4gw"
-version = "0.0.1"
-description = "Tools for building training torch models on gravitational wave data"
+version = "0.1.0"
+description = "Tools for training torch models on gravitational wave data"
+readme = "README.md"
 authors = [
     "Alec Gunny <alec.gunny@ligo.org>",
 ]
@@ -22,7 +23,7 @@ gwpy = "^2.1"
 pre-commit = "^2.16"
 pytest = "^7.0"
 
-# need lalsuite for compute gmst in injection testing
+# need lalsuite to compute gmst in injection testing
 lalsuite = "^7.0"
 
 
@@ -73,5 +74,5 @@ commands = pytest tests
 
 
 [build-system]
-requires = ["poetry>=1.2.0a2"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
