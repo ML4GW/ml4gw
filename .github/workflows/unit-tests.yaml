@@ -39,11 +39,13 @@ jobs:
     # run the library's tests
     -
       name: run tests
+      env:
+        pyver: ${{ matrix.python-version }}
       run: |
         if [[ -z "${{ matrix.poetry-version }}" ]]; then
-            tox -e 'py{38,39,310}'-pip
+            tox -e py${pyver//./}-pip
         else
-            tox -e 'py{38,39,310}'-poetry
+            tox -e py${pyver//./}-poetry
         fi
 
   # if all the tests pass on a push to main,
