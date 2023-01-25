@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10']
-        poetry-version: ['1.2.0a2', '1.2.0b2', '1.2.0b3']
+        poetry-version: ['', '1.2.0', '1.2.1', '1.2.2', '1.3.0', '1.3.1']
     steps:
     - uses: actions/checkout@v2
 
@@ -26,6 +26,7 @@ jobs:
     - 
       name: Install Poetry
       uses: abatilo/actions-poetry@v2.0.0
+      if: ${{ matrix.poetry-version != '' }}
       with:
         poetry-version: ${{ matrix.poetry-version }}
 
@@ -35,17 +36,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
 
-    # oldest supported poetry version breaks with
-    # newer versions of packaging
-    -
-      name: Manage packing version
-      if: ${{ matrix.poetry-version == '1.2.0a2' }}
-      run: python -m pip install -U 'packaging<21.0'
-
     # run the library's tests
     -
       name: run tests
-      run: tox
+      run: |
+        if [[ -z "${{ matrix.poetry-version }}" ]]; then
+            tox -e py{38,39,310}-pip
+        else
+            tox -e py{38,39,310}-poetry
+        fi
 
   # if all the tests pass on a push to main,
   # publish the new code to pypi
@@ -60,4 +59,5 @@ jobs:
       name: Build and publish to pypi
       uses: JRubics/poetry-publish@v1.16
       with:
+        python_version: "3.10.9"
         pypi_token: ${{ secrets.PYPI_TOKEN }}
