@@ -4,13 +4,17 @@ Torch utilities for training neural networks in gravitational wave physics appli
 
 ## Installation
 ### Pip installation
-You can install `ml4gw` by pointing `pip` at this repo:
+You can install `ml4gw` with pip:
 
 ```console
-pip install git+https://github.com/ML4GW/ml4gw.git
+pip install ml4gw
 ```
 
-To build with a specific version of PyTorch/CUDA, please see the PyTorch installation instructions [here](https://pytorch.org/get-started/previous-versions/) to see how to specify the desired torch version and `--extra-index-url` flag.
+To build with a specific version of PyTorch/CUDA, please see the PyTorch installation instructions [here](https://pytorch.org/get-started/previous-versions/) to see how to specify the desired torch version and `--extra-index-url` flag. For example, to install with torch 1.12 and CUDA 11.6 support, you would run
+
+```console
+pip install ml4gw torch==1.12.0 --extra-index-url=https://download.pytorch.org/whl/cu116
+```
 
 ### Poetry installation
 `ml4gw` is also fully compatible with use in Poetry, with your `pyproject.toml` set up like
@@ -18,7 +22,7 @@ To build with a specific version of PyTorch/CUDA, please see the PyTorch install
 ```toml
 [tool.poetry.dependencies]
 python = "^3.8"  # python versions 3.8-3.10 are supported
-ml4gw = {git = "https://github.com/ml4gw/ml4gw.git", branch = "main"}
+ml4gw = "^0.1.0"
 ```
 
 To build against a specific PyTorch/CUDA combination, consult the PyTorch installation documentation above and specify the `extra-index-url` via the `tool.poetry.source` table in your `pyproject.toml`. For example, to build against CUDA 11.6, you would do something like:
@@ -26,7 +30,7 @@ To build against a specific PyTorch/CUDA combination, consult the PyTorch instal
 ```toml
 [tool.poetry.dependencies]
 python = "^3.8"
-ml4gw = {git = "https://github.com/ml4gw/ml4gw.git", branch = "main"}
+ml4gw = "^0.1.0"
 torch = {version = "^1.12", source = "torch"}
 
 [[tool.poetry.source]]
@@ -122,5 +126,5 @@ for i in range(NUM_EPOCHS):
 As this library is still very much a work in progress, we anticipate that novel use cases will encounter errors stemming from a lack of robustness.
 We encourage users who encounter these difficulties to file issues on GitHub, and we'll be happy to offer support to extend our coverage to new or improved functionality.
 We also strongly encourage ML users in the GW physics space to try their hand at working on these issues and joining on as collaborators!
-For more information about how to get involved, feel free to reach out to [alecg@mit.edu](mailto:alecg@mit.edu) .
+For more information about how to get involved, feel free to reach out to [ml4gw@ligo.mit.edu](mailto:ml4gw@ligo.mit.edu) .
 By bringing in new users with new use cases, we hope to develop this library into a truly general-purpose tool which makes DL more accessible for gravitational wave physicists everywhere.
