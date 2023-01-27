@@ -81,3 +81,29 @@ def test_scaler_2d():
     # now reverse
     y = scaler(y, reverse=True)
     assert torch.isclose(x, y, rtol=1e-6).all().item()
+
+
+def test_scaler_save_and_load(tmp_path):
+    scaler = ChannelWiseScaler()
+    background = np.arange(1, 11)
+
+    scaler.fit(background)
+    assert scaler.built
+    mean, std = 5.5, (99 / 12) ** 0.5
+
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    torch.save(scaler.state_dict(), tmp_path / "scaler.pt")
+
+    scaler = ChannelWiseScaler()
+    assert not scaler.built
+    assert (scaler.mean == 0).all().item()
+    assert (scaler.std == 1).all().item()
+
+    scaler.load_state_dict(torch.load(tmp_path / "scaler.pt"))
+    assert scaler.built
+    assert scaler.mean == mean
+    assert scaler.std == std
+
+    scaler = ChannelWiseScaler(2)
+    with pytest.raises(RuntimeError):
+        scaler.load_state_dict(torch.load(tmp_path / "scaler.pt"))
