@@ -3,8 +3,10 @@ from typing import Optional
 import numpy as np
 import torch
 
+from ml4gw.transforms.transform import FittableTransform
 
-class ChannelWiseScaler(torch.nn.Module):
+
+class ChannelWiseScaler(FittableTransform):
     """Scale timeseries channels to be zero mean unit variance
 
     Scales timeseries channels by the mean and standard
@@ -56,9 +58,10 @@ class ChannelWiseScaler(torch.nn.Module):
                 "from tensor of shape {}".format(X.shape)
             )
 
-        with torch.no_grad():
-            self.mean.copy_(torch.Tensor(mean))
-            self.std.copy_(torch.Tensor(std))
+        mean = torch.tensor(mean)
+        std = torch.tensor(std)
+
+        super().build(mean=mean, std=std)
 
     def forward(self, X: torch.Tensor, reverse: bool = False) -> torch.Tensor:
         if not reverse:
