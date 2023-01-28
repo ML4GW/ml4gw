@@ -52,6 +52,11 @@ def slice_kernels(
         `num_channels = x.shape[0]` if `x` is 2D.
     """
 
+    # create the indices all the slices will be built around,
+    # and ensure they live on the appropriate device
+    kernels = torch.arange(kernel_size, device=x.device)
+    idx = idx.to(kernels.device)
+
     # TODO: add try-catches aroud the actual slicing operations
     # to catch out-of-range index errors and raise with a
     # standardized error that's very explicit
@@ -64,7 +69,7 @@ def slice_kernels(
         # this is a one dimensional array that we want
         # to select kernels from beginning at each of
         # the specified indices
-        kernels = torch.arange(kernel_size).view(kernel_size, 1)
+        kernels = kernels.view(kernel_size, 1)
         kernels = kernels.repeat(1, len(idx))
         kernels = (kernels + idx).t()
         return torch.take(x, kernels)
@@ -74,8 +79,7 @@ def slice_kernels(
         # coincidentally
 
         # channels x batch_size x kernel_size
-        kernels = torch.arange(kernel_size).view(1, 1, kernel_size)
-        kernels = kernels.to(x.device)
+        kernels = kernels.view(1, 1, kernel_size)
         kernels = kernels.repeat(len(x), len(idx), 1)
         kernels += idx.view(1, -1, 1)
 
@@ -101,8 +105,7 @@ def slice_kernels(
             )
 
         # batch_size x num_channels x kernel_size
-        kernels = torch.arange(kernel_size).view(1, 1, kernel_size)
-        kernels = kernels.to(x.device)
+        kernels = kernels.view(1, 1, kernel_size)
         kernels = kernels.repeat(len(idx), len(x), 1)
         kernels += idx[:, :, None]
 
@@ -133,8 +136,7 @@ def slice_kernels(
             )
 
         # batch_size x kernel_size
-        kernels = torch.arange(kernel_size).view(1, -1)
-        kernels = kernels.to(x.device)
+        kernels = kernels.view(1, -1)
         kernels = kernels.repeat(len(idx), 1)
         kernels += idx.view(-1, 1)
 

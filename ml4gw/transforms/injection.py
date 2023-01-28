@@ -304,9 +304,7 @@ class RandomWaveformInjection(FittableTransform):
         return torch.nn.Module.__call__(self, *args, **kwargs)
 
     def sample(
-        self,
-        N_or_idx: Union[int, gw.ScalarTensor],
-        device: Optional[str] = None,
+        self, N_or_idx: Union[int, gw.ScalarTensor]
     ) -> Tuple[gw.WaveformTensor, Tuple[gw.ScalarTensor, ...]]:
         """
         Sample some waveforms and source parameters and use them
@@ -350,6 +348,12 @@ class RandomWaveformInjection(FittableTransform):
                 # we asked for some specific random number of waveforms
                 idx = torch.randperm(self.num_waveforms)[:N_or_idx]
                 N = N_or_idx
+        elif N_or_idx.ndim != 1:
+            raise ValueError(
+                "Can't slice waveforms with index tensor with {} dims".format(
+                    N_or_idx.ndim
+                )
+            )
         else:
             # we provided specific waveform indices that
             # we would like to project
@@ -365,9 +369,7 @@ class RandomWaveformInjection(FittableTransform):
         polarizations = {}
         for polarization, waveforms in self.polarizations.items():
             waveforms = waveforms[idx]
-            if device is not None:
-                waveforms = waveforms.to(device)
-            polarizations[polarization] = waveforms
+            polarizations[polarization] = waveforms.to(dec.device)
 
         ifo_responses = gw.compute_observed_strain(
             dec,
@@ -425,17 +427,30 @@ class RandomWaveformInjection(FittableTransform):
                     param_shape += 1
                 if self.intrinsic_parameters is not None:
                     param_shape += self.intrinsic_parameters.size(-1)
-                return X, torch.zeros((0,)), torch.zeros((0, param_shape))
 
-            waveforms, sampled_params = self.sample(N, X.device)
+                indices = torch.zeros((0,), device=X.device)
+                sampled_params = torch.zeros((0, param_shape), device=X.device)
+                return X, indices, sampled_params
+
+            waveforms, sampled_params = self.sample(N)
             waveforms = sample_kernels(
                 waveforms,
                 kernel_size=X.shape[-1],
                 max_center_offset=self.trigger_offset,
                 coincident=True,
             )
+
+            # map waveforms to appropriate device and
+            # inject them into input tensor
+            waveforms = waveforms.to(X.device)
             X[mask] += waveforms
 
-            indices = torch.where(mask)[0]
+            # make sure all our returns live on the same device
+            indices = torch.where(mask)[0].to(X.device)
+            sampled_params = sampled_params.to(X.device)
+        else:
+            # if we're in eval mode, skip injection
+            # altogether and return nones to indicate this
+            indices = sampled_params = None
 
         return X, indices, sampled_params
