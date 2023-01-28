@@ -445,7 +445,9 @@ class RandomWaveformInjection(FittableTransform):
             waveforms = waveforms.to(X.device)
             X[mask] += waveforms
 
+            # make sure all our returns live on the same device
             indices = torch.where(mask)[0].to(X.device)
+            sampled_params = sampled_params.to(X.device)
         else:
             # if we're in eval mode, skip injection
             # altogether and return nones to indicate this
