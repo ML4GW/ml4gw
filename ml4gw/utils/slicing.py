@@ -67,7 +67,7 @@ def unfold_windows(
     x = x.transpose(1, -2).transpose(0, 1)
 
     if not drop_last:
-        remainder = x_clone[..., num_windows * stride:]
+        remainder = x_clone[..., num_windows * stride :]
         reshape[-2] = 1
         remainder = remainder.reshape(*reshape)
         remainder = remainder.transpose(1, -2).transpose(0, 1)
