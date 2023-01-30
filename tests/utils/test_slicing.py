@@ -17,6 +17,41 @@ def num_channels(request):
     return request.param
 
 
+@pytest.fixture(params=[True, False])
+def drop_last(request):
+    return request.param
+
+
+def test_unfold_windows(num_channels, drop_last):
+    x = torch.arange(100).to(torch.float32)
+    if not drop_last:
+        result, rem = slicing.unfold_windows(x, 10, 1, drop_last)
+        assert result.shape = ...
+        assert rem.shape = ...
+    else:
+        result = slicing.unfold_windows(x, 10, 1, drop_last)
+        assert result.shape = ...
+
+    X = torch.stack([x + i * 100 for i in range(num_channels)])
+    if not drop_last:
+        result, rem = slicing.unfold_windows(X, 10, 1, drop_last)
+        assert result.shape = ...
+        assert rem.shape = ...
+    else:
+        result = slicing.unfold_windows(x, 10, 1, drop_last)
+        assert result.shape = ...
+
+    batch_size = 8
+    X = torch.stack([X + i * 1000 for i in range(batch_size)])
+    if not drop_last:
+        result, rem = slicing.unfold_windows(X, 10, 1, drop_last)
+        assert result.shape = ...
+        assert rem.shape = ...
+    else:
+        result = slicing.unfold_windows(x, 10, 1, drop_last)
+        assert result.shape = ...
+
+
 def test_slice_kernels(kernel_size, num_channels):
     x = torch.arange(100)
     idx = 7 * torch.arange(2, 10)
