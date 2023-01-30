@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 import torch
+from torch.nn.functional import unfold
 from torchtyping import TensorType
 
 # need to define these for flake8 compatibility
@@ -11,6 +12,67 @@ TimeSeriesTensor = Union[TensorType["time"], TensorType["channel", "time"]]
 BatchTimeSeriesTensor = Union[
     TensorType["batch", "time"], TensorType["batch", "channel", "time"]
 ]
+
+
+def unfold_windows(
+    x: torch.Tensor,
+    window_size: int,
+    stride: int,
+    drop_last: bool = True,
+):
+    """Unfold a timeseries into windows
+
+    Args:
+        x:
+            The timeseries to unfold. Can have shape
+            `(batch_size, num_channels, length * sample_rate)`,
+            `(num_channels, length * sample_rate)`, or
+            `(length * sample_rate)`
+        window_size:
+            The size of the windows to unfold from x
+        stride:
+            The stride between windows
+        drop_last:
+            If true, does not return the remainder that exists
+            when the timeseries cannot be evenly broken up into
+            windows
+
+    Returns:
+       A tensor of shape
+       `(num_windows, batch_size, num_channels, kernel_size)`,
+       `(num_windows, num_channels, kernel_size)`, or
+       `(num_windows, kernel_size)` depending on whether the
+       input tensor is 3D, 2D, or 1D
+
+       If `drop_last` is false, returns the remainder of the
+       timeseries, shaped to be compatible with the returned
+       unfolded tensor
+    """
+    reshape = list(x.shape[:-1])
+    if x.ndim == 1:
+        x = x[None, None, None, :]
+    elif x.ndim == 2:
+        x = x[None, :, None, :]
+    elif x.ndim == 3:
+        x = x[:, :, None, :]
+
+    num_windows = (x.shape[-1] - window_size) // stride + 1
+    stop = (num_windows - 1) * stride + window_size
+    x_clone = x.detach().clone()
+    x = x[..., :stop]
+
+    x = unfold(x, (1, num_windows), dilation=(1, stride))
+    reshape += [num_windows, -1]
+    x = x.reshape(*reshape)
+    x = x.transpose(1, -2).transpose(0, 1)
+
+    if not drop_last:
+        remainder = x_clone[..., num_windows * stride:]
+        reshape[-2] = 1
+        remainder = remainder.reshape(*reshape)
+        remainder = remainder.transpose(1, -2).transpose(0, 1)
+        return x, remainder
+    return x
 
 
 def slice_kernels(
