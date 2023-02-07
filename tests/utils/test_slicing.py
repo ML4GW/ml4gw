@@ -23,8 +23,9 @@ def test_unfold_windows():
     result = slicing.unfold_windows(x, window_size=3, stride=2)
     assert result.tolist() == [[1, 2, 3], [3, 4, 5]]
 
-    result, rem = slicing.unfold_windows(x, window_size=3,
-                                         stride=2, drop_last=False)
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=2, drop_last=False
+    )
     assert rem.tolist() == [[6]]
 
     # 2D
@@ -32,25 +33,29 @@ def test_unfold_windows():
     result = slicing.unfold_windows(x, window_size=3, stride=2)
     assert result.tolist() == [[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]]
 
-    result, rem = slicing.unfold_windows(x, window_size=3, stride=2,
-                                         drop_last=False)
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=2, drop_last=False
+    )
     assert rem.tolist() == [[[6], [7]]]
 
     # 3D
-    x = torch.tensor([[[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7]],
-                      [[3, 4, 5, 6, 7, 8], [4, 5, 6, 7, 8, 9]]],
-                     dtype=float)
+    x = torch.tensor(
+        [
+            [[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7]],
+            [[3, 4, 5, 6, 7, 8], [4, 5, 6, 7, 8, 9]],
+        ],
+        dtype=float,
+    )
     result = slicing.unfold_windows(x, window_size=3, stride=2)
-    assert result.tolist() == [[[[1, 2, 3], [2, 3, 4]],
-                                [[3, 4, 5], [4, 5, 6]]],
-                               [[[3, 4, 5], [4, 5, 6]],
-                                [[5, 6, 7], [6, 7, 8]]]]
+    assert result.tolist() == [
+        [[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]],
+        [[[3, 4, 5], [4, 5, 6]], [[5, 6, 7], [6, 7, 8]]],
+    ]
 
-    result, rem = slicing.unfold_windows(x, window_size=3, stride=2,
-                                         drop_last=False)
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=2, drop_last=False
+    )
     assert rem.tolist() == [[[[6], [7]], [[8], [9]]]]
-
-
 
 
 def test_slice_kernels(kernel_size, num_channels):

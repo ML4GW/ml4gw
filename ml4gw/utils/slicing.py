@@ -67,7 +67,9 @@ def unfold_windows(
     else:
         # separate x from its remainder _regardless_ of whether
         # we end up returning it or not
-        x, remainder = torch.split(x, [x.shape[-1] - remainder, remainder], dim=-1)
+        x, remainder = torch.split(
+            x, [x.shape[-1] - remainder, remainder], dim=-1
+        )
 
     x = unfold(x, (1, num_windows), dilation=(1, stride))
     reshape += [num_windows, -1]
