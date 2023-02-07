@@ -17,39 +17,40 @@ def num_channels(request):
     return request.param
 
 
-@pytest.fixture(params=[True, False])
-def drop_last(request):
-    return request.param
+def test_unfold_windows():
+    # 1D
+    x = torch.tensor([1, 2, 3, 4, 5, 6], dtype=float)
+    result = slicing.unfold_windows(x, window_size=3, stride=2)
+    assert result.tolist() == [[1, 2, 3], [3, 4, 5]]
+
+    result, rem = slicing.unfold_windows(x, window_size=3,
+                                         stride=2, drop_last=False)
+    assert rem.tolist() == [[6]]
+
+    # 2D
+    x = torch.tensor([[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7]], dtype=float)
+    result = slicing.unfold_windows(x, window_size=3, stride=2)
+    assert result.tolist() == [[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]]
+
+    result, rem = slicing.unfold_windows(x, window_size=3, stride=2,
+                                         drop_last=False)
+    assert rem.tolist() == [[[6], [7]]]
+
+    # 3D
+    x = torch.tensor([[[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7]],
+                      [[3, 4, 5, 6, 7, 8], [4, 5, 6, 7, 8, 9]]],
+                     dtype=float)
+    result = slicing.unfold_windows(x, window_size=3, stride=2)
+    assert result.tolist() == [[[[1, 2, 3], [2, 3, 4]],
+                                [[3, 4, 5], [4, 5, 6]]],
+                               [[[3, 4, 5], [4, 5, 6]],
+                                [[5, 6, 7], [6, 7, 8]]]]
+
+    result, rem = slicing.unfold_windows(x, window_size=3, stride=2,
+                                         drop_last=False)
+    assert rem.tolist() == [[[[6], [7]], [[8], [9]]]]
 
 
-def test_unfold_windows(num_channels, drop_last):
-    x = torch.arange(100).to(torch.float32)
-    if not drop_last:
-        result, rem = slicing.unfold_windows(x, 10, 1, drop_last)
-        assert result.shape = ...
-        assert rem.shape = ...
-    else:
-        result = slicing.unfold_windows(x, 10, 1, drop_last)
-        assert result.shape = ...
-
-    X = torch.stack([x + i * 100 for i in range(num_channels)])
-    if not drop_last:
-        result, rem = slicing.unfold_windows(X, 10, 1, drop_last)
-        assert result.shape = ...
-        assert rem.shape = ...
-    else:
-        result = slicing.unfold_windows(x, 10, 1, drop_last)
-        assert result.shape = ...
-
-    batch_size = 8
-    X = torch.stack([X + i * 1000 for i in range(batch_size)])
-    if not drop_last:
-        result, rem = slicing.unfold_windows(X, 10, 1, drop_last)
-        assert result.shape = ...
-        assert rem.shape = ...
-    else:
-        result = slicing.unfold_windows(x, 10, 1, drop_last)
-        assert result.shape = ...
 
 
 def test_slice_kernels(kernel_size, num_channels):

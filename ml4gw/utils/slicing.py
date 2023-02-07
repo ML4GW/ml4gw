@@ -57,9 +57,17 @@ def unfold_windows(
         x = x[:, :, None, :]
 
     num_windows = (x.shape[-1] - window_size) // stride + 1
-    stop = (num_windows - 1) * stride + window_size
-    x_clone = x.detach().clone()
-    x = x[..., :stop]
+    remainder = x.shape[-1] - window_size - (num_windows - 1) * stride
+    if remainder == 0:
+        if not drop_last:
+            # create an empty tensor for consistency
+            shape = list(x.shape)
+            shape[-1] = 0
+            remainder = torch.zeros(shape, dtype=x.dtype, device=x.device)
+    else:
+        # separate x from its remainder _regardless_ of whether
+        # we end up returning it or not
+        x, remainder = torch.split(x, [x.shape[-1] - remainder, remainder], dim=-1)
 
     x = unfold(x, (1, num_windows), dilation=(1, stride))
     reshape += [num_windows, -1]
@@ -67,7 +75,6 @@ def unfold_windows(
     x = x.transpose(1, -2).transpose(0, 1)
 
     if not drop_last:
-        remainder = x_clone[..., num_windows * stride :]
         reshape[-2] = 1
         remainder = remainder.reshape(*reshape)
         remainder = remainder.transpose(1, -2).transpose(0, 1)
