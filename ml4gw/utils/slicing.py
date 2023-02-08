@@ -48,13 +48,6 @@ def unfold_windows(
        timeseries, shaped to be compatible with the returned
        unfolded tensor
     """
-    reshape = list(x.shape[:-1])
-    if x.ndim == 1:
-        x = x[None, None, None, :]
-    elif x.ndim == 2:
-        x = x[None, :, None, :]
-    elif x.ndim == 3:
-        x = x[:, :, None, :]
 
     num_windows = (x.shape[-1] - window_size) // stride + 1
     remainder = x.shape[-1] - window_size - (num_windows - 1) * stride
@@ -71,16 +64,21 @@ def unfold_windows(
             x, [x.shape[-1] - remainder, remainder], dim=-1
         )
 
+    reshape = list(x.shape[:-1])
+    if x.ndim == 1:
+        x = x[None, None, None, :]
+    elif x.ndim == 2:
+        x = x[None, :, None, :]
+    elif x.ndim == 3:
+        x = x[:, :, None, :]
+
     x = unfold(x, (1, num_windows), dilation=(1, stride))
     reshape += [num_windows, -1]
     x = x.reshape(*reshape)
     x = x.transpose(1, -2).transpose(0, 1)
 
     if not drop_last:
-        reshape[-2] = 1
-        remainder = remainder.reshape(*reshape)
-        remainder = remainder.transpose(1, -2).transpose(0, 1)
-        return x, remainder
+        return x, remainder[None]
     return x
 
 
