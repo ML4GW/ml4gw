@@ -1,5 +1,3 @@
-from typing import Any, Mapping
-
 import torch
 
 
@@ -25,9 +23,14 @@ class FittableTransform(torch.nn.Module):
         self._check_built()
         return super().__call__(*args, **kwargs)
 
-    def load_state_dict(
-        self, state_dict: Mapping[str, Any], strict: bool = True
-    ):
-        keys = super().load_state_dict(state_dict, strict)
-        self.built = True
-        return keys
+    def _load_from_state_dict(self, *args):
+        # keep track of number of error messages to see
+        # if trying to load these weights causes another
+        num_errs = len(args[-1])
+        ret = super()._load_from_state_dict(*args)
+
+        # if we didn't create any new errors, then
+        # assume that we built correctly
+        if len(args[-1]) == num_errs:
+            self.built = True
+        return ret
