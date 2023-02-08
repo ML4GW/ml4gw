@@ -138,3 +138,14 @@ def test_whitening_save_and_load(dtype, tmp_path):
     tform = Whitening(2, 512, 0.5, dtype)
     with pytest.raises(RuntimeError):
         tform.load_state_dict(torch.load(tmp_path / "weights.pt"))
+
+    # ensure that we didn't set the built flag
+    # during this attempt to read bad weights
+    assert not tform.built
+
+    # make sure saving and loading as part of
+    # a larger module works as expected
+    nn = torch.nn.Sequential(tform, torch.nn.Linear(512, 64))
+    torch.save(nn.state_dict(), tmp_path / "weights.pt")
+    nn.load_state_dict(torch.load(tmp_path / "weights.pt"))
+    assert tform.built
