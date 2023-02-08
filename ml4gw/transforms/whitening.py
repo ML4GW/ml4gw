@@ -4,7 +4,7 @@ Whitening logic largely lifted from gwpy's whitening functionality:
 https://github.com/gwpy/gwpy/blob/main/gwpy/timeseries/timeseries.py
 """
 
-from typing import Any, Mapping, Optional
+from typing import Optional
 
 import numpy as np
 import torch
@@ -15,18 +15,19 @@ from ml4gw.transforms.transform import FittableTransform
 
 
 class _Conv1d(torch.nn.Module):
-    def __init__(self, num_channels: int) -> None:
+    def __init__(self, num_channels: int, padding: int) -> None:
         super().__init__()
         self.num_channels = num_channels
+        self.padding = padding
 
     def forward(self, X: torch.Tensor, tdf: torch.Tensor):
         return torch.nn.functional.conv1d(
-            X, tdf, groups=self.num_channels, padding="same"
+            X, tdf, groups=self.num_channels, padding=self.padding
         )
 
 
 def _overlap_add_conv(
-    X: torch.Tensor, tdf: torch.Tensor, conv_op: torch.nn.Module, nfft: int
+    X: torch.Tensor, tdf: torch.Tensor, conv_op: _Conv1d, nfft: int
 ) -> torch.Tensor:
     """
     TODO: Stand-in implementation until we
@@ -34,7 +35,7 @@ def _overlap_add_conv(
     rather than looping
     """
     conv = torch.zeros_like(X)
-    pad = conv_op.pad
+    pad = conv_op.padding
     kernel_size = X.shape[-1]
 
     # handle first chunk separately
@@ -100,7 +101,7 @@ class Whitening(FittableTransform):
 
         # the op that will actually convolve incoming
         # kernels with the time domain filter
-        self.conv_op = _Conv1d(num_channels)
+        self.conv_op = _Conv1d(num_channels, self.pad)
 
         # initialize the time domain filter with 0s,
         # then fill it out later
@@ -120,6 +121,17 @@ class Whitening(FittableTransform):
         # this will be set at fit time and will help us
         # decide which convolution implementation to use
         self.nfft = None
+
+        # after we load in some saved weights, make sure
+        # that whatever kernel length we expect to use
+        # at run time will be sufficient for length of
+        # the time domain filter we initialized this
+        # transform with
+        self.register_load_state_dict_post_hook(
+            lambda module, _: module._check_kernel_length(
+                module.kernel_length.item()
+            )
+        )
 
     def _check_kernel_length(self, kernel_length: float):
         kernel_size = int(kernel_length * self.sample_rate)
@@ -243,10 +255,3 @@ class Whitening(FittableTransform):
         # scale by sqrt(2 / sample_rate) for some inscrutable
         # signal processing reason beyond my understanding
         return X * (2 / self.sample_rate) ** 0.5
-
-    def load_state_dict(
-        self, state_dict: Mapping[str, Any], strict: bool = True
-    ):
-        keys = super().load_state_dict(state_dict, strict)
-        self._check_kernel_length(self.kernel_length.item())
-        return keys
