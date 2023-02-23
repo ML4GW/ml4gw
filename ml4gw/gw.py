@@ -10,6 +10,7 @@ Specifically the code here:
 https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 """
 
+from collections.abc import Callable
 from typing import List, Tuple, Union
 
 import bilby
@@ -440,11 +441,8 @@ def reweight_snrs(
             raw gravitational waveforms
         target_snrs:
             Either a tensor of desired SNRs for each waveform,
-            or a single SNR to which all waveforms should be scaled.
-            If None, it is assumed that the target SNRs should follow
-            the same distribution as the original SNRs, so the
-            targets are set to a shuffled copy of the calculated
-            network SNRs
+            a single SNR to which all waveforms should be scaled, or
+            a Callable that returns the target SNRs
         backgrounds:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
@@ -465,13 +463,14 @@ def reweight_snrs(
     """
 
     snrs = compute_network_snr(responses, backgrounds, sample_rate, highpass)
-    if target_snrs is None:
-        if snrs.dim() == 0:
-            # I think this is the case when there's just one response
-            snrs = snrs.unsqueeze(0)
-            target_snrs = snrs
-        else:
-            idx = torch.randperm(snrs.shape[-1])
-            target_snrs = snrs[idx]
+    if isinstance(target_snrs, Callable):
+        target_snrs = target_snrs(snrs.shape[-1])
+
+    # For the case that target_snrs was the Identity distribution
+    try:
+        target_snrs = snrs[target_snrs]
+    except IndexError:
+        pass
+
     weights = target_snrs / snrs
     return responses * weights[:, None, None]
