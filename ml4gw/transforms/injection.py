@@ -382,7 +382,10 @@ class RandomWaveformInjection(FittableTransform):
         )
 
         if self.snr is not None:
-            target_snrs = self._sample_source_param(self.snr, idx, N)
+            if self.snr == -1:
+                target_snrs = None
+            else:
+                target_snrs = self._sample_source_param(self.snr, idx, N)
             rescaled_responses = gw.reweight_snrs(
                 ifo_responses,
                 target_snrs,

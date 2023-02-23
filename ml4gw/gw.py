@@ -441,6 +441,10 @@ def reweight_snrs(
         target_snrs:
             Either a tensor of desired SNRs for each waveform,
             or a single SNR to which all waveforms should be scaled.
+            If None, it is assumed that the target SNRs should follow
+            the same distribution as the original SNRs, so the
+            targets are set to a shuffled copy of the calculated
+            network SNRs
         backgrounds:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
@@ -461,5 +465,13 @@ def reweight_snrs(
     """
 
     snrs = compute_network_snr(responses, backgrounds, sample_rate, highpass)
+    if target_snrs is None:
+        if snrs.dim() == 0:
+            # I think this is the case when there's just one response
+            snrs = snrs.unsqueeze(0)
+            target_snrs = snrs
+        else:
+            idx = torch.randperm(snrs.shape[-1])
+            target_snrs = snrs[idx]
     weights = target_snrs / snrs
     return responses * weights[:, None, None]
