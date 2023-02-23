@@ -10,7 +10,6 @@ Specifically the code here:
 https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 """
 
-from collections.abc import Callable
 from typing import List, Tuple, Union
 
 import bilby
@@ -441,8 +440,7 @@ def reweight_snrs(
             raw gravitational waveforms
         target_snrs:
             Either a tensor of desired SNRs for each waveform,
-            a single SNR to which all waveforms should be scaled, or
-            a Callable that returns the target SNRs
+            or a single SNR to which all waveforms should be scaled.
         backgrounds:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
@@ -463,14 +461,5 @@ def reweight_snrs(
     """
 
     snrs = compute_network_snr(responses, backgrounds, sample_rate, highpass)
-    if isinstance(target_snrs, Callable):
-        target_snrs = target_snrs(snrs.shape[-1])
-
-    # For the case that target_snrs was the Identity distribution
-    try:
-        target_snrs = snrs[target_snrs]
-    except IndexError:
-        pass
-
     weights = target_snrs / snrs
     return responses * weights[:, None, None]

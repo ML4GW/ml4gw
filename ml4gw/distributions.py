@@ -11,21 +11,6 @@ from typing import Optional
 import torch
 
 
-class Identity:
-    """
-    Return a list of integers representing indices, possibly shuffled
-    """
-
-    def __init__(self, shuffle: bool = True) -> None:
-        self.shuffle = shuffle
-
-    def __call__(self, N: int) -> torch.Tensor:
-        if self.shuffle:
-            return torch.randperm(N)
-        else:
-            return torch.arange(N)
-
-
 class Uniform:
     """
     Sample uniformly between `low` and `high`.
