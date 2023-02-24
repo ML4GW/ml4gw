@@ -175,7 +175,7 @@ class RandomWaveformInjection(FittableTransform):
         names = ["dec", "psi", "phi", "snr"]
         for name, param in zip(names, [dec, psi, phi, snr]):
             if name == "snr" and isinstance(param, int):
-                self.register_buffer(name, param, persistent=False)
+                self.snr = -1
             elif not isinstance(param, Callable) and param is not None:
                 try:
                     length = len(param)
@@ -388,7 +388,7 @@ class RandomWaveformInjection(FittableTransform):
             snrs = gw.compute_network_snr(
                 ifo_responses, self.background, self.sample_rate, self.mask
             )
-            if isinstance(self.snr, int) and self.snr == 1:
+            if isinstance(self.snr, int) and self.snr == -1:
                 idx_perm = torch.randperm(N)
                 target_snrs = snrs[idx_perm]
             else:
