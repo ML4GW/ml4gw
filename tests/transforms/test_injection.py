@@ -103,11 +103,11 @@ def compute_observed_strain(ifos):
         yield
 
 
-def reweight_snrs(*args, **kwargs):
-    return args[0]
+def compute_network_snr(*args, **kwargs):
+    return torch.ones(args[0].shape[0])
 
 
-@patch("ml4gw.gw.reweight_snrs", new=reweight_snrs)
+@patch("ml4gw.gw.compute_network_snr", new=compute_network_snr)
 def test_sample(sample_rate, ifos, dist):
     with patch(
         "ml4gw.transforms.RandomWaveformInjection.__init__",
@@ -131,7 +131,8 @@ def test_sample(sample_rate, ifos, dist):
 
     # first make sure we enforce fitting
     # if sampling with snr reweighting
-    tform.snr = mock_dist
+    num_waveforms = 100
+    tform.snr = torch.ones(num_waveforms)
     tform.built = False
     with pytest.raises(ValueError) as exc:
         tform.sample(1)
@@ -142,11 +143,13 @@ def test_sample(sample_rate, ifos, dist):
     tform.built = True
 
     # now give our dummy sampler some waveforms to sample
-    tform.num_waveforms = 100
+    tform.num_waveforms = num_waveforms
     tform.tensors = torch.zeros((2, 3, 3))
     tform.vertices = torch.zeros((2, 3))
 
-    waveforms = {i: torch.randn(100, 1024) for i in ["plus", "cross"]}
+    waveforms = {
+        i: torch.randn(num_waveforms, 1024) for i in ["plus", "cross"]
+    }
     tform.polarizations = waveforms
 
     # since our patched functions just add the polarizations,
@@ -174,7 +177,7 @@ def test_sample(sample_rate, ifos, dist):
     result, params = tform.sample(-1)
     assert len(result) == len(summed)
     assert (result == summed).all()
-    tform.dec.assert_called_with(100)
+    tform.dec.assert_called_with(num_waveforms)
 
     # make sure if we ask for too many waveforms we get yelled at
     with pytest.raises(ValueError):
@@ -217,9 +220,12 @@ def dist():
     return f
 
 
-@patch("ml4gw.gw.reweight_snrs", new=reweight_snrs)
+@patch("ml4gw.gw.compute_network_snr", new=compute_network_snr)
 def test_random_waveform_injection(prob, ifos, dist):
-    waveforms = {i: torch.randn(100, 1024) for i in ["plus", "cross"]}
+    num_waveforms = 100
+    waveforms = {
+        i: torch.randn(num_waveforms, 1024) for i in ["plus", "cross"]
+    }
 
     waveform = waveforms["plus"] + waveforms["cross"]
     summed = torch.stack([waveform + i for i in range(len(ifos))], axis=1)
@@ -227,7 +233,7 @@ def test_random_waveform_injection(prob, ifos, dist):
     dec = Mock(side_effect=dist)
     psi = Mock(side_effect=dist)
     phi = Mock(side_effect=dist)
-    snr = Mock(side_effect=dist)
+    snr = torch.ones(num_waveforms)
 
     sample_rate = 1024
     # enforce all polarizations have to be same length
@@ -274,7 +280,7 @@ def test_random_waveform_injection(prob, ifos, dist):
         sample_rate, ifos, dec, psi, phi, snr=None, prob=prob, **waveforms
     )
 
-    # should be no registerd parameters
+    # should be no registered parameters
     assert len(list(transform.parameters())) == 0
 
     # should have buffers for tensors, vertices
@@ -286,9 +292,9 @@ def test_random_waveform_injection(prob, ifos, dist):
         sample_rate, ifos, dec, psi, phi, snr, prob=prob, **waveforms
     )
     assert len(list(transform.parameters())) == 0
-    assert len(list(transform.buffers())) == 3
+    assert len(list(transform.buffers())) == 4
 
-    assert transform.num_waveforms == 100
+    assert transform.num_waveforms == num_waveforms
     assert transform.df == 1
     assert transform.mask is None
     assert not transform.built
@@ -318,7 +324,7 @@ def test_random_waveform_injection(prob, ifos, dist):
 
     # ensure all the expected calls happened
     rand_mock.assert_called_with(size=(16,))
-    perm_mock.assert_called_with(100)
+    perm_mock.assert_called_with(num_waveforms)
     randint_mock.assert_called_with(256, 512, size=(expected_count,))
     dec.assert_called_with(expected_count)
 
@@ -333,7 +339,7 @@ def test_random_waveform_injection(prob, ifos, dist):
             assert (x_row == summed[i, :, i : i + 256]).all().item()
 
     # now try things with one of the parameters as a tensor
-    dec = np.random.randn(100)
+    dec = np.random.randn(num_waveforms)
 
     # first make sure that having a param
     # too short raises an exception
@@ -347,7 +353,7 @@ def test_random_waveform_injection(prob, ifos, dist):
     transform = RandomWaveformInjection(
         sample_rate, ifos, dec, psi, phi, snr, prob=prob, **waveforms
     )
-    assert len(list(transform.buffers())) == 4
+    assert len(list(transform.buffers())) == 5
 
     transform.built = True
     with rand_patch as rand_mock, perm_patch as perm_mock:
@@ -366,11 +372,11 @@ def test_random_waveform_injection(prob, ifos, dist):
 
     # now re-make transform passing intrinsic parameters
     num_intrinsic = 5
-    intrinsic_parameters = torch.randn((100, num_intrinsic))
+    intrinsic_parameters = torch.randn((num_waveforms, num_intrinsic))
 
-    dec = torch.arange(0, 100, 1) * 1
-    psi = torch.arange(0, 100, 1) * 2
-    phi = torch.arange(0, 100, 1) * 3
+    dec = torch.arange(0, num_waveforms, 1) * 1
+    psi = torch.arange(0, num_waveforms, 1) * 2
+    phi = torch.arange(0, num_waveforms, 1) * 3
 
     transform = RandomWaveformInjection(
         sample_rate,

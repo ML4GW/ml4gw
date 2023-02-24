@@ -383,10 +383,10 @@ class RandomWaveformInjection(FittableTransform):
         )
 
         if self.snr is not None:
-            snrs = gw.compute_network_snrs(
+            snrs = gw.compute_network_snr(
                 ifo_responses, self.background, self.sample_rate, self.mask
             )
-            if self.snr == -1:
+            if (self.snr == -1).all():
                 idx_perm = torch.randperm(N)
                 target_snrs = snrs[idx_perm]
             else:
