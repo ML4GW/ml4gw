@@ -85,7 +85,8 @@ class RandomWaveformInjection(FittableTransform):
                 Source parameter specifying the desired signal to noise
                 ratio of each injection. See description above about how
                 this can be specified. If left as `None`, no SNR reweighting
-                will be performed.
+                will be performed. If -1, then the calculated SNRs will be
+                reweighted to a shuffled copy of themselves
             intrinsic_parameters:
                 Tensor containing the intrinsic parameters
                 used to produce the passed polarizations.
@@ -173,7 +174,9 @@ class RandomWaveformInjection(FittableTransform):
         # number of waveforms
         names = ["dec", "psi", "phi", "snr"]
         for name, param in zip(names, [dec, psi, phi, snr]):
-            if not isinstance(param, Callable) and param is not None:
+            if name == "snr" and isinstance(param, int):
+                self.snr = -1
+            elif not isinstance(param, Callable) and param is not None:
                 try:
                     length = len(param)
                 except AttributeError:
@@ -382,14 +385,17 @@ class RandomWaveformInjection(FittableTransform):
         )
 
         if self.snr is not None:
-            target_snrs = self._sample_source_param(self.snr, idx, N)
-            rescaled_responses = gw.reweight_snrs(
-                ifo_responses,
-                target_snrs,
-                backgrounds=self.background,
-                sample_rate=self.sample_rate,
-                highpass=self.mask,
+            snrs = gw.compute_network_snr(
+                ifo_responses, self.background, self.sample_rate, self.mask
             )
+            if isinstance(self.snr, int) and self.snr == -1:
+                idx_perm = torch.randperm(N)
+                target_snrs = snrs[idx_perm]
+            else:
+                target_snrs = self._sample_source_param(self.snr, idx, N)
+
+            weights = target_snrs / snrs
+            rescaled_responses = ifo_responses * weights.view(-1, 1, 1)
 
             sampled_params = torch.column_stack((dec, psi, phi, target_snrs))
         else:
