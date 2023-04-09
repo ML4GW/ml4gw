@@ -218,12 +218,11 @@ class InMemoryDataset(Dataset):
 
         # slice our timeseries
         X = slice_kernels(self.X, idx, self.kernel_size)
+        y = None
         if self.y is not None:
             y = slice_kernels(self.y, idx, self.kernel_size)
 
-        if self.y is not None:
-            return X, y
-        return X
+        return X, y
 
     def __next__(
         self,
@@ -243,13 +242,7 @@ class InMemoryDataset(Dataset):
         # slice the array of _indices_ we'll be using to
         # slice our timeseries, and scale them by the stride
         slc = slice(self._i * self.batch_size, (self._i + 1) * self.batch_size)
-        idx = self._idx[slc] * self.stride
-
-        # slice our timeseries
-        X = slice_kernels(self.X, idx, self.kernel_size)
-        if self.y is not None:
-            y = slice_kernels(self.y, idx, self.kernel_size)
-
+        X, y = self.__getitem__(slc)
         self._i += 1
         if self.y is not None:
             return X, y
