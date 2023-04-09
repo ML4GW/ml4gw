@@ -3,11 +3,12 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch
+from torch.utils.data import Dataset
 
 from ml4gw.utils.slicing import slice_kernels
 
 
-class InMemoryDataset:
+class InMemoryDataset(Dataset):
     """Dataset for iterating through in-memory multi-channel timeseries
 
     Dataset for arrays of timeseries data which can be stored
@@ -207,6 +208,22 @@ class InMemoryDataset:
         self._idx = idx
         self._i = 0
         return self
+
+    def __getitem__(
+        self, idx: torch.Tensor
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+        # slice the array of _indices_ we'll be using to
+        # slice our timeseries, and scale them by the stride
+        idx = self._idx[idx] * self.stride
+
+        # slice our timeseries
+        X = slice_kernels(self.X, idx, self.kernel_size)
+        if self.y is not None:
+            y = slice_kernels(self.y, idx, self.kernel_size)
+
+        if self.y is not None:
+            return X, y
+        return X
 
     def __next__(
         self,
