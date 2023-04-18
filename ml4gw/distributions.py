@@ -73,6 +73,20 @@ class LogNormal:
         return x
 
 
+class LogUniform(Uniform):
+    """
+    Sample from a log uniform distribution
+    """
+
+    def __init__(self, low: float, high: float) -> None:
+        self.low = math.log(low)
+        self.high = math.log(high)
+
+    def __call__(self, N: int) -> torch.Tensor:
+        u = super().__call__(N)
+        return 10**u
+
+
 class PowerLaw:
     """
     Sample from a power law distribution,

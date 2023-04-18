@@ -1,3 +1,4 @@
+import math
 from math import pi
 
 import numpy as np
@@ -30,6 +31,24 @@ def test_uniform():
     sample_variance = variance / 10000
     sample_std = sample_variance**0.5
     assert abs(mean - 1) < (3 * sample_std)
+
+
+def test_log_uniform():
+    sampler = distributions.LogUniform(math.e, math.e**2)
+    samples = sampler(10)
+    assert len(samples) == 10
+    assert ((math.e <= samples) & (math.e**2 <= 100)).all()
+
+    # check that the mean is roughly correct
+    # (within three standard deviations)
+    samples = sampler(100000)
+    log_samples = np.log10(samples)
+
+    mean = log_samples.mean().item()
+    variance = 4 / 12
+    sample_variance = variance / 10000
+    sample_std = sample_variance**0.5
+    assert abs(mean - 1.5) < (3 * sample_std)
 
 
 def test_cosine():
