@@ -1,17 +1,25 @@
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import torch
 
-from ml4gw.distributions import ParameterSampler
+if TYPE_CHECKING:
+    from ml4gw.distributions import ParameterSampler
 
 
 class WaveformGenerator(torch.nn.Module):
     def __init__(
-        self, waveform: Callable, parameter_sampler: ParameterSampler
+        self, waveform: Callable, parameter_sampler: "ParameterSampler"
     ):
         """
         A torch module that generates waveforms from a given waveform function
         and a parameter sampler.
+
+        Args:
+            waveform:
+                A callable that takes returns hplus and hcross polarizations
+                given a set of parameters.
+            parameter_sampler:
+                A ParameterSampler object
         """
 
         super().__init__()
