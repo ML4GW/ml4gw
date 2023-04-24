@@ -1,8 +1,8 @@
-from typing import ScalarTensor
-
 import torch
 from scipy.signal.windows import tukey
 from torch import Tensor
+
+from ml4gw.types import ScalarTensor
 
 
 def semi_major_minor_from_e(e: Tensor):
@@ -17,8 +17,8 @@ def tukey_window(num: int, alpha: float = 0.5):
 
 
 def sine_gaussian(
-    frequency: ScalarTensor,
     quality: ScalarTensor,
+    frequency: ScalarTensor,
     hrss: ScalarTensor,
     phase: ScalarTensor,
     eccentricity: ScalarTensor,
@@ -50,8 +50,6 @@ def sine_gaussian(
     Returns:
         A tensor of size (batch, 2, time) containing
         the hplus and hcross polarizations
-
-
     """
 
     # add dimension for calculating waveforms in batch
@@ -70,18 +68,15 @@ def sine_gaussian(
     # calculate relative hplus / hcross amplitudes based on eccentricity
     # as well as normalization factors
     a, b = semi_major_minor_from_e(eccentricity)
-    cosine_norm = (
-        quality
-        / (4.0 * frequency * torch.sqrt(torch.pi))
-        * (1.0 + torch.exp(-quality * quality))
+
+    norm_prefactor = quality / (
+        4.0 * frequency * torch.sqrt(torch.Tensor([torch.pi]))
     )
-    sine_norm = (
-        quality
-        / (4.0 * frequency * torch.sqrt(torch.pi))
-        * (1.0 - torch.exp(-quality * quality))
-    )
-    cos_phase = torch.cos(phase)
-    sin_phase = torch.sin(phase)
+    cosine_norm = norm_prefactor * (1.0 + torch.exp(-quality * quality))
+    sine_norm = norm_prefactor * (1.0 - torch.exp(-quality * quality))
+
+    cos_phase, sin_phase = torch.cos(phase), torch.sin(phase)
+
     h0_plus = (
         hrss
         * a
