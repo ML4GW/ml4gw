@@ -10,12 +10,13 @@ Specifically the code here:
 https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 """
 
-from typing import List
+from typing import List, Tuple, Union
 
 import bilby
 import numpy as np
 import torch
 from bilby.core.utils import speed_of_light
+from torchtyping import TensorType
 
 from ml4gw.types import (
     NetworkDetectorTensors,
@@ -23,9 +24,6 @@ from ml4gw.types import (
     PSDTensor,
     ScalarTensor,
     TensorGeometry,
-    TensorType,
-    Tuple,
-    Union,
     VectorGeometry,
     WaveformTensor,
 )
