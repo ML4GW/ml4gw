@@ -1,1 +1,1 @@
-from .sine_gaussian import sine_gaussian
+from .sine_gaussian import SineGaussian

@@ -3,7 +3,7 @@ import pytest
 import torch
 from lalinference import BurstSineGaussian
 
-from ml4gw.waveforms import sine_gaussian
+from ml4gw.waveforms import SineGaussian
 
 
 @pytest.fixture(params=[2048, 4096])
@@ -51,15 +51,10 @@ def test_sine_gaussian(
     eccentricities,
 ):
 
+    sine_gaussian = SineGaussian(sample_rate, duration)
     # calculate waveforms with torch implementation
     waveforms = sine_gaussian(
-        qualities,
-        frequencies,
-        hrss,
-        phases,
-        eccentricities,
-        sample_rate,
-        duration,
+        qualities, frequencies, hrss, phases, eccentricities
     )
 
     # calculate waveforms with lalsimulation implementation
