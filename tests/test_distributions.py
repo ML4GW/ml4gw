@@ -81,3 +81,21 @@ def test_power_law():
     popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
     # popt[1] is the index
     assert popt[1] == pytest.approx(4, rel=1e-1)
+
+
+@pytest.fixture(params=[10, 100, 1000])
+def n_samples(request):
+    return request.param
+
+
+def test_parameter_sampler(n_samples):
+    parameter_sampler = distributions.ParameterSampler(
+        phi=distributions.Uniform(0, 2 * pi),
+        dec=distributions.Cosine(),
+        snr=distributions.LogNormal(6, 4, 3),
+    )
+
+    samples = parameter_sampler(n_samples)
+
+    for k in ["phi", "dec", "snr"]:
+        assert len(samples[k]) == n_samples

@@ -115,6 +115,8 @@ class ParameterSampler(torch.nn.Module):
         super().__init__()
         self.parameters = parameters
 
-    def forward(self, N: int, device: Optional[str] = None):
-        # TODO: do we want to return a tensor?
-        return {k: v(N, device) for k, v in self.parameters.items()}
+    def forward(
+        self,
+        N: int,
+    ):
+        return {k: v(N) for k, v in self.parameters.items()}
