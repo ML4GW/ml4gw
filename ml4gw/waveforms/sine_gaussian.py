@@ -1,3 +1,5 @@
+from typing import ScalarTensor
+
 import torch
 from scipy.signal.windows import tukey
 from torch import Tensor
@@ -15,14 +17,42 @@ def tukey_window(num: int, alpha: float = 0.5):
 
 
 def sine_gaussian(
-    frequency: Tensor,
-    quality: Tensor,
-    hrss: Tensor,
-    phase: Tensor,
-    eccentricity: Tensor,
+    frequency: ScalarTensor,
+    quality: ScalarTensor,
+    hrss: ScalarTensor,
+    phase: ScalarTensor,
+    eccentricity: ScalarTensor,
     sample_rate: float,
     duration: float,
 ):
+    """
+    Generate lalsimulation implementation of a sine-Gaussian waveform.
+    https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimBurst.c#L1080
+
+    Args:
+        frequency:
+            Central frequency of the sine-Gaussian waveform
+        quality:
+            Quality factor of the sine-Gaussian waveform
+        hrss:
+            Hrss of the sine-Gaussian waveform
+        phase:
+            Phase of the sine-Gaussian waveform
+        eccentricity:
+            Eccentricity of the sine-Gaussian waveform.
+            Controls the relative amplitudes of the
+            hplus and hcross polarizations.
+        sample_rate:
+            Sample rate of the waveform
+        duration:
+            Duration of the waveform
+
+    Returns:
+        A tensor of size (batch, 2, time) containing
+        the hplus and hcross polarizations
+
+
+    """
 
     # add dimension for calculating waveforms in batch
     frequency = frequency.view(-1, 1)
@@ -79,4 +109,8 @@ def sine_gaussian(
     hplus = fac.real * h0_plus
     hcross = fac.imag * h0_cross
 
-    return hplus, hcross
+    hplus = hplus.unsqueeze(1)
+    hcross = hcross.unsqueeze(1)
+
+    waveforms = torch.cat([hplus, hcross], dim=1)
+    return waveforms
