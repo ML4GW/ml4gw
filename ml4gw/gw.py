@@ -10,7 +10,14 @@ Specifically the code here:
 https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 """
 
-from types import (
+from typing import List
+
+import bilby
+import numpy as np
+import torch
+from bilby.core.utils import speed_of_light
+
+from ml4gw.types import (
     NetworkDetectorTensors,
     NetworkVertices,
     PSDTensor,
@@ -22,12 +29,6 @@ from types import (
     VectorGeometry,
     WaveformTensor,
 )
-from typing import List
-
-import bilby
-import numpy as np
-import torch
-from bilby.core.utils import speed_of_light
 
 # define some tensor shapes we'll reuse a bit
 # up front. Need to assign these variables so
