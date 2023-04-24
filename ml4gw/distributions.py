@@ -6,7 +6,7 @@ from the corresponding distribution.
 """
 
 import math
-from typing import Optional
+from typing import Callable, Optional
 
 import torch
 
@@ -108,3 +108,13 @@ class PowerLaw:
         samples = self.x_min ** (-self.alpha + 1) - u
         samples = torch.pow(samples, -1.0 / (self.alpha - 1))
         return samples
+
+
+class ParameterSampler(torch.nn.Module):
+    def __init__(self, **parameters: Callable):
+        super().__init__()
+        self.parameters = parameters
+
+    def forward(self, N: int, device: Optional[str] = None):
+        # TODO: do we want to return a tensor?
+        return {k: v(N, device) for k, v in self.parameters.items()}
