@@ -16,7 +16,7 @@ class WaveformGenerator(torch.nn.Module):
 
         Args:
             waveform:
-                A callable that takes returns hplus and hcross polarizations
+                A callable that returns hplus and hcross polarizations
                 given a set of parameters.
             parameter_sampler:
                 A ParameterSampler object
@@ -28,4 +28,4 @@ class WaveformGenerator(torch.nn.Module):
 
     def forward(self, N: int):
         parameters = self.parameter_sampler(N)
-        return self.waveform(**parameters)
+        return self.waveform(**parameters), parameters
