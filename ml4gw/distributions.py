@@ -84,7 +84,7 @@ class LogUniform(Uniform):
 
     def __call__(self, N: int) -> torch.Tensor:
         u = super().__call__(N)
-        return 10**u
+        return torch.exp(u)
 
 
 class PowerLaw:

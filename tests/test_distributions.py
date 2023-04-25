@@ -42,7 +42,7 @@ def test_log_uniform():
     # check that the mean is roughly correct
     # (within three standard deviations)
     samples = sampler(100000)
-    log_samples = np.log10(samples)
+    log_samples = np.log(samples)
 
     mean = log_samples.mean().item()
     variance = 4 / 12
