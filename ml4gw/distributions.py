@@ -6,7 +6,7 @@ from the corresponding distribution.
 """
 
 import math
-from typing import Callable, Optional
+from typing import Optional
 
 import torch
 
@@ -20,10 +20,8 @@ class Uniform:
         self.low = low
         self.high = high
 
-    def __call__(self, N: int, device: Optional[str] = None) -> torch.Tensor:
-        return self.low + torch.rand(size=(N,), device=device) * (
-            self.high - self.low
-        )
+    def __call__(self, N: int) -> torch.Tensor:
+        return self.low + torch.rand(size=(N,)) * (self.high - self.low)
 
 
 class Cosine:
@@ -40,12 +38,12 @@ class Cosine:
         self.low = low
         self.norm = 1 / (math.sin(high) - math.sin(low))
 
-    def __call__(self, N: int, device: Optional[str] = None) -> torch.Tensor:
+    def __call__(self, N: int) -> torch.Tensor:
         """
         Implementation lifted from
         https://lscsoft.docs.ligo.org/bilby/_modules/bilby/core/prior/analytical.html#Cosine # noqa
         """
-        u = torch.rand(size=(N,), device=device)
+        u = torch.rand(size=(N,))
         return torch.arcsin(u / self.norm + math.sin(self.low))
 
 
@@ -64,9 +62,9 @@ class LogNormal:
         self.mu = 2 * math.log(mean / (mean**2 + std**2) ** 0.25)
         self.low = low
 
-    def __call__(self, N: int, device: Optional[str] = None) -> torch.Tensor:
+    def __call__(self, N: int) -> torch.Tensor:
 
-        u = self.mu + torch.randn(N, device=device) * self.sigma
+        u = self.mu + torch.randn(N) * self.sigma
         x = torch.exp(u)
 
         if self.low is not None:
@@ -116,19 +114,9 @@ class PowerLaw:
         self.normalization = x_min ** (-self.alpha + 1)
         self.normalization -= x_max ** (-self.alpha + 1)
 
-    def __call__(self, N: int, device: Optional[str] = None) -> torch.Tensor:
-        u = torch.rand(N, device=device)
+    def __call__(self, N: int) -> torch.Tensor:
+        u = torch.rand(N)
         u *= self.normalization
         samples = self.x_min ** (-self.alpha + 1) - u
         samples = torch.pow(samples, -1.0 / (self.alpha - 1))
         return samples
-
-
-class ParameterSampler(torch.nn.Module):
-    def __init__(self, *parameters: Callable):
-        super().__init__()
-        self.parameters = parameters
-
-    def forward(self, N: int, device: Optional[str] = None):
-        # TODO: do we want to return a tensor?
-        return (p(N, device) for p in self.parameters)
