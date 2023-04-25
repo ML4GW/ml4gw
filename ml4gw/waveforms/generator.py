@@ -1,9 +1,18 @@
-from typing import TYPE_CHECKING, Callable
+from typing import Callable
 
 import torch
 
-if TYPE_CHECKING:
-    from ml4gw.distributions import ParameterSampler
+
+class ParameterSampler(torch.nn.Module):
+    def __init__(self, **parameters: Callable):
+        super().__init__()
+        self.parameters = parameters
+
+    def forward(
+        self,
+        N: int,
+    ):
+        return {k: v(N) for k, v in self.parameters.items()}
 
 
 class WaveformGenerator(torch.nn.Module):
@@ -21,7 +30,6 @@ class WaveformGenerator(torch.nn.Module):
             parameter_sampler:
                 A ParameterSampler object
         """
-
         super().__init__()
         self.waveform = waveform
         self.parameter_sampler = parameter_sampler
