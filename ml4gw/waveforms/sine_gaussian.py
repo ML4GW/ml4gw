@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 import torch
 from scipy.signal.windows import tukey
 from torch import Tensor
@@ -18,16 +16,12 @@ def tukey_window(num: int, alpha: float = 0.5):
     return torch.tensor(tukey(num, alpha=alpha))
 
 
-@dataclass
 class SineGaussian:
-    sample_rate: float
-    duration: float
-
-    def __post_init__(self):
+    def __init__(self, sample_rate: float, duration: float):
         # determine times based on requested duration and sample rate
         # and shift so that the waveform is centered at t=0
-        num = int(self.duration * self.sample_rate)
-        times = torch.arange(num, dtype=torch.float64) / self.sample_rate
+        num = int(duration * sample_rate)
+        times = torch.arange(num, dtype=torch.float64) / sample_rate
         times -= self.duration / 2.0
 
         self.times = times
