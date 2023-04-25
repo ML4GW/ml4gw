@@ -17,7 +17,7 @@ class ParameterSampler(torch.nn.Module):
 
 class WaveformGenerator(torch.nn.Module):
     def __init__(
-        self, waveform: Callable, parameter_sampler: "ParameterSampler"
+        self, waveform: Callable, parameter_sampler: ParameterSampler
     ):
         """
         A torch module that generates waveforms from a given waveform function
