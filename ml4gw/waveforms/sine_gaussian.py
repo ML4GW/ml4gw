@@ -22,7 +22,7 @@ class SineGaussian:
         # and shift so that the waveform is centered at t=0
         num = int(duration * sample_rate)
         times = torch.arange(num, dtype=torch.float64) / sample_rate
-        times -= self.duration / 2.0
+        times -= duration / 2.0
 
         self.times = times
         self.window = tukey_window(num)
