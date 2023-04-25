@@ -79,8 +79,7 @@ class LogUniform(Uniform):
     """
 
     def __init__(self, low: float, high: float) -> None:
-        self.low = math.log(low)
-        self.high = math.log(high)
+        super().__init__(math.log(low), math.log(high))
 
     def __call__(self, N: int) -> torch.Tensor:
         u = super().__call__(N)
