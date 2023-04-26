@@ -12,6 +12,7 @@ class WaveformSampler(torch.nn.Module):
         parameters: Optional[torch.Tensor] = None,
         **polarizations: torch.Tensor,
     ):
+        super().__init__()
         # make sure we have the same number of waveforms
         # for all the different polarizations
         num_waveforms = None
@@ -29,12 +30,32 @@ class WaveformSampler(torch.nn.Module):
 
             self.polarizations[polarization] = torch.Tensor(tensor)
 
+        if parameters is not None and len(parameters) != num_waveforms:
+            raise ValueError(
+                "Waveform parameters has {} waveforms "
+                "associated with it, expected {}".format(
+                    len(parameters), num_waveforms
+                )
+            )
         self.num_waveforms = num_waveforms
         self.parameters = parameters
 
-    def foward(self, N: int):
-        idx = torch.randint(self.num_waveforms, size=(N,))
-        waveforms = {k: v[idx] for k, v in self.polarizations}
+    def forward(self, N: int):
+        # TODO: should we allow sampling with replacement?
+        if N > self.num_waveforms:
+            raise ValueError(
+                "Requested {} waveforms, but only {} are available".format(
+                    N, self.num_waveforms
+                )
+            )
+        # TODO: do we still really need this behavior here?
+        elif N == -1:
+            idx = torch.arange(self.num_waveforms)
+            N = self.num_waveforms
+        else:
+            idx = torch.randint(self.num_waveforms, size=(N,))
+
+        waveforms = {k: v[idx] for k, v in self.polarizations.items()}
         if self.parameters is not None:
             return waveforms, self.parameters[idx]
         return waveforms
