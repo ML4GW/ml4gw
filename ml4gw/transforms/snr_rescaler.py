@@ -12,16 +12,19 @@ class SnrRescaler(FittableTransform):
     def __init__(
         self,
         n_ifos: int,
-        waveform_size: int,
-        highpass: float,
         sample_rate: float,
+        waveform_duration: float,
+        highpass: Optional[float] = None,
         distribution: Optional[Callable] = None,
     ):
+        super().__init__()
         self.distribution = distribution
         self.highpass = highpass
         self.sample_rate = sample_rate
+        self.df = 1 / waveform_duration
+        waveform_size = int(waveform_duration * sample_rate)
         num_freqs = int(waveform_size // 2 + 1)
-        buff = torch.zeros((len(n_ifos), num_freqs), dtype=torch.float64)
+        buff = torch.zeros((n_ifos, num_freqs), dtype=torch.float64)
         self.register_buffer("background", buff)
 
         if highpass is not None:
