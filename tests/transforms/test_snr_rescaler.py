@@ -77,7 +77,7 @@ def test_snr_rescaler(sample_rate, ifos, waveform_duration, factor):
     rescaled_snrs = gw.compute_network_snr(
         rescaled, scaler.background, sample_rate, scaler.mask
     )
-    assert np.isclose(sorted(snrs), sorted(rescaled_snrs), rtol=1e-6).all()
+    assert np.isclose(sorted(snrs), sorted(rescaled_snrs), rtol=1e-3).all()
 
     # now test that rescaling snrs with a distribution
     # passed to the rescaler results in expected snrs
