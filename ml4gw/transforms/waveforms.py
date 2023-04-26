@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import torch
 
@@ -6,6 +6,7 @@ from ml4gw import gw
 
 
 # TODO: should these live in ml4gw.waveforms submodule?
+# TODO: what in here should be stored as buffers?
 class WaveformSampler(torch.nn.Module):
     def __init__(
         self,
@@ -48,7 +49,8 @@ class WaveformSampler(torch.nn.Module):
                     N, self.num_waveforms
                 )
             )
-        # TODO: do we still really need this behavior here?
+        # TODO: do we still really want this behavior here when a
+        # user can do this without instantiating a WaveformSampler?
         elif N == -1:
             idx = torch.arange(self.num_waveforms)
             N = self.num_waveforms
@@ -62,18 +64,18 @@ class WaveformSampler(torch.nn.Module):
 
 
 class WaveformProjector(torch.nn.Module):
-    def __init__(self, *ifos: str, sample_rate: float):
+    def __init__(self, ifos: List[str], sample_rate: float):
         super().__init__()
-        self.tensors, self.vertices = gw.get_ifo_geometry(*ifos)
+        tensors, vertices = gw.get_ifo_geometry(*ifos)
         self.sample_rate = sample_rate
-        self.register_buffer("tensors", self.tensors)
-        self.register_buffer("vertices", self.vertices)
+        self.register_buffer("tensors", tensors)
+        self.register_buffer("vertices", vertices)
 
     def forward(
         self,
         dec: gw.ScalarTensor,
-        phi: gw.ScalarTensor,
         psi: gw.ScalarTensor,
+        phi: gw.ScalarTensor,
         **polarizations,
     ):
         ifo_responses = gw.compute_observed_strain(
