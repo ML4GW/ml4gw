@@ -3,6 +3,7 @@ import pytest
 import torch
 from gwpy.timeseries import TimeSeries
 
+from ml4gw import gw
 from ml4gw.transforms import SnrRescaler
 
 
@@ -32,6 +33,11 @@ def test_snr_rescaler(sample_rate, ifos, waveform_duration, factor):
     assert scaler.mask is None
     assert (scaler.background == 0).all().item()
 
+    # ensure calling forward method before fitting raises a ValueError
+    with pytest.raises(ValueError) as exc:
+        scaler(torch.zeros((n_ifos, waveform_duration * sample_rate)))
+    assert str(exc.value).startswith("Must fit")
+
     scaler.fit(*background, sample_rate=fit_sample_rate)
     assert (scaler.background != 0).all().item()
     # Question for Alec: this assertion statement used to be
@@ -60,3 +66,30 @@ def test_snr_rescaler(sample_rate, ifos, waveform_duration, factor):
     scaler = SnrRescaler(n_ifos, sample_rate, waveform_duration)
     scaler.fit(*background)
     assert np.isclose(scaler.background, target_background, rtol=1e-6).all()
+
+    # now test that rescaling snrs without a passed distribution
+    # results in a random permutation of the snrs
+    waveforms = torch.randn((100, n_ifos, waveform_duration * sample_rate))
+    snrs = gw.compute_network_snr(
+        waveforms, scaler.background, sample_rate, scaler.mask
+    )
+    rescaled, _ = scaler(waveforms)
+    rescaled_snrs = gw.compute_network_snr(
+        rescaled, scaler.background, sample_rate, scaler.mask
+    )
+    assert np.isclose(sorted(snrs), sorted(rescaled_snrs), rtol=1e-6).all()
+
+    # now test that rescaling snrs with a distribution
+    # passed to the rescaler results in expected snrs
+    def distribution(n):
+        return torch.ones(n)
+
+    scaler = SnrRescaler(
+        n_ifos, sample_rate, waveform_duration, distribution=distribution
+    )
+    scaler.fit(*background)
+    rescaled, _ = scaler(waveforms)
+    rescaled_snrs = gw.compute_network_snr(
+        rescaled, scaler.background, sample_rate, scaler.mask
+    )
+    assert np.isclose(sorted(rescaled_snrs), torch.ones(100), rtol=1e-6).all()

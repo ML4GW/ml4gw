@@ -50,14 +50,14 @@ class SnrRescaler(FittableTransform):
         super().build(background=background)
 
     def forward(self, responses: gw.WaveformTensor):
-        snrs = gw.compute_network_snrs(
+        snrs = gw.compute_network_snr(
             responses, self.background, self.sample_rate, self.mask
         )
         if self.distribution is None:
             idx = torch.randperm(len(snrs))
             target_snrs = snrs[idx]
         else:
-            target_snrs = self.distribution(len(snrs), snrs.device)
+            target_snrs = self.distribution(len(snrs))
 
         weights = target_snrs / snrs
         rescaled_responses = responses * weights.view(-1, 1, 1)
