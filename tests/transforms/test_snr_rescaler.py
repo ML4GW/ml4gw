@@ -81,15 +81,12 @@ def test_snr_rescaler(sample_rate, ifos, waveform_duration, factor):
 
     # now test that rescaling snrs with a distribution
     # passed to the rescaler results in expected snrs
-    def distribution(n):
-        return torch.ones(n)
+    target_snrs = torch.arange(len(waveforms))
 
-    scaler = SnrRescaler(
-        n_ifos, sample_rate, waveform_duration, distribution=distribution
-    )
+    scaler = SnrRescaler(n_ifos, sample_rate, waveform_duration)
     scaler.fit(*background)
-    rescaled, _ = scaler(waveforms)
+    rescaled, _ = scaler(waveforms, target_snrs)
     rescaled_snrs = gw.compute_network_snr(
         rescaled, scaler.background, sample_rate, scaler.mask
     )
-    assert np.isclose(sorted(rescaled_snrs), torch.ones(100), rtol=1e-6).all()
+    assert np.isclose(rescaled_snrs, target_snrs, rtol=1e-6).all()

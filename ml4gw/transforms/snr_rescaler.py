@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Optional
 
 import numpy as np
 import torch
@@ -15,10 +15,8 @@ class SnrRescaler(FittableTransform):
         sample_rate: float,
         waveform_duration: float,
         highpass: Optional[float] = None,
-        distribution: Optional[Callable] = None,
     ):
         super().__init__()
-        self.distribution = distribution
         self.highpass = highpass
         self.sample_rate = sample_rate
         self.df = 1 / waveform_duration
@@ -49,15 +47,17 @@ class SnrRescaler(FittableTransform):
         background = torch.tensor(np.stack(psds), dtype=torch.float64)
         super().build(background=background)
 
-    def forward(self, responses: gw.WaveformTensor):
+    def forward(
+        self,
+        responses: gw.WaveformTensor,
+        target_snrs: Optional[gw.ScalarTensor] = None,
+    ):
         snrs = gw.compute_network_snr(
             responses, self.background, self.sample_rate, self.mask
         )
-        if self.distribution is None:
+        if target_snrs is None:
             idx = torch.randperm(len(snrs))
             target_snrs = snrs[idx]
-        else:
-            target_snrs = self.distribution(len(snrs))
 
         weights = target_snrs / snrs
         rescaled_responses = responses * weights.view(-1, 1, 1)
