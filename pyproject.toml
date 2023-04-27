@@ -25,6 +25,7 @@ pytest = "^7.0"
 
 # need lalsuite to compute gmst in injection testing
 lalsuite = "^7.0"
+jupyter = "^1.0.0"
 
 
 [tool.black]

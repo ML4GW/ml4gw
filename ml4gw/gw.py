@@ -18,18 +18,20 @@ import torch
 from bilby.core.utils import speed_of_light
 from torchtyping import TensorType
 
+from ml4gw.types import (
+    NetworkDetectorTensors,
+    NetworkVertices,
+    PSDTensor,
+    ScalarTensor,
+    TensorGeometry,
+    VectorGeometry,
+    WaveformTensor,
+)
+
 # define some tensor shapes we'll reuse a bit
 # up front. Need to assign these variables so
 # that static linters don't give us name errors
 batch = num_ifos = polarizations = time = frequency = space = None  # noqa
-
-WaveformTensor = TensorType["batch", "num_ifos", "time"]
-PSDTensor = TensorType["num_ifos", "frequency"]
-ScalarTensor = TensorType["batch"]
-VectorGeometry = TensorType["batch", "space"]
-TensorGeometry = TensorType["batch", "space", "space"]
-NetworkVertices = TensorType["num_ifos", 3]
-NetworkDetectorTensors = TensorType["num_ifos", 3, 3]
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
