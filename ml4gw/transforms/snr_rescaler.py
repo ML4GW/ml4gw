@@ -11,7 +11,7 @@ from ml4gw.transforms.transform import FittableTransform
 class SnrRescaler(FittableTransform):
     def __init__(
         self,
-        n_ifos: int,
+        num_ifos: int,
         sample_rate: float,
         waveform_duration: float,
         highpass: Optional[float] = None,
@@ -22,7 +22,7 @@ class SnrRescaler(FittableTransform):
         self.df = 1 / waveform_duration
         waveform_size = int(waveform_duration * sample_rate)
         num_freqs = int(waveform_size // 2 + 1)
-        buff = torch.zeros((n_ifos, num_freqs), dtype=torch.float64)
+        buff = torch.zeros((num_ifos, num_freqs), dtype=torch.float64)
         self.register_buffer("background", buff)
 
         if highpass is not None:
