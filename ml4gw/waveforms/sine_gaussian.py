@@ -65,15 +65,13 @@ class SineGaussian(torch.nn.Module):
         hrss = hrss.view(-1, 1)
         phase = phase.view(-1, 1)
         eccentricity = eccentricity.view(-1, 1)
-        pi = torch.tensor([torch.pi], device = frequency.device)
+        pi = torch.tensor([torch.pi], device=frequency.device)
 
         # calculate relative hplus / hcross amplitudes based on eccentricity
         # as well as normalization factors
         a, b = semi_major_minor_from_e(eccentricity)
 
-        norm_prefactor = quality / (
-            4.0 * frequency * torch.sqrt(pi)
-        )
+        norm_prefactor = quality / (4.0 * frequency * torch.sqrt(pi))
         cosine_norm = norm_prefactor * (1.0 + torch.exp(-quality * quality))
         sine_norm = norm_prefactor * (1.0 - torch.exp(-quality * quality))
 
