@@ -70,7 +70,6 @@ class SineGaussian(torch.nn.Module):
         # calculate relative hplus / hcross amplitudes based on eccentricity
         # as well as normalization factors
         a, b = semi_major_minor_from_e(eccentricity)
-
         norm_prefactor = quality / (4.0 * frequency * torch.sqrt(pi))
         cosine_norm = norm_prefactor * (1.0 + torch.exp(-quality * quality))
         sine_norm = norm_prefactor * (1.0 - torch.exp(-quality * quality))
