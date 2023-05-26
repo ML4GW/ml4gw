@@ -16,16 +16,18 @@ def tukey_window(num: int, alpha: float = 0.5):
     return torch.tensor(tukey(num, alpha=alpha))
 
 
-class SineGaussian:
+class SineGaussian(torch.nn.Module):
     def __init__(self, sample_rate: float, duration: float):
+        super().__init__()
         # determine times based on requested duration and sample rate
         # and shift so that the waveform is centered at t=0
+
         num = int(duration * sample_rate)
         times = torch.arange(num, dtype=torch.float64) / sample_rate
         times -= duration / 2.0
 
-        self.times = times
-        self.window = tukey_window(num)
+        self.register_buffer("times", times)
+        self.register_buffer("window", tukey_window(num))
 
     def __call__(
         self,
@@ -63,14 +65,12 @@ class SineGaussian:
         hrss = hrss.view(-1, 1)
         phase = phase.view(-1, 1)
         eccentricity = eccentricity.view(-1, 1)
+        pi = torch.tensor([torch.pi], device=frequency.device)
 
         # calculate relative hplus / hcross amplitudes based on eccentricity
         # as well as normalization factors
         a, b = semi_major_minor_from_e(eccentricity)
-
-        norm_prefactor = quality / (
-            4.0 * frequency * torch.sqrt(torch.Tensor([torch.pi]))
-        )
+        norm_prefactor = quality / (4.0 * frequency * torch.sqrt(pi))
         cosine_norm = norm_prefactor * (1.0 + torch.exp(-quality * quality))
         sine_norm = norm_prefactor * (1.0 - torch.exp(-quality * quality))
 
@@ -92,7 +92,7 @@ class SineGaussian:
         )
 
         # cast the phase to a complex number
-        phi = 2 * torch.pi * frequency * self.times
+        phi = 2 * pi * frequency * self.times
         complex_phase = torch.complex(torch.zeros_like(phi), (phi - phase))
 
         # calculate the waveform and apply a tukey window to taper the waveform
@@ -103,6 +103,9 @@ class SineGaussian:
 
         hplus = hplus.unsqueeze(1)
         hcross = hcross.unsqueeze(1)
+
+        hplus = hplus.float()
+        hcross = hcross.float()
 
         waveforms = torch.cat([hplus, hcross], dim=1)
         return waveforms
