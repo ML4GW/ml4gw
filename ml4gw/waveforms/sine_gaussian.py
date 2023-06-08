@@ -27,7 +27,6 @@ class SineGaussian(torch.nn.Module):
         times -= duration / 2.0
 
         self.register_buffer("times", times)
-        self.register_buffer("window", tukey_window(num))
 
     def __call__(
         self,
@@ -65,6 +64,8 @@ class SineGaussian(torch.nn.Module):
         hrss = hrss.view(-1, 1)
         phase = phase.view(-1, 1)
         eccentricity = eccentricity.view(-1, 1)
+
+        # TODO: enforce all inputs are on the same device?
         pi = torch.tensor([torch.pi], device=frequency.device)
 
         # calculate relative hplus / hcross amplitudes based on eccentricity
@@ -98,15 +99,14 @@ class SineGaussian(torch.nn.Module):
 
         # calculate the waveform and apply a tukey window to taper the waveform
         fac = torch.exp(phi**2 / (-2.0 * quality**2) + complex_phase)
-        fac *= self.window
-        hplus = fac.real * h0_plus
-        hcross = fac.imag * h0_cross
 
-        hplus = hplus.unsqueeze(1)
-        hcross = hcross.unsqueeze(1)
+        cross = fac.imag * h0_cross
+        plus = fac.real * h0_plus
+        
+        # TODO dtype as argument?
+        cross = cross.double()
+        plus = plus.double()
+        
+        return cross, plus
 
-        hplus = hplus.float()
-        hcross = hcross.float()
-
-        waveforms = torch.cat([hplus, hcross], dim=1)
-        return waveforms
+        
