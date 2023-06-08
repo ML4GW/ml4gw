@@ -11,6 +11,13 @@ def semi_major_minor_from_e(e: Tensor):
     return a, b
 
 class SineGaussian(torch.nn.Module):
+    """
+    Callable class for generating sine-Gaussian waveforms.
+
+    Args:
+        sample_rate: Sample rate of waveform
+        duration: Duration of waveform
+    """
     def __init__(self, sample_rate: float, duration: float):
         super().__init__()
         # determine times based on requested duration and sample rate
@@ -31,8 +38,9 @@ class SineGaussian(torch.nn.Module):
         eccentricity: ScalarTensor,
     ):
         """
-        Generate lalsimulation implementation of a sine-Gaussian waveform.
-        https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalinference/lib/LALInferenceBurstRoutines.c#L381
+        Generate lalinference implementation of a sine-Gaussian waveform.
+        See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalinference/lib/LALInferenceBurstRoutines.c#L381
+        for details on parameter definitions.
 
         Args:
             frequency:
@@ -48,8 +56,7 @@ class SineGaussian(torch.nn.Module):
                 Controls the relative amplitudes of the
                 hplus and hcross polarizations.
         Returns:
-            A tensor of size (batch, 2, time) containing
-            the hplus and hcross polarizations
+            Tensors of cross and plus polarizations
         """
 
         # add dimension for calculating waveforms in batch
