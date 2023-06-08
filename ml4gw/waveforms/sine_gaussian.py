@@ -6,15 +6,9 @@ from ml4gw.types import ScalarTensor
 
 
 def semi_major_minor_from_e(e: Tensor):
-    a = 1.0 / torch.sqrt(2.0 - e * e)
-    b = a * torch.sqrt(1.0 - e * e)
+    a = 1.0 / torch.sqrt(2.0 - (e * e))
+    b = a * torch.sqrt(1.0 - (e * e))
     return a, b
-
-
-# TODO: replace with torch implementation
-def tukey_window(num: int, alpha: float = 0.5):
-    return torch.tensor(tukey(num, alpha=alpha))
-
 
 class SineGaussian(torch.nn.Module):
     def __init__(self, sample_rate: float, duration: float):
