@@ -32,7 +32,7 @@ class SineGaussian(torch.nn.Module):
     ):
         """
         Generate lalsimulation implementation of a sine-Gaussian waveform.
-        https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimBurst.c#L1080
+        https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalinference/lib/LALInferenceBurstRoutines.c#L381
 
         Args:
             frequency:
