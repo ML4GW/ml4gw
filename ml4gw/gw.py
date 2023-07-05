@@ -365,7 +365,7 @@ def compute_ifo_snr(
     elif highpass is not None:
         freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
         mask = freqs >= highpass
-        integrand *= mask
+        integrand *= mask.to(integrand.device)
 
     # TODO: we could in principle do this without requiring
     # that the user specify the sample rate by taking the
