@@ -1,22 +1,24 @@
 import torch
-from scipy.signal.windows import tukey
 from torch import Tensor
 
 from ml4gw.types import ScalarTensor
 
 
 def semi_major_minor_from_e(e: Tensor):
-    a = 1.0 / torch.sqrt(2.0 - e * e)
-    b = a * torch.sqrt(1.0 - e * e)
+    a = 1.0 / torch.sqrt(2.0 - (e * e))
+    b = a * torch.sqrt(1.0 - (e * e))
     return a, b
 
 
-# TODO: replace with torch implementation
-def tukey_window(num: int, alpha: float = 0.5):
-    return torch.tensor(tukey(num, alpha=alpha))
-
-
 class SineGaussian(torch.nn.Module):
+    """
+    Callable class for generating sine-Gaussian waveforms.
+
+    Args:
+        sample_rate: Sample rate of waveform
+        duration: Duration of waveform
+    """
+
     def __init__(self, sample_rate: float, duration: float):
         super().__init__()
         # determine times based on requested duration and sample rate
@@ -27,7 +29,6 @@ class SineGaussian(torch.nn.Module):
         times -= duration / 2.0
 
         self.register_buffer("times", times)
-        self.register_buffer("window", tukey_window(num))
 
     def __call__(
         self,
@@ -38,8 +39,10 @@ class SineGaussian(torch.nn.Module):
         eccentricity: ScalarTensor,
     ):
         """
-        Generate lalsimulation implementation of a sine-Gaussian waveform.
-        https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimBurst.c#L1080
+        Generate lalinference implementation of a sine-Gaussian waveform.
+        See
+        git.ligo.org/lscsoft/lalsuite/-/blob/master/lalinference/lib/LALInferenceBurstRoutines.c#L381
+        for details on parameter definitions.
 
         Args:
             frequency:
@@ -55,8 +58,7 @@ class SineGaussian(torch.nn.Module):
                 Controls the relative amplitudes of the
                 hplus and hcross polarizations.
         Returns:
-            A tensor of size (batch, 2, time) containing
-            the hplus and hcross polarizations
+            Tensors of cross and plus polarizations
         """
 
         # add dimension for calculating waveforms in batch
@@ -65,6 +67,8 @@ class SineGaussian(torch.nn.Module):
         hrss = hrss.view(-1, 1)
         phase = phase.view(-1, 1)
         eccentricity = eccentricity.view(-1, 1)
+
+        # TODO: enforce all inputs are on the same device?
         pi = torch.tensor([torch.pi], device=frequency.device)
 
         # calculate relative hplus / hcross amplitudes based on eccentricity
@@ -97,15 +101,12 @@ class SineGaussian(torch.nn.Module):
 
         # calculate the waveform and apply a tukey window to taper the waveform
         fac = torch.exp(phi**2 / (-2.0 * quality**2) + complex_phase)
-        fac *= self.window
-        hplus = fac.real * h0_plus
-        hcross = fac.imag * h0_cross
 
-        hplus = hplus.unsqueeze(1)
-        hcross = hcross.unsqueeze(1)
+        cross = fac.imag * h0_cross
+        plus = fac.real * h0_plus
 
-        hplus = hplus.float()
-        hcross = hcross.float()
+        # TODO dtype as argument?
+        cross = cross.double()
+        plus = plus.double()
 
-        waveforms = torch.cat([hplus, hcross], dim=1)
-        return waveforms
+        return cross, plus
