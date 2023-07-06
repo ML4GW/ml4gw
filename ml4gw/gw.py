@@ -352,19 +352,18 @@ def compute_ifo_snr(
 
     # mask out low frequency components if a critical
     # frequency or frequency mask was provided
-    if isinstance(highpass, torch.Tensor):
-        if len(highpass) != integrand.shape[-1]:
+    if highpass is not None:
+        if not isinstance(highpass, torch.Tensor):
+            freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
+            highpass = freqs >= highpass
+        elif len(highpass) != integrand.shape[-1]:
             raise ValueError(
                 "Can't apply highpass filter mask with {} frequecy bins"
                 "to signal fft with {} frequency bins".format(
                     len(highpass), integrand.shape[-1]
                 )
             )
-    elif highpass is not None:
-        freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
-        highpass = freqs >= highpass
-
-    integrand *= highpass.to(integrand.device)
+        integrand *= highpass.to(integrand.device)
 
     # sum over the desired frequency range and multiply
     # by df to turn it into an integration (and get
