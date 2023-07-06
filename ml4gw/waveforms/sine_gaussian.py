@@ -40,7 +40,7 @@ class SineGaussian(torch.nn.Module):
     ):
         """
         Generate lalinference implementation of a sine-Gaussian waveform.
-        See 
+        See
         git.ligo.org/lscsoft/lalsuite/-/blob/master/lalinference/lib/LALInferenceBurstRoutines.c#L381
         for details on parameter definitions.
 
