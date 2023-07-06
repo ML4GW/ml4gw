@@ -1,5 +1,4 @@
 import torch
-from scipy.signal.windows import tukey
 from torch import Tensor
 
 from ml4gw.types import ScalarTensor
@@ -10,6 +9,7 @@ def semi_major_minor_from_e(e: Tensor):
     b = a * torch.sqrt(1.0 - (e * e))
     return a, b
 
+
 class SineGaussian(torch.nn.Module):
     """
     Callable class for generating sine-Gaussian waveforms.
@@ -18,6 +18,7 @@ class SineGaussian(torch.nn.Module):
         sample_rate: Sample rate of waveform
         duration: Duration of waveform
     """
+
     def __init__(self, sample_rate: float, duration: float):
         super().__init__()
         # determine times based on requested duration and sample rate
@@ -39,7 +40,8 @@ class SineGaussian(torch.nn.Module):
     ):
         """
         Generate lalinference implementation of a sine-Gaussian waveform.
-        See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalinference/lib/LALInferenceBurstRoutines.c#L381
+        See 
+        git.ligo.org/lscsoft/lalsuite/-/blob/master/lalinference/lib/LALInferenceBurstRoutines.c#L381
         for details on parameter definitions.
 
         Args:
@@ -103,11 +105,9 @@ class SineGaussian(torch.nn.Module):
 
         cross = fac.imag * h0_cross
         plus = fac.real * h0_plus
-        
+
         # TODO dtype as argument?
         cross = cross.double()
         plus = plus.double()
-        
-        return cross, plus
 
-        
+        return cross, plus
