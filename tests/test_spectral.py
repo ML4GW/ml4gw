@@ -7,7 +7,7 @@ import torch
 from packaging import version
 from scipy import signal
 
-from ml4gw.spectral import fast_spectral_density, spectral_density
+from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
 
 TOL = 1e-7
 
@@ -332,3 +332,66 @@ def test_spectral_density(
         with pytest.raises(ValueError) as exc_info:
             sd(torch.Tensor(x[None]))
         assert str(exc_info.value).startswith("Can't compute spectral")
+
+
+@pytest.fixture(params=[16, 32])
+def background_length(request):
+    return request.param
+
+
+@pytest.fixture(params=[1, 2])
+def fduration(request):
+    return request.param
+
+
+@pytest.fixture(params=[None, 32])
+def highpass(request):
+    return request.param
+
+
+def test_whiten(
+    length,
+    background_length,
+    fftlength,
+    fduration,
+    sample_rate,
+    highpass,
+    ndim,
+):
+    batch_size = 8
+    num_channels = 5
+    background_size = int(background_length * sample_rate)
+    background_shape = (background_size,)
+    if ndim > 1:
+        background_shape = (num_channels,) + background_shape
+    if ndim > 2:
+        background_shape = (batch_size,) + background_shape
+
+    background = torch.randn(*background_shape)
+    nperseg = int(fftlength * sample_rate)
+    window = torch.hann_window(nperseg)
+    psd = spectral_density(
+        background,
+        nperseg=nperseg,
+        nstride=int(fftlength * sample_rate / 2),
+        window=window,
+        scale=1 / (sample_rate * (window**2).sum()),
+    )
+
+    size = int(length * sample_rate)
+    X = torch.randn(batch_size, num_channels, size)
+    if length <= fduration:
+        with pytest.raises(ValueError):
+            whiten(X, psd, fduration, sample_rate)
+        return
+
+    whitened = whiten(X, psd, fduration, sample_rate)
+    expected_size = int((length - fduration) * sample_rate)
+    assert whitened.shape == (batch_size, num_channels, expected_size)
+
+    fft = (
+        torch.fft.rfft(whitened, axis=-1, norm="ortho")[:, :, 2:].abs() ** 0.5
+    )
+    print(fft)
+    expected = torch.ones_like(fft)
+    torch.testing.assert_close(fft, expected, atol=0, rtol=0.1)
