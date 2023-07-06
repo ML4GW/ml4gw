@@ -350,24 +350,38 @@ def highpass(request):
 
 
 def test_whiten(
-    length,
-    background_length,
     fftlength,
     fduration,
     sample_rate,
     highpass,
     ndim,
 ):
+    background_length = 128
+    length = 64
     batch_size = 8
     num_channels = 5
     background_size = int(background_length * sample_rate)
     background_shape = (background_size,)
+
+    mean = 2
+    std = 5
     if ndim > 1:
         background_shape = (num_channels,) + background_shape
+
+        arr = torch.arange(num_channels).view(-1, 1)
+        mean = arr + mean
+        std = 0.1 * arr + std
     if ndim > 2:
+        arr = torch.arange(num_channels)
+        mean = torch.stack(
+            [i * num_channels + mean for i in range(batch_size)]
+        )
+        std = torch.stack(
+            [i * 0.1 * num_channels + std for i in range(batch_size)]
+        )
         background_shape = (batch_size,) + background_shape
 
-    background = torch.randn(*background_shape)
+    background = mean + std * torch.randn(*background_shape)
     nperseg = int(fftlength * sample_rate)
     window = torch.hann_window(nperseg)
     psd = spectral_density(
@@ -379,19 +393,38 @@ def test_whiten(
     )
 
     size = int(length * sample_rate)
-    X = torch.randn(batch_size, num_channels, size)
-    if length <= fduration:
-        with pytest.raises(ValueError):
-            whiten(X, psd, fduration, sample_rate)
-        return
-
-    whitened = whiten(X, psd, fduration, sample_rate)
+    X = mean + std * torch.randn(batch_size, num_channels, size)
+    whitened = whiten(X, psd, fduration, sample_rate, highpass)
     expected_size = int((length - fduration) * sample_rate)
     assert whitened.shape == (batch_size, num_channels, expected_size)
 
-    fft = (
-        torch.fft.rfft(whitened, axis=-1, norm="ortho")[:, :, 2:].abs() ** 0.5
-    )
-    print(fft)
-    expected = torch.ones_like(fft)
-    torch.testing.assert_close(fft, expected, atol=0, rtol=0.1)
+    # make sure we have 0 mean unit variance
+    means = whitened.mean(axis=-1)
+    target = torch.zeros_like(means)
+    torch.testing.assert_close(means, target, rtol=0, atol=0.01)
+
+    stds = whitened.std(axis=-1)
+    target = torch.ones_like(stds)
+    torch.testing.assert_close(stds, target, rtol=0, atol=0.05)
+
+    # check that frequencies up to close to the highpass
+    # frequency have near 0 power
+    if highpass is not None:
+        fft = torch.fft.rfft(whitened, norm="ortho").abs()
+        idx = int(0.8 * highpass * length)
+        passed = fft[:, :, :idx]
+        target = torch.zeros_like(passed)
+        torch.testing.assert_close(passed, target, rtol=0, atol=0.05)
+
+    # inject a gaussian pulse into the timeseries and
+    # ensure that its max value comes out to the same place
+    # adapted from gwpy's tests
+    # https://github.com/gwpy/gwpy/blob/e9f687e8d34720d9d386a6bd7f95e3b759264739/gwpy/timeseries/tests/test_timeseries.py#L1285  # noqa
+    t = np.arange(size) / sample_rate - length / 2
+    glitch = torch.Tensor(signal.gausspulse(t, bw=100))
+    glitch = 10 * std * glitch
+    inj = X + glitch
+    whitened = whiten(inj, psd, fduration, sample_rate, highpass)
+    maxs = whitened.argmax(-1) / sample_rate + fduration / 2
+    target = torch.ones_like(maxs) * length / 2
+    torch.testing.assert_close(maxs, target, rtol=0, atol=0.01)

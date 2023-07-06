@@ -555,6 +555,7 @@ def whiten(
     # and divide it by the ASD of the background section.
     # If the ASD of any background bin hit inf, set the
     # corresponding bin to 0
+    X = X - X.mean(-1, keepdims=True)
     X_tilde = torch.fft.rfft(X.double(), norm="forward", dim=-1)
     X_tilde = X_tilde / psd**0.5
     X_tilde[torch.isnan(X_tilde)] = 0
