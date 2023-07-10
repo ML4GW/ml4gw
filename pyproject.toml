@@ -70,6 +70,7 @@ commands = poetry run pytest tests
 deps = 
     pytest>=7,<8
     lalsuite>=7,<8
+    bilby>=1.1,<2
 commands = pytest tests
 """
 
