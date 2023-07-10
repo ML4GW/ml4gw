@@ -15,7 +15,6 @@ torch = "^1.10"
 torchtyping = "^0.1"
 
 # gw deps
-bilby = "^1.1"
 gwpy = "^2.1"
 # astropy = "<5.0"
 
@@ -25,6 +24,7 @@ pytest = "^7.0"
 
 # need lalsuite to compute gmst in injection testing
 lalsuite = "^7.0"
+bilby = "^1.1"
 jupyter = "^1.0.0"
 
 

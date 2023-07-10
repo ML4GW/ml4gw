@@ -12,10 +12,8 @@ https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 
 from typing import List, Tuple, Union
 
-import bilby
 import numpy as np
 import torch
-from bilby.core.utils import speed_of_light
 from torchtyping import TensorType
 
 from ml4gw.types import (
@@ -27,6 +25,10 @@ from ml4gw.types import (
     VectorGeometry,
     WaveformTensor,
 )
+from ml4gw.utils.interferometer import InterferometerGeometry
+
+SPEED_OF_LIGHT = 299792458.0  # m/s
+
 
 # define some tensor shapes we'll reuse a bit
 # up front. Need to assign these variables so
@@ -165,7 +167,7 @@ def shift_responses(
     # Divide by c in the second line so that we only
     # need to multiply the array by a single float
     dt = -(omega * vertices).sum(axis=-1)
-    dt *= sample_rate / speed_of_light
+    dt *= sample_rate / SPEED_OF_LIGHT
     dt = torch.trunc(dt).type(torch.int64)
 
     # rolling by gathering implementation based on
@@ -274,9 +276,9 @@ def get_ifo_geometry(
 
     tensors, vertices = [], []
     for ifo in ifos:
-        ifo = bilby.gw.detector.get_empty_interferometer(ifo)
-
-        tensors.append(ifo.detector_tensor)
+        ifo = InterferometerGeometry(ifo)
+        detector_tensor = plus(ifo.x_arm, ifo.y_arm) / 2
+        tensors.append(detector_tensor)
         vertices.append(ifo.vertex)
 
     tensors = np.stack(tensors)
