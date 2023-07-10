@@ -473,6 +473,31 @@ def truncate_inverse_power_spectrum(
     return psd / 2
 
 
+def normalize_by_psd(
+    X: types.WaveformTensor,
+    psd: types.PSDTensor,
+    sample_rate: float,
+    pad: int,
+):
+    # compute the FFT of the section we want to whiten
+    # and divide it by the ASD of the background section.
+    # If the ASD of any background bin hit inf, set the
+    # corresponding bin to 0
+    X = X - X.mean(-1, keepdims=True)
+    X_tilde = torch.fft.rfft(X.double(), norm="forward", dim=-1)
+    X_tilde = X_tilde / psd**0.5
+    X_tilde[torch.isnan(X_tilde)] = 0
+
+    # convert back to the time domain and normalize
+    # TODO: what's this normalization factor?
+    X = torch.fft.irfft(X_tilde, norm="forward", dim=-1)
+    X = X.float() / (sample_rate / 2) ** 0.5
+
+    # slice off corrupted data at edges of kernel
+    X = X[:, :, pad:-pad]
+    return X
+
+
 def whiten(
     X: types.WaveformTensor,
     psd: types.PSDTensor,
@@ -551,20 +576,4 @@ def whiten(
         psd, fduration, sample_rate, highpass
     )
 
-    # compute the FFT of the section we want to whiten
-    # and divide it by the ASD of the background section.
-    # If the ASD of any background bin hit inf, set the
-    # corresponding bin to 0
-    X = X - X.mean(-1, keepdims=True)
-    X_tilde = torch.fft.rfft(X.double(), norm="forward", dim=-1)
-    X_tilde = X_tilde / psd**0.5
-    X_tilde[torch.isnan(X_tilde)] = 0
-
-    # convert back to the time domain and normalize
-    # TODO: what's this normalization factor?
-    X = torch.fft.irfft(X_tilde, norm="forward", dim=-1)
-    X = X.float() / sample_rate**0.5
-
-    # slice off corrupted data at edges of kernel
-    X = X[:, :, pad:-pad]
-    return X
+    return normalize_by_psd(X, psd, sample_rate, pad)
