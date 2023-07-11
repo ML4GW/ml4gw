@@ -34,19 +34,3 @@ jobs:
       env:
         pyver: ${{ matrix.python-version }}
       run: tox -e py${pyver//./}
-
-  # if all the tests pass on a push to main,
-  # publish the new code to pypi
-  publish:
-    runs-on: ubuntu-latest
-    needs: test
-    environment: PyPI
-    if: ${{ github.event_name == 'push' }}
-    steps:
-    - uses: actions/checkout@v2
-    - 
-      name: Build and publish to pypi
-      uses: JRubics/poetry-publish@v1.16
-      with:
-        python_version: "3.10.9"
-        pypi_token: ${{ secrets.PYPI_TOKEN }}
