@@ -3,7 +3,7 @@ import pytest
 import torch
 from gwpy.timeseries import TimeSeries
 
-from ml4gw.transforms import Whitening
+from ml4gw.transforms import Whiten
 
 
 @pytest.fixture(params=[512, 1024])
@@ -39,7 +39,7 @@ def dtype(request):
 def test_whitening_transform(
     num_ifos, sample_rate, fduration, fftlength, highpass, dtype
 ):
-    tform = Whitening(num_ifos, sample_rate, fduration, dtype=dtype)
+    tform = Whiten(num_ifos, sample_rate, fduration, dtype=dtype)
 
     # make sure that trying to run the forward
     # call without fitting raises an error
@@ -112,7 +112,7 @@ def test_whitening_transform(
 
 
 def test_whitening_save_and_load(dtype, tmp_path):
-    tform = Whitening(2, 512, 1, dtype)
+    tform = Whiten(2, 512, 1, dtype)
     h1 = torch.randn(512 * 10)
     l1 = torch.randn(512 * 10)
     tform.fit(2, h1, l1, fftlength=2)
@@ -124,7 +124,7 @@ def test_whitening_save_and_load(dtype, tmp_path):
     tmp_path.mkdir(parents=True, exist_ok=True)
     torch.save(tform.state_dict(), tmp_path / "weights.pt")
 
-    tform = Whitening(2, 512, 1, dtype)
+    tform = Whiten(2, 512, 1, dtype)
     assert not tform.built
     assert (tform.kernel_length == 0).all().item()
 
@@ -135,7 +135,7 @@ def test_whitening_save_and_load(dtype, tmp_path):
 
     # ensure that loading something with the wrong shape
     # causes an error to get raised
-    tform = Whitening(2, 512, 0.5, dtype)
+    tform = Whiten(2, 512, 0.5, dtype)
     with pytest.raises(RuntimeError):
         tform.load_state_dict(torch.load(tmp_path / "weights.pt"))
 

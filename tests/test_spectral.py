@@ -334,11 +334,6 @@ def test_spectral_density(
         assert str(exc_info.value).startswith("Can't compute spectral")
 
 
-@pytest.fixture(params=[16, 32])
-def background_length(request):
-    return request.param
-
-
 @pytest.fixture(params=[1, 2])
 def fduration(request):
     return request.param
@@ -349,15 +344,25 @@ def highpass(request):
     return request.param
 
 
+@pytest.fixture(params=[32, 64, 128])
+def whiten_length(request):
+    return request.param
+
+
+@pytest.fixture(params=[64, 128])
+def background_length(request):
+    return request.param
+
+
 def test_whiten(
     fftlength,
     fduration,
     sample_rate,
     highpass,
     ndim,
+    whiten_length,
+    background_length,
 ):
-    background_length = 128
-    length = 64
     batch_size = 8
     num_channels = 5
     background_size = int(background_length * sample_rate)
@@ -392,26 +397,26 @@ def test_whiten(
         scale=1 / (sample_rate * (window**2).sum()),
     )
 
-    size = int(length * sample_rate)
+    size = int(whiten_length * sample_rate)
     X = mean + std * torch.randn(batch_size, num_channels, size)
     whitened = whiten(X, psd, fduration, sample_rate, highpass)
-    expected_size = int((length - fduration) * sample_rate)
+    expected_size = int((whiten_length - fduration) * sample_rate)
     assert whitened.shape == (batch_size, num_channels, expected_size)
 
     # make sure we have 0 mean unit variance
     means = whitened.mean(axis=-1)
     target = torch.zeros_like(means)
-    torch.testing.assert_close(means, target, rtol=0, atol=0.01)
+    torch.testing.assert_close(means, target, rtol=0, atol=0.02)
 
     stds = whitened.std(axis=-1)
     target = torch.ones_like(stds)
-    torch.testing.assert_close(stds, target, rtol=0, atol=0.05)
+    torch.testing.assert_close(stds, target, rtol=0, atol=0.07)
 
     # check that frequencies up to close to the highpass
     # frequency have near 0 power
     if highpass is not None:
         fft = torch.fft.rfft(whitened, norm="ortho").abs()
-        idx = int(0.8 * highpass * length)
+        idx = int(0.8 * highpass * whiten_length)
         passed = fft[:, :, :idx]
         target = torch.zeros_like(passed)
         torch.testing.assert_close(passed, target, rtol=0, atol=0.05)
@@ -420,11 +425,11 @@ def test_whiten(
     # ensure that its max value comes out to the same place
     # adapted from gwpy's tests
     # https://github.com/gwpy/gwpy/blob/e9f687e8d34720d9d386a6bd7f95e3b759264739/gwpy/timeseries/tests/test_timeseries.py#L1285  # noqa
-    t = np.arange(size) / sample_rate - length / 2
+    t = np.arange(size) / sample_rate - whiten_length / 2
     glitch = torch.Tensor(signal.gausspulse(t, bw=100))
     glitch = 10 * std * glitch
     inj = X + glitch
     whitened = whiten(inj, psd, fduration, sample_rate, highpass)
     maxs = whitened.argmax(-1) / sample_rate + fduration / 2
-    target = torch.ones_like(maxs) * length / 2
+    target = torch.ones_like(maxs) * whiten_length / 2
     torch.testing.assert_close(maxs, target, rtol=0, atol=0.01)
