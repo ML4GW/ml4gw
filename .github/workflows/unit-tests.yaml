@@ -12,8 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
-        poetry-version: ['', '1.2.0', '1.2.1', '1.2.2', '1.3.0', '1.3.1']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
     steps:
     - uses: actions/checkout@v2
 
@@ -23,13 +22,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - 
-      name: Install Poetry
-      uses: abatilo/actions-poetry@v2.0.0
-      if: ${{ matrix.poetry-version != '' }}
-      with:
-        poetry-version: ${{ matrix.poetry-version }}
-
     -
       name: Install tox
       run: |
@@ -41,12 +33,7 @@ jobs:
       name: run tests
       env:
         pyver: ${{ matrix.python-version }}
-      run: |
-        if [[ -z "${{ matrix.poetry-version }}" ]]; then
-            tox -e py${pyver//./}-pip
-        else
-            tox -e py${pyver//./}-poetry
-        fi
+      run: tox -e py${pyver//./}
 
   # if all the tests pass on a push to main,
   # publish the new code to pypi
