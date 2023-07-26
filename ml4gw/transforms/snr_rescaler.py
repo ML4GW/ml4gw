@@ -21,7 +21,6 @@ class SnrRescaler(FittableSpectralTransform):
         self.sample_rate = sample_rate
         self.num_channels = num_channels
 
-        self.df = 1 / waveform_duration
         waveform_size = int(waveform_duration * sample_rate)
         num_freqs = int(waveform_size // 2 + 1)
 
