@@ -55,9 +55,9 @@ class TestSnrRescaler:
 
         if highpass is not None:
             idx = int(highpass * waveform_duration)
-            assert len(list(transform._buffers())) == 2
+            assert len(transform._buffers) == 2
             assert not (transform.mask[:idx]).any().item()
             assert (transform.mask[idx:]).all().item()
         else:
-            assert len(list(transform._buffers())) == 1
+            assert len(transform._buffers) == 1
             assert transform.mask is None
