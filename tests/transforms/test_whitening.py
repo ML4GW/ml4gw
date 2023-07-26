@@ -68,6 +68,11 @@ class TestWhiten(WhitenModuleTest):
         background = self.get_psds(background, 2)
         background = torch.stack(background)
         whitened = transform(X, background)
+        assert whitened.shape == (
+            8,
+            5,
+            X.size(-1) - self.fduration * self.sample_rate,
+        )
         validate_whitened(
             whitened, highpass, self.sample_rate, 1 / self.whiten_length
         )

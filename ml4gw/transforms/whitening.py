@@ -8,6 +8,40 @@ from ml4gw.transforms.transform import FittableTransform
 
 
 class Whiten(torch.nn.Module):
+    """
+    Normalize the frequency content of timeseries
+    data by a provided power spectral density, such
+    that if the timeseries are sampled from the same
+    distribution as the PSD the normalized power will
+    be approximately unity across all frequency bins.
+    The whitened timeseries will then also have
+    0 mean and unit variance.
+
+    In order to avoid edge effects due to filter settle-in,
+    the provided PSDs will have their spectrum truncated
+    such that their impulse response time in the time
+    domain is `fduration` seconds, and `fduration / 2`
+    seconds worth of data will be removed from each
+    edge of the whitened timeseries.
+
+    For more information, see the documentation to
+    `ml4gw.spectral.whiten`.
+
+    Args:
+        fduration:
+            The length of the whitening filter's impulse
+            response, in seconds. `fduration / 2` seconds
+            worth of data will be cropped from the edges
+            of the whitened timeseries.
+        sample_rate:
+            Rate at which timeseries data passed at call
+            time is expected to be sampled
+        highpass:
+            Cutoff frequency to apply highpass filtering
+            during whitening. If left as `None`, no highpass
+            filtering will be performed.
+    """
+
     def __init__(
         self,
         fduration: float,
@@ -26,6 +60,37 @@ class Whiten(torch.nn.Module):
         self.register_buffer("window", window)
 
     def forward(self, X: torch.Tensor, psd: torch.Tensor) -> torch.Tensor:
+        """
+        Whiten a batch of multichannel timeseries by a
+        background power spectral density.
+
+        Args:
+            X:
+                Batch of multichannel timeseries to whiten.
+                Should have the shape (B, C, N), where
+                B is the batch size, C is the number of
+                channels, and N is the number of seconds
+                in the timeseries times `self.sample_rate`.
+            psd:
+                Power spectral density used to whiten the
+                provided timeseries. Can be either 1D, 2D,
+                or 3D, with the last dimension representing
+                power at each frequency value. All other
+                dimensions must match their corresponding
+                value in `X`, starting from the right.
+                (e.g. if `psd.ndim == 2`, `psd.size(1)` should
+                be equal to `X.size(1)`. If `psd.ndim == 3`,
+                `psd.size(1)` and `psd.size(0)` should be equal
+                to `X.size(1)` and `X.size(0)`, respectively.)
+                For more information about what these different
+                shapes for `psd` represent, consult the documentation
+                for `ml4gw.spectral.whiten`.
+        Returns:
+            Whitened timeseries, with `fduration * sample_rate / 2`
+                samples cropped from each edge. Output shape will then
+                be (B, C, N - `fduration * sample_rate`).
+        """
+
         return spectral.whiten(
             X,
             psd,
