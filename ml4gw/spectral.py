@@ -9,7 +9,7 @@ and
 https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 """
 
-from typing import Optional
+from typing import Optional, Union
 
 import torch
 from torchtyping import TensorType
@@ -20,6 +20,8 @@ try:
     from scipy.signal.spectral import _median_bias
 except ImportError:
     from scipy.signal._spectral_py import _median_bias
+
+time = None
 
 
 def median(x, axis):

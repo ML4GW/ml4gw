@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 from ml4gw import spectral
-from ml4gw.transforms.transform import FittableTransform
+from ml4gw.transforms.transform import FittableSpectralTransform
 
 
 class Whiten(torch.nn.Module):
@@ -100,7 +100,7 @@ class Whiten(torch.nn.Module):
         )
 
 
-class FixedWhiten(FittableTransform):
+class FixedWhiten(FittableSpectralTransform):
     """
     Transform that whitens timeseries by a fixed
     power spectral density that's determined by
@@ -211,34 +211,10 @@ class FixedWhiten(FittableTransform):
         num_freqs = self.psd.size(-1)
         psds = []
         for x in background:
-            if not isinstance(x, torch.Tensor):
-                x = torch.tensor(x)
-
-            # if we specified an FFT length, convert
-            # the (assumed) time-domain data to the
-            # frequency domain
-            if fftlength is not None:
-                nperseg = int(fftlength * self.sample_rate)
-
-                overlap = overlap or fftlength / 2
-                nstride = nperseg - int(overlap * self.sample_rate)
-
-                window = torch.hann_window(nperseg, dtype=torch.float64)
-                scale = 1.0 / (self.sample_rate * (window**2).sum())
-                x = spectral.spectral_density(
-                    x,
-                    nperseg=nperseg,
-                    nstride=nstride,
-                    window=window,
-                    scale=scale,
-                )
-
-            # add two dummy dimensions in case we need to inerpolate
-            # the frequency dimension, since `interpolate` expects
-            # a (batch, channel, spatial) formatted tensor as input
+            x = self.normalize_psd(
+                x, self.sample_rate, num_freqs, fftlength, overlap
+            )
             x = x.view(1, 1, -1)
-            if x.size(-1) != num_freqs:
-                x = torch.nn.functional.interpolate(x, size=(num_freqs,))
 
             psd = spectral.truncate_inverse_power_spectrum(
                 x, fduration, self.sample_rate, highpass
