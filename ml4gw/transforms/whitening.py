@@ -36,6 +36,24 @@ class Whiten(torch.nn.Module):
 
 
 class FixedWhiten(FittableTransform):
+    """
+    Transform that whitens timeseries by a fixed
+    power spectral density that's determined by
+    calling the `.fit` method.
+
+    Args:
+        num_channels:
+            Number of channels to whiten
+        kernel_length:
+            Expected length of tensors to whiten
+            in seconds. Determines the number of
+            frequency bins in the fit PSD.
+        sample_rate:
+            Rate at which timeseries will be sampled, in Hz
+        dtype:
+            Datatype with which background PSD will be stored
+    """
+
     def __init__(
         self,
         num_channels: float,
@@ -65,6 +83,58 @@ class FixedWhiten(FittableTransform):
         highpass: Optional[float] = None,
         overlap: Optional[float] = None
     ) -> None:
+        """
+        Compute the PSD of channel-wise background to
+        use to whiten timeseries at call time. PSDs will
+        be resampled to have
+        `self.kernel_length * self.sample_rate // 2 + 1`
+        frequency bins.
+
+        Args:
+            fduration:
+                Desired length of the impulse response
+                of the whitening filter, in seconds.
+                Fit PSDs will have their spectrum truncated
+                to approximate this response time.
+                A longer `fduration` will be able to
+                handle narrower spikes in frequency, but
+                at the expense of longer filter settle-in
+                time. As such `fduration / 2` seconds of data
+                will be removed from each edge of whitened
+                timeseries.
+            *background:
+                1D arrays capturing the signal to be used to
+                whiten each channel at call time. If `fftlength`
+                is left as `None`, it will be assumed that these
+                already represent frequency-domain data that will
+                be possibly resampled and truncated to whiten
+                timeseries at call time. Otherwise, it will be
+                assumed that these represent time-domain data that
+                will be converted to the frequency domain via
+                Welch's method using the specified `fftlength`
+                and `overlap`, with a Hann window used to window
+                the FFT frames by default. Should have the same
+                number of args as `self.num_channels`.
+            fftlength:
+                Length of frames used to convert time-domain
+                data to the frequency-domain via Welch's method.
+                If left as `None`, it will be assumed that the
+                background arrays passed already represent frequency-
+                domain data and don't require any conversion.
+            highpass:
+                Cutoff frequency, in Hz, used for highpass filtering
+                with the fit whitening filter. This is achieved by
+                setting the frequency response of the fit PSDs
+                in the frequency bins below this value to 0.
+                If left as `None`, the fit filter won't have any
+                highpass filtering properties.
+            overlap:
+                Overlap between FFT frames used to convert
+                time-domain data to the frequency domain via
+                Welch's method. If `fftlength` is `None`, this
+                is ignored. Otherwise, if left as `None`, it will
+                be set to half of `fftlength` by default.
+        """
         if len(background) != self.num_channels:
             raise ValueError(
                 "Expected to fit whitening transform on {} background "
@@ -79,6 +149,9 @@ class FixedWhiten(FittableTransform):
             if not isinstance(x, torch.Tensor):
                 x = torch.tensor(x)
 
+            # if we specified an FFT length, convert
+            # the (assumed) time-domain data to the
+            # frequency domain
             if fftlength is not None:
                 nperseg = int(fftlength * self.sample_rate)
 
@@ -95,8 +168,11 @@ class FixedWhiten(FittableTransform):
                     scale=scale,
                 )
 
+            # add two dummy dimensions in case we need to inerpolate
+            # the frequency dimension, since `interpolate` expects
+            # a (batch, channel, spatial) formatted tensor as input
             x = x.view(1, 1, -1)
-            if len(x) != num_freqs:
+            if x.size(-1) != num_freqs:
                 x = torch.nn.functional.interpolate(x, size=(num_freqs,))
 
             psd = spectral.truncate_inverse_power_spectrum(
@@ -108,7 +184,12 @@ class FixedWhiten(FittableTransform):
         fduration = torch.Tensor([fduration])
         self.build(psd=psd, fduration=fduration)
 
-    def forward(self, X):
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
+        """
+        Whiten the input timeseries tensor using the
+        PSD fit by the `.fit` method, which must be
+        called _before_ the first call to `.forward`.
+        """
         expected_dim = int(self.kernel_length * self.sample_rate)
         if X.size(-1) != expected_dim:
             raise ValueError(
