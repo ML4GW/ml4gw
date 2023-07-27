@@ -11,10 +11,7 @@ https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 
 from typing import Optional, Union
 
-import numpy as np
 import torch
-from gwpy.frequencyseries import FrequencySeries
-from gwpy.timeseries import TimeSeries
 from torchtyping import TensorType
 
 from ml4gw import types
@@ -24,54 +21,7 @@ try:
 except ImportError:
     from scipy.signal._spectral_py import _median_bias
 
-Background = Union[np.ndarray, TimeSeries, FrequencySeries]
 time = None
-
-
-def normalize_psd(
-    x: Background,
-    df: float,
-    target_sample_rate: float,
-    sample_rate: Optional[float] = None,
-    fftlength: Optional[float] = None,
-    **psd_kwargs,
-) -> np.ndarray:
-    """Utility function for mapping from generic data types to psds
-
-    Build a PSD out of background data contained in `x`. If `x`
-    is a Numpy array or a gwpy `TimeSeries`, the data will assumed
-    to exist in the time domain and will be converted to the
-    frequency domain via the gwpy `TimeSeries.psd` method. In any case,
-    the `FrequencySeries` will be resampled to the desired frequency
-    resolution `df` before being returned as a numpy array.
-    """
-    if not isinstance(x, FrequencySeries):
-        # this is not already a frequency series, so we'll
-        # assume it's a timeseries of some sort and convert
-        # it to frequency space via psd
-        if not isinstance(x, TimeSeries):
-            # if it's also not a TimeSeries object, then we'll
-            # assume that it's a numpy array which is sampled
-            # at the specified sample rate
-            x = TimeSeries(x, sample_rate=sample_rate or target_sample_rate)
-
-        if x.sample_rate.value != target_sample_rate:
-            x = x.resample(target_sample_rate)
-
-        # now convert to frequency space
-        fftlength = fftlength or 1 / df
-        default_psd_kwargs = dict(method="median", window="hann")
-        default_psd_kwargs.update(**psd_kwargs)
-        x = x.psd(fftlength, **default_psd_kwargs)
-
-    # since the FFT length used to compute this PSD
-    # won't, in general, match the length of waveforms
-    # we're sampling, we'll interpolate the frequencies
-    # to the expected frequency resolution
-    if x.df.value != df:
-        x = x.interpolate(df)
-    x = x.crop(0, target_sample_rate / 2 + df)
-    return x.value
 
 
 def median(x, axis):
