@@ -6,10 +6,22 @@ import scipy
 import torch
 from packaging import version
 from scipy import signal
+from scipy.special import erfinv
 
 from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
 
-TOL = 1e-6
+# idea here is that if relative error is
+# distributed a zero mean gaussian with
+# variance sigma, pick a tolerance such that
+# all values will fall into spec prob fraction
+# of the time
+sigma = 1e-3
+prob = 0.999
+
+
+def get_tolerance(shape):
+    N = np.product(shape)
+    return sigma * erfinv(prob ** (1 / N)) * 2**0.5
 
 
 @pytest.fixture(params=[1, 4, 8])
@@ -109,7 +121,8 @@ def test_fast_spectral_density(
     # that components higher than the first two are correct
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    assert np.testing.assert_allclose(torch_result, scipy_result, rtol=TOL)
+    tol = get_tolerance(scipy_result.shape)
+    np.testing.assert_allclose(torch_result, scipy_result, rtol=tol)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -266,7 +279,8 @@ def test_fast_spectral_density_with_y(
 
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    assert np.testing.assert_allclose(torch_result, scipy_result, rtol=TOL)
+    tol = get_tolerance(scipy_result.shape)
+    np.testing.assert_allclose(torch_result, scipy_result, rtol=tol)
 
     _shape_checks(ndim, y_ndim, x, y, fsd)
 
@@ -323,7 +337,8 @@ def test_spectral_density(
         window=signal.windows.hann(nperseg, False),
         average=average,
     )
-    assert np.testing.assert_allclose(torch_result, scipy_result, rtol=TOL)
+    tol = get_tolerance(scipy_result.shape)
+    np.testing.assert_allclose(torch_result, scipy_result, rtol=tol)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
