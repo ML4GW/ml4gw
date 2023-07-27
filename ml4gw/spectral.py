@@ -16,11 +16,6 @@ from torchtyping import TensorType
 
 from ml4gw import types
 
-try:
-    from scipy.signal.spectral import _median_bias
-except ImportError:
-    from scipy.signal._spectral_py import _median_bias
-
 time = None
 
 
@@ -29,8 +24,10 @@ def median(x, axis):
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
     the same bias correction used by scipy's implementation.
+    see https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066 # noqa
     """
-    bias = _median_bias(x.shape[axis])
+    ii_2 = 2 * np.arange(1., (n-1) // 2 + 1)
+    bias = 1 + np.sum(1. / (ii_2 + 1) - 1. / ii_2)
     return torch.quantile(x, q=0.5, axis=axis) / bias
 
 
