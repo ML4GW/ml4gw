@@ -10,18 +10,25 @@ def validate_whitened():
         target = torch.zeros_like(means)
         torch.testing.assert_close(means, target, rtol=0, atol=0.02)
 
-        stds = whitened.std(axis=-1)
+        stds = whitened.var(axis=-1)
         target = torch.ones_like(stds)
 
         # if we're highpassing, then we shouldn't expect
         # the standard deviation to be one because we're
         # subtracting some power, so remove roughly the
         # expected power contributed by the highpassed
-        # frequencies from the target
+        # frequencies from the target.
         if highpass is not None:
             nyquist = sample_rate / 2
             target *= (1 - highpass / nyquist) ** 0.5
-        torch.testing.assert_close(stds, target, rtol=0.05, atol=0.0)
+
+        # expect stds to be chi-squared distributed,
+        # so use the explict expression for the
+        # expected standard deviation and ensure all
+        # our samples are within 5-sigma
+        std = (2 / whitened.size(-1)) ** 0.5
+        tol = 5 * std
+        torch.testing.assert_close(stds, target, rtol=tol, atol=0.0)
 
         # check that frequencies up to close to the highpass
         # frequency have near 0 power.
