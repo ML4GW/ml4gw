@@ -1,6 +1,5 @@
 from typing import Optional
 
-import numpy as np
 import torch
 
 from ml4gw.transforms.transform import FittableTransform
@@ -35,7 +34,7 @@ class ChannelWiseScaler(FittableTransform):
         self.register_buffer("mean", mean)
         self.register_buffer("std", std)
 
-    def fit(self, X: np.ndarray) -> None:
+    def fit(self, X: torch.Tensor) -> None:
         """Fit the scaling parameters to a timeseries
 
         Computes the channel-wise mean and standard deviation
