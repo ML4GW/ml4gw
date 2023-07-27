@@ -141,7 +141,7 @@ lxml = ["lxml"]
 
 [[package]]
 name = "bilby"
-version = "1.4.1"
+version = "2.1.2"
 description = "A user-friendly Bayesian inference library"
 category = "dev"
 optional = false
@@ -152,7 +152,7 @@ attrs = "*"
 "bilby.cython" = ">=0.3.0"
 corner = "*"
 dill = "*"
-dynesty = ">=2"
+dynesty = ">=2.0.1"
 emcee = "*"
 h5py = "*"
 matplotlib = ">=2.1"
@@ -163,7 +163,7 @@ tqdm = "*"
 
 [package.extras]
 all = ["cpnest (>=0.9.4)", "dynesty", "emcee", "nestle", "ptmcmcsampler (!=0.0.0,!=2.1.0)", "ptemcee", "pymc (>=4.0.0)", "pymultinest", "kombine", "ultranest (>=3.0.0)", "dnest4", "nessai (>=0.7.0)", "schwimmbad", "zeus-mcmc (>=2.3.0)", "astropy (>=5)", "lalsuite", "gwpy", "tables", "pyfftw", "scikit-learn", "nflows", "celerite", "george", "plotly"]
-gw = ["astropy (>=5)", "lalsuite", "gwpy", "tables", "pyfftw"]
+gw = ["astropy (>=5)", "lalsuite", "gwpy", "tables", "pyfftw", "scikit-learn"]
 mcmc = ["scikit-learn", "nflows"]
 
 [[package]]
@@ -1952,7 +1952,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-ena
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "230896708ebe90cee0697904d96c8cbd0a5be3ec8d39cb873e407976773236fb"
+content-hash = "783d8b4dab815aafca222d3f1ce4383fa13d5860227ce66c4732dbcf3287ecf1"
 
 [metadata.files]
 anyio = [
@@ -2044,7 +2044,8 @@ beautifulsoup4 = [
     {file = "beautifulsoup4-4.12.2.tar.gz", hash = "sha256:492bbc69dca35d12daac71c4db1bfff0c876c00ef4a2ffacce226d4638eb72da"},
 ]
 bilby = [
-    {file = "bilby-1.4.1.tar.gz", hash = "sha256:aa9994cea9161c91205e5998a717c1a8bfbca6f739f26dfe2dfa124543dbdb98"},
+    {file = "bilby-2.1.2-py3-none-any.whl", hash = "sha256:0e002c618ecc5aa6ef6809c6be913f4ff3618f4390178ee8791fe6587734cbb7"},
+    {file = "bilby-2.1.2.tar.gz", hash = "sha256:b9354eb197c9232b8403793af0384993a6f1ce84b73e60b60d9c28ab92406a8d"},
 ]
 bilby-cython = [
     {file = "bilby.cython-0.4.2-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:11c5030a91c9b204920a41411ef1d3c3b6488ac8fcb2a028b328f421855a11b8"},
