@@ -11,12 +11,12 @@ from scipy.special import erfinv
 from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
 
 # idea here is that if relative error is
-# distributed a zero mean gaussian with
+# distributed as a zero mean gaussian with
 # variance sigma, pick a tolerance such that
 # all values will fall into spec prob fraction
 # of the time
-sigma = 1e-3
-prob = 0.999
+sigma = 2e-3
+prob = 0.9999
 
 
 def get_tolerance(shape):
