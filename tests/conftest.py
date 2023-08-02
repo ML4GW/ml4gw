@@ -1,5 +1,27 @@
+import numpy as np
 import pytest
 import torch
+from scipy.special import erfinv
+
+
+@pytest.fixture
+def compare_against_numpy():
+    """
+    idea here is that if relative error is
+    distributed as a zero mean gaussian with
+    variance sigma, pick a tolerance such that
+    all values will fall into spec prob fraction
+    of the time
+    """
+
+    def compare(value, expected):
+        sigma = 5e-3
+        prob = 0.9999
+        N = np.product(expected.shape)
+        tol = sigma * erfinv(prob ** (1 / N)) * 2**0.5
+        np.testing.assert_allclose(value, expected, rtol=tol)
+
+    return compare
 
 
 @pytest.fixture
