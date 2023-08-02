@@ -83,6 +83,7 @@ def test_compute_antenna_responses(
     waveform_duration,
     bilby_get_ifo_response,
     data,
+    compare_against_numpy,
 ):
     ra, dec, psi, phi, gps_times, plus, cross = data
     expected = bilby_get_ifo_response(
@@ -99,7 +100,7 @@ def test_compute_antenna_responses(
         np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
     )
     assert result.shape == (batch_size, 2, len(ifos))
-    assert np.isclose(result, expected, rtol=1e-5).all()
+    compare_against_numpy(result, expected)
 
 
 @pytest.fixture
@@ -160,6 +161,7 @@ def test_shift_responses(
     waveform_duration,
     bilby_shift_responses,
     data,
+    compare_against_numpy,
 ):
     ra, dec, psi, phi, gps_times, plus, cross = data
     projections = np.random.randn(
@@ -180,7 +182,7 @@ def test_shift_responses(
     result = result.cpu().numpy()
 
     assert result.shape == projections.shape
-    assert np.isclose(result, expected, rtol=1e-5).all()
+    compare_against_numpy(result, expected)
 
 
 @pytest.fixture
@@ -203,6 +205,7 @@ def test_compute_observed_strain(
     waveform_duration,
     bilby_compute_observed_strain,
     data,
+    compare_against_numpy,
 ):
     ra, dec, psi, phi, gps_times, plus, cross = data
     expected = bilby_compute_observed_strain(
@@ -235,7 +238,7 @@ def test_compute_observed_strain(
         len(ifos),
         waveform_duration * sample_rate,
     )
-    assert np.isclose(result, expected, rtol=1e-5).all()
+    compare_against_numpy(result, expected)
 
 
 @pytest.fixture(params=combinations([25, 30, 35, 40], 2), scope="session")

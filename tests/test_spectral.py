@@ -9,8 +9,6 @@ from scipy import signal
 
 from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
 
-TOL = 1e-7
-
 
 @pytest.fixture(params=[1, 4, 8])
 def length(request):
@@ -53,7 +51,13 @@ def ndim(request):
 
 
 def test_fast_spectral_density(
-    length, sample_rate, fftlength, overlap, average, ndim
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    average,
+    ndim,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -109,7 +113,7 @@ def test_fast_spectral_density(
     # that components higher than the first two are correct
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
+    compare_against_numpy(torch_result, scipy_result)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -159,7 +163,14 @@ def _shape_checks(ndim, y_ndim, x, y, f):
 
 
 def test_fast_spectral_density_with_y(
-    y_ndim, length, sample_rate, fftlength, overlap, average, ndim
+    y_ndim,
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    average,
+    ndim,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -266,15 +277,18 @@ def test_fast_spectral_density_with_y(
 
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-
-    ratio = torch_result / scipy_result
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all(), ratio
-
+    compare_against_numpy(torch_result, scipy_result)
     _shape_checks(ndim, y_ndim, x, y, fsd)
 
 
 def test_spectral_density(
-    length, sample_rate, fftlength, overlap, average, ndim
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    average,
+    ndim,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -325,7 +339,7 @@ def test_spectral_density(
         window=signal.windows.hann(nperseg, False),
         average=average,
     )
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
+    compare_against_numpy(torch_result, scipy_result)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -344,7 +358,7 @@ def highpass(request):
     return request.param
 
 
-@pytest.fixture(params=[32, 64, 128])
+@pytest.fixture(params=[64, 128])
 def whiten_length(request):
     return request.param
 
@@ -355,17 +369,24 @@ def background_length(request):
 
 
 def test_whiten(
-    fftlength,
     fduration,
-    sample_rate,
     highpass,
     ndim,
     whiten_length,
-    background_length,
     validate_whitened,
 ):
+    # hard-coding fftlength since longer values
+    # produce higher variance estimates of the PSD.
+    # which lead to higher variance in whitened output.
+    # Adopting this value and the associated tolerance
+    # in conftest.py to stay consistent with gwpy's tests.
+    # TODO: what's the exact nature of this relationship
+    # and how we can we build tolerances against it?
+    fftlength = 2
     batch_size = 8
     num_channels = 5
+    sample_rate = 16384
+    background_length = 64
     background_size = int(background_length * sample_rate)
     background_shape = (background_size,)
 

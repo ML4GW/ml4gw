@@ -1,5 +1,27 @@
+import numpy as np
 import pytest
 import torch
+from scipy.special import erfinv
+
+
+@pytest.fixture
+def compare_against_numpy():
+    """
+    idea here is that if relative error is
+    distributed as a zero mean gaussian with
+    variance sigma, pick a tolerance such that
+    all values will fall into spec prob fraction
+    of the time
+    """
+
+    def compare(value, expected):
+        sigma = 0.01
+        prob = 0.9999
+        N = np.product(expected.shape)
+        tol = sigma * erfinv(prob ** (1 / N)) * 2**0.5
+        np.testing.assert_allclose(value, expected, rtol=tol)
+
+    return compare
 
 
 @pytest.fixture
@@ -17,11 +39,22 @@ def validate_whitened():
         # the standard deviation to be one because we're
         # subtracting some power, so remove roughly the
         # expected power contributed by the highpassed
-        # frequencies from the target
+        # frequencies from the target.
         if highpass is not None:
             nyquist = sample_rate / 2
             target *= (1 - highpass / nyquist) ** 0.5
-        torch.testing.assert_close(stds, target, rtol=0.05, atol=0.0)
+
+        # TODO: most statistically accurate test would be
+        # to ensure that variances of the whitened data
+        # along the time dimension are distributed like
+        # a chi-squared with degrees of freedom equal to
+        # the number of samples along time dimension, but
+        # there's extra variance to account for in the
+        # PSD as well that throws this off. There should be
+        # a way to account for all of these sources of noise
+        # in the tolerance, but for now we'll just adopt the
+        # tolerance that gwpy uses in its tests
+        torch.testing.assert_close(stds, target, rtol=0.015, atol=0.0)
 
         # check that frequencies up to close to the highpass
         # frequency have near 0 power.

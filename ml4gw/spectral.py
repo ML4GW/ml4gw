@@ -518,7 +518,11 @@ def whiten(
     # of frequency bins we expect to get from X
     num_freqs = N // 2 + 1
     if psd.size(-1) != num_freqs:
-        psd = torch.nn.functional.interpolate(psd, size=(num_freqs,))
+        # TODO: does there need to be any rescaling to
+        # keep the integral of the PSD constant?
+        psd = torch.nn.functional.interpolate(
+            psd, size=(num_freqs,), mode="linear"
+        )
 
     # truncate it to have the desired
     # time domain response length
