@@ -10,7 +10,7 @@ def validate_whitened():
         target = torch.zeros_like(means)
         torch.testing.assert_close(means, target, rtol=0, atol=0.02)
 
-        stds = whitened.var(axis=-1)
+        stds = whitened.std(axis=-1)
         target = torch.ones_like(stds)
 
         # if we're highpassing, then we shouldn't expect
@@ -20,20 +20,19 @@ def validate_whitened():
         # frequencies from the target.
         if highpass is not None:
             nyquist = sample_rate / 2
-            target *= 1 - highpass / nyquist
+            target *= (1 - highpass / nyquist) ** 0.5
 
-        # TODO: there variances should be distributed
-        # something like this, but can't quite get things
-        # to pass so setting an arbitrary tolerance for now.
-        # Also note that since we're comparing against 1
-        # it doesn't matter whether we set rtol or atol
-        # expect variances to be chi-squared distributed,
-        # so use the explict expression for the
-        # expected standard deviation and ensure all
-        # our samples are within 5-sigma
-        std = (2 / whitened.size(-1)) ** 0.5
-        tol = 25 * std
-        torch.testing.assert_close(stds, target, rtol=tol, atol=0.0)
+        # TODO: most statistically accurate test would be
+        # to ensure that variances of the whitened data
+        # along the time dimension are distributed like
+        # a chi-squared with degrees of freedom equal to
+        # the number of samples along time dimension, but
+        # there's extra variance to account for in the
+        # PSD as well that throws this off. There should be
+        # a way to account for all of these sources of noise
+        # in the tolerance, but for now we'll just adopt the
+        # tolerance that gwpy uses in its tests
+        torch.testing.assert_close(stds, target, rtol=0.015, atol=0.0)
 
         # check that frequencies up to close to the highpass
         # frequency have near 0 power.

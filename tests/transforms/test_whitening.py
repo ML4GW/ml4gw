@@ -8,7 +8,7 @@ from ml4gw.transforms import FixedWhiten, Whiten
 
 
 class WhitenModuleTest:
-    sample_rate = 256
+    sample_rate = 8192
     psd_length = 128
     whiten_length = 64
     num_channels = 5
@@ -49,18 +49,14 @@ class WhitenModuleTest:
 
 
 class TestWhiten(WhitenModuleTest):
-    fduration = 2
-
-    @pytest.fixture(params=[None, 32])
-    def highpass(self, request):
-        return request.param
+    fduration = 1
 
     @pytest.fixture
     def transform(self, highpass):
         return Whiten(self.fduration, self.sample_rate, highpass)
 
     def test_init(self, transform):
-        assert transform.window.size(0) == 512
+        assert transform.window.size(0) == 8192
 
     def test_forward(
         self, transform, X, background, highpass, validate_whitened
@@ -91,7 +87,8 @@ class TestFixedWhiten(WhitenModuleTest):
     def test_init(self, transform, X):
         # ensure parameters have been initialized
         # with the right shapes and to 0 valuess
-        assert transform.psd.shape == (self.num_channels, 8193)
+        num_freqs = (8192 * 64) // 2 + 1
+        assert transform.psd.shape == (self.num_channels, num_freqs)
         assert (transform.psd == 0).all().item()
 
         assert transform.fduration.shape == (1,)
@@ -115,7 +112,7 @@ class TestFixedWhiten(WhitenModuleTest):
 
         # fit to the background and ensure that the
         # parameter values have been set to nonzero values
-        transform.fit(2, *background, fftlength=4, highpass=highpass)
+        transform.fit(2, *background, fftlength=2, highpass=highpass)
         assert (transform.psd != 0).all().item()
         assert (transform.fduration == 2).item()
 
@@ -148,7 +145,7 @@ class TestFixedWhiten(WhitenModuleTest):
 
         # now do a fit with a more realistic
         # fftlength, fduration, and highpass
-        psds = self.get_psds(background, 4)
+        psds = self.get_psds(background, 2)
         transform.fit(2, *psds, highpass=highpass)
         assert (transform.psd != 0).all().item()
         assert (transform.fduration == 2).item()

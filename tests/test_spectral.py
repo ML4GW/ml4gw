@@ -357,7 +357,7 @@ def highpass(request):
     return request.param
 
 
-@pytest.fixture(params=[32, 64, 128])
+@pytest.fixture(params=[64, 128])
 def whiten_length(request):
     return request.param
 
@@ -368,17 +368,24 @@ def background_length(request):
 
 
 def test_whiten(
-    fftlength,
     fduration,
-    sample_rate,
     highpass,
     ndim,
     whiten_length,
-    background_length,
     validate_whitened,
 ):
+    # hard-coding fftlength since longer values
+    # produce higher variance estimates of the PSD.
+    # which lead to higher variance in whitened output.
+    # Adopting this value and the associated tolerance
+    # in conftest.py to stay consistent with gwpy's tests.
+    # TODO: what's the exact nature of this relationship
+    # and how we can we build tolerances against it?
+    fftlength = 2
     batch_size = 8
     num_channels = 5
+    sample_rate = 16384
+    background_length = 64
     background_size = int(background_length * sample_rate)
     background_shape = (background_size,)
 
