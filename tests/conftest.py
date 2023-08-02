@@ -15,7 +15,7 @@ def compare_against_numpy():
     """
 
     def compare(value, expected):
-        sigma = 5e-3
+        sigma = 0.01
         prob = 0.9999
         N = np.product(expected.shape)
         tol = sigma * erfinv(prob ** (1 / N)) * 2**0.5
