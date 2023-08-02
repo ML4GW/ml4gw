@@ -49,9 +49,6 @@ class FittableSpectralTransform(FittableTransform):
         fftlength: Optional[float] = None,
         overlap: Optional[float] = None,
     ):
-        if not isinstance(x, torch.Tensor):
-            x = torch.tensor(x)
-
         # if we specified an FFT length, convert
         # the (assumed) time-domain data to the
         # frequency domain
