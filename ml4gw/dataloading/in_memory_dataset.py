@@ -3,6 +3,7 @@ from typing import Optional, Tuple, Union
 
 import torch
 
+from ml4gw import types
 from ml4gw.utils.slicing import slice_kernels
 
 
@@ -75,9 +76,9 @@ class InMemoryDataset:
 
     def __init__(
         self,
-        X: torch.Tensor,
+        X: types.TimeSeriesTensor,
         kernel_size: int,
-        y: Optional[torch.Tensor] = None,
+        y: Optional[types.ScalarTensor] = None,
         batch_size: int = 32,
         stride: int = 1,
         batches_per_epoch: Optional[int] = None,
