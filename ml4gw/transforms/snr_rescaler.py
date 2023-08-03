@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Optional
 
-import numpy as np
 import torch
 
 from ml4gw import gw
@@ -35,7 +34,7 @@ class SnrRescaler(FittableSpectralTransform):
 
     def fit(
         self,
-        *background: Union[torch.Tensor, np.ndarray],
+        *background: torch.Tensor,
         fftlength: Optional[float] = None,
         overlap: Optional[float] = None,
     ):
