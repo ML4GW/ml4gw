@@ -1,7 +1,6 @@
 import itertools
 from typing import Optional, Tuple, Union
 
-import numpy as np
 import torch
 
 from ml4gw.utils.slicing import slice_kernels
@@ -76,9 +75,9 @@ class InMemoryDataset:
 
     def __init__(
         self,
-        X: np.ndarray,
+        X: torch.Tensor,
         kernel_size: int,
-        y: Optional[np.ndarray] = None,
+        y: Optional[torch.Tensor] = None,
         batch_size: int = 32,
         stride: int = 1,
         batches_per_epoch: Optional[int] = None,
@@ -98,7 +97,7 @@ class InMemoryDataset:
         elif y is not None and not coincident:
             raise ValueError("Can't sample target array non-coincidentally")
         elif y is not None:
-            self.y = torch.Tensor(y).to(device)
+            self.y = y.to(device)
         else:
             self.y = None
 
@@ -192,8 +191,8 @@ class InMemoryDataset:
             # everything.
             idx = [range(self.num_kernels) for _ in range(len(self.X))]
             idx = zip(range(num_kernels), itertools.product(*idx))
-            idx = np.stack([i[1] for i in idx])
-            idx = torch.Tensor(idx).type(torch.int64).to(device)
+            idx = torch.stack([torch.Tensor(i[1]) for i in idx])
+            idx = idx.type(torch.int64).to(device)
         elif self.shuffle:
             # sampling randomly but coincidentally, so we
             # just need one set of indices and we can use
