@@ -45,8 +45,8 @@ def X(num_kernels, stride, kernel_size, extra):
     elif extra < stride:
         num_samples += extra
 
-    x = np.arange(num_samples)
-    return np.stack([i * num_samples + x for i in range(3)])
+    x = torch.arange(num_samples)
+    return torch.stack([i * num_samples + x for i in range(3)])
 
 
 @pytest.fixture(params=[True, False])

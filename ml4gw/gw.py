@@ -12,7 +12,6 @@ https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 
 from typing import List, Tuple, Union
 
-import numpy as np
 import torch
 from torchtyping import TensorType
 
@@ -244,7 +243,7 @@ def compute_observed_strain(
     # TODO: just use theta as the input parameter?
     # note that ** syntax is ordered, so we're safe
     # to be lazy and use `list` for the keys and values
-    theta = np.pi / 2 - dec
+    theta = torch.pi / 2 - dec
     antenna_responses = compute_antenna_responses(
         theta, psi, phi, detector_tensors, list(polarizations)
     )
@@ -281,8 +280,8 @@ def get_ifo_geometry(
         tensors.append(detector_tensor)
         vertices.append(ifo.vertex)
 
-    tensors = np.stack(tensors)
-    vertices = np.stack(vertices)
+    tensors = torch.stack(tensors)
+    vertices = torch.stack(vertices)
     return torch.Tensor(tensors), torch.Tensor(vertices)
 
 

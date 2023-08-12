@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Optional
 
-import numpy as np
 import torch
 
 from ml4gw import spectral
@@ -143,7 +142,7 @@ class FixedWhiten(FittableSpectralTransform):
     def fit(
         self,
         fduration: float,
-        *background: Union[torch.Tensor, np.ndarray],
+        *background: torch.Tensor,
         fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
         overlap: Optional[float] = None
