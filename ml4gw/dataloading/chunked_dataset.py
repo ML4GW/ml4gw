@@ -158,16 +158,31 @@ class ChunkedDataset(torch.utils.data.IterableDataset):
         coincident: bool = True,
         num_workers: int = 0,
         device: str = "cpu",
+        pin_memory: bool = False,
     ) -> None:
         if not num_workers:
             reads_per_worker = reads_per_chunk
+        elif reads_per_chunk < num_workers:
+            raise ValueError(
+                "Too many workers {} for number of reads_per_chunk {}".format(
+                    num_workers, reads_per_chunk
+                )
+            )
         else:
             reads_per_worker = int(reads_per_chunk // num_workers)
+
+        if kernel_length > chunk_length:
+            raise ValueError(
+                "Kernel length {} must be shorter than "
+                "chunk length {}".format(kernel_length, chunk_length)
+            )
+        self.kernel_size = int(kernel_length * sample_rate)
+        self.chunk_size = int(chunk_length * sample_rate)
 
         chunk_loader = ChunkLoader(
             fnames,
             channels,
-            int(chunk_length * sample_rate),
+            self.chunk_size,
             reads_per_worker,
             chunks_per_epoch,
             coincident=coincident,
@@ -180,7 +195,7 @@ class ChunkedDataset(torch.utils.data.IterableDataset):
                 chunk_loader,
                 batch_size=num_workers,
                 num_workers=num_workers,
-                pin_memory=True,
+                pin_memory=pin_memory,
                 collate_fn=chunk_loader.collate,
             )
 
@@ -188,8 +203,6 @@ class ChunkedDataset(torch.utils.data.IterableDataset):
         self.num_channels = len(channels)
         self.coincident = coincident
 
-        self.chunk_size = int(chunk_length * sample_rate)
-        self.kernel_size = int(kernel_length * sample_rate)
         self.batch_size = batch_size
         self.batches_per_chunk = batches_per_chunk
         self.chunks_per_epoch = chunks_per_epoch

@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import torch
 
-from ml4gw.dataloading.chunked_dataset import ChunkLoader
+from ml4gw.dataloading.chunked_dataset import ChunkedDataset, ChunkLoader
 
 
 @pytest.fixture
@@ -111,3 +111,87 @@ class TestChunkLoader:
                 expected = torch.ones_like(diffs)
                 torch.testing.assert_close(diffs, expected, rtol=0, atol=0)
         assert i == 5
+
+
+class TestChunkedDataset:
+    @pytest.fixture
+    def chunk_length(self):
+        return 2
+
+    @pytest.fixture
+    def reads_per_chunk(self):
+        return 4
+
+    @pytest.fixture
+    def chunks_per_epoch(self):
+        return 6
+
+    @pytest.fixture
+    def kernel_length(self):
+        return 1.5
+
+    @pytest.fixture
+    def batch_size(self):
+        return 8
+
+    @pytest.fixture
+    def batches_per_chunk(self):
+        return 7
+
+    @pytest.fixture(params=[0, 3])
+    def num_workers(self, request):
+        return request.param
+
+    @pytest.fixture(params=[True, False])
+    def coincident(self, request):
+        return request.param
+
+    @pytest.fixture
+    def dataset(
+        self,
+        fnames,
+        channels,
+        kernel_length,
+        sample_rate,
+        batch_size,
+        chunk_length,
+        reads_per_chunk,
+        batches_per_chunk,
+        chunks_per_epoch,
+        num_workers,
+        coincident,
+    ):
+        return ChunkedDataset(
+            sorted(fnames),
+            channels,
+            kernel_length=kernel_length,
+            sample_rate=sample_rate,
+            batch_size=batch_size,
+            reads_per_chunk=reads_per_chunk,
+            chunk_length=chunk_length,
+            batches_per_chunk=batches_per_chunk,
+            chunks_per_epoch=chunks_per_epoch,
+            num_workers=num_workers,
+            coincident=coincident,
+            pin_memory=False,
+        )
+
+    def test_init(self, dataset, num_workers):
+        assert dataset.chunk_size == 256
+        assert dataset.kernel_size == 192
+        if num_workers:
+            assert dataset.chunk_loader.dataset.reads_per_chunk == 1
+
+    def test_iter(self, dataset, coincident):
+        for i, x in enumerate(dataset):
+            assert x.shape == (8, 2, 192)
+            if coincident:
+                torch.testing.assert_close(x[:, 0], -x[:, 1], rtol=0, atol=0)
+            else:
+                assert (x[:, 0] != -x[:, 1]).any().item()
+
+            diffs = torch.diff(x[:, 0], axis=-1)
+            expected = torch.ones_like(diffs)
+            torch.testing.assert_close(diffs, expected, rtol=0, atol=0)
+
+        assert i == 41
