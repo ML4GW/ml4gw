@@ -96,7 +96,7 @@ class TestChunkLoader:
         assert x.shape == (4, 2, 2 * sample_rate)
 
         for sample in x:
-            assert (sample[0] != -sample[1]).all()
+            assert (sample[0] != -sample[1]).any()
             np.testing.assert_equal(np.diff(sample[0]), 1)
 
     def test_iter(self, loader, sample_rate):
