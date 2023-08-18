@@ -7,9 +7,7 @@ import torch
 from packaging import version
 from scipy import signal
 
-from ml4gw.spectral import fast_spectral_density, spectral_density
-
-TOL = 1e-7
+from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
 
 
 @pytest.fixture(params=[1, 4, 8])
@@ -53,7 +51,13 @@ def ndim(request):
 
 
 def test_fast_spectral_density(
-    length, sample_rate, fftlength, overlap, average, ndim
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    average,
+    ndim,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -109,7 +113,7 @@ def test_fast_spectral_density(
     # that components higher than the first two are correct
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
+    compare_against_numpy(torch_result, scipy_result)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -159,7 +163,14 @@ def _shape_checks(ndim, y_ndim, x, y, f):
 
 
 def test_fast_spectral_density_with_y(
-    y_ndim, length, sample_rate, fftlength, overlap, average, ndim
+    y_ndim,
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    average,
+    ndim,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -266,15 +277,18 @@ def test_fast_spectral_density_with_y(
 
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-
-    ratio = torch_result / scipy_result
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all(), ratio
-
+    compare_against_numpy(torch_result, scipy_result)
     _shape_checks(ndim, y_ndim, x, y, fsd)
 
 
 def test_spectral_density(
-    length, sample_rate, fftlength, overlap, average, ndim
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    average,
+    ndim,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -325,10 +339,103 @@ def test_spectral_density(
         window=signal.windows.hann(nperseg, False),
         average=average,
     )
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
+    compare_against_numpy(torch_result, scipy_result)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
         with pytest.raises(ValueError) as exc_info:
             sd(torch.Tensor(x[None]))
         assert str(exc_info.value).startswith("Can't compute spectral")
+
+
+@pytest.fixture(params=[1, 2])
+def fduration(request):
+    return request.param
+
+
+@pytest.fixture(params=[None, 32])
+def highpass(request):
+    return request.param
+
+
+@pytest.fixture(params=[64, 128])
+def whiten_length(request):
+    return request.param
+
+
+@pytest.fixture(params=[64, 128])
+def background_length(request):
+    return request.param
+
+
+def test_whiten(
+    fduration,
+    highpass,
+    ndim,
+    whiten_length,
+    validate_whitened,
+):
+    # hard-coding fftlength since longer values
+    # produce higher variance estimates of the PSD.
+    # which lead to higher variance in whitened output.
+    # Adopting this value and the associated tolerance
+    # in conftest.py to stay consistent with gwpy's tests.
+    # TODO: what's the exact nature of this relationship
+    # and how we can we build tolerances against it?
+    fftlength = 2
+    batch_size = 8
+    num_channels = 5
+    sample_rate = 16384
+    background_length = 64
+    background_size = int(background_length * sample_rate)
+    background_shape = (background_size,)
+
+    mean = 2
+    std = 5
+    if ndim > 1:
+        background_shape = (num_channels,) + background_shape
+
+        arr = torch.arange(num_channels).view(-1, 1)
+        mean = arr + mean
+        std = 0.1 * arr + std
+    if ndim > 2:
+        arr = torch.arange(num_channels)
+        mean = torch.stack(
+            [i * num_channels + mean for i in range(batch_size)]
+        )
+        std = torch.stack(
+            [i * 0.1 * num_channels + std for i in range(batch_size)]
+        )
+        background_shape = (batch_size,) + background_shape
+
+    background = mean + std * torch.randn(*background_shape)
+    nperseg = int(fftlength * sample_rate)
+    window = torch.hann_window(nperseg)
+    psd = spectral_density(
+        background,
+        nperseg=nperseg,
+        nstride=int(fftlength * sample_rate / 2),
+        window=window,
+        scale=1 / (sample_rate * (window**2).sum()),
+    )
+
+    size = int(whiten_length * sample_rate)
+    X = mean + std * torch.randn(batch_size, num_channels, size)
+    whitened = whiten(X, psd, fduration, sample_rate, highpass)
+    expected_size = int((whiten_length - fduration) * sample_rate)
+    assert whitened.shape == (batch_size, num_channels, expected_size)
+
+    validate_whitened(whitened, highpass, sample_rate, 1 / whiten_length)
+
+    # inject a gaussian pulse into the timeseries and
+    # ensure that its max value comes out to the same place
+    # adapted from gwpy's tests
+    # https://github.com/gwpy/gwpy/blob/e9f687e8d34720d9d386a6bd7f95e3b759264739/gwpy/timeseries/tests/test_timeseries.py#L1285  # noqa
+    t = np.arange(size) / sample_rate - whiten_length / 2
+    glitch = torch.Tensor(signal.gausspulse(t, bw=100))
+    glitch = 10 * std * glitch
+    inj = X + glitch
+    whitened = whiten(inj, psd, fduration, sample_rate, highpass)
+    maxs = whitened.argmax(-1) / sample_rate + fduration / 2
+    target = torch.ones_like(maxs) * whiten_length / 2
+    torch.testing.assert_close(maxs, target, rtol=0, atol=0.01)

@@ -58,7 +58,6 @@ class LogNormal:
     def __init__(
         self, mean: float, std: float, low: Optional[float] = None
     ) -> None:
-
         self.sigma = math.log((std / mean) ** 2 + 1) ** 0.5
         self.mu = 2 * math.log(mean / (mean**2 + std**2) ** 0.25)
         self.low = low
@@ -71,6 +70,19 @@ class LogNormal:
         if self.low is not None:
             x = torch.clip(x, self.low)
         return x
+
+
+class LogUniform(Uniform):
+    """
+    Sample from a log uniform distribution
+    """
+
+    def __init__(self, low: float, high: float) -> None:
+        super().__init__(math.log(low), math.log(high))
+
+    def __call__(self, N: int) -> torch.Tensor:
+        u = super().__call__(N)
+        return torch.exp(u)
 
 
 class PowerLaw:

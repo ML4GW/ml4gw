@@ -11,63 +11,12 @@ https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 
 from typing import Optional, Union
 
-import numpy as np
 import torch
-from gwpy.frequencyseries import FrequencySeries
-from gwpy.timeseries import TimeSeries
+from torchtyping import TensorType
 
-try:
-    from scipy.signal.spectral import _median_bias
-except ImportError:
-    from scipy.signal._spectral_py import _median_bias
+from ml4gw import types
 
-Background = Union[np.ndarray, TimeSeries, FrequencySeries]
-
-
-def normalize_psd(
-    x: Background,
-    df: float,
-    target_sample_rate: float,
-    sample_rate: Optional[float] = None,
-    fftlength: Optional[float] = None,
-    **psd_kwargs,
-) -> np.ndarray:
-    """Utility function for mapping from generic data types to psds
-
-    Build a PSD out of background data contained in `x`. If `x`
-    is a Numpy array or a gwpy `TimeSeries`, the data will assumed
-    to exist in the time domain and will be converted to the
-    frequency domain via the gwpy `TimeSeries.psd` method. In any case,
-    the `FrequencySeries` will be resampled to the desired frequency
-    resolution `df` before being returned as a numpy array.
-    """
-    if not isinstance(x, FrequencySeries):
-        # this is not already a frequency series, so we'll
-        # assume it's a timeseries of some sort and convert
-        # it to frequency space via psd
-        if not isinstance(x, TimeSeries):
-            # if it's also not a TimeSeries object, then we'll
-            # assume that it's a numpy array which is sampled
-            # at the specified sample rate
-            x = TimeSeries(x, sample_rate=sample_rate or target_sample_rate)
-
-        if x.sample_rate.value != target_sample_rate:
-            x = x.resample(target_sample_rate)
-
-        # now convert to frequency space
-        fftlength = fftlength or 1 / df
-        default_psd_kwargs = dict(method="median", window="hann")
-        default_psd_kwargs.update(**psd_kwargs)
-        x = x.psd(fftlength, **default_psd_kwargs)
-
-    # since the FFT length used to compute this PSD
-    # won't, in general, match the length of waveforms
-    # we're sampling, we'll interpolate the frequencies
-    # to the expected frequency resolution
-    if x.df.value != df:
-        x = x.interpolate(df)
-    x = x.crop(0, target_sample_rate / 2 + df)
-    return x.value
+time = None
 
 
 def median(x, axis):
@@ -75,8 +24,11 @@ def median(x, axis):
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
     the same bias correction used by scipy's implementation.
+    see https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066 # noqa
     """
-    bias = _median_bias(x.shape[axis])
+    n = x.shape[axis]
+    ii_2 = 2 * torch.arange(1.0, (n - 1) // 2 + 1)
+    bias = 1 + torch.sum(1.0 / (ii_2 + 1) - 1.0 / ii_2)
     return torch.quantile(x, q=0.5, axis=axis) / bias
 
 
@@ -381,3 +333,199 @@ def spectral_density(
         return fft.mean(axis=-2)
     else:
         return median(fft, -2)
+
+
+def truncate_inverse_power_spectrum(
+    psd: types.PSDTensor,
+    fduration: Union[TensorType["time"], float],
+    sample_rate: float,
+    highpass: Optional[float] = None,
+) -> types.PSDTensor:
+    """
+    Truncate the length of the time domain response
+    of a whitening filter built using the specified
+    `psd` so that it has maximum length `fduration`
+    seconds. This is meant to mitigate the impact
+    of sharp features in the background PSD causing
+    time domain responses longer than the segments
+    to which the whitening filter will be applied.
+
+    Implementation details adapted from
+    https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8  # noqa
+
+    Args:
+        psd:
+            The one-sided power spectraul density used
+            to construct a whitening filter.
+        fduration:
+            Desired length in seconds of the time domain
+            response of a whitening filter built using
+            this PSD, or a window of this length to taper
+            the edges of the time domain response of the
+            filter. If passed as a float, a Hann window
+            of this length will be used.
+        sample_rate:
+            Rate at which the time domain data to which
+            the whitening filter will be applied has been
+            sampled.
+        highpass:
+            If specified, will zero out the frequency response
+            of all frequencies below this value in Hz. If left
+            as `None`, no highpass filtering will be applied.
+    Returns:
+        The PSD with its time domain response truncated
+            to `fduration` and any highpassed frequencies
+            tapered.
+    """
+
+    num_freqs = psd.size(-1)
+    N = (num_freqs - 1) * 2
+
+    # use the inverse of the ASD as the
+    # impulse response function
+    inv_asd = 1 / psd**0.5
+
+    # zero our leading frequencies if we want the
+    # filter to perform highpass filtering
+    if highpass is not None:
+        df = sample_rate / N
+        idx = int(highpass / df)
+        inv_asd[:, :, :idx] = 0
+
+    if inv_asd.size(-1) % 2:
+        inv_asd[:, :, -1] = 0
+
+    # now convert to time domain representation
+    q = torch.fft.irfft(inv_asd, n=N, norm="forward", dim=-1)
+
+    # taper the edges of the TD filter
+    if isinstance(fduration, torch.Tensor):
+        pad = fduration.size(-1) // 2
+        window = fduration
+    else:
+        pad = int(fduration * sample_rate / 2)
+        window = torch.hann_window(2 * pad, dtype=torch.float64)
+        window = window.to(q.device)
+
+    # 0 out anything else between the tapering regions
+    q[:, :, :pad] *= window[-pad:]
+    q[:, :, -pad:] *= window[:pad]
+    if 2 * pad < q.size(-1):
+        q[:, :, pad : q.size(-1) - pad] = 0
+
+    # convert back to the frequency domain
+    # to build the desired PSD
+    inv_asd = torch.fft.rfft(q, n=N, norm="forward", dim=-1)
+    inv_psd = inv_asd * inv_asd.conj()
+    psd = 1 / inv_psd.abs()
+    return psd / 2
+
+
+def normalize_by_psd(
+    X: types.WaveformTensor,
+    psd: types.PSDTensor,
+    sample_rate: float,
+    pad: int,
+):
+    # compute the FFT of the section we want to whiten
+    # and divide it by the ASD of the background section.
+    # If the ASD of any background bin hit inf, set the
+    # corresponding bin to 0
+    X = X - X.mean(-1, keepdims=True)
+    X_tilde = torch.fft.rfft(X.double(), norm="forward", dim=-1)
+    X_tilde = X_tilde / psd**0.5
+    X_tilde[torch.isnan(X_tilde)] = 0
+
+    # convert back to the time domain and normalize
+    # TODO: what's this normalization factor?
+    X = torch.fft.irfft(X_tilde, norm="forward", dim=-1)
+    X = X.float() / sample_rate**0.5
+
+    # slice off corrupted data at edges of kernel
+    X = X[:, :, pad:-pad]
+    return X
+
+
+def whiten(
+    X: types.WaveformTensor,
+    psd: types.PSDTensor,
+    fduration: Union[TensorType["time"], float],
+    sample_rate: float,
+    highpass: Optional[float] = None,
+) -> types.WaveformTensor:
+    """
+    Whiten a batch of timeseries using the specified
+    background one-sided power spectral densities (PSDs),
+    modified to have the desired time domain response length
+    `fduration` and possibly to highpass filter.
+
+    Args:
+        X: batch of multichannel timeseries to whiten
+        psd:
+            PSDs use to whiten the data. The frequency
+            response of the whitening filter will be roughly
+            the inverse of the square root of this PSD, ensuring
+            that data from the same distribution will have
+            approximately uniform power after whitening.
+            If 2D, each batch element in `X` will be whitened
+            using the same PSDs. If 3D, each batch element will
+            be whitened by the PSDs contained along the 0th
+            dimenion of `psd`, and so the first two dimensions
+            of `X` and `psd` should match.
+        fduration:
+            Desired length in seconds of the time domain
+            response of a whitening filter built using
+            this PSD, or a window of this length to taper
+            the edges of the time domain response of the
+            filter. If passed as a float, a Hann window
+            of this length will be used. Moreover, half of
+            this length will be removed from each edge of
+            the whitened timeseries to account for filter
+            settle-in time.
+        sample_rate:
+            Rate at which the data in `X` has been sampled
+        highpass:
+            The frequency in Hz at which to highpass filter
+            the data, setting the frequency response in the
+            whitening filter to 0. If left as `None`, no
+            highpass filtering will be applied.
+    Returns:
+        Batch of whitened multichannel timeseries with
+            `fduration / 2` seconds trimmed from each side.
+    """
+
+    # figure out how much data we'll need to slice
+    # off after whitening
+    if isinstance(fduration, torch.Tensor):
+        pad = fduration.size(-1) // 2
+    else:
+        pad = int(fduration * sample_rate / 2)
+
+    N = X.size(-1)
+    if N <= (2 * pad):
+        raise ValueError(
+            "Not enough timeseries samples {} for "
+            "number of padded samples {}".format(N, 2 * pad)
+        )
+
+    # normalize the number of expected dimensions in the PSD
+    while psd.ndim < 3:
+        psd = psd[None]
+
+    # possibly interpolate our PSD to match the number
+    # of frequency bins we expect to get from X
+    num_freqs = N // 2 + 1
+    if psd.size(-1) != num_freqs:
+        # TODO: does there need to be any rescaling to
+        # keep the integral of the PSD constant?
+        psd = torch.nn.functional.interpolate(
+            psd, size=(num_freqs,), mode="linear"
+        )
+
+    # truncate it to have the desired
+    # time domain response length
+    psd = truncate_inverse_power_spectrum(
+        psd, fduration, sample_rate, highpass
+    )
+
+    return normalize_by_psd(X, psd, sample_rate, pad)

@@ -12,24 +12,27 @@ https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 
 from typing import List, Tuple, Union
 
-import bilby
-import numpy as np
 import torch
-from bilby.core.utils import speed_of_light
 from torchtyping import TensorType
+
+from ml4gw.types import (
+    NetworkDetectorTensors,
+    NetworkVertices,
+    PSDTensor,
+    ScalarTensor,
+    TensorGeometry,
+    VectorGeometry,
+    WaveformTensor,
+)
+from ml4gw.utils.interferometer import InterferometerGeometry
+
+SPEED_OF_LIGHT = 299792458.0  # m/s
+
 
 # define some tensor shapes we'll reuse a bit
 # up front. Need to assign these variables so
 # that static linters don't give us name errors
 batch = num_ifos = polarizations = time = frequency = space = None  # noqa
-
-WaveformTensor = TensorType["batch", "num_ifos", "time"]
-PSDTensor = TensorType["num_ifos", "frequency"]
-ScalarTensor = TensorType["batch"]
-VectorGeometry = TensorType["batch", "space"]
-TensorGeometry = TensorType["batch", "space", "space"]
-NetworkVertices = TensorType["num_ifos", 3]
-NetworkDetectorTensors = TensorType["num_ifos", 3, 3]
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
@@ -163,7 +166,7 @@ def shift_responses(
     # Divide by c in the second line so that we only
     # need to multiply the array by a single float
     dt = -(omega * vertices).sum(axis=-1)
-    dt *= sample_rate / speed_of_light
+    dt *= sample_rate / SPEED_OF_LIGHT
     dt = torch.trunc(dt).type(torch.int64)
 
     # rolling by gathering implementation based on
@@ -240,7 +243,7 @@ def compute_observed_strain(
     # TODO: just use theta as the input parameter?
     # note that ** syntax is ordered, so we're safe
     # to be lazy and use `list` for the keys and values
-    theta = np.pi / 2 - dec
+    theta = torch.pi / 2 - dec
     antenna_responses = compute_antenna_responses(
         theta, psi, phi, detector_tensors, list(polarizations)
     )
@@ -272,19 +275,19 @@ def get_ifo_geometry(
 
     tensors, vertices = [], []
     for ifo in ifos:
-        ifo = bilby.gw.detector.get_empty_interferometer(ifo)
-
-        tensors.append(ifo.detector_tensor)
+        ifo = InterferometerGeometry(ifo)
+        detector_tensor = plus(ifo.x_arm, ifo.y_arm) / 2
+        tensors.append(detector_tensor)
         vertices.append(ifo.vertex)
 
-    tensors = np.stack(tensors)
-    vertices = np.stack(vertices)
+    tensors = torch.stack(tensors)
+    vertices = torch.stack(vertices)
     return torch.Tensor(tensors), torch.Tensor(vertices)
 
 
 def compute_ifo_snr(
     responses: WaveformTensor,
-    backgrounds: PSDTensor,
+    psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, TensorType["frequency"], None] = None,
 ) -> TensorType["batch", "num_ifos"]:
@@ -312,10 +315,15 @@ def compute_ifo_snr(
         responses:
             A batch of interferometer responses to a batch of
             raw gravitational waveforms
-        backgrounds:
+        psd:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated.
+            in `responses` has been calculated. If 2D, each row of
+            `psd` will be assumed to be the background PSD for each
+            channel of _every_ batch element in `responses`. If 3D,
+            this should contain a background PSD for each channel
+            of each element in `responses`, and therefore the first
+            two dimensions of `psd` and `responses` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -332,7 +340,7 @@ def compute_ifo_snr(
     """
 
     # TODO: should we do windowing here?
-    # compute frequency power, upsample precision so that
+    # compute frequency power, upsampling precision so that
     # computing absolute value doesn't accidentally zero some
     # values out.
     fft = torch.fft.rfft(responses, axis=-1).type(torch.complex128)
@@ -340,31 +348,27 @@ def compute_ifo_snr(
 
     # divide by background asd, then go back to FP32 precision
     # and square now that values are back in a reasonable range
-    integrand = fft / (backgrounds**0.5)
+    integrand = fft / (psd**0.5)
     integrand = integrand.type(torch.float32) ** 2
-
-    # sum over the desired frequency range and multiply
-    # by df to turn it into an integration (and get
-    # our units to drop out)
-    df = sample_rate / responses.shape[-1]
 
     # mask out low frequency components if a critical
     # frequency or frequency mask was provided
-    if isinstance(highpass, torch.Tensor):
-        if len(highpass) != integrand.shape[-1]:
+    if highpass is not None:
+        if not isinstance(highpass, torch.Tensor):
+            freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
+            highpass = freqs >= highpass
+        elif len(highpass) != integrand.shape[-1]:
             raise ValueError(
                 "Can't apply highpass filter mask with {} frequecy bins"
                 "to signal fft with {} frequency bins".format(
                     len(highpass), integrand.shape[-1]
                 )
             )
+        integrand *= highpass.to(integrand.device)
 
-        integrand *= highpass
-    elif highpass is not None:
-        freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
-        mask = freqs >= highpass
-        integrand *= mask
-
+    # sum over the desired frequency range and multiply
+    # by df to turn it into an integration (and get
+    # our units to drop out)
     # TODO: we could in principle do this without requiring
     # that the user specify the sample rate by taking the
     # fft as-is (without dividing by sample rate) and then
@@ -374,6 +378,7 @@ def compute_ifo_snr(
     # need the sample rate to compute the mask, but if we
     # replace this with a `mask` argument instead we're in
     # the clear
+    df = sample_rate / responses.shape[-1]
     integrated = integrand.sum(axis=-1) * df
 
     # multiply by 4 for mystical reasons
@@ -383,7 +388,7 @@ def compute_ifo_snr(
 
 def compute_network_snr(
     responses: WaveformTensor,
-    backgrounds: PSDTensor,
+    psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, TensorType["frequency"], None] = None,
 ) -> ScalarTensor:
@@ -405,7 +410,12 @@ def compute_network_snr(
         backgrounds:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated.
+            in `responses` has been calculated. If 2D, each row of
+            `psd` will be assumed to be the background PSD for each
+            channel of _every_ batch element in `responses`. If 3D,
+            this should contain a background PSD for each channel
+            of each element in `responses`, and therefore the first
+            two dimensions of `psd` and `responses` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -420,7 +430,7 @@ def compute_network_snr(
     Returns:
         Batch of SNRs for each waveform across the interferometer network
     """
-    snrs = compute_ifo_snr(responses, backgrounds, sample_rate, highpass)
+    snrs = compute_ifo_snr(responses, psd, sample_rate, highpass)
     snrs = snrs**2
     return snrs.sum(axis=-1) ** 0.5
 
@@ -428,7 +438,7 @@ def compute_network_snr(
 def reweight_snrs(
     responses: WaveformTensor,
     target_snrs: Union[float, ScalarTensor],
-    backgrounds: PSDTensor,
+    psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, TensorType["frequency"], None] = None,
 ) -> WaveformTensor:
@@ -441,10 +451,15 @@ def reweight_snrs(
         target_snrs:
             Either a tensor of desired SNRs for each waveform,
             or a single SNR to which all waveforms should be scaled.
-        backgrounds:
+        psd:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated.
+            in `responses` has been calculated. If 2D, each row of
+            `psd` will be assumed to be the background PSD for each
+            channel of _every_ batch element in `responses`. If 3D,
+            this should contain a background PSD for each channel
+            of each element in `responses`, and therefore the first
+            two dimensions of `psd` and `responses` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -460,6 +475,6 @@ def reweight_snrs(
         Rescaled interferometer responses
     """
 
-    snrs = compute_network_snr(responses, backgrounds, sample_rate, highpass)
+    snrs = compute_network_snr(responses, psd, sample_rate, highpass)
     weights = target_snrs / snrs
     return responses * weights[:, None, None]

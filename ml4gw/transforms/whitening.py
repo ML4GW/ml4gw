@@ -1,252 +1,243 @@
-"""
-Whitening logic largely lifted from gwpy's whitening functionality:
+from typing import Optional
 
-https://github.com/gwpy/gwpy/blob/main/gwpy/timeseries/timeseries.py
-"""
-
-from typing import Any, Mapping, Optional
-
-import numpy as np
 import torch
-from gwpy.signal.filter_design import fir_from_transfer
 
-from ml4gw.spectral import Background, normalize_psd
-from ml4gw.transforms.transform import FittableTransform
+from ml4gw import spectral
+from ml4gw.transforms.transform import FittableSpectralTransform
 
 
-class _Conv1d(torch.nn.Module):
-    def __init__(self, num_channels: int) -> None:
+class Whiten(torch.nn.Module):
+    """
+    Normalize the frequency content of timeseries
+    data by a provided power spectral density, such
+    that if the timeseries are sampled from the same
+    distribution as the PSD the normalized power will
+    be approximately unity across all frequency bins.
+    The whitened timeseries will then also have
+    0 mean and unit variance.
+
+    In order to avoid edge effects due to filter settle-in,
+    the provided PSDs will have their spectrum truncated
+    such that their impulse response time in the time
+    domain is `fduration` seconds, and `fduration / 2`
+    seconds worth of data will be removed from each
+    edge of the whitened timeseries.
+
+    For more information, see the documentation to
+    `ml4gw.spectral.whiten`.
+
+    Args:
+        fduration:
+            The length of the whitening filter's impulse
+            response, in seconds. `fduration / 2` seconds
+            worth of data will be cropped from the edges
+            of the whitened timeseries.
+        sample_rate:
+            Rate at which timeseries data passed at call
+            time is expected to be sampled
+        highpass:
+            Cutoff frequency to apply highpass filtering
+            during whitening. If left as `None`, no highpass
+            filtering will be performed.
+    """
+
+    def __init__(
+        self,
+        fduration: float,
+        sample_rate: float,
+        highpass: Optional[float] = None,
+    ) -> None:
         super().__init__()
-        self.num_channels = num_channels
+        self.fduration = fduration
+        self.sample_rate = sample_rate
+        self.highpass = highpass
 
-    def forward(self, X: torch.Tensor, tdf: torch.Tensor):
-        return torch.nn.functional.conv1d(
-            X, tdf, groups=self.num_channels, padding="same"
+        # register a window up front to signify our
+        # fduration at inference time
+        size = int(fduration * sample_rate)
+        window = torch.hann_window(size, dtype=torch.float64)
+        self.register_buffer("window", window)
+
+    def forward(self, X: torch.Tensor, psd: torch.Tensor) -> torch.Tensor:
+        """
+        Whiten a batch of multichannel timeseries by a
+        background power spectral density.
+
+        Args:
+            X:
+                Batch of multichannel timeseries to whiten.
+                Should have the shape (B, C, N), where
+                B is the batch size, C is the number of
+                channels, and N is the number of seconds
+                in the timeseries times `self.sample_rate`.
+            psd:
+                Power spectral density used to whiten the
+                provided timeseries. Can be either 1D, 2D,
+                or 3D, with the last dimension representing
+                power at each frequency value. All other
+                dimensions must match their corresponding
+                value in `X`, starting from the right.
+                (e.g. if `psd.ndim == 2`, `psd.size(1)` should
+                be equal to `X.size(1)`. If `psd.ndim == 3`,
+                `psd.size(1)` and `psd.size(0)` should be equal
+                to `X.size(1)` and `X.size(0)`, respectively.)
+                For more information about what these different
+                shapes for `psd` represent, consult the documentation
+                for `ml4gw.spectral.whiten`.
+        Returns:
+            Whitened timeseries, with `fduration * sample_rate / 2`
+                samples cropped from each edge. Output shape will then
+                be (B, C, N - `fduration * sample_rate`).
+        """
+
+        return spectral.whiten(
+            X,
+            psd,
+            fduration=self.window,
+            sample_rate=self.sample_rate,
+            highpass=self.highpass,
         )
 
 
-def _overlap_add_conv(
-    X: torch.Tensor, tdf: torch.Tensor, conv_op: torch.nn.Module, nfft: int
-) -> torch.Tensor:
+class FixedWhiten(FittableSpectralTransform):
     """
-    TODO: Stand-in implementation until we
-    implement efficiently using windowing
-    rather than looping
+    Transform that whitens timeseries by a fixed
+    power spectral density that's determined by
+    calling the `.fit` method.
+
+    Args:
+        num_channels:
+            Number of channels to whiten
+        kernel_length:
+            Expected length of tensors to whiten
+            in seconds. Determines the number of
+            frequency bins in the fit PSD.
+        sample_rate:
+            Rate at which timeseries will be sampled, in Hz
+        dtype:
+            Datatype with which background PSD will be stored
     """
-    conv = torch.zeros_like(X)
-    pad = conv_op.pad
-    kernel_size = X.shape[-1]
 
-    # handle first chunk separately
-    y0 = conv_op(X[:, :, :nfft], tdf)
-    conv[:, :, : nfft - pad] = y0[:, :, : nfft - pad]
-
-    # process chunks of length nstep
-    k = nfft - pad
-    nstep = nfft - 2 * pad
-    while k < kernel_size - nfft + pad:
-        xk = X[:, :, k - pad : k + nstep + pad]
-        yk = conv_op(xk, tdf)[:, :, pad:-pad]
-        conv[:, :, k : k + yk.size(-1) - 2 * pad] = yk
-        k += nstep
-
-    # handle last chunk separately
-    yf = conv_op(X[:, :, -nfft:], tdf)
-    conv[:, :, -nfft + pad :] = yf[:, :, -nfft + pad :]
-    return conv
-
-
-class Whitening(FittableTransform):
     def __init__(
         self,
-        num_channels: int,
+        num_channels: float,
+        kernel_length: float,
         sample_rate: float,
-        fduration: float,
         dtype: torch.dtype = torch.float32,
     ) -> None:
-        """Whiten time domain data to background
-
-        Whitens time domain data by some background to
-        set the power across all frequency bins roughly
-        to 0. Background data is passed to its `fit` method
-        to create a time domain filter which is convolved with
-        input data at call time.
-
-        Args:
-            num_channels: The number of timeseries channels to whiten
-            sample_rate:
-                The rate at which data on which this transform
-                will be called will be sampled
-            fduration:
-                The length of the time domain filter in seconds.
-                `fduration / 2` seconds will be cropped from either
-                side of data passed to this transform, so that the
-                output length, in seconds, of input timeseries of
-                length `kernel_length` seconds will be
-                `kernel_length - fduration`
-            dtype:
-                The datatype desired for the time domain filter
-        """
-
         super().__init__()
         self.num_channels = num_channels
         self.sample_rate = sample_rate
+        self.kernel_length = kernel_length
 
-        # shape properties of transfrom are only
-        # functions of the fduration
-        self.crop_samples = int((fduration / 2) * self.sample_rate)
-        self.ntaps = int(fduration * self.sample_rate)
-        self.pad = int((self.ntaps - 1) / 2)
-
-        # the op that will actually convolve incoming
-        # kernels with the time domain filter
-        self.conv_op = _Conv1d(num_channels)
-
-        # initialize the time domain filter with 0s,
-        # then fill it out later
-        tdf = torch.zeros((num_channels, 1, self.ntaps - 1), dtype=dtype)
-        self.register_buffer("time_domain_filter", tdf)
+        N = int(kernel_length * sample_rate)
+        num_freqs = N // 2 + 1
+        psd = torch.zeros((num_channels, num_freqs), dtype=dtype)
+        self.register_buffer("psd", psd)
 
         # save this as a parameter since it's decided at fit time
-        kernel_length = torch.zeros((1,))
-        self.register_buffer("kernel_length", kernel_length)
-
-        # set up a window that we won't save with state
-        # since it doesn't depend on the data at all
-        window = torch.zeros((self.ntaps,), dtype=dtype)
-        window[:-1] = torch.hann_window(self.ntaps - 1)
-        self.register_buffer("window", window, persistent=False)
-
-        # this will be set at fit time and will help us
-        # decide which convolution implementation to use
-        self.nfft = None
-
-    def _check_kernel_length(self, kernel_length: float):
-        kernel_size = int(kernel_length * self.sample_rate)
-        if kernel_size <= (2 * self.crop_samples):
-            raise ValueError(
-                "Whitening pad size {} is too long for "
-                "input kernel of size {}".format(
-                    2 * self.crop_samples, kernel_size
-                )
-            )
-        elif (8 * (self.ntaps - 1)) < (kernel_size / 2):
-            self.nfft = min(8 * (self.ntaps - 1), kernel_size)
-            # TODO: remove this error once the above
-            # implementation is optimized
-            raise NotImplementedError(
-                "An optimal torch implementation of whitening for short "
-                "filter padding is not complete. Use a larger value of pad."
-            )
+        fduration = torch.zeros((1,))
+        self.register_buffer("fduration", fduration)
 
     def fit(
         self,
-        kernel_length: float,
-        *backgrounds: Background,
+        fduration: float,
+        *background: torch.Tensor,
         fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
-        sample_rate: Optional[float] = None,
+        overlap: Optional[float] = None
     ) -> None:
-        """Compute a time domain filter from background
+        """
+        Compute the PSD of channel-wise background to
+        use to whiten timeseries at call time. PSDs will
+        be resampled to have
+        `self.kernel_length * self.sample_rate // 2 + 1`
+        frequency bins.
 
         Args:
-            kernel_length:
-                The length in seconds of the timeseries data
-                on which this transform will be applied after
-                fitting.
+            fduration:
+                Desired length of the impulse response
+                of the whitening filter, in seconds.
+                Fit PSDs will have their spectrum truncated
+                to approximate this response time.
+                A longer `fduration` will be able to
+                handle narrower spikes in frequency, but
+                at the expense of longer filter settle-in
+                time. As such `fduration / 2` seconds of data
+                will be removed from each edge of whitened
+                timeseries.
+            *background:
+                1D arrays capturing the signal to be used to
+                whiten each channel at call time. If `fftlength`
+                is left as `None`, it will be assumed that these
+                already represent frequency-domain data that will
+                be possibly resampled and truncated to whiten
+                timeseries at call time. Otherwise, it will be
+                assumed that these represent time-domain data that
+                will be converted to the frequency domain via
+                Welch's method using the specified `fftlength`
+                and `overlap`, with a Hann window used to window
+                the FFT frames by default. Should have the same
+                number of args as `self.num_channels`.
             fftlength:
-                If background data is passed as timeseries data,
-                the length of the FFT to use to compute the PSD
-                of the background data, in seconds. If left as `None`,
-                will default to `1 / kernel_length`.
+                Length of frames used to convert time-domain
+                data to the frequency-domain via Welch's method.
+                If left as `None`, it will be assumed that the
+                background arrays passed already represent frequency-
+                domain data and don't require any conversion.
             highpass:
-                Cutoff high-pass frequency for the frequency response
-                of the fit time domain filter, in Hz. If left as `None`,
-                frequency response will be the inverse of the background
-                PSD across all bins.
-            sample_rate:
-                If background ata is passed as timeseries data,
-                the rate at which it is sampled. If left as `None`,
-                will default to the sample rate of the data on which
-                this transform is meant to be applied.
-            *backgrounds:
-                Background data to use to fit the whitening time
-                domain filter, whose frequency response in each
-                channel will be the inverse of the corresponding
-                background data's PSD. Should be passed in the
-                same order these channels are expected to fall
-                along the channel dimension of the data this
-                transform is called on. Can be passed either as
-                time domain or frequency domain data.
+                Cutoff frequency, in Hz, used for highpass filtering
+                with the fit whitening filter. This is achieved by
+                setting the frequency response of the fit PSDs
+                in the frequency bins below this value to 0.
+                If left as `None`, the fit filter won't have any
+                highpass filtering properties.
+            overlap:
+                Overlap between FFT frames used to convert
+                time-domain data to the frequency domain via
+                Welch's method. If `fftlength` is `None`, this
+                is ignored. Otherwise, if left as `None`, it will
+                be set to half of `fftlength` by default.
         """
-
-        if len(backgrounds) != self.num_channels:
+        if len(background) != self.num_channels:
             raise ValueError(
                 "Expected to fit whitening transform on {} background "
                 "timeseries, but was passed {}".format(
-                    self.num_channels, len(backgrounds)
+                    self.num_channels, len(background)
                 )
             )
 
-        self._check_kernel_length(kernel_length)
-        df = 1 / kernel_length
-        ncorner = int(highpass / df) if highpass else 0
-
-        tdfs = []
-        for x in backgrounds:
-            psd = normalize_psd(
-                x, df, self.sample_rate, sample_rate, fftlength
+        num_freqs = self.psd.size(-1)
+        psds = []
+        for x in background:
+            x = self.normalize_psd(
+                x, self.sample_rate, num_freqs, fftlength, overlap
             )
+            x = x.view(1, 1, -1)
 
-            tdf = fir_from_transfer(
-                1 / psd**0.5,
-                ntaps=self.ntaps,
-                window="hann",
-                ncorner=ncorner,
+            psd = spectral.truncate_inverse_power_spectrum(
+                x, fduration, self.sample_rate, highpass
             )
-            tdfs.append(tdf[:-1])
+            psds.append(psd[0, 0])
+        psd = torch.stack(psds)
 
-        tdfs = np.stack(tdfs)[:, None]
-        tdf = torch.tensor(tdfs, dtype=self.time_domain_filter.dtype)
-        kernel_length = torch.tensor((kernel_length,))
-        super().build(time_domain_filter=tdf, kernel_length=kernel_length)
+        fduration = torch.Tensor([fduration])
+        self.build(psd=psd, fduration=fduration)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
-        expected_dim = int(self.kernel_length.item() * self.sample_rate)
+        """
+        Whiten the input timeseries tensor using the
+        PSD fit by the `.fit` method, which must be
+        called _before_ the first call to `.forward`.
+        """
+        expected_dim = int(self.kernel_length * self.sample_rate)
         if X.size(-1) != expected_dim:
             raise ValueError(
-                "Whitening transform was fit using a kernel length "
+                "Whitening transform expected a kernel length "
                 "of {}s, but was passed data of length {}s".format(
-                    self.kernel_length.item(), X.size(-1) / self.sample_rate
+                    self.kernel_length, X.size(-1) / self.sample_rate
                 )
             )
 
-        # do a constant detrend along the time axis,
-        X = X - X.mean(axis=-1, keepdims=True)
-
-        # apply our window
-        X[:, :, : self.pad] *= self.window[: self.pad]
-        X[:, :, -self.pad :] *= self.window[-self.pad :]
-
-        # apply different convolution depending on
-        # length of time domain filter
-        if self.nfft is None:
-            X = self.conv_op(X, self.time_domain_filter)
-        else:
-            X = _overlap_add_conv(
-                X, self.time_domain_filter, self.conv_op, self.nfft
-            )
-
-        # crop the beginning and ending fduration / 2
-        X = X[:, :, self.crop_samples : -self.crop_samples]
-
-        # scale by sqrt(2 / sample_rate) for some inscrutable
-        # signal processing reason beyond my understanding
-        return X * (2 / self.sample_rate) ** 0.5
-
-    def load_state_dict(
-        self, state_dict: Mapping[str, Any], strict: bool = True
-    ):
-        keys = super().load_state_dict(state_dict, strict)
-        self._check_kernel_length(self.kernel_length.item())
-        return keys
+        pad = int(self.fduration.item() * self.sample_rate / 2)
+        return spectral.normalize_by_psd(X, self.psd, self.sample_rate, pad)

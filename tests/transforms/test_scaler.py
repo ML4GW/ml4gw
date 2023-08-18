@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 import torch
 
@@ -12,7 +11,7 @@ def test_scaler_1d():
     assert scaler.std.shape == (1,)
 
     # test fitting
-    background = np.arange(1, 11)
+    background = torch.arange(1, 11).type(torch.float32)
     scaler.fit(background)
 
     mean, std = 5.5, (99 / 12) ** 0.5
@@ -46,7 +45,12 @@ def test_scaler_2d():
     assert scaler.std.shape == (num_channels, 1)
 
     # test fitting
-    background = np.arange(num_channels * 10).reshape(num_channels, 10) + 1
+    background = (
+        torch.arange(num_channels * 10)
+        .reshape(num_channels, 10)
+        .type(torch.float32)
+        + 1
+    )
     scaler.fit(background)
 
     std = (99 / 12) ** 0.5
@@ -62,7 +66,7 @@ def test_scaler_2d():
         scaler.fit(background[None, None])
 
     # test forward with 2D
-    x = torch.arange(num_channels * 10)
+    x = torch.arange(num_channels * 10).type(torch.float32)
     x = x.reshape(num_channels, 10).type(torch.float32) + 1
     y = scaler(x)
     expected = (torch.arange(1, 11) - 5.5) / std
@@ -85,7 +89,7 @@ def test_scaler_2d():
 
 def test_scaler_save_and_load(tmp_path):
     scaler = ChannelWiseScaler()
-    background = np.arange(1, 11)
+    background = torch.arange(1, 11).type(torch.float32)
 
     scaler.fit(background)
     assert scaler.built
