@@ -61,7 +61,7 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
     def iter_epoch(self):
         it = iter(self.chunk_it)
         chunk = next(it)
-        num_channels = chunk.size(1)
+        num_chunks, num_channels, chunk_size = chunk.shape
 
         # if we're sampling coincidentally, we only need
         # to sample indices on a per-batch-element basis.
@@ -85,13 +85,17 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
         channel_idx = torch.arange(num_channels, device=self.device)
         channel_idx = channel_idx.view(1, -1, 1)
         channel_idx = channel_idx.repeat(self.batch_size, 1, self.kernel_size)
-        idx += channel_idx * self.chunk_size
+        idx += channel_idx * chunk_size
 
         while True:
             # record the number of rows in the chunk, then
             # flatten it to make it easier to slice
-            num_chunks, _, chunk_size = chunk.shape
-            chunk = chunk.to(self.device).reshape(-1)
+            if chunk_size < self.kernel_size:
+                raise ValueError(
+                    "Can't sample kernels of size {} from chunk "
+                    "with size {}".format(self.kernel_size, chunk_size)
+                )
+            chunk = chunk.reshape(-1)
 
             # generate batches from the current chunk
             for _ in range(self.batches_per_chunk):
@@ -103,7 +107,7 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
 
                 # account for the offset this batch element
                 # introduces in the flattened array
-                chunk_idx *= num_channels * self.chunk_size
+                chunk_idx *= num_channels * chunk_size
                 chunk_idx = chunk_idx.view(self.batch_size, -1, 1)
                 chunk_idx = chunk_idx + idx
 
@@ -123,10 +127,11 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
                 # now slice this 3D tensor from our flattened chunk
                 yield chunk[chunk_idx]
 
-                try:
-                    chunk = next(it)
-                except StopIteration:
-                    break
+            try:
+                chunk = next(it)
+            except StopIteration:
+                break
+            num_chunks, num_channels, chunk_size = chunk.shape
 
     def __iter__(self):
         return self.iter_epoch()
