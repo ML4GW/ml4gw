@@ -1,6 +1,5 @@
 import warnings
-from collections.abc import Sequence
-from typing import Union
+from typing import Sequence, Union
 
 import h5py
 import numpy as np
