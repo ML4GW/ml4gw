@@ -58,7 +58,7 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
     def __len__(self):
         return len(self.chunk_it) * self.batches_per_chunk
 
-    def iter_epoch(self):
+    def __iter__(self):
         it = iter(self.chunk_it)
         chunk = next(it)
         num_chunks, num_channels, chunk_size = chunk.shape
@@ -132,6 +132,3 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
             except StopIteration:
                 break
             num_chunks, num_channels, chunk_size = chunk.shape
-
-    def __iter__(self):
-        return self.iter_epoch()
