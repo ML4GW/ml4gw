@@ -137,10 +137,8 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             # or at the file level, all channels will
             # correspond to the same file
             if self.coincident is not False:
-                batch_indices = indices[0]
+                batch_indices = np.repeat(indices, self.num_channels)
                 channel_indices = np.arange(self.num_channels)
-
-                batch_indices = np.repeat(batch_indices, self.num_channels)
                 channel_indices = np.concatenate([channel_indices] * count)
             else:
                 batch_indices = indices // self.num_channels
@@ -158,6 +156,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
 
             # open the file and sample a different set of
             # kernels for each batch element it occupies
+            print(fname, batch_indices, channel_indices, idx)
             with h5py.File(fname, "r") as f:
                 for b, c, i in zip(batch_indices, channel_indices, idx):
                     x[b, c] = f[self.channels[c]][i : i + self.kernel_size]
