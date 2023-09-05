@@ -156,7 +156,6 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
 
             # open the file and sample a different set of
             # kernels for each batch element it occupies
-            print(fname, batch_indices, channel_indices, idx)
             with h5py.File(fname, "r") as f:
                 for b, c, i in zip(batch_indices, channel_indices, idx):
                     x[b, c] = f[self.channels[c]][i : i + self.kernel_size]
