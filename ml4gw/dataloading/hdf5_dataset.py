@@ -63,7 +63,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
     ) -> None:
         if not isinstance(coincident, bool) and coincident != "files":
             raise ValueError(
-                "coincident must be either a boolean or 'file', "
+                "coincident must be either a boolean or 'files', "
                 "got unrecognized value {}".format(coincident)
             )
 
@@ -87,7 +87,8 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                         "If you need faster loading, try re-generating "
                         "your datset with chunked storage turned on.".format(
                             fname
-                        )
+                        ),
+                        category=ContiguousHdf5Warning,
                     )
 
                 self.sizes[fname] = len(dset)
