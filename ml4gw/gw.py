@@ -60,6 +60,43 @@ polarization_funcs = {
     "breathing": breathing,
 }
 
+def pol_from_quad(
+    quads,
+    theta,
+    phi
+):
+    
+    "Reference paper"
+    "https://academic.oup.com/ptps/article/doi/10.1143/PTPS.128.183/1930275"
+    "Returns h_cross, h_plus according to asigned orentation"
+    
+    ori_matrix_c = torch.zeros([len(theta), 3, 3])
+    ori_matrix_p = torch.zeros([len(theta), 3, 3])
+    
+    # ori_matrix_c
+    ori_matrix_c[:, 0, 0] = -(torch.cos(theta)*torch.sin(phi)*torch.cos(phi))
+    ori_matrix_c[:, 0, 1] = torch.cos(theta)*torch.cos(2*phi)
+    # ori_matrix_c[:, 0, 2]
+    # ori_matrix_c[:, 1, 0]
+    ori_matrix_c[:, 1, 1] = torch.cos(theta)*torch.sin(phi)*torch.cos(phi)
+    ori_matrix_c[:, 1, 2]= -(torch.sin(theta)*torch.cos(phi))
+    ori_matrix_c[:, 2, 0] = torch.sin(theta)*torch.sin(phi)
+    # ori_matrix_c[:, 2, 1]
+    # ori_matrix_c[:, 2, 2]
+    
+    # ori_matrix_p
+    ori_matrix_p[:, 0, 0] = 2*torch.cos(theta)**2*torch.cos(phi)**2 - torch.sin(phi)**2
+    ori_matrix_p[:, 0, 1] = 2*torch.cos(theta)**2*torch.sin(2*phi) - torch.sin(2*phi)
+    # ori_matrix_p[:, 0, 0]
+    # ori_matrix_p[:, 1, 0]
+    ori_matrix_p[:, 1, 1] = 2*torch.cos(theta)**2*torch.sin(phi)**2 - torch.cos(phi)**2
+    ori_matrix_p[:, 1, 2] = -2*(torch.sin(2*theta)*torch.sin(phi))
+    ori_matrix_p[:, 2, 0] = -2*(torch.sin(2*theta)*torch.cos(phi))
+    # ori_matrix_p[:, 2, 1]
+    ori_matrix_p[:, 2, 2] = 2*torch.sin(theta)**2
+    
+    
+    return torch.einsum('nijk,nij->nk', quads, ori_matrix_c), torch.einsum('nijk,nij->nk', quads, ori_matrix_p)
 
 def compute_antenna_responses(
     theta: ScalarTensor,
