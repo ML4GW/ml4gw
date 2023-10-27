@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import torch
 
@@ -75,7 +75,7 @@ class OnlineAverager(torch.nn.Module):
 
     def forward(
         self, update: torch.Tensor, state: Optional[torch.Tensor] = None
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         if state is None:
             state = self.get_initial_state()
 

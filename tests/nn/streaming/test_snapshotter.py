@@ -20,7 +20,7 @@ def stride_size(request):
     return request.param
 
 
-@pytest.fixture(params=[[1], [4], [1, 4], [1, 2, 4]])
+@pytest.fixture(params=[[1], 1, [4], 4, [1, 4], [1, 2, 4]])
 def channels(request):
     return request.param
 
@@ -31,15 +31,48 @@ def snapshotter(snapshot_size, stride_size, batch_size, channels):
 
 
 def test_snapshotter(snapshot_size, stride_size, batch_size, channels):
+    if isinstance(channels, int):
+        num_channels = channels
+        channels = [num_channels]
+        channels_per_snapshot = None
+    else:
+        num_channels = sum(channels)
+        channels_per_snapshot = channels
+
+    # test that we don't allow for snapshotting
+    # when the stride is longer than the kernel,
+    # since there's no real stateful behavior
+    # in this case
     if stride_size >= snapshot_size:
         with pytest.raises(ValueError):
             snapshotter = Snapshotter(
-                snapshot_size, stride_size, batch_size, channels
+                num_channels,
+                snapshot_size,
+                stride_size,
+                batch_size,
+                channels_per_snapshot,
             )
         return
 
-    snapshotter = Snapshotter(snapshot_size, stride_size, batch_size, channels)
-    num_channels = sum(channels)
+    # now make sure we test for agreement between
+    # num_channels and any way of breaking up the channels
+    if channels_per_snapshot is not None:
+        with pytest.raises(ValueError):
+            snapshotter = Snapshotter(
+                num_channels + 1,
+                snapshot_size,
+                stride_size,
+                batch_size,
+                channels_per_snapshot,
+            )
+
+    snapshotter = Snapshotter(
+        num_channels,
+        snapshot_size,
+        stride_size,
+        batch_size,
+        channels_per_snapshot,
+    )
 
     # now run an input through as a new sequence and
     # make sure we get the appropriate number of outputs
