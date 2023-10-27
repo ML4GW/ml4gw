@@ -38,7 +38,7 @@ class OnlineAverager(torch.nn.Module):
         batch_size: int,
         num_updates: int,
         num_channels: int,
-        offset: Optional[int] = None
+        offset: Optional[int] = None,
     ) -> None:
         super().__init__()
         self.update_size = update_size
@@ -74,9 +74,7 @@ class OnlineAverager(torch.nn.Module):
         return torch.zeros((self.num_channels, self.state_size))
 
     def forward(
-        self,
-        update: torch.Tensor,
-        state: Optional[torch.Tensor] = None
+        self, update: torch.Tensor, state: Optional[torch.Tensor] = None
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if state is None:
             state = self.get_initial_state()
@@ -91,7 +89,7 @@ class OnlineAverager(torch.nn.Module):
             start += end
         else:
             end = None
-        x = update[:, :, start: end] / self.num_updates
+        x = update[:, :, start:end] / self.num_updates
 
         # append zeros to the state into which we
         # can insert our updates

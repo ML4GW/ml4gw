@@ -37,6 +37,7 @@ def validate_output(num_updates, update_size, num_channels):
                 step = (offset * update_size + n) // update_size
                 factor = min((step + 1) / num_updates, 1)
                 assert isclose(i * factor, j, rel_tol=1e-6)
+
     return f
 
 

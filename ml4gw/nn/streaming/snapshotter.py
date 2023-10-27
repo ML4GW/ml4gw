@@ -36,9 +36,7 @@ class Snapshotter(torch.nn.Module):
     # TODO: use torchtyping annotations to make
     # clear what the expected shapes are
     def forward(
-        self,
-        update: torch.Tensor,
-        snapshot: Optional[torch.Tensor] = None
+        self, update: torch.Tensor, snapshot: Optional[torch.Tensor] = None
     ) -> tuple[torch.Tensor, ...]:
         if snapshot is None:
             snapshot = self.get_initial_state()
@@ -57,8 +55,7 @@ class Snapshotter(torch.nn.Module):
             if snapshots.size(1) != self.num_channels:
                 raise ValueError(
                     "Expected {} channels, found {}".format(
-                        self.num_channels,
-                        snapshots.size(1)
+                        self.num_channels, snapshots.size(1)
                     )
                 )
             snapshots = torch.split(
@@ -68,5 +65,5 @@ class Snapshotter(torch.nn.Module):
             snapshots = (snapshots,)
 
         # keep only the latest snapshot as our state
-        snapshot = snapshot[:, -self.state_size:]
+        snapshot = snapshot[:, -self.state_size :]
         return tuple(snapshots) + (snapshot,)
