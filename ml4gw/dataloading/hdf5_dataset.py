@@ -1,6 +1,6 @@
 import warnings
 from contextlib import contextmanager
-from typing import Sequence, Optional, Union
+from typing import Optional, Sequence, Union
 
 import h5py
 import numpy as np
@@ -22,9 +22,7 @@ class _Reader:
         return super().__new__(cls)
 
     def __init__(
-        self,
-        fnames: Union[str, Sequence[str]],
-        path: Optional[str] = None
+        self, fnames: Union[str, Sequence[str]], path: Optional[str] = None
     ):
         self.fnames = fnames
         if path is not None:
@@ -58,7 +56,7 @@ class _Reader:
     def initialize_probs(self, channel):
         self.get_sizes(channel)
         total = sum(self.sizes.values())
-        self.probs = np.array([self.sizes[k]/ total for k in self.fnames])
+        self.probs = np.array([self.sizes[k] / total for k in self.fnames])
 
     def sample_fnames(self, size):
         return np.random.choice(
@@ -171,7 +169,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         batch_size: int,
         batches_per_epoch: int,
         coincident: Union[bool, str],
-        path: Optional[str] = None
+        path: Optional[str] = None,
     ) -> None:
         if not isinstance(coincident, bool) and coincident != "files":
             raise ValueError(
