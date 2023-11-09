@@ -13,7 +13,7 @@ class ChiSq(torch.nn.Module):
         sample_rate: float,
         highpass: Optional[float] = None,
         return_snr: bool = False,
-        input_domain: Literal["time", "frequncy"] = "time"
+        input_domain: Literal["time", "frequncy"] = "time",
     ) -> None:
         super().__init__()
         self.sample_rate = sample_rate
@@ -108,7 +108,7 @@ class ChiSq(torch.nn.Module):
     def interpolate_psd(self, psd):
         # have to scale the interpolated psd to ensure
         # that the integral of the power remains constant
-        factor = (psd.size(-1) / self.num_freqs)**2
+        factor = (psd.size(-1) / self.num_freqs) ** 2
         psd = torch.nn.functional.interpolate(
             psd, size=self.num_freqs, mode="linear"
         )
@@ -135,10 +135,10 @@ class ChiSq(torch.nn.Module):
             )
 
     def forward(
-        self, 
+        self,
         template: torch.Tensor,
         strain: torch.Tensor,
-        psd: Optional[torch.Tensor] = None
+        psd: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """
         Make PSD optional in case strain has already been whitened
@@ -160,12 +160,14 @@ class ChiSq(torch.nn.Module):
             stilde = stilde[:, :, self.mask]
 
         qtilde, edges = self.partition_frequencies(htilde, psd)
-        snr_per_bin, total_snr = self.get_snr_per_bin(qtilde, stilde, edges, psd)
+        snr_per_bin, total_snr = self.get_snr_per_bin(
+            qtilde, stilde, edges, psd
+        )
 
         # for each frequency bin, compute the square of the
         # deviation from the expected amount of SNR in the bin
         # and then sum it over all the bins
-        chisq_summand = (snr_per_bin - total_snr / self.num_bins)**2
+        chisq_summand = (snr_per_bin - total_snr / self.num_bins) ** 2
         chisq = chisq_summand.sum(dim=-1)
 
         # normalize by number of degrees of freedom
@@ -173,4 +175,3 @@ class ChiSq(torch.nn.Module):
         if self.return_snr:
             return chisq, total_snr
         return chisq
-        

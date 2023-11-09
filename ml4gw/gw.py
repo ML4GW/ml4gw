@@ -291,7 +291,7 @@ def snr_from_freqs(
     psd: Optional[PSDTensor] = None,
     strain: Optional[PSDTensor] = None,
     highpass: Union[float, TensorType["frequency"], None] = None,
-    scale: float = 1e20
+    scale: float = 1e20,
 ) -> PSDTensor:
     """
     Returns SNR as a function of frequency
@@ -406,7 +406,7 @@ def compute_ifo_snr(
     """
 
     integrand = snr_integral(responses, sample_rate, psd, highpass=highpass)
-    return integrand.sum(-1)**0.5
+    return integrand.sum(-1) ** 0.5
 
 
 def compute_network_snr(
