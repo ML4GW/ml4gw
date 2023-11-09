@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 import torch
 
-from ml4gw.gw import snr_from_freqs
+from ml4gw.gw import snr_frequency_series
 
 
 class ChiSq(torch.nn.Module):
@@ -37,7 +37,12 @@ class ChiSq(torch.nn.Module):
         self.input_domain = input_domain
 
     def get_cumulative_snr(self, htilde, psd=None, stilde=None):
-        snr = snr_from_freqs(htilde, self.sample_rate, psd, stilde)
+        """
+        Compute the cumulative integral of the SNR frequency
+        series along the frequency dimension.
+        """
+
+        snr = snr_frequency_series(htilde, self.sample_rate, psd, stilde)
         return snr.cumsum(dim=-1)
 
     def make_indices(self, batch_size, num_channels):
