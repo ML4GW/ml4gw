@@ -10,7 +10,7 @@ Specifically the code here:
 https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 """
 
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import torch
 from torchtyping import TensorType
@@ -285,6 +285,72 @@ def get_ifo_geometry(
     return torch.Tensor(tensors), torch.Tensor(vertices)
 
 
+def snr_from_freqs(
+    template: PSDTensor,
+    df: float,
+    psd: Optional[PSDTensor] = None,
+    strain: Optional[PSDTensor] = None,
+    highpass: Union[float, TensorType["frequency"], None] = None,
+    scale: float = 1e20
+) -> PSDTensor:
+    """
+    Returns SNR as a function of frequency
+    """
+
+    if strain is None:
+        other = template
+    else:
+        other = strain
+    asd = psd**0.5
+    template = template * scale**0.5 / asd
+    other = other.conj() * scale**0.5 / asd
+    integrand = template * other
+    integrand = integrand.real / scale
+    integrand = integrand.type(torch.float32)
+
+    # mask out low frequency components if a critical
+    # frequency or frequency mask was provided
+    if highpass is not None:
+        if not isinstance(highpass, torch.Tensor):
+            freqs = torch.arange(template.size(-1)) * df
+            highpass = freqs >= highpass
+        elif len(highpass) != integrand.shape[-1]:
+            raise ValueError(
+                "Can't apply highpass filter mask with {} frequecy bins"
+                "to signal fft with {} frequency bins".format(
+                    len(highpass), integrand.shape[-1]
+                )
+            )
+        integrand *= highpass.to(integrand)
+    return integrand * 4 * df
+
+
+def snr_integral(
+    template: WaveformTensor,
+    sample_rate: float,
+    psd: Optional[PSDTensor] = None,
+    strain: Optional[WaveformTensor] = None,
+    highpass: Union[float, TensorType["frequency"], None] = None,
+) -> PSDTensor:
+    df = sample_rate / template.size(-1)
+
+    # TODO: should we do windowing here?
+    # compute frequency power, upsampling precision so that
+    # computing absolute value doesn't accidentally zero some
+    # values out.
+    htilde = torch.fft.rfft(template, axis=-1).type(torch.complex128)
+    if strain is not None:
+        stilde = torch.fft.rfft(strain, axis=-1).type(torch.complex128)
+    else:
+        stilde = None
+    integrand = snr_from_freqs(htilde, df, psd, stilde, highpass)
+
+    # factor of sample_rate**2 that should have been applied
+    # to each FFT separately, but doing it after the fact
+    # where the orders of magnitude are more manageable
+    return integrand / sample_rate**2
+
+
 def compute_ifo_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
@@ -339,51 +405,8 @@ def compute_ifo_snr(
         Batch of SNRs computed for each interferometer
     """
 
-    # TODO: should we do windowing here?
-    # compute frequency power, upsampling precision so that
-    # computing absolute value doesn't accidentally zero some
-    # values out.
-    fft = torch.fft.rfft(responses, axis=-1).type(torch.complex128)
-    fft = fft.abs() / sample_rate
-
-    # divide by background asd, then go back to FP32 precision
-    # and square now that values are back in a reasonable range
-    integrand = fft / (psd**0.5)
-    integrand = integrand.type(torch.float32) ** 2
-
-    # mask out low frequency components if a critical
-    # frequency or frequency mask was provided
-    if highpass is not None:
-        if not isinstance(highpass, torch.Tensor):
-            freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
-            highpass = freqs >= highpass
-        elif len(highpass) != integrand.shape[-1]:
-            raise ValueError(
-                "Can't apply highpass filter mask with {} frequecy bins"
-                "to signal fft with {} frequency bins".format(
-                    len(highpass), integrand.shape[-1]
-                )
-            )
-        integrand *= highpass.to(integrand.device)
-
-    # sum over the desired frequency range and multiply
-    # by df to turn it into an integration (and get
-    # our units to drop out)
-    # TODO: we could in principle do this without requiring
-    # that the user specify the sample rate by taking the
-    # fft as-is (without dividing by sample rate) and then
-    # taking the mean here (or taking the sum and dividing
-    # by the sum of `highpass` if it's a mask). If we want
-    # to allow the user to pass a float for highpass, we'll
-    # need the sample rate to compute the mask, but if we
-    # replace this with a `mask` argument instead we're in
-    # the clear
-    df = sample_rate / responses.shape[-1]
-    integrated = integrand.sum(axis=-1) * df
-
-    # multiply by 4 for mystical reasons
-    integrated = 4 * integrated  # rho-squared
-    return torch.sqrt(integrated)
+    integrand = snr_integral(responses, sample_rate, psd, highpass=highpass)
+    return integrand.sum(-1)**0.5
 
 
 def compute_network_snr(

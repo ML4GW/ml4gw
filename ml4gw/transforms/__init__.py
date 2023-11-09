@@ -1,3 +1,4 @@
+from .chisq import ChiSq
 from .scaler import ChannelWiseScaler
 from .snr_rescaler import SnrRescaler
 from .spectral import SpectralDensity
