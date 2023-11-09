@@ -285,7 +285,7 @@ def get_ifo_geometry(
     return torch.Tensor(tensors), torch.Tensor(vertices)
 
 
-def snr_from_freqs(
+def snr_frequency_series(
     template: PSDTensor,
     df: float,
     psd: Optional[PSDTensor] = None,
@@ -301,10 +301,29 @@ def snr_from_freqs(
         other = template
     else:
         other = strain
+
+    # TODO: handle scale issues by 1) dividing
+    # each tensor by the ASD separately and 2)
+    # multiplying by the sqrt of the scale factor.
+    # This is less optimal than our previous implementation
+    # because we're now doing 2 element-wise divides by
+    # the ASD rather than 1, so worth figuring out if
+    # there's a better, more consistent way to make the
+    # scale workout. All see TODO below
     asd = psd**0.5
     template = template * scale**0.5 / asd
     other = other.conj() * scale**0.5 / asd
     integrand = template * other
+
+    # convert to real before we divide the scale
+    # because something about the complex datatype
+    # is making this go to 0.
+    # TODO: we should probably be returning the full
+    # complex integrand and letting downstream functions
+    # convert to real where necessary, this way this
+    # can ultimately be used to take an ifft and compute
+    # an SNR timeseries. But this requires figuring out
+    # how to get the scaling right for the complex version
     integrand = integrand.real / scale
     integrand = integrand.type(torch.float32)
 
@@ -325,13 +344,18 @@ def snr_from_freqs(
     return integrand * 4 * df
 
 
-def snr_integral(
+def snr_frequency_series_from_timeseries(
     template: WaveformTensor,
     sample_rate: float,
     psd: Optional[PSDTensor] = None,
     strain: Optional[WaveformTensor] = None,
     highpass: Union[float, TensorType["frequency"], None] = None,
 ) -> PSDTensor:
+    # TODO: should this and snr_frequency_series just
+    # be combined into a single function with an `input_domain`
+    # argument? Or maybe expose both `df` and `sample` rate
+    # arguments and then infer input domain from whichever
+    # is not `None`?
     df = sample_rate / template.size(-1)
 
     # TODO: should we do windowing here?
@@ -343,7 +367,7 @@ def snr_integral(
         stilde = torch.fft.rfft(strain, axis=-1).type(torch.complex128)
     else:
         stilde = None
-    integrand = snr_from_freqs(htilde, df, psd, stilde, highpass)
+    integrand = snr_frequency_series(htilde, df, psd, stilde, highpass)
 
     # factor of sample_rate**2 that should have been applied
     # to each FFT separately, but doing it after the fact
@@ -405,7 +429,9 @@ def compute_ifo_snr(
         Batch of SNRs computed for each interferometer
     """
 
-    integrand = snr_integral(responses, sample_rate, psd, highpass=highpass)
+    integrand = snr_frequency_series_from_timeseries(
+        responses, sample_rate, psd, highpass=highpass
+    )
     return integrand.sum(-1) ** 0.5
 
 

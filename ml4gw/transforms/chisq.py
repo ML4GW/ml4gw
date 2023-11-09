@@ -90,16 +90,16 @@ class ChiSq(torch.nn.Module):
         """
         # compute the cumulative SNR of our template
         # wrt the background PSD as a function of frequency
-        snr_integral = self.get_cumulative_snr(htilde, psd)
+        cumulative_snr = self.get_cumulative_snr(htilde, psd)
 
         # break the total SNR up into even bins
-        total_snr = snr_integral[:, :, -1:]
+        total_snr = cumulative_snr[:, :, -1:]
         bins = self.bins * total_snr
 
         # figure out which indices along the frequency axis
         # break up the SNR as closely into these bins as possible
-        edges = torch.searchsorted(snr_integral, bins, side="right")
-        edges = edges.clamp(0, snr_integral.size(-1) - 1)
+        edges = torch.searchsorted(cumulative_snr, bins, side="right")
+        edges = edges.clamp(0, cumulative_snr.size(-1) - 1)
 
         # normalize by the sqrt of the total SNR
         qtilde = htilde / total_snr**0.5
