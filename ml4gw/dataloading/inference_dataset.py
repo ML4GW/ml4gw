@@ -20,24 +20,28 @@ class InferenceDataset(torch.utils.data.IterableDataset):
         shift_sizes: Optional[Sequence[int]] = None,
     ):
         """
-        Chronologically load streaming updates from a set of HDF5 files
-        corresponding to segments of data. Optionally provide shift_sizes
-        that will shift data by corresponding amount for timeslides.
+        Iterable dataset that chronologically loads `stride_size `windows of
+        timeseries data. If `shift_sizes` is provided, the dataset will
+        also yield windows that are shifted by the specified amounts.
+
+        It is _strongly_ recommended that these files have been
+        written using [chunked storage]
+        (https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage).
+        This has shown to produce increases in read-time speeds
+        of over an order of magnitude.
 
         Args:
             fnames:
-                List of HDF5 files to load data from
+                Paths to HDF5 files from which to load data.
             channels:
-                List of channels to load from each HDF5 file
+                Datasets to read from the indicated files, which
+                will be stacked along dim 1 of the generated batches
+                during iteration.
             stride_size:
-                Number of samples to stride over for each update
-            batch_size:
-                Number of updates to include in each batch
-            kernel_size:
-                Number of samples to include in each update
+                Size of the windows to read and yield at each step
             shift_sizes:
-                List of shift sizes to apply to each channel
-
+                List of shift sizes to apply to each channel. If `None`,
+                no shifts will be applied.
         """
 
         self.fnames = fnames
