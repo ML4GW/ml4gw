@@ -18,45 +18,70 @@ class TestInferenceDataset:
     def stride_size(self):
         return 10
 
+    @pytest.fixture(params=[None, [0, 1]])
+    def shift_sizes(self, request):
+        return request.param
+
     @pytest.fixture
-    def fnames(self, channels, sample_rate, tmp_path):
+    def fname(self, channels, sample_rate, tmp_path):
         data_dir = tmp_path / "data"
         data_dir.mkdir(exist_ok=True)
 
-        fnames = {"a.h5": 1, "b.h5": 2, "c.h5": 3}
-        idx = 0
-        keys = sorted(fnames)
-        for fname in keys:
-            length = fnames[fname]
-            with h5py.File(fname, "w") as f:
-                size = int(length * sample_rate)
-                x = np.arange(idx, idx + size)
-                f[channels[0]] = x
-                f[channels[1]] = -x
-                idx += size
-        return fnames
+        fname = "a.h5"
+        length = 1
+        with h5py.File(fname, "w") as f:
+            size = int(length * sample_rate)
+            x = np.arange(size)
+            f[channels[0]] = x
+            f[channels[1]] = -x
+        return fname
 
     @pytest.fixture
     def dataset(
         self,
-        fnames,
+        fname,
         channels,
         stride_size,
     ):
+        def fn(shift_sizes):
+            return InferenceDataset(
+                fname,
+                channels,
+                stride_size,
+                shift_sizes=shift_sizes,
+            )
 
-        return InferenceDataset(
-            sorted(fnames.keys()),
-            channels,
-            stride_size,
-        )
+        return fn
 
     def test_init(self, dataset):
-        assert dataset.sizes == {"a.h5": 100, "b.h5": 200, "c.h5": 300}
-        assert len(dataset) == 60
+        dataset = dataset(None)
+        assert dataset.size == 100
+        assert len(dataset) == 10
 
     def test_iter(self, dataset, stride_size):
+        dataset = dataset(None)
         first = np.arange(stride_size)
         for i, x in enumerate(dataset):
             assert np.all(x[0] == first)
             assert np.all(x[1] == -first)
+            first += stride_size
+
+        assert i == len(dataset) - 1
+
+    def test_iter_with_shifts(self, dataset, stride_size):
+        dataset = dataset([0, 1])
+        assert dataset.size == 99
+        assert len(dataset) == 10
+
+        first = np.arange(stride_size)
+        for i, x in enumerate(dataset):
+            # account for one sample smaller stride yielded due
+            # to shifting data by one smaple
+            if i == len(dataset) - 1:
+                assert np.all(x[0] == first[:-1])
+                assert np.all(x[1] == -first[:-1] - 1)
+
+            else:
+                assert np.all(x[0] == first + 0)
+                assert np.all(x[1] == -first - 1)
             first += stride_size
