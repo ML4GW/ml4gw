@@ -235,8 +235,9 @@ class ResNet1D(nn.Module):
 
     def __init__(
         self,
-        num_ifos: int,
+        in_channels: int,
         layers: List[int],
+        classes: int,
         kernel_size: int = 3,
         zero_init_residual: bool = False,
         groups: int = 1,
@@ -272,7 +273,7 @@ class ResNet1D(nn.Module):
         # to reduce the dimensionality before the heavy
         # lifting starts
         self.conv1 = nn.Conv1d(
-            num_ifos,
+            in_channels,
             self.inplanes,
             kernel_size=7,
             stride=2,
@@ -311,7 +312,7 @@ class ResNet1D(nn.Module):
 
         # use a fully connected layer to map from the
         # feature maps to the binary output that we need
-        self.fc = nn.Linear(block_size * self.block.expansion, 1)
+        self.fc = nn.Linear(block_size * self.block.expansion, classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv1d):
