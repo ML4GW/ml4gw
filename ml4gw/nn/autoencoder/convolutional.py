@@ -91,7 +91,7 @@ class ConvolutionalAutoencoder(Autoencoder):
 
     def __init__(
         self,
-        num_ifos: int,
+        in_channels: int,
         encode_channels: Sequence[int],
         kernel_size: int,
         stride: int = 1,
@@ -110,7 +110,6 @@ class ConvolutionalAutoencoder(Autoencoder):
         super().__init__(skip_connection=skip_connection)
 
         output_activation = output_activation or activation
-        in_channels = num_ifos
         for i, channels in enumerate(encode_channels):
             # All intermediate layers should decode to
             # the same number of channels. The last decoder
