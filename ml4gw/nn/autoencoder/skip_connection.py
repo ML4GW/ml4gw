@@ -1,4 +1,5 @@
 import torch
+
 from ml4gw.nn.autoencoder.utils import match_size
 
 

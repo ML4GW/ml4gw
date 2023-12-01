@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from typing import Optional
 
 import torch
+
 from ml4gw.nn.autoencoder.skip_connection import SkipConnection
 
 

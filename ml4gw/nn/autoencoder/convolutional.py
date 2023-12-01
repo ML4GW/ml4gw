@@ -22,7 +22,7 @@ class ConvBlock(Autoencoder):
         norm: Module = torch.nn.BatchNorm1d,
         decode_channels: Optional[int] = None,
         output_activation: Optional[torch.nn.Module] = None,
-        skip_connection: Optional[SkipConnection] = None
+        skip_connection: Optional[SkipConnection] = None,
     ) -> None:
         super().__init__(skip_connection=None)
 
@@ -38,7 +38,7 @@ class ConvBlock(Autoencoder):
             stride=stride,
             padding=self.padding,
             bias=False,
-            groups=groups
+            groups=groups,
         )
 
         decode_channels = decode_channels or in_channels
@@ -52,7 +52,7 @@ class ConvBlock(Autoencoder):
             stride=stride,
             padding=self.padding,
             bias=False,
-            groups=groups
+            groups=groups,
         )
 
         self.activation = activation
@@ -100,7 +100,7 @@ class ConvolutionalAutoencoder(Autoencoder):
         output_activation: Optional[torch.nn.Module] = None,
         norm: Module = torch.nn.BatchNorm1d,
         decode_channels: Optional[int] = None,
-        skip_connection: Optional[SkipConnection] = None
+        skip_connection: Optional[SkipConnection] = None,
     ) -> None:
         # TODO: how to do this dynamically? Maybe the base
         # architecture looks for overlapping arguments between
@@ -140,7 +140,7 @@ class ConvolutionalAutoencoder(Autoencoder):
                 norm=norm,
                 decode_channels=decode,
                 skip_connection=connect,
-                output_activation=out_act
+                output_activation=out_act,
             )
             self.blocks.append(block)
             in_channels = channels * groups
