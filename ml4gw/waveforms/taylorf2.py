@@ -23,14 +23,20 @@ def taylorf2_phase(
     f: TensorType,
     mass1: TensorType,
     mass2: TensorType,
+    chi1: TensorType,
+    chi2: TensorType,
 ) -> TensorType:
     """
-    Calculate the inspiral phase for the IMRPhenomD waveform.
+    Calculate the inspiral phase for the TaylorF2.
     """
     mass1_s = mass1 * MTSUN_SI
     mass2_s = mass2 * MTSUN_SI
     M_s = mass1_s + mass2_s
     eta = mass1_s * mass2_s / M_s / M_s
+    m1byM = mass1_s / M_s
+    m2byM = mass2_s / M_s
+    chi1sq = chi1 * chi1
+    chi2sq = chi2 * chi2
 
     Mf = (f.T * M_s).T
 
@@ -52,13 +58,60 @@ def taylorf2_phase(
     pfa_v1 = 0.0
     pfa_v2 = 5.0 * (74.3 / 8.4 + 11.0 * eta) / 9.0
     pfa_v3 = -16.0 * PI
+    # SO contributions at 1.5 PN
+    pfa_v3 += (
+        m1byM * (25.0 + 38.0 / 3.0 * m1byM) * chi1
+        + m2byM * (25.0 + 38.0 / 3.0 * m2byM) * chi2
+    )
     pfa_v4 = (
         5.0
         * (3058.673 / 7.056 + 5429.0 / 7.0 * eta + 617.0 * eta * eta)
         / 72.0
     )
+    # SO, SS, S1,2-squared contributions
+    pfa_v4 += (
+        247.0 / 4.8 * eta * chi1 * chi2
+        + -721.0 / 4.8 * eta * chi1 * chi2
+        + (-720.0 / 9.6 * m1byM * m1byM + 1.0 / 9.6 * m1byM * m1byM) * chi1sq
+        + (-720.0 / 9.6 * m2byM * m2byM + 1.0 / 9.6 * m2byM * m2byM) * chi2sq
+        + (240.0 / 9.6 * m1byM * m1byM + -7.0 / 9.6 * m1byM * m1byM) * chi1sq
+        + (240.0 / 9.6 * m2byM * m2byM + -7.0 / 9.6 * m2byM * m2byM) * chi2sq
+    )
     pfa_v5logv = 5.0 / 3.0 * (772.9 / 8.4 - 13.0 * eta) * PI
     pfa_v5 = 5.0 / 9.0 * (772.9 / 8.4 - 13.0 * eta) * PI
+    # SO coefficient for 2.5 PN
+    pfa_v5logv += 3.0 * (
+        -m1byM
+        * (
+            1391.5 / 8.4
+            - m1byM * (1.0 - m1byM) * 10.0 / 3.0
+            + m1byM * (1276.0 / 8.1 + m1byM * (1.0 - m1byM) * 170.0 / 9.0)
+        )
+        * chi1
+        - m2byM
+        * (
+            1391.5 / 8.4
+            - m2byM * (1.0 - m2byM) * 10.0 / 3.0
+            + m2byM * (1276.0 / 8.1 + m2byM * (1.0 - m2byM) * 170.0 / 9.0)
+        )
+        * chi2
+    )
+    pfa_v5 += (
+        -m1byM
+        * (
+            1391.5 / 8.4
+            - m1byM * (1.0 - m1byM) * 10.0 / 3.0
+            + m1byM * (1276.0 / 8.1 + m1byM * (1.0 - m1byM) * 170.0 / 9.0)
+        )
+        * chi1
+        + -m2byM
+        * (
+            1391.5 / 8.4
+            - m2byM * (1.0 - m2byM) * 10.0 / 3.0
+            + m2byM * (1276.0 / 8.1 + m2byM * (1.0 - m2byM) * 170.0 / 9.0)
+        )
+        * chi2
+    )
     pfa_v6logv = -684.8 / 2.1
     pfa_v6 = (
         11583.231236531 / 4.694215680
@@ -69,9 +122,69 @@ def taylorf2_phase(
         - eta * eta * eta * 127.825 / 1.296
         + pfa_v6logv * torch.log(torch.tensor(4.0))
     )
+    # SO + S1-S2 + S-squared contribution at 3 PM
+    pfa_v6 += (
+        PI * m1byM * (1490.0 / 3.0 + m1byM * 260.0) * chi1
+        + PI * m2byM * (1490.0 / 3.0 + m2byM * 260.0) * chi2
+        + (326.75 / 1.12 + 557.5 / 1.8 * eta) * eta * chi1 * chi2
+        + (
+            (4703.5 / 8.4 + 2935.0 / 6.0 * m1byM - 120.0 * m1byM * m1byM)
+            * m1byM
+            * m1byM
+            + (
+                -4108.25 / 6.72
+                - 108.5 / 1.2 * m1byM
+                + 125.5 / 3.6 * m1byM * m1byM
+            )
+            * m1byM
+            * m1byM
+        )
+        * chi1sq
+        + (
+            (4703.5 / 8.4 + 2935.0 / 6.0 * m2byM - 120.0 * m2byM * m2byM)
+            * m2byM
+            * m2byM
+            + (
+                -4108.25 / 6.72
+                - 108.5 / 1.2 * m2byM
+                + 125.5 / 3.6 * m2byM * m2byM
+            )
+            * m2byM
+            * m2byM
+        )
+        * chi2sq
+    )
     pfa_v7 = PI * (
         770.96675 / 2.54016 + 378.515 / 1.512 * eta - 740.45 / 7.56 * eta * eta
     )
+    # SO contribution at 3.5 PN
+    pfa_v7 += (
+        m1byM
+        * (
+            -17097.8035 / 4.8384
+            + eta * 28764.25 / 6.72
+            + eta * eta * 47.35 / 1.44
+            + m1byM
+            * (
+                -7189.233785 / 1.524096
+                + eta * 458.555 / 3.024
+                - eta * eta * 534.5 / 7.2
+            )
+        )
+    ) * chi1 + (
+        m2byM
+        * (
+            -17097.8035 / 4.8384
+            + eta * 28764.25 / 6.72
+            + eta * eta * 47.35 / 1.44
+            + m2byM
+            * (
+                -7189.233785 / 1.524096
+                + eta * 458.555 / 3.024
+                - eta * eta * 534.5 / 7.2
+            )
+        )
+    ) * chi2
     # construct power series
     phasing = (v7.T * pfa_v7).T
     phasing += (v6.T * pfa_v6 + v6_logv.T * pfa_v6logv).T
@@ -117,6 +230,8 @@ def taylorf2_htilde(
     f: TensorType,
     mass1: TensorType,
     mass2: TensorType,
+    chi1: TensorType,
+    chi2: TensorType,
     distance: TensorType,
     phic: TensorType,
     f_ref: float,
@@ -125,8 +240,8 @@ def taylorf2_htilde(
     f = f.repeat([mass1.shape[0], 1])
     f_ref = torch.tensor(f_ref).repeat([mass1.shape[0], 1])
 
-    Psi = taylorf2_phase(f, mass1, mass2)
-    Psi_ref = taylorf2_phase(f_ref, mass1, mass2)
+    Psi = taylorf2_phase(f, mass1, mass2, chi1, chi2)
+    Psi_ref = taylorf2_phase(f_ref, mass1, mass2, chi1, chi2)
 
     Psi = (Psi.T - 2 * phic).T
     Psi -= Psi_ref
@@ -140,6 +255,8 @@ def TaylorF2(
     f: TensorType,
     mass1: TensorType,
     mass2: TensorType,
+    chi1: TensorType,
+    chi2: TensorType,
     distance: TensorType,
     phic: TensorType,
     inclination: TensorType,
@@ -155,7 +272,9 @@ def TaylorF2(
     # shape assumed (n_batch, params)
     if (
         mass1.shape[0] != mass2.shape[0]
-        or mass2.shape[0] != distance.shape[0]
+        or mass2.shape[0] != chi1.shape[0]
+        or chi1.shape[0] != chi2.shape[0]
+        or chi2.shape[0] != distance.shape[0]
         or distance.shape[0] != phic.shape[0]
         or phic.shape[0] != inclination.shape[0]
     ):
@@ -163,7 +282,9 @@ def TaylorF2(
     cfac = torch.cos(inclination)
     pfac = 0.5 * (1.0 + cfac * cfac)
 
-    htilde = taylorf2_htilde(f, mass1, mass2, distance, phic, f_ref)
+    htilde = taylorf2_htilde(
+        f, mass1, mass2, chi1, chi2, distance, phic, f_ref
+    )
 
     hp = (htilde.T * pfac).T
     hc = -1j * (htilde.T * cfac).T

@@ -23,6 +23,16 @@ def mass_2(request):
     return request.param
 
 
+@pytest.fixture(params=[0.0, 0.5])
+def chi1z(request):
+    return request.param
+
+
+@pytest.fixture(params=[-0.1, 0.1])
+def chi2z(request):
+    return request.param
+
+
 @pytest.fixture(params=[100.0, 1000.0])
 def distance(request):
     return request.param
@@ -33,18 +43,20 @@ def inclination(request):
     return request.param
 
 
-def test_taylor_f2(mass_1, mass_2, distance, inclination, sample_rate):
+def test_taylor_f2(
+    mass_1, mass_2, chi1z, chi2z, distance, inclination, sample_rate
+):
     # Fix spins and coal. phase, ref, freq.
-    phic, f_ref = 0.0, 15
+    phic, f_ref = 0.0, 25
     params = dict(
         m1=mass_1 * lal.MSUN_SI,
         m2=mass_2 * lal.MSUN_SI,
         S1x=0,
         S1y=0,
-        S1z=0,
+        S1z=chi1z,
         S2x=0,
         S2y=0,
-        S2z=0,
+        S2z=chi2z,
         distance=(distance * u.Mpc).to("m").value,
         inclination=inclination,
         phiRef=phic,
@@ -67,19 +79,23 @@ def test_taylor_f2(mass_1, mass_2, distance, inclination, sample_rate):
         params["f_min"], params["f_max"], params["deltaF"]
     )
     _params = torch.tensor(
-        [mass_1, mass_2, distance, phic, inclination]
+        [mass_1, mass_2, chi1z, chi2z, distance, phic, inclination]
     ).repeat(
         10, 1
     )  # repeat along batch dim for testing
     batched_mass1 = _params[:, 0]
     batched_mass2 = _params[:, 1]
-    batched_distance = _params[:, 2]
-    batched_phic = _params[:, 3]
-    batched_inclination = _params[:, 4]
+    batched_chi1 = _params[:, 2]
+    batched_chi2 = _params[:, 3]
+    batched_distance = _params[:, 4]
+    batched_phic = _params[:, 5]
+    batched_inclination = _params[:, 6]
     hp_torch, hc_torch = waveforms.TaylorF2(
         torch_freqs,
         batched_mass1,
         batched_mass2,
+        batched_chi1,
+        batched_chi2,
         batched_distance,
         batched_phic,
         batched_inclination,
@@ -103,7 +119,15 @@ def test_taylor_f2(mass_1, mass_2, distance, inclination, sample_rate):
     hp_torch = hp_torch[torch_mask]
     hc_torch = hc_torch[torch_mask]
 
-    assert np.allclose(hp_lal_data.real, hp_torch.real)
-    assert np.allclose(hp_lal_data.imag, hp_torch.imag)
-    assert np.allclose(hc_lal_data.real, hc_torch.real)
-    assert np.allclose(hc_lal_data.imag, hc_torch.imag)
+    assert np.allclose(
+        1e21 * hp_lal_data.real, 1e21 * hp_torch.real.numpy(), atol=1e-3
+    )
+    assert np.allclose(
+        1e21 * hp_lal_data.imag, 1e21 * hp_torch.imag.numpy(), atol=1e-3
+    )
+    assert np.allclose(
+        1e21 * hc_lal_data.real, 1e21 * hc_torch.real.numpy(), atol=1e-3
+    )
+    assert np.allclose(
+        1e21 * hc_lal_data.imag, 1e21 * hc_torch.imag.numpy(), atol=1e-3
+    )
