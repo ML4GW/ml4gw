@@ -122,7 +122,7 @@ def taylorf2_phase(
         - eta * eta * eta * 127.825 / 1.296
         + pfa_v6logv * torch.log(torch.tensor(4.0))
     )
-    # SO + S1-S2 + S-squared contribution at 3 PM
+    # SO + S1-S2 + S-squared contribution at 3 PN
     pfa_v6 += (
         PI * m1byM * (1490.0 / 3.0 + m1byM * 260.0) * chi1
         + PI * m2byM * (1490.0 / 3.0 + m2byM * 260.0) * chi2
