@@ -20,7 +20,7 @@ MPC_SEC = 1.02927125e14
 
 
 def taylorf2_phase(
-    f: TensorType,
+    Mf: TensorType,
     mass1: TensorType,
     mass2: TensorType,
     chi1: TensorType,
@@ -29,16 +29,12 @@ def taylorf2_phase(
     """
     Calculate the inspiral phase for the TaylorF2.
     """
-    mass1_s = mass1 * MTSUN_SI
-    mass2_s = mass2 * MTSUN_SI
-    M_s = mass1_s + mass2_s
-    eta = mass1_s * mass2_s / M_s / M_s
-    m1byM = mass1_s / M_s
-    m2byM = mass2_s / M_s
+    M = mass1 + mass2
+    eta = mass1 * mass2 / M / M
+    m1byM = mass1 / M
+    m2byM = mass2 / M
     chi1sq = chi1 * chi1
     chi2sq = chi2 * chi2
-
-    Mf = (f.T * M_s).T
 
     v0 = torch.ones_like(Mf)
     v1 = (PI * Mf) ** (1.0 / 3.0)
@@ -199,15 +195,29 @@ def taylorf2_phase(
     # Multiply by 0PN coefficient
     phasing = (phasing.T * pfaN).T
 
-    return phasing
+    # Derivative of phase w.r.t Mf
+    # dPhi/dMf = dPhi/dv dv/dMf
+    Dphasing = (2.0 * v7.T * pfa_v7).T
+    Dphasing += (v6.T * (pfa_v6 + pfa_v6logv)).T
+    Dphasing += (v6_logv.T * pfa_v6logv).T
+    Dphasing += (v5.T * pfa_v5logv).T
+    Dphasing += (-1.0 * v4.T * pfa_v4).T
+    Dphasing += (-2.0 * v3.T * pfa_v3).T
+    Dphasing += (-3.0 * v2.T * pfa_v2).T
+    Dphasing += (-4.0 * v1.T * pfa_v1).T
+    Dphasing += -5.0 * v0
+    Dphasing /= 3.0 * v1 * v7
+    Dphasing *= PI
+    Dphasing = (Dphasing.T * pfaN).T
+
+    return phasing, Dphasing
 
 
-def taylorf2_amplitude(f: TensorType, mass1, mass2, distance) -> TensorType:
+def taylorf2_amplitude(
+    Mf: TensorType, mass1, mass2, eta, distance
+) -> TensorType:
     mass1_s = mass1 * MTSUN_SI
     mass2_s = mass2 * MTSUN_SI
-    M_s = mass1_s + mass2_s
-    eta = mass1_s * mass2_s / M_s / M_s
-    Mf = (f.T * M_s).T
     v = (PI * Mf) ** (1.0 / 3.0)
     v10 = v**10
 
@@ -236,17 +246,21 @@ def taylorf2_htilde(
     phic: TensorType,
     f_ref: float,
 ):
-    # frequency array is repeated along batch
-    f = f.repeat([mass1.shape[0], 1])
-    f_ref = torch.tensor(f_ref).repeat([mass1.shape[0], 1])
+    mass1_s = mass1 * MTSUN_SI
+    mass2_s = mass2 * MTSUN_SI
+    M_s = mass1_s + mass2_s
+    eta = mass1_s * mass2_s / M_s / M_s
 
-    Psi = taylorf2_phase(f, mass1, mass2, chi1, chi2)
-    Psi_ref = taylorf2_phase(f_ref, mass1, mass2, chi1, chi2)
+    Mf = torch.outer(M_s, f)
+    Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
+
+    Psi, _ = taylorf2_phase(Mf, mass1, mass2, chi1, chi2)
+    Psi_ref, _ = taylorf2_phase(Mf_ref, mass1, mass2, chi1, chi2)
 
     Psi = (Psi.T - 2 * phic).T
     Psi -= Psi_ref
 
-    amp0 = taylorf2_amplitude(f, mass1, mass2, distance)
+    amp0 = taylorf2_amplitude(Mf, mass1, mass2, eta, distance)
     h0 = amp0 * torch.exp(-1j * (Psi - PI / 4))
     return h0
 
