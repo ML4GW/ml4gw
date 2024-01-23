@@ -4,7 +4,7 @@ version = "0.3.0"
 description = "Tools for training torch models on gravitational wave data"
 readme = "README.md"
 authors = [
-    "Alec Gunny <alec.gunny@ligo.org>", "Ethan Marx <emarx@mit.edu>"
+    "Alec Gunny <alec.gunny@ligo.org>", "Ethan Marx <emarx@mit.edu>", "Will Benoit <benoi090@umn.edu>"
 ]
 
 [tool.poetry.dependencies]
@@ -12,6 +12,7 @@ python = "^3.8"
 
 # torch deps
 torch = "^1.10"
+torchaudio = "^0.13"
 torchtyping = "^0.1"
 
 [tool.poetry.group.dev.dependencies]
