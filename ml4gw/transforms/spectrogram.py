@@ -58,6 +58,15 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self.num_freqs = max([shape[0] for shape in self.shapes])
         self.num_times = max([shape[1] for shape in self.shapes])
 
+        bottom_pad = torch.tensor(
+            [int(self.num_freqs - shape[0]) for shape in self.shapes]
+        )
+        right_pad = torch.tensor(
+            [int(self.num_times - shape[1]) for shape in self.shapes]
+        )
+        self.register_buffer("bottom_pad", bottom_pad)
+        self.register_buffer("right_pad", right_pad)
+
         freq_idxs = torch.tensor(
             [
                 [int(i * shape[0] / self.num_freqs) for shape in self.shapes]
@@ -106,12 +115,12 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         """
         spectrograms = [t(X) for t in self.transforms]
 
-        left = 0
-        top = 0
+        left_pad = torch.zeros(len(spectrograms), dtype=torch.int)
+        top_pad = torch.zeros(len(spectrograms), dtype=torch.int)
         padded_specs = []
-        for i, spec in enumerate(spectrograms):
-            bottom = self.num_freqs - self.shapes[i][0]
-            right = self.num_times - self.shapes[i][1]
+        for spec, left, right, top, bottom in zip(
+            spectrograms, left_pad, self.right_pad, top_pad, self.bottom_pad
+        ):
             padded_specs.append(F.pad(spec, (left, right, top, bottom)))
 
         padded_specs = torch.stack(padded_specs)
