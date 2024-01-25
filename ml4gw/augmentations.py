@@ -1,9 +1,10 @@
 import torch
 
+
 class SignalInverter(torch.nn.Module):
     """
-    Takes a tensor of timeseries and randomly inverts
-    (i.e. h(t) -> -h(t))
+    Takes a tensor of timeseries of arbitrary dimension
+    and randomly inverts (i.e. h(t) -> -h(t))
     each timeseries with probability `prob`.
 
     Args:
@@ -23,8 +24,8 @@ class SignalInverter(torch.nn.Module):
 
 class SignalReverser(torch.nn.Module):
     """
-    Takes a tensor of timeseries and randomly reverses
-    (i.e. h(t) -> h(-t))
+    Takes a tensor of timeseries of arbitrary dimension
+    and randomly reverses (i.e. h(t) -> h(-t))
     each timeseries with probability `prob`.
 
     Args:
