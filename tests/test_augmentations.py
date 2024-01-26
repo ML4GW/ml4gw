@@ -6,11 +6,6 @@ import torch
 from ml4gw.augmentations import SignalInverter, SignalReverser
 
 
-@pytest.fixture(params=[0, 0.25, 1])
-def prob(request):
-    return request.param
-
-
 @pytest.fixture(params=[0.0, 0.25, 0.5, 1])
 def flip_prob(request):
     return request.param
