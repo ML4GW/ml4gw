@@ -41,6 +41,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self, kernel_length: float, sample_rate: float, **kwargs
     ) -> None:
         super().__init__()
+        self.kernel_size = kernel_length * sample_rate
         # This method of combination makes sense only when
         # the spectrograms are normalized, so enforce this
         kwargs["normalized"] = [True]
@@ -113,6 +114,13 @@ class MultiResolutionSpectrogram(torch.nn.Module):
                 batches, `C` is the  number of channels,
                 and `T` is the number of time samples.
         """
+        if X.shape[-1] != self.kernel_size:
+            raise ValueError(
+                "Expected time dimension to be "
+                f"{self.kernel_size} samples long, got input with "
+                f"{X.shape[-1]} samples"
+            )
+
         spectrograms = [t(X) for t in self.transforms]
 
         left_pad = torch.zeros(len(spectrograms), dtype=torch.int)
