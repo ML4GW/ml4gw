@@ -35,9 +35,30 @@ def win_lengths(request):
     return request.param
 
 
-@pytest.fixture(params=[[2], [2, 2, 2, 2]])
+@pytest.fixture(params=[[2]])
 def powers(request):
     return request.param
+
+
+def test_num_spectrogram_warning():
+    with pytest.warns(RuntimeWarning):
+        MultiResolutionSpectrogram(8, 2048, n_fft=[32, 64, 128, 256])
+
+
+def test_normalization_error():
+    with pytest.raises(ValueError):
+        MultiResolutionSpectrogram(8, 2048, normalized=[False])
+
+
+def test_arg_length_error():
+    with pytest.raises(ValueError):
+        MultiResolutionSpectrogram(8, 2048, n_fft=[32, 64], power=[1, 1, 1])
+
+
+def test_kernel_size_error():
+    with pytest.raises(ValueError):
+        spectrogram = MultiResolutionSpectrogram(8, 2048)
+        spectrogram(torch.ones([4, 3, 8 * 2048 + 1]))
 
 
 def test_multi_resolution_spectrogram(
@@ -50,36 +71,14 @@ def test_multi_resolution_spectrogram(
     powers,
 ):
 
-    # List length of spectrogram parameters must be compatible
-    if len(powers) == 4 and len(n_ffts) > 1:
-        with pytest.raises(ValueError):
-            spectrogram = MultiResolutionSpectrogram(
-                kernel_length,
-                sample_rate,
-                n_fft=n_ffts,
-                win_length=win_lengths,
-                power=powers,
-            )
-        return
-
     # Creating a MRS without any spectrogram arguments should
     # just create a single default torchaudio histogram with
     # `normalized = True`
     spectrogram = MultiResolutionSpectrogram(kernel_length, sample_rate)
-    with pytest.raises(ValueError):
-        spectrogram(torch.ones([4, 3, kernel_length * sample_rate + 1]))
 
     X = torch.ones([batch_size, num_channels, kernel_length * sample_rate])
     y = spectrogram(X)
     expected_y = Spectrogram(normalized=True)(X)
-
-    assert (y == expected_y).all()
-
-    # The `normalized = False` should be ignored
-    spectrogram = MultiResolutionSpectrogram(
-        kernel_length, sample_rate, normalized=[False]
-    )
-    y = spectrogram(X)
 
     assert (y == expected_y).all()
 

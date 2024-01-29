@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, List
 
 import torch
@@ -44,7 +45,15 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self.kernel_size = kernel_length * sample_rate
         # This method of combination makes sense only when
         # the spectrograms are normalized, so enforce this
-        kwargs["normalized"] = [True]
+        if "normalized" in kwargs.keys():
+            if not all(kwargs["normalized"]):
+                raise ValueError(
+                    "Received a value of False for 'normalized'. "
+                    "This method of combination is sensible only for "
+                    "normalized spectrograms."
+                )
+        else:
+            kwargs["normalized"] = [True]
         self.kwargs = self._check_and_format_kwargs(kwargs)
 
         self.transforms = torch.nn.ModuleList(
@@ -59,12 +68,16 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self.num_freqs = max([shape[0] for shape in self.shapes])
         self.num_times = max([shape[1] for shape in self.shapes])
 
+        left_pad = torch.zeros(len(self.transforms), dtype=torch.int)
+        top_pad = torch.zeros(len(self.transforms), dtype=torch.int)
         bottom_pad = torch.tensor(
             [int(self.num_freqs - shape[0]) for shape in self.shapes]
         )
         right_pad = torch.tensor(
             [int(self.num_times - shape[1]) for shape in self.shapes]
         )
+        self.register_buffer("left_pad", left_pad)
+        self.register_buffer("top_pad", top_pad)
         self.register_buffer("bottom_pad", bottom_pad)
         self.register_buffer("right_pad", right_pad)
 
@@ -88,6 +101,15 @@ class MultiResolutionSpectrogram(torch.nn.Module):
 
     def _check_and_format_kwargs(self, kwargs: Dict[str, List]) -> List:
         lengths = sorted(set([len(v) for v in kwargs.values()]))
+
+        if lengths[-1] > 3:
+            warnings.warn(
+                "Combining too many spectrograms can impede computation time. "
+                "If performance is slower than desired, try reducing the "
+                "number of spectrograms",
+                RuntimeWarning,
+            )
+
         if len(lengths) > 2 or (len(lengths) == 2 and lengths[0] != 1):
             raise ValueError(
                 "Spectrogram keyword args should all have the same "
@@ -123,11 +145,13 @@ class MultiResolutionSpectrogram(torch.nn.Module):
 
         spectrograms = [t(X) for t in self.transforms]
 
-        left_pad = torch.zeros(len(spectrograms), dtype=torch.int)
-        top_pad = torch.zeros(len(spectrograms), dtype=torch.int)
         padded_specs = []
         for spec, left, right, top, bottom in zip(
-            spectrograms, left_pad, self.right_pad, top_pad, self.bottom_pad
+            spectrograms,
+            self.left_pad,
+            self.right_pad,
+            self.top_pad,
+            self.bottom_pad,
         ):
             padded_specs.append(F.pad(spec, (left, right, top, bottom)))
 
