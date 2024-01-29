@@ -11,8 +11,8 @@ authors = [
 python = "^3.8"
 
 # torch deps
-torch = "^1.10"
-torchaudio = "^0.13"
+torch = "^2.0"
+torchaudio = "^2.0"
 torchtyping = "^0.1"
 
 [tool.poetry.group.dev.dependencies]
