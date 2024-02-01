@@ -3,7 +3,7 @@ import pytest
 import torch
 from lalinference import BurstSineGaussian
 
-from ml4gw.waveforms import SineGaussian
+from ml4gw.simulation import SineGaussian
 
 
 @pytest.fixture(params=[2048, 4096])
