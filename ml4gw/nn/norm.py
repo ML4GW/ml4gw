@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import Callable, Optional
 
 import torch
+
+NormLayer = Callable[[int], torch.nn.Module]
 
 
 class GroupNorm1D(torch.nn.Module):

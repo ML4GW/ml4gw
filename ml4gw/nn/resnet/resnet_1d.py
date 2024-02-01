@@ -13,9 +13,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ml4gw.nn.norm import GroupNormGetter
-
-NormLayer = Callable[[int], nn.Module]
+from ml4gw.nn.norm import GroupNormGetter, NormLayer
 
 
 def convN(
@@ -189,10 +187,8 @@ class ResNet1D(nn.Module):
     used in BBH detection.
 
     Args:
-        num_ifos:
-            The number of interferometers used for BBH
-            detection. Sets the channel dimension of the
-            input tensor
+        in_channels:
+            The number of channels in input tensor.
         layers:
             A list representing the number of residual
             blocks to include in each "layer" of the
