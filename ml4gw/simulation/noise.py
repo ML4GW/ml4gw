@@ -23,7 +23,7 @@ def colored_gaussian_noise(shape: Tuple[int, int, int], psd: torch.Tensor):
             Colored Gaussian noise
     """
 
-    if shape.ndim != 3:
+    if len(shape) != 3:
         raise ValueError("Shape must have 3 dimensions")
 
     X = torch.randn(shape)
@@ -44,5 +44,5 @@ def colored_gaussian_noise(shape: Tuple[int, int, int], psd: torch.Tensor):
     X_fft = torch.fft.rfft(X, norm="forward", dim=-1)
     X_fft *= psd**0.5
     X_fft = torch.fft.irfft(X_fft, norm="forward", dim=-1)
-    X_fft /= torch.std(X_fft)
+    X_fft /= torch.std(X_fft, dim=-1, keepdim=True)
     return X_fft

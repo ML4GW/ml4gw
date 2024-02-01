@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from ml4gw import distributions
-from ml4gw.waveforms.generator import ParameterSampler, WaveformGenerator
+from ml4gw.simulation.generator import ParameterSampler, WaveformGenerator
 
 
 @pytest.fixture(params=[10, 100, 1000])
