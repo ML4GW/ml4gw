@@ -3,15 +3,15 @@ from typing import Tuple
 import torch
 
 
-def colored_gaussian_noise(
-    shape: Tuple[int, ...], psd: torch.Tensor, sample_rate: float
-):
+def colored_gaussian_noise(shape: Tuple[int, int, int], psd: torch.Tensor):
     """
     Generate time-domain Gaussian noise colored by a specified PSD.
 
     Args:
         shape:
-            Shape of noise tensor to generate.
+            3D shape of noise tensor to generate.
+            First dimension corresponds to `batch_size`,
+            Second dimension corresponds to the number of channels,
             Last dimension corresponds to the time dimension.
         psd:
             Spectral density used to color noise
@@ -23,13 +23,26 @@ def colored_gaussian_noise(
             Colored Gaussian noise
     """
 
-    noise = torch.randn(shape)
-    noise_fft = torch.fft.fft(noise)
+    if shape.ndim != 3:
+        raise ValueError("Shape must have 3 dimensions")
 
-    asd = torch.sqrt(psd)
-    colored_fft = noise_fft * asd
+    X = torch.randn(shape)
+    # possibly interpolate our PSD to match the number
+    # of frequency bins we expect to get from X
+    N = X.size(-1)
+    num_freqs = N // 2 + 1
 
-    colored = torch.fft.ifft(colored_fft)
-    colored /= torch.std(colored)
+    # normalize the number of expected dimensions in the PSD
+    while psd.ndim < 3:
+        psd = psd[None]
 
-    return colored.real
+    if psd.size(-1) != num_freqs:
+        psd = torch.nn.functional.interpolate(
+            psd, size=(num_freqs), mode="linear"
+        )
+
+    X_fft = torch.fft.rfft(X, norm="forward", dim=-1)
+    X_fft *= psd**0.5
+    X_fft = torch.fft.irfft(X_fft, norm="forward", dim=-1)
+    X_fft /= torch.std(X_fft)
+    return X_fft
