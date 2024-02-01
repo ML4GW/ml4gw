@@ -2,7 +2,7 @@ import h5py  # noqa
 import pytest
 import torch
 
-from ml4gw.nn.resnet_1d import (
+from ml4gw.nn.resnet.resnet_1d import (
     BasicBlock,
     Bottleneck,
     BottleneckResNet1D,
@@ -16,7 +16,7 @@ def kernel_size(request):
     return request.param
 
 
-@pytest.fixture(params=[1024, 4096])
+@pytest.fixture(params=[64, 128])
 def sample_rate(request):
     return request.param
 
@@ -67,7 +67,7 @@ def test_blocks(block, kernel_size, stride, sample_rate, inplanes):
 
 
 @pytest.fixture(params=[1, 2, 3])
-def num_ifos(request):
+def in_channels(request):
     return request.param
 
 
@@ -91,13 +91,13 @@ def test_resnet(
     kernel_size,
     layers,
     classes,
-    num_ifos,
+    in_channels,
     sample_rate,
     stride_type,
 ):
     if kernel_size % 2 == 0:
         with pytest.raises(ValueError):
-            nn = ResNet1D(num_ifos, layers, classes, kernel_size)
+            nn = ResNet1D(in_channels, layers, classes, kernel_size)
         return
 
     if stride_type is not None:
@@ -110,24 +110,28 @@ def test_resnet(
     ):
         with pytest.raises(NotImplementedError):
             nn = architecture(
-                num_ifos, layers, classes, kernel_size, stride_type=stride_type
+                in_channels,
+                layers,
+                classes,
+                kernel_size,
+                stride_type=stride_type,
             )
         return
 
     nn = architecture(
-        num_ifos, layers, classes, kernel_size, stride_type=stride_type
+        in_channels, layers, classes, kernel_size, stride_type=stride_type
     )
-    x = torch.randn(8, num_ifos, sample_rate)
+    x = torch.randn(8, in_channels, sample_rate)
     y = nn(x)
     assert y.shape == (8, classes)
 
     with pytest.raises(ValueError):
         stride_type = ["stride"] * len(layers)
         nn = architecture(
-            num_ifos, layers, kernel_size, stride_type=stride_type
+            in_channels, layers, kernel_size, stride_type=stride_type
         )
     with pytest.raises(ValueError):
         stride_type = ["strife"] * (len(layers) - 1)
         nn = architecture(
-            num_ifos, layers, kernel_size, stride_type=stride_type
+            in_channels, layers, kernel_size, stride_type=stride_type
         )

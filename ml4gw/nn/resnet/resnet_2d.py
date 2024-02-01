@@ -1,10 +1,7 @@
 """
 In large part lifted from
 https://github.com/pytorch/vision/blob/main/torchvision/models/resnet.py
-but with 1d convolutions and arbitrary kernel sizes, and a
-default norm layer that makes more sense for most GW applications
-where training-time statistics are entirely arbitrary due to
-simulations.
+but with arbitrary kernel sizes
 """
 
 from typing import Callable, List, Literal, Optional
@@ -13,9 +10,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ml4gw.nn.norm import GroupNormGetter
-
-NormLayer = Callable[[int], nn.Module]
+from ml4gw.nn.norm import GroupNorm2DGetter, NormLayer
 
 
 def convN(
@@ -25,12 +20,12 @@ def convN(
     stride: int = 1,
     groups: int = 1,
     dilation: int = 1,
-) -> nn.Conv1d:
-    """1d convolution with padding"""
+) -> nn.Conv2d:
+    """2d convolution with padding"""
     if not kernel_size % 2:
         raise ValueError("Can't use even sized kernels")
 
-    return nn.Conv1d(
+    return nn.Conv2d(
         in_planes,
         out_planes,
         kernel_size=kernel_size,
@@ -42,9 +37,9 @@ def convN(
     )
 
 
-def conv1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv1d:
+def conv1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     """Kernel-size 1 convolution"""
-    return nn.Conv1d(
+    return nn.Conv2d(
         in_planes, out_planes, kernel_size=1, stride=stride, bias=False
     )
 
@@ -69,7 +64,7 @@ class BasicBlock(nn.Module):
 
         super().__init__()
         if norm_layer is None:
-            norm_layer = nn.BatchNorm1d
+            norm_layer = nn.BatchNorm2d
         if groups != 1 or base_width != 64:
             raise ValueError(
                 "BasicBlock only supports groups=1 and base_width=64"
@@ -130,11 +125,11 @@ class Bottleneck(nn.Module):
         groups: int = 1,
         base_width: int = 64,
         dilation: int = 1,
-        norm_layer: Optional[NormLayer] = None,
+        norm_layer: Optional[Callable[..., nn.Module]] = None,
     ) -> None:
         super().__init__()
         if norm_layer is None:
-            norm_layer = nn.BatchNorm1d
+            norm_layer = nn.BatchNorm2d
 
         width = int(planes * (base_width / 64.0)) * groups
 
@@ -181,18 +176,15 @@ class Bottleneck(nn.Module):
         return out
 
 
-class ResNet1D(nn.Module):
-    """1D ResNet architecture
+class ResNet2D(nn.Module):
+    """2D ResNet architecture
 
-    Simple extension of ResNet to 1D convolutions with
-    arbitrary kernel sizes to support the longer timeseries
-    used in BBH detection.
+    Simple extension of ResNet with arbitrary kernel sizes
+    to support the longer timeseries used in BBH detection.
 
     Args:
-        num_ifos:
-            The number of interferometers used for BBH
-            detection. Sets the channel dimension of the
-            input tensor
+        in_channels:
+            The number of channels in input tensor.
         layers:
             A list representing the number of residual
             blocks to include in each "layer" of the
@@ -229,6 +221,11 @@ class ResNet1D(nn.Module):
             used at each layer. Otherwise, `stride_type` should
             be one element shorter than `layers` and indicate either
             `stride` or `dilation` for each layer after the first.
+        norm_groups:
+            The number of groups to use in GroupNorm layers
+            throughout the model. If left as `-1`, the number
+            of groups will be equal to the number of channels,
+            making this equilavent to LayerNorm
     """
 
     block = BasicBlock
@@ -246,13 +243,12 @@ class ResNet1D(nn.Module):
         norm_layer: Optional[NormLayer] = None,
     ) -> None:
         super().__init__()
+        # default to using InstanceNorm if no
+        # norm layer is provided explicitly
+        self._norm_layer = norm_layer or GroupNorm2DGetter()
 
         self.inplanes = 64
         self.dilation = 1
-
-        # default to using InstanceNorm if no
-        # norm layer is provided explicitly
-        self._norm_layer = norm_layer or GroupNormGetter()
 
         # TODO: should we support passing a single string
         # for simplicity here?
@@ -272,7 +268,7 @@ class ResNet1D(nn.Module):
         # start with a basic conv-bn-relu-maxpool block
         # to reduce the dimensionality before the heavy
         # lifting starts
-        self.conv1 = nn.Conv1d(
+        self.conv1 = nn.Conv2d(
             in_channels,
             self.inplanes,
             kernel_size=7,
@@ -282,7 +278,7 @@ class ResNet1D(nn.Module):
         )
         self.bn1 = self._norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         # now create layers of residual blocks where each
         # layer uses the same number of feature maps for
@@ -308,18 +304,18 @@ class ResNet1D(nn.Module):
         # Average pool over each feature map to create a
         # single value for each feature map that we'll use
         # in the fully connected head
-        self.avgpool = nn.AdaptiveAvgPool1d(1)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
         # use a fully connected layer to map from the
         # feature maps to the binary output that we need
         self.fc = nn.Linear(block_size * self.block.expansion, classes)
 
         for m in self.modules():
-            if isinstance(m, nn.Conv1d):
+            if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(
                     m.weight, mode="fan_out", nonlinearity="relu"
                 )
-            elif isinstance(m, (nn.BatchNorm1d, nn.GroupNorm)):
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
@@ -411,7 +407,7 @@ class ResNet1D(nn.Module):
 
 
 # TODO: implement as arg of ResNet instead?
-class BottleneckResNet1D(ResNet1D):
+class BottleneckResNet2D(ResNet2D):
     """A version of ResNet that uses bottleneck blocks"""
 
     block = Bottleneck
