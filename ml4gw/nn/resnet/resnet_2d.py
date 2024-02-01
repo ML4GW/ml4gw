@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ml4gw.nn.norm import GroupNormGetter, NormLayer
+from ml4gw.nn.norm import GroupNorm2DGetter, NormLayer
 
 
 def convN(
@@ -245,7 +245,7 @@ class ResNet2D(nn.Module):
         super().__init__()
         # default to using InstanceNorm if no
         # norm layer is provided explicitly
-        self._norm_layer = norm_layer or GroupNormGetter()
+        self._norm_layer = norm_layer or GroupNorm2DGetter()
 
         self.inplanes = 64
         self.dilation = 1
@@ -407,7 +407,7 @@ class ResNet2D(nn.Module):
 
 
 # TODO: implement as arg of ResNet instead?
-class BottleneckResNet2d(ResNet2D):
+class BottleneckResNet2D(ResNet2D):
     """A version of ResNet that uses bottleneck blocks"""
 
     block = Bottleneck

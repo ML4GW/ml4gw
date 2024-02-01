@@ -60,7 +60,7 @@ class GroupNorm1D(torch.nn.Module):
         return shift + x * scale
 
 
-class GroupNormGetter:
+class GroupNorm1DGetter:
     """
     Utility for making a NormLayer Callable that maps from
     an integer number of channels to a torch Module. Useful
@@ -76,3 +76,22 @@ class GroupNormGetter:
         else:
             num_groups = min(num_channels, self.groups)
         return GroupNorm1D(num_channels, num_groups)
+
+
+# TODO generalize faster 1dDGroupNorm to 2D
+class GroupNorm2DGetter:
+    """
+    Utility for making a NormLayer Callable that maps from
+    an integer number of channels to a torch Module. Useful
+    for command-line parameterization with jsonargparse.
+    """
+
+    def __init__(self, groups: Optional[int] = None) -> None:
+        self.groups = groups
+
+    def __call__(self, num_channels: int) -> torch.nn.Module:
+        if self.groups is None:
+            num_groups = num_channels
+        else:
+            num_groups = min(num_channels, self.groups)
+        return torch.nn.GroupNorm(num_groups, num_channels)

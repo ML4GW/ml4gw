@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ml4gw.nn.norm import GroupNormGetter, NormLayer
+from ml4gw.nn.norm import GroupNorm1DGetter, NormLayer
 
 
 def convN(
@@ -248,7 +248,7 @@ class ResNet1D(nn.Module):
 
         # default to using InstanceNorm if no
         # norm layer is provided explicitly
-        self._norm_layer = norm_layer or GroupNormGetter()
+        self._norm_layer = norm_layer or GroupNorm1DGetter()
 
         # TODO: should we support passing a single string
         # for simplicity here?

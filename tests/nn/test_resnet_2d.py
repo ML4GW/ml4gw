@@ -2,11 +2,11 @@ import h5py  # noqa
 import pytest
 import torch
 
-from ml4gw.nn.resnet.resnet_1d import (
+from ml4gw.nn.resnet.resnet_2d import (
     BasicBlock,
     Bottleneck,
-    BottleneckResNet1D,
-    ResNet1D,
+    BottleneckResNet2D,
+    ResNet2D,
     conv1,
 )
 
@@ -16,8 +16,8 @@ def kernel_size(request):
     return request.param
 
 
-@pytest.fixture(params=[64, 128])
-def sample_rate(request):
+@pytest.fixture(params=[10, 50])
+def spectrogram_size(request):
     return request.param
 
 
@@ -41,7 +41,7 @@ def block(request):
     return request.param
 
 
-def test_blocks(block, kernel_size, stride, sample_rate, inplanes):
+def test_blocks(block, kernel_size, stride, spectrogram_size, inplanes):
     # TODO: test dilation for bottleneck
     planes = 4
 
@@ -58,12 +58,13 @@ def test_blocks(block, kernel_size, stride, sample_rate, inplanes):
         return
 
     block = block(inplanes, planes, kernel_size, stride, downsample=downsample)
-    x = torch.randn(8, inplanes, sample_rate)
+    x = torch.randn(8, inplanes, spectrogram_size, spectrogram_size)
     y = block(x)
 
-    assert len(y.shape) == 3
+    assert len(y.shape) == 4
     assert y.shape[1] == planes * block.expansion
-    assert y.shape[2] == sample_rate // stride
+    assert y.shape[2] == spectrogram_size // stride
+    assert y.shape[3] == spectrogram_size // stride
 
 
 @pytest.fixture(params=[1, 2, 3])
@@ -81,7 +82,7 @@ def stride_type(request):
     return request.param
 
 
-@pytest.fixture(params=[BottleneckResNet1D, ResNet1D])
+@pytest.fixture(params=[BottleneckResNet2D, ResNet2D])
 def architecture(request):
     return request.param
 
@@ -92,12 +93,12 @@ def test_resnet(
     layers,
     classes,
     in_channels,
-    sample_rate,
+    spectrogram_size,
     stride_type,
 ):
     if kernel_size % 2 == 0:
         with pytest.raises(ValueError):
-            nn = ResNet1D(in_channels, layers, classes, kernel_size)
+            nn = ResNet2D(in_channels, layers, classes, kernel_size)
         return
 
     if stride_type is not None:
@@ -106,7 +107,7 @@ def test_resnet(
     if (
         stride_type is not None
         and stride_type[0] == "dilation"
-        and architecture == ResNet1D
+        and architecture == ResNet2D
     ):
         with pytest.raises(NotImplementedError):
             nn = architecture(
@@ -121,7 +122,7 @@ def test_resnet(
     nn = architecture(
         in_channels, layers, classes, kernel_size, stride_type=stride_type
     )
-    x = torch.randn(8, in_channels, sample_rate)
+    x = torch.randn(8, in_channels, spectrogram_size, spectrogram_size)
     y = nn(x)
     assert y.shape == (8, classes)
 
