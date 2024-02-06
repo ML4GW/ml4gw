@@ -123,7 +123,7 @@ class FixedWhiten(FittableSpectralTransform):
         num_channels: float,
         kernel_length: float,
         sample_rate: float,
-        dtype: torch.dtype = torch.float32,
+        dtype: torch.dtype = torch.float64,
     ) -> None:
         super().__init__()
         self.num_channels = num_channels
