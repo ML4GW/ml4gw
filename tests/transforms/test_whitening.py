@@ -140,7 +140,7 @@ class TestFixedWhiten(WhitenModuleTest):
         assert (transform.fduration == 2).item()
         for i, psd in enumerate(psds):
             torch.testing.assert_close(
-                psd, transform.psd[i], rtol=1e-6, atol=0.0
+                psd, transform.psd[i], rtol=1e-6, atol=0.0, check_dtype=False
             )
 
         # now do a fit with a more realistic

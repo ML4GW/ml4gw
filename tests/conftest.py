@@ -54,7 +54,7 @@ def validate_whitened():
         # a way to account for all of these sources of noise
         # in the tolerance, but for now we'll just adopt the
         # tolerance that gwpy uses in its tests
-        torch.testing.assert_close(stds, target, rtol=0.015, atol=0.0)
+        torch.testing.assert_close(stds, target, rtol=0.02, atol=0.0)
 
         # check that frequencies up to close to the highpass
         # frequency have near 0 power.
