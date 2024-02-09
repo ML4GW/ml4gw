@@ -21,8 +21,8 @@ pip install ml4gw torch==1.12.0 --extra-index-url=https://download.pytorch.org/w
 
 ```toml
 [tool.poetry.dependencies]
-python = "^3.8"  # python versions 3.8-3.10 are supported
-ml4gw = "^0.1.0"
+python = "^3.8"  # python versions 3.8-3.11 are supported
+ml4gw = "^0.3.0"
 ```
 
 To build against a specific PyTorch/CUDA combination, consult the PyTorch installation documentation above and specify the `extra-index-url` via the `tool.poetry.source` table in your `pyproject.toml`. For example, to build against CUDA 11.6, you would do something like:
@@ -30,7 +30,7 @@ To build against a specific PyTorch/CUDA combination, consult the PyTorch instal
 ```toml
 [tool.poetry.dependencies]
 python = "^3.8"
-ml4gw = "^0.1.0"
+ml4gw = "^0.3.0"
 torch = {version = "^1.12", source = "torch"}
 
 [[tool.poetry.source]]
@@ -39,6 +39,8 @@ url = "https://download.pytorch.org/whl/cu116"
 secondary = true
 default = false
 ```
+
+Note: if you are building against CUDA 11.6 or 11.7, make sure that you are using python 3.8, 3.9, or 3.10. Python 3.11 is incompatible with `torchaudio` 0.13, and the following `torchaudio` version is incompatible with CUDA 11.7 and earlier.
 
 ## Use cases
 This library provided utilities for both data iteration and transformation via dataloaders defined in `ml4gw/dataloading` and transform layers exposed in `ml4gw/transforms`. Lower level functions and utilies are defined at the top level of the library and in the `utils` library.
