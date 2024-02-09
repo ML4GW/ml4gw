@@ -8,11 +8,17 @@ authors = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = "^3.8"
 
 # torch deps
-torch = "^1.10"
-torchaudio = "^0.13"
+torch = [
+    {version = "^1.10", python = ">=3.8,<3.11"},
+    {version = "^2.0", python = ">=3.11"}
+]
+torchaudio = [
+    {version = "^0.13", python = ">=3.8,<3.11"},
+    {version = "^2.0", python = ">=3.11"}
+]
 torchtyping = "^0.1"
 
 [tool.poetry.group.dev.dependencies]
@@ -56,6 +62,7 @@ python =
     3.8: py38
     3.9: py39
     3.10: py310
+    3.11: py311
 
 [testenv:py{38,39,310,311}]
 deps = 
