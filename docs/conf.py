@@ -29,6 +29,7 @@ author = "Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     "myst_parser",
     "sphinx.ext.githubpages",
