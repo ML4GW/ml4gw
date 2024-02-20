@@ -57,11 +57,11 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-augmentations-module">ml4gw.augmentations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-distributions-module">ml4gw.distributions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-gw-module">ml4gw.gw module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-spectral-module">ml4gw.spectral module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-types-module">ml4gw.types module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.augmentations">ml4gw.augmentations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.distributions">ml4gw.distributions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.gw">ml4gw.gw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.spectral">ml4gw.spectral module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.types">ml4gw.types module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw">Module contents</a></li>
 </ul>
 </li>
@@ -101,14 +101,125 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
-<section id="ml4gw-nn-streaming-online-average-module">
-<h2>ml4gw.nn.streaming.online_average module<a class="headerlink" href="#ml4gw-nn-streaming-online-average-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.nn.streaming.online_average">
+<span id="ml4gw-nn-streaming-online-average-module"></span><h2>ml4gw.nn.streaming.online_average module<a class="headerlink" href="#module-ml4gw.nn.streaming.online_average" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.nn.streaming.online_average.OnlineAverager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.streaming.online_average.</span></span><span class="sig-name descname"><span class="pre">OnlineAverager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_updates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.streaming.online_average.OnlineAverager" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Module for performing stateful online averaging of
+batches of overlapping timeseries. At present, the
+first <cite>num_updates</cite> predictions produced by this
+model will underestimate the true average.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>update_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The number of samples separating the timestamps
+of subsequent inputs.</p></li>
+<li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The number of batched inputs to expect at inference
+time.</p></li>
+<li><p><strong>num_updates</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The number of steps over which to average predictions
+before returning them.</p></li>
+<li><p><strong>num_channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The expected channel dimension of the input passed
+to the module at inference time.</p></li>
+<li><p><strong>offset</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- Number of samples to throw away from the front
+edge of the kernel when averaging.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.nn.streaming.online_average.OnlineAverager.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.streaming.online_average.OnlineAverager.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.nn.streaming.online_average.OnlineAverager.get_initial_state">
+<span class="sig-name descname"><span class="pre">get_initial_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.streaming.online_average.OnlineAverager.get_initial_state" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="ml4gw-nn-streaming-snapshotter-module">
-<h2>ml4gw.nn.streaming.snapshotter module<a class="headerlink" href="#ml4gw-nn-streaming-snapshotter-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.nn.streaming.snapshotter">
+<span id="ml4gw-nn-streaming-snapshotter-module"></span><h2>ml4gw.nn.streaming.snapshotter module<a class="headerlink" href="#module-ml4gw.nn.streaming.snapshotter" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.nn.streaming.snapshotter.Snapshotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.streaming.snapshotter.</span></span><span class="sig-name descname"><span class="pre">Snapshotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels_per_snapshot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.streaming.snapshotter.Snapshotter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Model for converting streaming state updates into
+a batch of overlapping snaphots of a multichannel
+timeseries. Can support multiple timeseries in a
+single state update via the <cite>channels_per_snapshot</cite>
+kwarg.</p>
+<p>Specifically, maps tensors of shape
+<cite>(num_channels, batch_size * stride_size)</cite> to a tensor
+of shape <cite>(batch_size, num_channels, snapshot_size)</cite>.
+If <cite>channels_per_snapshot</cite> is specified, it will return
+<cite>len(channels_per_snapshot)</cite> tensors of this shape,
+with the channel dimension replaced by the corresponding
+value of <cite>channels_per_snapshot</cite>. The last tensor returned
+at call time will be the current state that can be passed
+to the next <cite>forward</cite> call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of channels in the timeseries. If
+<cite>channels_per_snapshot</cite> is not <cite>None</cite>,
+this should be equal to <cite>sum(channels_per_snapshot)</cite>.</p></li>
+<li><p><strong>snapshot_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The size of the output snapshot windows in
+number of samples</p></li>
+<li><p><strong>stride_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The number of samples in between each output
+snapshot</p></li>
+<li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The number of snapshots to produce at each
+update. The last dimension of the input
+tensor should have size <cite>batch_size * stride_size</cite>.</p></li>
+<li><p><strong>channels_per_snapshot</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span>) -- How to split up the channels in the timeseries
+for different tensors. If left as <cite>None</cite>, all
+the channels will be returned in a single tensor.
+Otherwise, the channels will be split up into
+<cite>len(channels_per_snapshot)</cite> tensors, with each
+tensor's channel dimension being equal to the
+corresponding value in <cite>channels_per_snapshot</cite>.
+Therefore, if specified, these values should
+add up to <cite>num_channels</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.nn.streaming.snapshotter.Snapshotter.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.streaming.snapshotter.Snapshotter.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.nn.streaming.snapshotter.Snapshotter.get_initial_state">
+<span class="sig-name descname"><span class="pre">get_initial_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.streaming.snapshotter.Snapshotter.get_initial_state" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.nn.streaming">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ml4gw.nn.streaming" title="Permalink to this heading"></a></h2>
 </section>
 </section>
 

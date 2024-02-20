@@ -57,11 +57,11 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-augmentations-module">ml4gw.augmentations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-distributions-module">ml4gw.distributions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-gw-module">ml4gw.gw module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-spectral-module">ml4gw.spectral module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-types-module">ml4gw.types module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.augmentations">ml4gw.augmentations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.distributions">ml4gw.distributions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.gw">ml4gw.gw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.spectral">ml4gw.spectral module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.types">ml4gw.types module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw">Module contents</a></li>
 </ul>
 </li>
@@ -100,17 +100,191 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
-<section id="ml4gw-dataloading-chunked-dataset-module">
-<h2>ml4gw.dataloading.chunked_dataset module<a class="headerlink" href="#ml4gw-dataloading-chunked-dataset-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.dataloading.chunked_dataset">
+<span id="ml4gw-dataloading-chunked-dataset-module"></span><h2>ml4gw.dataloading.chunked_dataset module<a class="headerlink" href="#module-ml4gw.dataloading.chunked_dataset" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.dataloading.chunked_dataset.ChunkedTimeSeriesDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.chunked_dataset.</span></span><span class="sig-name descname"><span class="pre">ChunkedTimeSeriesDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk_it</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches_per_chunk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.chunked_dataset.ChunkedTimeSeriesDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></p>
+<p>Wrapper dataset that will loop through chunks of timeseries
+data produced by another iterable and sample windows from
+these chunks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chunk_it</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></span>) -- Iterator which will produce chunks of timeseries
+data to sample windows from. Should have shape
+<cite>(N, C, T)</cite>, where <cite>N</cite> is the number of chunks
+to sample from, <cite>C</cite> is the number of channels,
+and <cite>T</cite> is the number of samples along the
+time dimension for each chunk.</p></li>
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Size of windows to be sampled from each chunk.
+Should be less than the size of each chunk
+along the time dimension.</p></li>
+<li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of windows to sample at each iteration</p></li>
+<li><p><strong>batches_per_chunk</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of batches of windows to sample from
+each chunk before moving on to the next one.
+Sampling fewer batches from each chunk means
+a lower likelihood of sampling duplicate windows,
+but an increase in chunk-loading overhead.</p></li>
+<li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- Whether the windows sampled from individual
+channels in each batch element should be
+sampled coincidentally, i.e. consisting of
+the same timesteps, or whether each window
+should be sample independently from the others.</p></li>
+<li><p><strong>device</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Which device chunks should be moved to upon loading.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="ml4gw-dataloading-hdf5-dataset-module">
-<h2>ml4gw.dataloading.hdf5_dataset module<a class="headerlink" href="#ml4gw-dataloading-hdf5-dataset-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.dataloading.hdf5_dataset">
+<span id="ml4gw-dataloading-hdf5-dataset-module"></span><h2>ml4gw.dataloading.hdf5_dataset module<a class="headerlink" href="#module-ml4gw.dataloading.hdf5_dataset" title="Permalink to this heading"></a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.ContiguousHdf5Warning">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.hdf5_dataset.</span></span><span class="sig-name descname"><span class="pre">ContiguousHdf5Warning</span></span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.ContiguousHdf5Warning" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.hdf5_dataset.</span></span><span class="sig-name descname"><span class="pre">Hdf5TimeSeriesDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fnames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></p>
+<p>Iterable dataset that samples and loads windows of
+timeseries data uniformly from a set of HDF5 files.
+It is _strongly_ recommended that these files have been
+written using [chunked storage]
+(<a class="reference external" href="https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage">https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage</a>).
+This has shown to produce increases in read-time speeds
+of over an order of magnitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fnames</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Paths to HDF5 files from which to sample data.</p></li>
+<li><p><strong>channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Datasets to read from the indicated files, which
+will be stacked along dim 1 of the generated batches
+during iteration.</p></li>
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Size of the windows to read, in number of samples.
+This will be the size of the last dimension of the
+generated batches.</p></li>
+<li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of windows to sample at each iteration.</p></li>
+<li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of batches to generate during each call
+to <cite>__iter__</cite>.</p></li>
+<li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Whether windows for each channel in a given batch
+element should be sampled coincidentally, i.e.
+corresponding to the same time indices from the
+same files, or should be sampled independently.
+For the latter case, users can either specify
+<cite>False</cite>, which will sample filenames independently
+for each channel, or <cite>&quot;files&quot;</cite>, which will sample
+windows independently within a given file for each
+channel. The latter setting limits the amount of
+entropy in the effective dataset, but can provide
+over 2x improvement in total throughput.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_batch">
+<span class="sig-name descname"><span class="pre">sample_batch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_batch" title="Permalink to this definition"></a></dt>
+<dd><p>Sample a single batch of multichannel timeseries</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_fnames">
+<span class="sig-name descname"><span class="pre">sample_fnames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_fnames" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="ml4gw-dataloading-in-memory-dataset-module">
-<h2>ml4gw.dataloading.in_memory_dataset module<a class="headerlink" href="#ml4gw-dataloading-in-memory-dataset-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.dataloading.in_memory_dataset">
+<span id="ml4gw-dataloading-in-memory-dataset-module"></span><h2>ml4gw.dataloading.in_memory_dataset module<a class="headerlink" href="#module-ml4gw.dataloading.in_memory_dataset" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.dataloading.in_memory_dataset.InMemoryDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.in_memory_dataset.</span></span><span class="sig-name descname"><span class="pre">InMemoryDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches_per_epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.in_memory_dataset.InMemoryDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Dataset for iterating through in-memory multi-channel timeseries</p>
+<p>Dataset for arrays of timeseries data which can be stored
+in-memory all at once. Iterates through the data by sampling
+fixed-length windows from all channels. The precise mechanism
+for this iteration is determined by combinations of the keyword
+arguments. See their descriptions for details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Timeseries data to be iterated through. Should have
+shape <cite>(num_channels, length * sample_rate)</cite>. Windows
+will be sampled from the time (1st) dimension for all
+channels along the channel (0th) dimension.</p></li>
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The length of the windows to sample from <cite>X</cite> in units
+of samples.</p></li>
+<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Target timeseries to be iterated through. If specified,
+should be a single channel and have shape
+<cite>(length * sample_rate,)</cite>. If left as <cite>None</cite>, only windows
+sampled from <cite>X</cite> will be returned during iteration.
+Otherwise, windows sampled from both arrays will be
+returned. Note that if sampling is performed non-coincidentally,
+there's no sensible way to align windows sampled from this
+array with the windows sampled from <cite>X</cite>, so this combination
+of arguments is not permitted.</p></li>
+<li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Maximum number of windows to return at each iteration. Will
+be the length of the 0th dimension of the returned array(s).
+If <cite>batches_per_epoch</cite> is specified, this will be the length
+of _every_ array returned during iteration. Otherwise, it's
+possible that the last array will be shorter due to the number
+of windows in the timeseries being a non-integer multiple of
+<cite>batch_size</cite>.</p></li>
+<li><p><strong>stride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The resolution at which windows will be sampled from the
+specified timeseries, in units of samples. E.g. if
+<cite>stride=2</cite>, the first sample of each window can only be
+from an index of <cite>X</cite> which is a multiple of 2. Obviously,
+this reduces the number of windows which can be iterated
+through by a factor of <cite>stride</cite>.</p></li>
+<li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- Number of batches of window to produce during iteration
+before raising a <cite>StopIteration</cite>. Must be specified if
+performing non-coincident sampling. Otherwise, if left
+as <cite>None</cite>, windows will be sampled until the entire
+timeseries has been exhausted. Note that
+<cite>batch_size * batches_per_epoch</cite> must be be small
+enough to be able to be fulfilled by the number of
+windows in the timeseries, otherise a <cite>ValueError</cite>
+will be raised.</p></li>
+<li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- Whether to sample windows from the channels of <cite>X</cite>
+using the same indices or independently. Can't be
+<cite>True</cite> if <cite>batches_per_epoch</cite> is <cite>None</cite> or <cite>y</cite> is
+_not_ <cite>None</cite>.</p></li>
+<li><p><strong>shuffle</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- Whether to sample windows from timeseries randomly
+or in order along the time axis. If <cite>coincident=False</cite>
+and <cite>shuffle=False</cite>, channels will be iterated through
+with the index along the last channel moving fastest.</p></li>
+<li><p><strong>device</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Which device to host the timeseries arrays on</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.dataloading.in_memory_dataset.InMemoryDataset.num_kernels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_kernels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ml4gw.dataloading.in_memory_dataset.InMemoryDataset.num_kernels" title="Permalink to this definition"></a></dt>
+<dd><p>The number of windows contained in the timeseries if we
+sample at the specified stride.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.dataloading">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ml4gw.dataloading" title="Permalink to this heading"></a></h2>
 </section>
 </section>
 

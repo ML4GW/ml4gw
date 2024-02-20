@@ -57,11 +57,43 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ml4gw-augmentations-module">ml4gw.augmentations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ml4gw-distributions-module">ml4gw.distributions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ml4gw-gw-module">ml4gw.gw module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ml4gw-spectral-module">ml4gw.spectral module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ml4gw-types-module">ml4gw.types module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ml4gw.augmentations">ml4gw.augmentations module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.augmentations.SignalInverter"><code class="docutils literal notranslate"><span class="pre">SignalInverter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.augmentations.SignalReverser"><code class="docutils literal notranslate"><span class="pre">SignalReverser</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ml4gw.distributions">ml4gw.distributions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.Cosine"><code class="docutils literal notranslate"><span class="pre">Cosine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.LogNormal"><code class="docutils literal notranslate"><span class="pre">LogNormal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.LogUniform"><code class="docutils literal notranslate"><span class="pre">LogUniform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.PowerLaw"><code class="docutils literal notranslate"><span class="pre">PowerLaw</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.Uniform"><code class="docutils literal notranslate"><span class="pre">Uniform</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ml4gw.gw">ml4gw.gw module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.breathing"><code class="docutils literal notranslate"><span class="pre">breathing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.compute_antenna_responses"><code class="docutils literal notranslate"><span class="pre">compute_antenna_responses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.compute_ifo_snr"><code class="docutils literal notranslate"><span class="pre">compute_ifo_snr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.compute_network_snr"><code class="docutils literal notranslate"><span class="pre">compute_network_snr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.compute_observed_strain"><code class="docutils literal notranslate"><span class="pre">compute_observed_strain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.cross"><code class="docutils literal notranslate"><span class="pre">cross()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.get_ifo_geometry"><code class="docutils literal notranslate"><span class="pre">get_ifo_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.outer"><code class="docutils literal notranslate"><span class="pre">outer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.plus"><code class="docutils literal notranslate"><span class="pre">plus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.reweight_snrs"><code class="docutils literal notranslate"><span class="pre">reweight_snrs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.gw.shift_responses"><code class="docutils literal notranslate"><span class="pre">shift_responses()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ml4gw.spectral">ml4gw.spectral module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.spectral.fast_spectral_density"><code class="docutils literal notranslate"><span class="pre">fast_spectral_density()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.spectral.median"><code class="docutils literal notranslate"><span class="pre">median()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd"><code class="docutils literal notranslate"><span class="pre">normalize_by_psd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.spectral.spectral_density"><code class="docutils literal notranslate"><span class="pre">spectral_density()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.spectral.truncate_inverse_power_spectrum"><code class="docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.spectral.whiten"><code class="docutils literal notranslate"><span class="pre">whiten()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ml4gw.types">ml4gw.types module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ml4gw">Module contents</a></li>
 </ul>
 </li>
@@ -110,20 +142,662 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
-<section id="ml4gw-augmentations-module">
-<h2>ml4gw.augmentations module<a class="headerlink" href="#ml4gw-augmentations-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.augmentations">
+<span id="ml4gw-augmentations-module"></span><h2>ml4gw.augmentations module<a class="headerlink" href="#module-ml4gw.augmentations" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.augmentations.SignalInverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.augmentations.</span></span><span class="sig-name descname"><span class="pre">SignalInverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalInverter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Takes a tensor of timeseries of arbitrary dimension
+and randomly inverts (i.e. h(t) -&gt; -h(t))
+each timeseries with probability <cite>prob</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prob</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Probability that a timeseries is inverted</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.augmentations.SignalInverter.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalInverter.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.augmentations.SignalReverser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.augmentations.</span></span><span class="sig-name descname"><span class="pre">SignalReverser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalReverser" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Takes a tensor of timeseries of arbitrary dimension
+and randomly reverses (i.e. h(t) -&gt; h(-t))
+each timeseries with probability <cite>prob</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prob</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Probability that a kernel is reversed</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.augmentations.SignalReverser.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalReverser.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="ml4gw-distributions-module">
-<h2>ml4gw.distributions module<a class="headerlink" href="#ml4gw-distributions-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.distributions">
+<span id="ml4gw-distributions-module"></span><h2>ml4gw.distributions module<a class="headerlink" href="#module-ml4gw.distributions" title="Permalink to this heading"></a></h2>
+<p>Module containing callables classes for generating samples
+from specified distributions. Each callable should map from
+an integer <cite>N</cite> to a 1D torch <cite>Tensor</cite> containing <cite>N</cite> samples
+from the corresponding distribution.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.Cosine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">Cosine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.Cosine" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Sample from a raised Cosine distribution between
+<cite>low</cite> and <cite>high</cite>. Based on the implementation from
+bilby documented here:
+<a class="reference external" href="https://lscsoft.docs.ligo.org/bilby/api/bilby.core.prior.analytical.Cosine.html">https://lscsoft.docs.ligo.org/bilby/api/bilby.core.prior.analytical.Cosine.html</a>  # noqa</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.LogNormal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">LogNormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.LogNormal" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Sample from a log normal distribution with the
+specified <cite>mean</cite> and standard deviation <cite>std</cite>.
+If a <cite>low</cite> value is specified, values sampled
+lower than this will be clipped to <cite>low</cite>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.LogUniform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">LogUniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.LogUniform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ml4gw.distributions.Uniform" title="ml4gw.distributions.Uniform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Uniform</span></code></a></p>
+<p>Sample from a log uniform distribution</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.PowerLaw">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">PowerLaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.PowerLaw" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<blockquote>
+<div><p>Sample from a power law distribution,
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>p(x) pprox x^{-lpha}.
+</pre></div>
+</div>
+<p>Index alpha must be greater than 1.
+This could be used, for example, as a universal distribution of
+signal-to-noise ratios (SNRs) from uniformly volume distributed
+sources
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span><span class="p">(</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>ho) = 3*
+ho_0^3 /
+ho^4</p>
+<blockquote>
+<div><p>where :math:<a href="#id1"><span class="problematic" id="id2">`</span></a></p>
+</div></blockquote>
+<dl class="simple">
+<dt>ho_0` is a representative minimum SNR</dt><dd><p>considered for detection. See, for example,
+<a class="reference external" href="https://arxiv.org/abs/1102.5421">Schutz (2011)</a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.Uniform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">Uniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.Uniform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Sample uniformly between <cite>low</cite> and <cite>high</cite>.</p>
+</dd></dl>
+
 </section>
-<section id="ml4gw-gw-module">
-<h2>ml4gw.gw module<a class="headerlink" href="#ml4gw-gw-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.gw">
+<span id="ml4gw-gw-module"></span><h2>ml4gw.gw module<a class="headerlink" href="#module-ml4gw.gw" title="Permalink to this heading"></a></h2>
+<p>Tools for manipulating raw gravitational waveforms
+and projecting them onto interferometer responses.
+Much of the projection code is an extension of the
+implementation made available in bilby:</p>
+<p><a class="reference external" href="https://arxiv.org/abs/1811.02042">https://arxiv.org/abs/1811.02042</a></p>
+<p>Specifically the code here:
+<a class="reference external" href="https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py">https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py</a></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.breathing">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">breathing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.breathing" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.compute_antenna_responses">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_antenna_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_tensors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_antenna_responses" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the antenna pattern factors of a batch of
+waveforms as a function of the sky parameters of
+their sources as well as the detector tensors of
+the interferometers whose response is being
+calculated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle of each source in radians relative
+to the celestial equator</p></li>
+<li><p><strong>psi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's
+natural polarization basis and the basis
+which has the 0th unit vector pointing along
+the celestial equator</p></li>
+<li><p><strong>phi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's right
+ascension and the right ascension of the
+geocenter</p></li>
+<li><p><strong>detector_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Detector tensor for each of the interferometers
+for which a response is being calculated, stacked
+along the 0th axis</p></li>
+<li><p><strong>modes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Which polarization modes to compute the response for</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>A tensor representing interferometer antenna pattern</dt><dd><p>factors for each of the polarizations of each of
+the waveforms, for each interferometer.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.compute_ifo_snr">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_ifo_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_ifo_snr" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the SNRs of a batch of interferometer responses</p>
+<p>Compute the signal to noise ratio (SNR) of individual
+interferometer responses to gravitational waveforms with
+respect to a background PSD for each interferometer. The
+SNR of the $i$th waveform at the $j$th interferometer
+is computed as:</p>
+<dl class="simple">
+<dt>$$rho_{ij} =</dt><dd><p>4 int_{f_{text{min}}}^{f_{text{max}}}
+frac{tilde{h_{ij}}(f)tilde{h_{ij}}^*(f)}
+{S_n^{(j)}(f)}df$$</p>
+</dd>
+</dl>
+<p>Where $f_{text{min}}$ is a minimum frequency denoted
+by <cite>highpass</cite>, <cite>f_{text{max}}</cite> is the Nyquist frequency
+dictated by <cite>sample_rate</cite>; <cite>tilde{h_{ij}}</cite> and <cite>tilde{h_{ij}}*</cite>
+indicate the fourier transform of the $i$th waveform at
+the $j$th inteferometer and its complex conjugate, respectively;
+and $S_n^{(j)}$ is the backround PSD at the $j$th interferometer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- A batch of interferometer responses to a batch of
+raw gravitational waveforms</p></li>
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The one-sided power spectral density of the background
+noise at each interferometer to which a response
+in <cite>responses</cite> has been calculated. If 2D, each row of
+<cite>psd</cite> will be assumed to be the background PSD for each
+channel of _every_ batch element in <cite>responses</cite>. If 3D,
+this should contain a background PSD for each channel
+of each element in <cite>responses</cite>, and therefore the first
+two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
+have been sampled. Upon fourier transforming, should
+match the frequency resolution of the provided PSDs.</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+If a tensor is provided, it will be assumed to be a
+pre-computed mask used to 0-out low frequency components.
+If a float, it will be used to compute such a mask. If
+left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
+will contribute to the SNR calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Batch of SNRs computed for each interferometer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.compute_network_snr">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_network_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_network_snr" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the total SNR from a gravitational waveform
+from a network of interferometers. The total SNR for
+the $i$th waveform is computed as</p>
+<p>$$rho_i = sqrt{sum_{j}^{N}rho_{ij}^2}$$</p>
+<p>where rho_{ij} is the SNR for the $i$th waveform at
+the $j$th interferometer in the network and $N$ is
+the total number of interferometers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- A batch of interferometer responses to a batch of
+raw gravitational waveforms</p></li>
+<li><p><strong>backgrounds</strong> -- The one-sided power spectral density of the background
+noise at each interferometer to which a response
+in <cite>responses</cite> has been calculated. If 2D, each row of
+<cite>psd</cite> will be assumed to be the background PSD for each
+channel of _every_ batch element in <cite>responses</cite>. If 3D,
+this should contain a background PSD for each channel
+of each element in <cite>responses</cite>, and therefore the first
+two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
+have been sampled. Upon fourier transforming, should
+match the frequency resolution of the provided PSDs.</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+If a tensor is provided, it will be assumed to be a
+pre-computed mask used to 0-out low frequency components.
+If a float, it will be used to compute such a mask. If
+left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
+will contribute to the SNR calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Batch of SNRs for each waveform across the interferometer network</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.compute_observed_strain">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_observed_strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_tensors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">polarizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_observed_strain" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the strain timeseries $h(t)$ observed by a network
+of interferometers from the given polarization timeseries
+corresponding to gravitational waveforms from sources with
+the indicated sky parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dec</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Declination of each source in radians relative
+to the celestial north</p></li>
+<li><p><strong>psi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's
+natural polarization basis and the basis
+which has the 0th unit vector pointing along
+the celestial equator</p></li>
+<li><p><strong>phi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's right
+ascension and the right ascension of the
+geocenter</p></li>
+<li><p><strong>detector_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Detector tensor for each of the interferometers
+for which observed strain is being calculated,
+stacked along the 0th axis</p></li>
+<li><p><strong>detector_vertices</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Vertices for each interferometer's spatial location
+relative to the geocenter. Used to compute delay
+between the waveform observed at the geocenter and
+the one observed at the detector site. To avoid
+adding any delay between the two, reset your coordinates
+such that the desired interferometer is at <cite>(0., 0., 0.)</cite>.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which the polarization timeseries have been sampled</p></li>
+<li><p><strong>polarziations</strong> -- Timeseries for each waveform polarization which
+contributes to the interferometer response. Allowed
+polarizations are <cite>cross</cite>, <cite>plus</cite>, and <cite>breathing</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor representing the observed strain at each
+interferometer for each waveform.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.cross">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">cross</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.cross" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.get_ifo_geometry">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">get_ifo_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">ifos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.get_ifo_geometry" title="Permalink to this definition"></a></dt>
+<dd><p>For a given list of interferometer names, retrieve and
+concatenate the associated detector tensors and vertices
+of those interferometers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ifos</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Names of the interferometers whose geometry to retrieve</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A concatenation of the detector tensors of each interferometer
+A concatenation of the vertices of each interferometer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.outer">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">outer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.outer" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the outer product of two batches of vectors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.plus">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">plus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.plus" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.reweight_snrs">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">reweight_snrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_snrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.reweight_snrs" title="Permalink to this definition"></a></dt>
+<dd><p>Scale interferometer responses such that they have a desired SNR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- A batch of interferometer responses to a batch of
+raw gravitational waveforms</p></li>
+<li><p><strong>target_snrs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Either a tensor of desired SNRs for each waveform,
+or a single SNR to which all waveforms should be scaled.</p></li>
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The one-sided power spectral density of the background
+noise at each interferometer to which a response
+in <cite>responses</cite> has been calculated. If 2D, each row of
+<cite>psd</cite> will be assumed to be the background PSD for each
+channel of _every_ batch element in <cite>responses</cite>. If 3D,
+this should contain a background PSD for each channel
+of each element in <cite>responses</cite>, and therefore the first
+two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
+have been sampled. Upon fourier transforming, should
+match the frequency resolution of the provided PSDs.</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+If a tensor is provided, it will be assumed to be a
+pre-computed mask used to 0-out low frequency components.
+If a float, it will be used to compute such a mask. If
+left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
+will contribute to the SNR calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Rescaled interferometer responses</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.gw.shift_responses">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">shift_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.shift_responses" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="ml4gw-spectral-module">
-<h2>ml4gw.spectral module<a class="headerlink" href="#ml4gw-spectral-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.spectral">
+<span id="ml4gw-spectral-module"></span><h2>ml4gw.spectral module<a class="headerlink" href="#module-ml4gw.spectral" title="Permalink to this heading"></a></h2>
+<p>Several implementation details are derived from the scipy csd and welch
+implementations. For more info, see</p>
+<p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html</a></p>
+<p>and</p>
+<p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html</a></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.fast_spectral_density">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">fast_spectral_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nperseg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.fast_spectral_density" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the power spectral density of a multichannel
+timeseries or a batch of multichannel timeseries, or
+the cross power spectral density of two such timeseries.
+This implementation is non-exact for the two lowest
+frequency bins, since it implements centering using the
+mean for the entire timeseries rather than on a per-
+window basis. The benefit of this is a faster implementation,
+which might be beneficial for cases where the lowest
+frequency components are going to be discarded anyway.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The timeseries tensor whose power spectral density
+to compute, or for cross spectral density the
+timeseries whose fft will be conjugated. Can have
+shape either
+<cite>(batch_size, num_channels, length * sample_rate)</cite>
+or <cite>(num_channels, length * sample_rate)</cite>.</p></li>
+<li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
+<li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Window array to multiply by each FFT window before
+FFT computation. Should have length <cite>nperseg // 2 + 1</cite>.</p></li>
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
+desired units for output tensor (e.g. letting this equal
+<cite>1 / (sample_rate * (window**2).sum())</cite> will give output
+units of density, $text{Hz}^-1$$.</p></li>
+<li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- How to aggregate the contributions of each FFT window to
+the spectral density. Allowed options are <cite>'mean'</cite> and
+<cite>'median'</cite>.</p></li>
+<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Timeseries tensor to compute cross spectral density
+with <cite>x</cite>. If left as <cite>None</cite>, <cite>x</cite>'s power spectral
+density will be returned. Otherwise, if <cite>x</cite> is 1D,
+<cite>y</cite> must also be 1D. If <cite>x</cite> is 2D, the assumption
+is that this represents a single multi-channel timeseries,
+and <cite>y</cite> must be either 2D or 1D. In the former case,
+the cross-spectral densities of each channel will be
+computed individually, so <cite>y</cite> must have the same shape as <cite>x</cite>.
+Otherwise, this will compute the CSD of each of <cite>x</cite>'s channels
+with <cite>y</cite>. If <cite>x</cite> is 3D, this will be assumed to be a batch
+of multi-channel timeseries. In this case, <cite>y</cite> can either
+be 3D, in which case each channel of each batch element will
+have its CSD calculated or 2D, which has two different options.
+If <cite>y</cite>'s 0th dimension matches <cite>x</cite>'s 0th dimension, it will
+be assumed that <cite>y</cite> represents a batch of 1D timeseries, and
+for each batch element this timeseries will have its CSD with
+each channel of the corresponding batch element of <cite>x</cite>
+calculated. Otherwise, it sill be assumed that <cite>y</cite> represents
+a single multi-channel timeseries, in which case each channel
+of <cite>y</cite> will have its CSD calculated with the corresponding
+channel in <cite>x</cite> across _all_ of <cite>x</cite>'s batch elements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Tensor of power spectral densities of <cite>x</cite> or its cross spectral</dt><dd><p>density with the timeseries in <cite>y</cite>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.median">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.median" title="Permalink to this definition"></a></dt>
+<dd><p>Implements a median calculation that matches numpy's
+behavior for an even number of elements and includes
+the same bias correction used by scipy's implementation.
+see <a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066</a> # noqa</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.normalize_by_psd">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">normalize_by_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.normalize_by_psd" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.spectral_density">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">spectral_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nperseg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.spectral_density" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the power spectral density of a multichannel
+timeseries or a batch of multichannel timeseries, or
+the cross power spectral density of two such timeseries.
+This implementation is exact for all frequency bins, but
+slower than the fast implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The timeseries tensor whose power spectral density
+to compute, or for cross spectral density the
+timeseries whose fft will be conjugated. Can have
+shape either
+<cite>(batch_size, num_channels, length * sample_rate)</cite>
+or <cite>(num_channels, length * sample_rate)</cite>.</p></li>
+<li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
+<li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Window array to multiply by each FFT window before
+FFT computation. Should have length <cite>nperseg // 2 + 1</cite>.</p></li>
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
+desired units for output tensor (e.g. letting this equal
+<cite>1 / (sample_rate * (window**2).sum())</cite> will give output
+units of density, $text{Hz}^-1$$.</p></li>
+<li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- How to aggregate the contributions of each FFT window to
+the spectral density. Allowed options are <cite>'mean'</cite> and
+<cite>'median'</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.truncate_inverse_power_spectrum">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">truncate_inverse_power_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.truncate_inverse_power_spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>Truncate the length of the time domain response
+of a whitening filter built using the specified
+<cite>psd</cite> so that it has maximum length <cite>fduration</cite>
+seconds. This is meant to mitigate the impact
+of sharp features in the background PSD causing
+time domain responses longer than the segments
+to which the whitening filter will be applied.</p>
+<p>Implementation details adapted from
+<a class="reference external" href="https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8">https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8</a>  # noqa</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The one-sided power spectraul density used
+to construct a whitening filter.</p></li>
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
+response of a whitening filter built using
+this PSD, or a window of this length to taper
+the edges of the time domain response of the
+filter. If passed as a float, a Hann window
+of this length will be used.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which the time domain data to which
+the whitening filter will be applied has been
+sampled.</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- If specified, will zero out the frequency response
+of all frequencies below this value in Hz. If left
+as <cite>None</cite>, no highpass filtering will be applied.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>The PSD with its time domain response truncated</dt><dd><p>to <cite>fduration</cite> and any highpassed frequencies
+tapered.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.whiten">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.whiten" title="Permalink to this definition"></a></dt>
+<dd><p>Whiten a batch of timeseries using the specified
+background one-sided power spectral densities (PSDs),
+modified to have the desired time domain response length
+<cite>fduration</cite> and possibly to highpass filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- batch of multichannel timeseries to whiten</p></li>
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- PSDs use to whiten the data. The frequency
+response of the whitening filter will be roughly
+the inverse of the square root of this PSD, ensuring
+that data from the same distribution will have
+approximately uniform power after whitening.
+If 2D, each batch element in <cite>X</cite> will be whitened
+using the same PSDs. If 3D, each batch element will
+be whitened by the PSDs contained along the 0th
+dimenion of <cite>psd</cite>, and so the first two dimensions
+of <cite>X</cite> and <cite>psd</cite> should match.</p></li>
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
+response of a whitening filter built using
+this PSD, or a window of this length to taper
+the edges of the time domain response of the
+filter. If passed as a float, a Hann window
+of this length will be used. Moreover, half of
+this length will be removed from each edge of
+the whitened timeseries to account for filter
+settle-in time.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which the data in <cite>X</cite> has been sampled</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The frequency in Hz at which to highpass filter
+the data, setting the frequency response in the
+whitening filter to 0. If left as <cite>None</cite>, no
+highpass filtering will be applied.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Batch of whitened multichannel timeseries with</dt><dd><p><cite>fduration / 2</cite> seconds trimmed from each side.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="ml4gw-types-module">
-<h2>ml4gw.types module<a class="headerlink" href="#ml4gw-types-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.types">
+<span id="ml4gw-types-module"></span><h2>ml4gw.types module<a class="headerlink" href="#module-ml4gw.types" title="Permalink to this heading"></a></h2>
 </section>
 <section id="module-ml4gw">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ml4gw" title="Permalink to this heading"></a></h2>

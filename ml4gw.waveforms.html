@@ -56,11 +56,11 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-augmentations-module">ml4gw.augmentations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-distributions-module">ml4gw.distributions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-gw-module">ml4gw.gw module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-spectral-module">ml4gw.spectral module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#ml4gw-types-module">ml4gw.types module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.augmentations">ml4gw.augmentations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.distributions">ml4gw.distributions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.gw">ml4gw.gw module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.spectral">ml4gw.spectral module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw.types">ml4gw.types module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.html#module-ml4gw">Module contents</a></li>
 </ul>
 </li>
@@ -99,23 +99,335 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
-<section id="ml4gw-waveforms-generator-module">
-<h2>ml4gw.waveforms.generator module<a class="headerlink" href="#ml4gw-waveforms-generator-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.waveforms.generator">
+<span id="ml4gw-waveforms-generator-module"></span><h2>ml4gw.waveforms.generator module<a class="headerlink" href="#module-ml4gw.waveforms.generator" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.ParameterSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.generator.</span></span><span class="sig-name descname"><span class="pre">ParameterSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.ParameterSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.ParameterSampler.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.ParameterSampler.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.WaveformGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.generator.</span></span><span class="sig-name descname"><span class="pre">WaveformGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_sampler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.WaveformGenerator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.WaveformGenerator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.WaveformGenerator.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="ml4gw-waveforms-phenom-d-module">
-<h2>ml4gw.waveforms.phenom_d module<a class="headerlink" href="#ml4gw-waveforms-phenom-d-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.waveforms.phenom_d">
+<span id="ml4gw-waveforms-phenom-d-module"></span><h2>ml4gw.waveforms.phenom_d module<a class="headerlink" href="#module-ml4gw.waveforms.phenom_d" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.AmpIntColFitCoeff">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">AmpIntColFitCoeff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.AmpIntColFitCoeff" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.FinalSpin0815">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">FinalSpin0815</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.FinalSpin0815" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.IMRPhenomD">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">IMRPhenomD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chirp_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.IMRPhenomD" title="Permalink to this definition"></a></dt>
+<dd><p>IMRPhenomD waveform</p>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>:</dt><dd><p>hp, hc</p>
+</dd>
+</dl>
 </section>
-<section id="ml4gw-waveforms-phenom-d-data-module">
-<h2>ml4gw.waveforms.phenom_d_data module<a class="headerlink" href="#ml4gw-waveforms-phenom-d-data-module" title="Permalink to this heading"></a></h2>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.PhenomInternal_EradRational0815">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">PhenomInternal_EradRational0815</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.PhenomInternal_EradRational0815" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.alpha1Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">alpha1Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.alpha1Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.alpha2Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">alpha2Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.alpha2Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.alpha3Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">alpha3Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.alpha3Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.alpha4Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">alpha4Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.alpha4Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.alpha5Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">alpha5Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.alpha5Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.beta1Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">beta1Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.beta1Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.beta2Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">beta2Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.beta2Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.beta3Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">beta3Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.beta3Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.chiPN">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">chiPN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Seta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.chiPN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.delta_values">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">delta_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.delta_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.fmaxCalc">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">fmaxCalc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fRD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fDM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.fmaxCalc" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.fring_fdamp">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">fring_fdamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.fring_fdamp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.gamma1_fun">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">gamma1_fun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.gamma1_fun" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.gamma2_fun">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">gamma2_fun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.gamma2_fun" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.gamma3_fun">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">gamma3_fun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.gamma3_fun" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_amp">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_amp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Seta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi22</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_amp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_htilde">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_htilde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chirp_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_htilde" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_inspiral_amp">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_inspiral_amp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Seta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi22</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_inspiral_amp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_inspiral_phase">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_inspiral_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_inspiral_phase" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_int_amp">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_int_amp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Seta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi22</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_int_amp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_int_phase">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_int_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_int_phase" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_mrd_amp">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_mrd_amp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_mrd_amp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_mrd_phase">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_mrd_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_mrd_phase" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.phenom_d_phase">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">phenom_d_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.phenom_d_phase" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.rho1_fun">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">rho1_fun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.rho1_fun" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.rho2_fun">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">rho2_fun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.rho2_fun" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.rho3_fun">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">rho3_fun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.rho3_fun" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.sigma1Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">sigma1Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.sigma1Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.sigma2Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">sigma2Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.sigma2Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.sigma3Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">sigma3Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.sigma3Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.sigma4Fit">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.phenom_d.</span></span><span class="sig-name descname"><span class="pre">sigma4Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.sigma4Fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="ml4gw-waveforms-sine-gaussian-module">
-<h2>ml4gw.waveforms.sine_gaussian module<a class="headerlink" href="#ml4gw-waveforms-sine-gaussian-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.waveforms.phenom_d_data">
+<span id="ml4gw-waveforms-phenom-d-data-module"></span><h2>ml4gw.waveforms.phenom_d_data module<a class="headerlink" href="#module-ml4gw.waveforms.phenom_d_data" title="Permalink to this heading"></a></h2>
 </section>
-<section id="ml4gw-waveforms-taylorf2-module">
-<h2>ml4gw.waveforms.taylorf2 module<a class="headerlink" href="#ml4gw-waveforms-taylorf2-module" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.waveforms.sine_gaussian">
+<span id="ml4gw-waveforms-sine-gaussian-module"></span><h2>ml4gw.waveforms.sine_gaussian module<a class="headerlink" href="#module-ml4gw.waveforms.sine_gaussian" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.waveforms.sine_gaussian.SineGaussian">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.sine_gaussian.</span></span><span class="sig-name descname"><span class="pre">SineGaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.sine_gaussian.SineGaussian" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Callable class for generating sine-Gaussian waveforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Sample rate of waveform</p></li>
+<li><p><strong>duration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Duration of waveform</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.sine_gaussian.semi_major_minor_from_e">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.sine_gaussian.</span></span><span class="sig-name descname"><span class="pre">semi_major_minor_from_e</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.sine_gaussian.semi_major_minor_from_e" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="module-ml4gw.waveforms.taylorf2">
+<span id="ml4gw-waveforms-taylorf2-module"></span><h2>ml4gw.waveforms.taylorf2 module<a class="headerlink" href="#module-ml4gw.waveforms.taylorf2" title="Permalink to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.GAMMA">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">GAMMA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5772156649015329</span></em><a class="headerlink" href="#ml4gw.waveforms.taylorf2.GAMMA" title="Permalink to this definition"></a></dt>
+<dd><p>Euler-Mascheroni constant. Same as lal.GAMMA</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.MPC_SEC">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">MPC_SEC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">102927125000000.0</span></em><a class="headerlink" href="#ml4gw.waveforms.taylorf2.MPC_SEC" title="Permalink to this definition"></a></dt>
+<dd><p>1 Mpc in seconds.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.MSUN_SI">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">MSUN_SI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.9884098706980507e+30</span></em><a class="headerlink" href="#ml4gw.waveforms.taylorf2.MSUN_SI" title="Permalink to this definition"></a></dt>
+<dd><p>Solar mass in kg. Same as lal.MSUN_SI</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.MTSUN_SI">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">MTSUN_SI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4.925490947641267e-06</span></em><a class="headerlink" href="#ml4gw.waveforms.taylorf2.MTSUN_SI" title="Permalink to this definition"></a></dt>
+<dd><p>1 solar mass in seconds. Same value as lal.MTSUN_SI</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.PI">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">PI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3.141592653589793</span></em><a class="headerlink" href="#ml4gw.waveforms.taylorf2.PI" title="Permalink to this definition"></a></dt>
+<dd><p>Archimedes constant. Same as lal.PI</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.TaylorF2">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">TaylorF2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.taylorf2.TaylorF2" title="Permalink to this definition"></a></dt>
+<dd><p>TaylorF2 up to 3.5 PN in phase. Newtonian SPA amplitude.</p>
+<section id="id1">
+<h3>Returns:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>:</dt><dd><p>hp, hc</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.taylorf2_amplitude">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">taylorf2_amplitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.taylorf2.taylorf2_amplitude" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.taylorf2_htilde">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">taylorf2_htilde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.taylorf2.taylorf2_htilde" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.taylorf2_phase">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.taylorf2.</span></span><span class="sig-name descname"><span class="pre">taylorf2_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.taylorf2.taylorf2_phase" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the inspiral phase for the TaylorF2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ml4gw.waveforms">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ml4gw.waveforms" title="Permalink to this heading"></a></h2>
 </section>
 </section>
 
