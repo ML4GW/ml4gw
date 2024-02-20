@@ -1,0 +1,21 @@
+name: Build and publish docs
+on:
+  push:
+    branches:
+      - main
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - 
+      name: Build docs
+      uses: ammaraskar/sphinx-action@master
+      with:
+        docs-folder: "docs/"
+    - 
+      name: Deploy pages
+      uses: JamesIves/github-pages-deploy-action@v4.2.5
+      with:
+        branch: gh-pages
+        folder: docs/_build/html
