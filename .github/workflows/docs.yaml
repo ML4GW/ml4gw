@@ -13,13 +13,12 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - name: Install
-      run: pip install .
-    - 
-      name: Build docs
-      uses: ammaraskar/sphinx-action@master
-      with:
-        docs-folder: "docs/"
+    - name: Install and Build
+      run: |
+        pip install .
+        cd docs
+        make clean
+        make html
     - 
       name: Deploy pages
       uses: JamesIves/github-pages-deploy-action@v4.2.5
