@@ -477,6 +477,7 @@ def rho3_fun(eta, eta2, xi):
 
 def FinalSpin0815(eta, eta2, chi1, chi2):
     Seta = torch.sqrt(1.0 - 4.0 * eta)
+    Seta = torch.nan_to_num(Seta)  # avoid nan around eta = 0.25
     m1 = 0.5 * (1.0 + Seta)
     m2 = 0.5 * (1.0 - Seta)
     m1s = m1 * m1
