@@ -6,6 +6,10 @@
 Welcome to ml4gw's documentation!
 =================================
 
+.. note:: 
+   This documentation is a work in progress!
+   If you have any questions or suggestions, please feel free to reach out to ml4gw@ligo.mit.edu
+
 ml4gw
 =====
 ml4gw is a library of `pytorch  <https://pytorch.org/docs/stable/index.html>`_ utilities 
@@ -20,6 +24,13 @@ The code can be found on github at `<https://github.com/ml4gw/ml4gw>`_
 
    installation
    modules
+
+Projects
+========
+Currently, the following projects are using ml4gw to support their research:
+
+* `Aframe <https://github.com/ml4gw/aframev2>`_ - Gravitational wave detection of binary black hole mergers
+* `PE <https://github.com/ml4gw/aframev2>`_ - Parameter estimation of gravitational wave signals
 
 
 Development
