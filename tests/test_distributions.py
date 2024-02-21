@@ -11,28 +11,6 @@ from ml4gw import distributions
 # distribution has the expected shape?
 
 
-def test_uniform():
-    sampler = distributions.Uniform()
-
-    samples = sampler(10)
-    assert len(samples) == 10
-    assert ((0 <= samples) & (samples <= 1)).all()
-
-    sampler = distributions.Uniform(-3, 5)
-    samples = sampler(100)
-    assert len(samples) == 100
-    assert ((-3 <= samples) & (samples <= 5)).all()
-
-    # check that the mean is roughly correct
-    # (within three standard deviations)
-    samples = sampler(100000)
-    mean = samples.mean().item()
-    variance = 64 / 12
-    sample_variance = variance / 10000
-    sample_std = sample_variance**0.5
-    assert abs(mean - 1) < (3 * sample_std)
-
-
 def test_log_uniform():
     sampler = distributions.LogUniform(math.e, math.e**2)
     samples = sampler.sample((10,))
@@ -61,25 +39,6 @@ def test_cosine():
     samples = sampler.sample((100,))
     assert len(samples) == 100
     assert ((-3 <= samples) & (samples <= 5)).all()
-
-
-def test_log_normal():
-    sampler = distributions.LogNormal(6, 4)
-    samples = sampler(10)
-    assert len(samples) == 10
-    assert (0 < samples).all()
-
-    sampler = distributions.LogNormal(6, 4, 3)
-    samples = sampler(100)
-    assert len(samples) == 100
-    assert (3 <= samples).all()
-
-    # check that mean is roughly correct
-    # (within 2 standard deviations)
-    sampler = distributions.LogNormal(10, 2)
-    samples = sampler(10000)
-    mean = samples.mean().item()
-    assert (abs(mean - 10) / 10) < (3 * 2 / 10000**0.5)
 
 
 def test_power_law():
