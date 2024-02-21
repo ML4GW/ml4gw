@@ -132,4 +132,16 @@ def test_power_law_distribution():
 
     popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
     # popt[1] is the index
-    assert popt[1] == pytest.approx(2, rel=1e-1)
+    assert popt[1] == pytest.approx(2, rel=5e-2)
+
+    # test 1/x distribution
+    inverse_in_distance = distributions.PowerLawDistribution(
+        min_dist, max_dist, index=-1
+    )
+    samples = inverse_in_distance.sample((10000,)).numpy()
+    counts, ebins = np.histogram(samples, bins=100)
+    bins = ebins[1:] + ebins[:-1]
+    bins *= 0.5
+    popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
+    # popt[1] is the index
+    assert popt[1] == pytest.approx(-1, rel=5e-2)

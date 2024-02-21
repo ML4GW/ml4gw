@@ -191,16 +191,20 @@ class PowerLawDistribution(dist.TransformedDistribution):
         if index == 0:
             raise RuntimeError("Index of 0 is the same as Uniform")
         elif index == -1:
-            raise RuntimeError("Supply index less that -1 or greater than 0")
-        index_plus = index + 1
-        base_min = minimum**index_plus / index_plus
-        base_max = maximum**index_plus / index_plus
+            base_min = torch.as_tensor(minimum).log()
+            base_max = torch.as_tensor(maximum).log()
+            transforms = [dist.ExpTransform()]
+        else:
+            index_plus = index + 1
+            base_min = minimum**index_plus / index_plus
+            base_max = maximum**index_plus / index_plus
+            transforms = [
+                dist.AffineTransform(loc=0, scale=index_plus),
+                dist.PowerTransform(1 / index_plus),
+            ]
         base_dist = dist.Uniform(base_min, base_max, validate_args=False)
         super().__init__(
             base_dist,
-            [
-                dist.AffineTransform(loc=0, scale=index_plus),
-                dist.PowerTransform(1 / index_plus),
-            ],
+            transforms,
             validate_args=validate_args,
         )
