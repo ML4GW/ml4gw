@@ -24,12 +24,14 @@ def sample_rate(request):
 
 def test_parameter_sampler(n_samples):
     parameter_sampler = ParameterSampler(
-        phi=distributions.Uniform(0, 2 * pi),
+        phi=torch.distributions.Uniform(0, 2 * pi),
         dec=distributions.Cosine(),
         snr=distributions.LogNormal(6, 4, 3),
     )
 
-    samples = parameter_sampler(n_samples)
+    samples = parameter_sampler(
+        n_samples,
+    )
 
     for k in ["phi", "dec", "snr"]:
         assert len(samples[k]) == n_samples
@@ -52,9 +54,9 @@ def test_waveform_generator(sample_rate, duration, n_samples):
         return waveforms
 
     parameter_sampler = ParameterSampler(
-        amplitude=distributions.Uniform(0, 1),
-        frequency=distributions.Uniform(0, 1),
-        phase=distributions.Uniform(0, 2 * pi),
+        amplitude=torch.distributions.Uniform(0, 1),
+        frequency=torch.distributions.Uniform(0, 1),
+        phase=torch.distributions.Uniform(0, 2 * pi),
     )
 
     generator = WaveformGenerator(waveform, parameter_sampler)

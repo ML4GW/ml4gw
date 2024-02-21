@@ -6,6 +6,7 @@ from the corresponding distribution.
 """
 
 import math
+from typing import Optional
 
 import torch
 import torch.distributions as dist
@@ -80,6 +81,22 @@ class LogUniform(dist.TransformedDistribution):
             [dist.ExpTransform()],
             validate_args=validate_args,
         )
+
+
+class LogNormal(dist.LogNormal):
+    def __init__(
+        self,
+        mean: float,
+        std: float,
+        low: Optional[float] = None,
+        validate_args=None,
+    ):
+        self.low = low
+        super().__init__(loc=mean, scale=std, validate_args=validate_args)
+
+    def support(self):
+        if self.low is not None:
+            return dist.constraints.greater_than(self.low)
 
 
 class PowerLaw(dist.TransformedDistribution):
