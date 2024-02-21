@@ -12,7 +12,7 @@ class ParameterSampler(torch.nn.Module):
         self,
         N: int,
     ):
-        return {k: v(N) for k, v in self.parameters.items()}
+        return {k: v.sample((N,)) for k, v in self.parameters.items()}
 
 
 class WaveformGenerator(torch.nn.Module):
