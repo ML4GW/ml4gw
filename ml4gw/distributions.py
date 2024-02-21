@@ -103,17 +103,22 @@ class LogNormal:
         return x
 
 
-class LogUniform(Uniform):
+class LogUniform(dist.TransformedDistribution):
     """
     Sample from a log uniform distribution
     """
 
-    def __init__(self, low: float, high: float) -> None:
-        super().__init__(math.log(low), math.log(high))
-
-    def __call__(self, N: int) -> torch.Tensor:
-        u = super().__call__(N)
-        return torch.exp(u)
+    def __init__(self, low: float, high: float, validate_args=None):
+        base_dist = dist.Uniform(
+            torch.as_tensor(low).log(),
+            torch.as_tensor(high).log(),
+            validate_args,
+        )
+        super().__init__(
+            base_dist,
+            [dist.ExpTransform()],
+            validate_args=validate_args,
+        )
 
 
 class PowerLaw(dist.TransformedDistribution):

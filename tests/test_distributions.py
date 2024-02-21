@@ -35,13 +35,13 @@ def test_uniform():
 
 def test_log_uniform():
     sampler = distributions.LogUniform(math.e, math.e**2)
-    samples = sampler(10)
+    samples = sampler.sample((10,))
     assert len(samples) == 10
     assert ((math.e <= samples) & (math.e**2 <= 100)).all()
 
     # check that the mean is roughly correct
     # (within three standard deviations)
-    samples = sampler(100000)
+    samples = sampler.sample((100000,))
     log_samples = np.log(samples)
 
     mean = log_samples.mean().item()
