@@ -9,6 +9,7 @@ import math
 from typing import Optional
 
 import torch
+import torch.distributions as dist
 
 
 class Uniform:
@@ -45,6 +46,59 @@ class Cosine:
         """
         u = torch.rand(size=(N,))
         return torch.arcsin(u / self.norm + math.sin(self.low))
+
+
+class CosineDistribution(dist.Distribution):
+    """
+    Cosine distribution based on
+    ``torch.distributions.TransformedDistribution``.
+    """
+
+    arg_constraints = {}
+
+    def __init__(
+        self,
+        low: float = -math.pi / 2,
+        high: float = math.pi / 2,
+        validate_args=None,
+    ):
+        batch_shape = torch.Size()
+        super().__init__(batch_shape, validate_args=validate_args)
+        self.low = low
+        self.norm = 1 / (math.sin(high) - math.sin(low))
+
+    def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
+        u = torch.rand(sample_shape)
+        return torch.arcsin(u / self.norm + math.sin(self.low))
+
+    def log_prob(self, value):
+        value = torch.as_tensor(value)
+        inside_range = (value >= self.low) & (value <= self.high)
+        return value.cos().log() * inside_range
+
+
+class SineDistribution(dist.TransformedDistribution):
+    """
+    Sine distribution based on
+    ``torch.distributions.TransformedDistribution``.
+    """
+
+    def __init__(
+        self, low: float = 0, high: float = math.pi, validate_args=None
+    ):
+        base_dist = CosineDistribution(
+            low - math.pi / 2, high - math.pi / 2, validate_args
+        )
+        super().__init__(
+            base_dist,
+            [
+                dist.AffineTransform(
+                    loc=math.pi / 2,
+                    scale=1,
+                )
+            ],
+            validate_args=validate_args,
+        )
 
 
 class LogNormal:
@@ -120,3 +174,33 @@ class PowerLaw:
         samples = self.x_min ** (-self.alpha + 1) - u
         samples = torch.pow(samples, -1.0 / (self.alpha - 1))
         return samples
+
+
+class PowerLawDistribution(dist.TransformedDistribution):
+    """
+    Power Law distribution based on
+    ``torch.distributions.TransformedDistribution``.
+    Use, for example, ``index=2`` for uniform in Euclidean volume.
+    """
+
+    support = dist.constraints.nonnegative
+
+    def __init__(
+        self, minimum: float, maximum: float, index: int, validate_args=None
+    ):
+        if index == 0:
+            raise RuntimeError("Index of 0 is the same as Uniform")
+        elif index == -1:
+            raise RuntimeError("Supply index less that -1 or greater than 0")
+        index_plus = index + 1
+        base_min = minimum**index_plus / index_plus
+        base_max = maximum**index_plus / index_plus
+        base_dist = dist.Uniform(base_min, base_max, validate_args=False)
+        super().__init__(
+            base_dist,
+            [
+                dist.AffineTransform(loc=0, scale=index_plus),
+                dist.PowerTransform(1 / index_plus),
+            ],
+            validate_args=validate_args,
+        )

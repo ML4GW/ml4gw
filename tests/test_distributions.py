@@ -63,6 +63,18 @@ def test_cosine():
     assert ((-3 <= samples) & (samples <= 5)).all()
 
 
+def test_cosine_distribution():
+    sampler = distributions.CosineDistribution()
+    samples = sampler.sample((10,))
+    assert len(samples) == 10
+    assert ((-pi / 2 <= samples) & (samples <= pi / 2)).all()
+
+    sampler = distributions.CosineDistribution(-3, 5)
+    samples = sampler.sample(100)
+    assert len(samples) == 100
+    assert ((-3 <= samples) & (samples <= 5)).all()
+
+
 def test_log_normal():
     sampler = distributions.LogNormal(6, 4)
     samples = sampler(10)
@@ -100,3 +112,24 @@ def test_power_law():
     popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
     # popt[1] is the index
     assert popt[1] == pytest.approx(4, rel=1e-1)
+
+
+def test_power_law_distribution():
+    """Test PowerLawDistribution against expected distribution of SNRs"""
+    min_dist = 10
+    max_dist = 1000
+    uniform_in_volume = distributions.PowerLawDistribution(
+        min_dist, max_dist, index=2
+    )
+    samples = uniform_in_volume.sample((10000,)).numpy()
+    # check d^2 behavior
+    counts, ebins = np.histogram(samples, bins=100)
+    bins = ebins[1:] + ebins[:-1]
+    bins *= 0.5
+
+    def foo(x, a, b):
+        return a * x ** (b)
+
+    popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
+    # popt[1] is the index
+    assert popt[1] == pytest.approx(2, rel=1e-1)
