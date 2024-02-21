@@ -25,30 +25,7 @@ class Uniform:
         return self.low + torch.rand(size=(N,)) * (self.high - self.low)
 
 
-class Cosine:
-    """
-    Sample from a raised Cosine distribution between
-    `low` and `high`. Based on the implementation from
-    bilby documented here:
-    https://lscsoft.docs.ligo.org/bilby/api/bilby.core.prior.analytical.Cosine.html  # noqa
-    """
-
-    def __init__(
-        self, low: float = -math.pi / 2, high: float = math.pi / 2
-    ) -> None:
-        self.low = low
-        self.norm = 1 / (math.sin(high) - math.sin(low))
-
-    def __call__(self, N: int) -> torch.Tensor:
-        """
-        Implementation lifted from
-        https://lscsoft.docs.ligo.org/bilby/_modules/bilby/core/prior/analytical.html#Cosine # noqa
-        """
-        u = torch.rand(size=(N,))
-        return torch.arcsin(u / self.norm + math.sin(self.low))
-
-
-class CosineDistribution(dist.Distribution):
+class Cosine(dist.Distribution):
     """
     Cosine distribution based on
     ``torch.distributions.TransformedDistribution``.
@@ -77,7 +54,7 @@ class CosineDistribution(dist.Distribution):
         return value.cos().log() * inside_range
 
 
-class SineDistribution(dist.TransformedDistribution):
+class Sine(dist.TransformedDistribution):
     """
     Sine distribution based on
     ``torch.distributions.TransformedDistribution``.
@@ -86,7 +63,7 @@ class SineDistribution(dist.TransformedDistribution):
     def __init__(
         self, low: float = 0, high: float = math.pi, validate_args=None
     ):
-        base_dist = CosineDistribution(
+        base_dist = Cosine(
             low - math.pi / 2, high - math.pi / 2, validate_args
         )
         super().__init__(
@@ -139,13 +116,13 @@ class LogUniform(Uniform):
         return torch.exp(u)
 
 
-class PowerLaw:
+class PowerLaw(dist.TransformedDistribution):
     """
     Sample from a power law distribution,
     .. math::
-        p(x) \approx x^{-\alpha}.
+        p(x) \approx x^{\alpha}.
 
-    Index alpha must be greater than 1.
+    Index alpha cannot be 0, since it is equivalent to a Uniform distribution.
     This could be used, for example, as a universal distribution of
     signal-to-noise ratios (SNRs) from uniformly volume distributed
     sources
@@ -156,31 +133,7 @@ class PowerLaw:
     where :math:`\rho_0` is a representative minimum SNR
     considered for detection. See, for example,
     `Schutz (2011) <https://arxiv.org/abs/1102.5421>`_.
-    """
-
-    def __init__(
-        self, x_min: float, x_max: float = float("inf"), alpha: float = 2
-    ) -> None:
-        self.x_min = x_min
-        self.x_max = x_max
-        self.alpha = alpha
-
-        self.normalization = x_min ** (-self.alpha + 1)
-        self.normalization -= x_max ** (-self.alpha + 1)
-
-    def __call__(self, N: int) -> torch.Tensor:
-        u = torch.rand(N)
-        u *= self.normalization
-        samples = self.x_min ** (-self.alpha + 1) - u
-        samples = torch.pow(samples, -1.0 / (self.alpha - 1))
-        return samples
-
-
-class PowerLawDistribution(dist.TransformedDistribution):
-    """
-    Power Law distribution based on
-    ``torch.distributions.TransformedDistribution``.
-    Use, for example, ``index=2`` for uniform in Euclidean volume.
+    Or, for example, ``index=2`` for uniform in Euclidean volume.
     """
 
     support = dist.constraints.nonnegative
