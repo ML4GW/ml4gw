@@ -5,7 +5,6 @@ an integer `N` to a 1D torch `Tensor` containing `N` samples
 from the corresponding distribution.
 """
 
-import math
 from typing import Optional
 
 import torch
@@ -22,18 +21,18 @@ class Cosine(dist.Distribution):
 
     def __init__(
         self,
-        low: float = -math.pi / 2,
-        high: float = math.pi / 2,
+        low: float = torch.as_tensor(-torch.pi / 2),
+        high: float = torch.as_tensor(torch.pi / 2),
         validate_args=None,
     ):
         batch_shape = torch.Size()
         super().__init__(batch_shape, validate_args=validate_args)
         self.low = low
-        self.norm = 1 / (math.sin(high) - math.sin(low))
+        self.norm = 1 / (torch.sin(high) - torch.sin(low))
 
     def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
-        u = torch.rand(sample_shape)
-        return torch.arcsin(u / self.norm + math.sin(self.low))
+        u = torch.rand(sample_shape, device=self.low.device)
+        return torch.arcsin(u / self.norm + torch.sin(self.low))
 
     def log_prob(self, value):
         value = torch.as_tensor(value)
@@ -48,16 +47,19 @@ class Sine(dist.TransformedDistribution):
     """
 
     def __init__(
-        self, low: float = 0, high: float = math.pi, validate_args=None
+        self,
+        low: float = torch.as_tensor(0),
+        high: float = torch.as_tensor(torch.pi),
+        validate_args=None,
     ):
         base_dist = Cosine(
-            low - math.pi / 2, high - math.pi / 2, validate_args
+            low - torch.pi / 2, high - torch.pi / 2, validate_args
         )
         super().__init__(
             base_dist,
             [
                 dist.AffineTransform(
-                    loc=math.pi / 2,
+                    loc=torch.pi / 2,
                     scale=1,
                 )
             ],
@@ -143,4 +145,22 @@ class PowerLaw(dist.TransformedDistribution):
             base_dist,
             transforms,
             validate_args=validate_args,
+        )
+
+
+class DeltaFunction(dist.Distribution):
+    arg_constraints = {}
+
+    def __init__(
+        self,
+        peak: float = torch.as_tensor(0.0),
+        validate_args=None,
+    ):
+        batch_shape = torch.Size()
+        super().__init__(batch_shape, validate_args=validate_args)
+        self.peak = peak
+
+    def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
+        return self.peak * torch.ones(
+            sample_shape, device=self.peak.device, dtype=torch.float32
         )
