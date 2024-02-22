@@ -5,7 +5,6 @@ an integer `N` to a 1D torch `Tensor` containing `N` samples
 from the corresponding distribution.
 """
 
-import math
 from typing import Optional
 
 import torch
@@ -23,7 +22,7 @@ class Cosine(dist.Distribution):
     def __init__(
         self,
         low: float = torch.as_tensor(-torch.pi / 2),
-        high: float = torch.as_tensor(math.pi / 2),
+        high: float = torch.as_tensor(torch.pi / 2),
         validate_args=None,
     ):
         batch_shape = torch.Size()
@@ -48,16 +47,19 @@ class Sine(dist.TransformedDistribution):
     """
 
     def __init__(
-        self, low: float = 0, high: float = math.pi, validate_args=None
+        self,
+        low: float = torch.as_tensor(0),
+        high: float = torch.as_tensor(torch.pi),
+        validate_args=None,
     ):
         base_dist = Cosine(
-            low - math.pi / 2, high - math.pi / 2, validate_args
+            low - torch.pi / 2, high - torch.pi / 2, validate_args
         )
         super().__init__(
             base_dist,
             [
                 dist.AffineTransform(
-                    loc=math.pi / 2,
+                    loc=torch.pi / 2,
                     scale=1,
                 )
             ],
