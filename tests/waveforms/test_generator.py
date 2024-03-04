@@ -65,3 +65,20 @@ def test_waveform_generator(sample_rate, duration, n_samples):
     for k in ["amplitude", "frequency", "phase"]:
         assert len(parameters[k]) == n_samples
     assert waveforms.shape == (n_samples, 2, duration * sample_rate)
+
+
+def test_parameter_sampler_bilby_prior_equivalence():
+    parameter_sampler = ParameterSampler(
+        phi=distributions.Uniform(0, 2 * pi),
+        dec=distributions.Cosine(),
+        snr=distributions.PowerLaw(8, 20, -4),
+        distance=distributions.PowerLaw(10, 100, 2),
+    )
+    bilby_equivalent = parameter_sampler.to_bilby_prior_dict()
+
+    parameter_samples = parameter_sampler(10000)
+    bilby_prior_samples = bilby_equivalent.sample(10000)
+    for name, samples in parameter_samples.items():
+        assert bilby_prior_samples[name].mean() == pytest.approx(
+            samples.mean().numpy(), abs=1e-2, rel=1e-1
+        )

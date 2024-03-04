@@ -14,6 +14,25 @@ class ParameterSampler(torch.nn.Module):
     ):
         return {k: v.sample((N,)) for k, v in self.parameters.items()}
 
+    def to_bilby_prior_dict(self):
+        """
+        Convert distributions supplied to parameter sampler to their bilby
+        prior equivalents and return a PriorDict object. Raises an error
+        if supplied distribution does not implement method
+        ``.bilby_prior_equivalent``.
+        """
+        assert all(
+            [
+                hasattr(dist, "bilby_prior_equivalent")
+                for dist in self.parameters.values()
+            ]
+        ), "Not all distributions have a bilby_prior_equivalent."
+        from bilby import prior
+
+        return prior.PriorDict(
+            {k: v.bilby_prior_equivalent() for k, v in self.parameters.items()}
+        )
+
 
 class WaveformGenerator(torch.nn.Module):
     def __init__(
