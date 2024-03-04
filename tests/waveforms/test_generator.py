@@ -76,8 +76,8 @@ def test_parameter_sampler_bilby_prior_equivalence():
     )
     bilby_equivalent = parameter_sampler.to_bilby_prior_dict()
 
-    parameter_samples = parameter_sampler(10000)
-    bilby_prior_samples = bilby_equivalent.sample(10000)
+    parameter_samples = parameter_sampler(100000)
+    bilby_prior_samples = bilby_equivalent.sample(100000)
     for name, samples in parameter_samples.items():
         assert bilby_prior_samples[name].mean() == pytest.approx(
             samples.mean().numpy(), abs=1e-2, rel=1e-1
