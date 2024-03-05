@@ -82,3 +82,22 @@ def test_parameter_sampler_bilby_prior_equivalence():
         assert bilby_prior_samples[name].mean() == pytest.approx(
             samples.mean().numpy(), abs=1e-2, rel=1e-1
         )
+
+
+def test_parameter_sampler_bilby_prior_raising(monkeypatch):
+    import importlib
+
+    import bilby
+
+    monkeypatch.delattr(bilby, "prior")
+    importlib.reload(distributions)
+    with pytest.raises(RuntimeError):
+        distributions.Cosine().bilby_prior_equivalent()
+    with pytest.raises(RuntimeError):
+        parameter_sampler = ParameterSampler(
+            phi=distributions.Uniform(0, 2 * pi),
+            dec=distributions.Cosine(),
+            snr=distributions.PowerLaw(8, 20, -4),
+            distance=distributions.PowerLaw(10, 100, 2),
+        )
+        parameter_sampler.to_bilby_prior_dict()

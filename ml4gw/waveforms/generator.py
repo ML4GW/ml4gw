@@ -21,6 +21,10 @@ class ParameterSampler(torch.nn.Module):
         if supplied distribution does not implement method
         ``.bilby_prior_equivalent``.
         """
+        from ml4gw import distributions
+
+        if not distributions._BILBY_INSTALLED:
+            raise RuntimeError("Bilby should be installed to use this method")
         assert all(
             [
                 hasattr(dist, "bilby_prior_equivalent")

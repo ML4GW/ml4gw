@@ -14,7 +14,7 @@ try:
     from bilby import prior
 
     _BILBY_INSTALLED = True
-except ModuleNotFoundError:
+except ImportError:
     _BILBY_INSTALLED = False
 
 
@@ -24,6 +24,8 @@ def raise_if_bilby_absent(foo):
             return foo(*args, **kwargs)
         else:
             raise RuntimeError("Bilby should be installed to use this method")
+
+    return bar
 
 
 class Uniform(dist.Uniform):
