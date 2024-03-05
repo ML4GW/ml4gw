@@ -9,10 +9,25 @@ from typing import Optional
 
 import torch
 import torch.distributions as dist
-from bilby import prior
+
+try:
+    from bilby import prior
+
+    _BILBY_INSTALLED = True
+except ModuleNotFoundError:
+    _BILBY_INSTALLED = False
+
+
+def raise_if_bilby_absent(foo):
+    def bar(*args, **kwargs):
+        if _BILBY_INSTALLED:
+            return foo(*args, **kwargs)
+        else:
+            raise RuntimeError("Bilby should be installed to use this method")
 
 
 class Uniform(dist.Uniform):
+    @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.Uniform(self.low.numpy(), self.high.numpy())
 
@@ -46,6 +61,7 @@ class Cosine(dist.Distribution):
         inside_range = (value >= self.low) & (value <= self.high)
         return value.cos().log() * inside_range
 
+    @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.Cosine(self.low.numpy(), self.high.numpy())
 
@@ -76,6 +92,7 @@ class Sine(dist.TransformedDistribution):
             validate_args=validate_args,
         )
 
+    @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.Sine(self.low.numpy(), self.high.numpy())
 
@@ -97,6 +114,7 @@ class LogUniform(dist.TransformedDistribution):
             validate_args=validate_args,
         )
 
+    @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.LogUniform(self.low.numpy(), self.high.numpy())
 
@@ -116,6 +134,7 @@ class LogNormal(dist.LogNormal):
         if self.low is not None:
             return dist.constraints.greater_than(self.low)
 
+    @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.LogNormal(self.loc.numpy(), self.scale.numpy())
 
@@ -169,6 +188,7 @@ class PowerLaw(dist.TransformedDistribution):
             validate_args=validate_args,
         )
 
+    @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.PowerLaw(
             minimum=self.minimum, maximum=self.maximum, alpha=self.index
@@ -192,5 +212,6 @@ class DeltaFunction(dist.Distribution):
             sample_shape, device=self.peak.device, dtype=torch.float32
         )
 
+    @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.DeltaFunction(self.peak)
