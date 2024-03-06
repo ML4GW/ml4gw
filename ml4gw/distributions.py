@@ -29,9 +29,15 @@ def raise_if_bilby_absent(foo):
 
 
 class Uniform(dist.Uniform):
+    def __init__(self, *args, **kwargs):
+        self.name = kwargs.pop("name", None)
+        super().__init__(*args, **kwargs)
+
     @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
-        return prior.Uniform(self.low.numpy(), self.high.numpy())
+        return prior.Uniform(
+            self.low.numpy(), self.high.numpy(), name=self.name
+        )
 
 
 class Cosine(dist.Distribution):
@@ -46,12 +52,14 @@ class Cosine(dist.Distribution):
         self,
         low: float = torch.as_tensor(-torch.pi / 2),
         high: float = torch.as_tensor(torch.pi / 2),
+        name=None,
         validate_args=None,
     ):
         batch_shape = torch.Size()
         super().__init__(batch_shape, validate_args=validate_args)
         self.low = low
         self.high = high
+        self.name = name
         self.norm = 1 / (torch.sin(high) - torch.sin(low))
 
     def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
@@ -65,7 +73,9 @@ class Cosine(dist.Distribution):
 
     @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
-        return prior.Cosine(self.low.numpy(), self.high.numpy())
+        return prior.Cosine(
+            self.low.numpy(), self.high.numpy(), name=self.name
+        )
 
 
 class Sine(dist.TransformedDistribution):
@@ -78,11 +88,15 @@ class Sine(dist.TransformedDistribution):
         self,
         low: float = torch.as_tensor(0),
         high: float = torch.as_tensor(torch.pi),
+        name=None,
         validate_args=None,
     ):
         base_dist = Cosine(
             low - torch.pi / 2, high - torch.pi / 2, validate_args
         )
+        self.low = low
+        self.high = high
+        self.name = name
         super().__init__(
             base_dist,
             [
@@ -96,7 +110,7 @@ class Sine(dist.TransformedDistribution):
 
     @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
-        return prior.Sine(self.low.numpy(), self.high.numpy())
+        return prior.Sine(self.low.numpy(), self.high.numpy(), name=self.name)
 
 
 class LogUniform(dist.TransformedDistribution):
@@ -104,7 +118,7 @@ class LogUniform(dist.TransformedDistribution):
     Sample from a log uniform distribution
     """
 
-    def __init__(self, low: float, high: float, validate_args=None):
+    def __init__(self, low: float, high: float, name=None, validate_args=None):
         base_dist = dist.Uniform(
             torch.as_tensor(low).log(),
             torch.as_tensor(high).log(),
@@ -115,10 +129,13 @@ class LogUniform(dist.TransformedDistribution):
             [dist.ExpTransform()],
             validate_args=validate_args,
         )
+        self.name = name
 
     @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
-        return prior.LogUniform(self.low.numpy(), self.high.numpy())
+        return prior.LogUniform(
+            self.low.numpy(), self.high.numpy(), name=self.name
+        )
 
 
 class LogNormal(dist.LogNormal):
@@ -127,9 +144,11 @@ class LogNormal(dist.LogNormal):
         mean: float,
         std: float,
         low: Optional[float] = None,
+        name=None,
         validate_args=None,
     ):
         self.low = low
+        self.name = name
         super().__init__(loc=mean, scale=std, validate_args=validate_args)
 
     def support(self):
@@ -138,7 +157,9 @@ class LogNormal(dist.LogNormal):
 
     @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
-        return prior.LogNormal(self.loc.numpy(), self.scale.numpy())
+        return prior.LogNormal(
+            self.loc.numpy(), self.scale.numpy(), name=self.name
+        )
 
 
 class PowerLaw(dist.TransformedDistribution):
@@ -164,11 +185,17 @@ class PowerLaw(dist.TransformedDistribution):
     support = dist.constraints.nonnegative
 
     def __init__(
-        self, minimum: float, maximum: float, index: int, validate_args=None
+        self,
+        minimum: float,
+        maximum: float,
+        index: int,
+        name=None,
+        validate_args=None,
     ):
         self.minimum = minimum
         self.maximum = maximum
         self.index = index
+        self.name = name
         if index == 0:
             raise RuntimeError("Index of 0 is the same as Uniform")
         elif index == -1:
@@ -193,7 +220,10 @@ class PowerLaw(dist.TransformedDistribution):
     @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
         return prior.PowerLaw(
-            minimum=self.minimum, maximum=self.maximum, alpha=self.index
+            minimum=self.minimum,
+            maximum=self.maximum,
+            alpha=self.index,
+            name=self.name,
         )
 
 
@@ -203,11 +233,13 @@ class DeltaFunction(dist.Distribution):
     def __init__(
         self,
         peak: float = torch.as_tensor(0.0),
+        name=None,
         validate_args=None,
     ):
         batch_shape = torch.Size()
         super().__init__(batch_shape, validate_args=validate_args)
         self.peak = peak
+        self.name = name
 
     def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
         return self.peak * torch.ones(
@@ -216,4 +248,4 @@ class DeltaFunction(dist.Distribution):
 
     @raise_if_bilby_absent
     def bilby_prior_equivalent(self):
-        return prior.DeltaFunction(self.peak)
+        return prior.DeltaFunction(self.peak, name=self.name)
