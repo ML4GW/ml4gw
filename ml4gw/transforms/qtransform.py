@@ -60,6 +60,8 @@ class QTile(torch.nn.Module):
         ).type(torch.long)
 
     def forward(self, fseries: torch.Tensor, norm: str = "median"):
+        while len(fseries.shape) < 3:
+            fseries = fseries[None]
         windowed = fseries[..., self.indices] * self.window
         left, right = self.padding
         padded = F.pad(windowed, (int(left), int(right)), mode="constant")
@@ -105,7 +107,6 @@ class SingleQTransform(torch.nn.Module):
             self.frange[0] = 50 * q / (2 * torch.pi * duration)
         if math.isinf(self.frange[1]):  # set non-infinite upper frequency
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
-
         freqs = self.get_freqs()
         self.qtiles = torch.nn.ModuleList(
             [QTile(q, freq, duration, sample_rate, mismatch) for freq in freqs]
@@ -133,9 +134,8 @@ class SingleQTransform(torch.nn.Module):
         tres: float,
         norm: str = "median",
     ):
-        while len(X.shape) < 3:
-            X = X[None]
-        X = torch.fft.fft(X)
+        X = torch.fft.rfft(X, norm="forward")
+        X[..., 1:] *= 2
         outs = [qtile(X, norm) for qtile in self.qtiles]
         num_t_bins = int(self.duration / tres)
         num_f_bins = int((self.frange[1] - self.frange[0]) / fres)
@@ -143,3 +143,56 @@ class SingleQTransform(torch.nn.Module):
         resampled = torch.stack(resampled, dim=-2)
         resampled = F.interpolate(resampled, (num_f_bins, num_t_bins))
         return torch.squeeze(resampled)
+
+
+class MultiQTransform(torch.nn.Module):
+    def __init__(
+        self,
+        duration: float,
+        sample_rate: float,
+        qrange: List[float] = [4, 64],
+        frange: List[float] = [0, torch.inf],
+        mismatch: float = 0.2,
+    ):
+        super().__init__()
+        self.qrange = qrange
+        self.mismatch = mismatch
+        self.qs = self.get_qs()
+        self.frange = frange
+
+        self.q_transforms = torch.nn.ModuleList(
+            [
+                SingleQTransform(
+                    duration=duration,
+                    sample_rate=sample_rate,
+                    q=q,
+                    frange=[0, torch.inf],
+                    mismatch=self.mismatch,
+                )
+                for q in self.qs
+            ]
+        )
+
+    def get_qs(self):
+        deltam = 2 * (self.mismatch / 3.0) ** (1 / 2.0)
+        cumum = math.log(self.qrange[1] / self.qrange[0]) / 2 ** (1 / 2.0)
+        nplanes = int(max(math.ceil(cumum / deltam), 1))
+        dq = cumum / nplanes
+        qs = [
+            self.qrange[0] * math.exp(2 ** (1 / 2.0) * dq * (i + 0.5))
+            for i in range(nplanes)
+        ]
+        return qs
+
+    def forward(self, X, num_t_bins, num_f_bins):
+        outs = [
+            transform(X, num_t_bins=num_t_bins, num_f_bins=num_f_bins)
+            for transform in self.q_transforms
+        ]
+        outs = torch.stack(outs)
+        idx = torch.argmax(
+            torch.Tensor(
+                [transform.max_energy for transform in self.q_transforms]
+            )
+        )
+        return outs[idx]
