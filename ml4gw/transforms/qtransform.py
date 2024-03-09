@@ -101,15 +101,16 @@ class SingleQTransform(torch.nn.Module):
         self.frange = frange
         self.duration = duration
         self.mismatch = mismatch
-
-        qprime = q / 11 ** (1 / 2.0)
+        qprime = self.q / 11 ** (1 / 2.0)
         if self.frange[0] == 0:  # set non-zero lower frequency
-            self.frange[0] = 50 * q / (2 * torch.pi * duration)
+            self.frange[0] = 50 * self.q / (2 * torch.pi * duration)
         if math.isinf(self.frange[1]):  # set non-infinite upper frequency
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
-        freqs = self.get_freqs()
         self.qtiles = torch.nn.ModuleList(
-            [QTile(q, freq, duration, sample_rate, mismatch) for freq in freqs]
+            [
+                QTile(self.q, freq, self.duration, sample_rate, self.mismatch)
+                for freq in self.get_freqs()
+            ]
         )
 
     def get_freqs(self):
@@ -130,15 +131,14 @@ class SingleQTransform(torch.nn.Module):
     def forward(
         self,
         X: torch.Tensor,
-        fres: float,
-        tres: float,
+        num_t_bins: int,
+        num_f_bins: int,
         norm: str = "median",
     ):
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
         outs = [qtile(X, norm) for qtile in self.qtiles]
-        num_t_bins = int(self.duration / tres)
-        num_f_bins = int((self.frange[1] - self.frange[0]) / fres)
+        self.max_energy = max([torch.max(out) for out in outs])
         resampled = [F.interpolate(out, num_t_bins) for out in outs]
         resampled = torch.stack(resampled, dim=-2)
         resampled = F.interpolate(resampled, (num_f_bins, num_t_bins))
