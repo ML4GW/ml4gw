@@ -109,10 +109,11 @@ class SingleQTransform(torch.nn.Module):
             self.frange[0] = 50 * self.q / (2 * torch.pi * duration)
         if math.isinf(self.frange[1]):  # set non-infinite upper frequency
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
+        self.freqs = self.get_freqs()
         self.qtiles_transforms = torch.nn.ModuleList(
             [
                 QTile(self.q, freq, self.duration, sample_rate, self.mismatch)
-                for freq in self.get_freqs()
+                for freq in self.freqs
             ]
         )
         self.qtiles = None
@@ -132,7 +133,9 @@ class SingleQTransform(torch.nn.Module):
         freqs = (minf * freqs // fstepmin) * fstepmin
         return torch.unique(freqs)
 
-    def get_max_energy(self, dimension: str = "both"):
+    def get_max_energy(
+        self, fsearch_range: List[float] = None, dimension: str = "both"
+    ):
         allowed_dimensions = ["both", "neither", "channel", "batch"]
         if dimension not in allowed_dimensions:
             raise ValueError(f"Dimension must be one of {allowed_dimensions}")
@@ -142,12 +145,17 @@ class SingleQTransform(torch.nn.Module):
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
 
-        if dimension == "both":
-            return max([torch.max(qtile) for qtile in self.qtiles])
+        if fsearch_range is not None:
+            start = min(torch.argwhere(self.freqs > fsearch_range[0]))
+            stop = min(torch.argwhere(self.freqs > fsearch_range[1]))
+            qtiles = self.qtiles[start:stop]
+        else:
+            qtiles = self.qtiles
 
-        max_across_t = [
-            torch.max(qtile, dim=-1).values for qtile in self.qtiles
-        ]
+        if dimension == "both":
+            return max([torch.max(qtile) for qtile in qtiles])
+
+        max_across_t = [torch.max(qtile, dim=-1).values for qtile in qtiles]
         max_across_t = torch.stack(max_across_t, dim=-1)
         max_across_ft = torch.max(max_across_t, dim=-1).values
 
@@ -168,9 +176,14 @@ class SingleQTransform(torch.nn.Module):
             raise RuntimeError(
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
-        resampled = [F.interpolate(qtile, num_t_bins) for qtile in self.qtiles]
+        resampled = [
+            F.interpolate(qtile, num_t_bins, mode="linear")
+            for qtile in self.qtiles
+        ]
         resampled = torch.stack(resampled, dim=-2)
-        resampled = F.interpolate(resampled, (num_f_bins, num_t_bins))
+        resampled = F.interpolate(
+            resampled, (num_f_bins, num_t_bins), mode="bilinear"
+        )
         return torch.squeeze(resampled)
 
     def forward(
@@ -232,13 +245,20 @@ class QScan(torch.nn.Module):
         X: torch.Tensor,
         num_f_bins: int,
         num_t_bins: int,
+        fsearch_range: List[float],
         norm: str = "median",
     ):
         for transform in self.q_transforms:
             transform.compute_qtiles(X, norm)
         idx = torch.argmax(
             torch.Tensor(
-                [transform.get_max_energy() for transform in self.q_transforms]
+                [
+                    transform.get_max_energy(fsearch_range=fsearch_range)
+                    for transform in self.q_transforms
+                ]
             )
         )
-        return self.q_transforms[idx].interpolate(num_f_bins, num_t_bins)
+        return (
+            self.q_transforms[idx].interpolate(num_f_bins, num_t_bins),
+            self.qs[idx],
+        )
