@@ -1,5 +1,5 @@
 from .pearson import ShiftedPearsonCorrelation
-from .qtransform import SingleQTransform
+from .qtransform import QScan, SingleQTransform
 from .scaler import ChannelWiseScaler
 from .snr_rescaler import SnrRescaler
 from .spectral import SpectralDensity
