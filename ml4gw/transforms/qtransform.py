@@ -101,17 +101,21 @@ class SingleQTransform(torch.nn.Module):
         self.frange = frange
         self.duration = duration
         self.mismatch = mismatch
+
+        # This needs to account for whatever highpassing was done for whitening
+        # Possibly include whitening in this module?
         qprime = self.q / 11 ** (1 / 2.0)
         if self.frange[0] == 0:  # set non-zero lower frequency
             self.frange[0] = 50 * self.q / (2 * torch.pi * duration)
         if math.isinf(self.frange[1]):  # set non-infinite upper frequency
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
-        self.qtiles = torch.nn.ModuleList(
+        self.qtiles_transforms = torch.nn.ModuleList(
             [
                 QTile(self.q, freq, self.duration, sample_rate, self.mismatch)
                 for freq in self.get_freqs()
             ]
         )
+        self.qtiles = None
 
     def get_freqs(self):
         minf, maxf = self.frange
@@ -128,24 +132,59 @@ class SingleQTransform(torch.nn.Module):
         freqs = (minf * freqs // fstepmin) * fstepmin
         return torch.unique(freqs)
 
-    def forward(
-        self,
-        X: torch.Tensor,
-        num_t_bins: int,
-        num_f_bins: int,
-        norm: str = "median",
-    ):
+    def get_max_energy(self, dimension: str = "both"):
+        allowed_dimensions = ["both", "neither", "channel", "batch"]
+        if dimension not in allowed_dimensions:
+            raise ValueError(f"Dimension must be one of {allowed_dimensions}")
+
+        if self.qtiles is None:
+            raise RuntimeError(
+                "Q-tiles must first be computed with .compute_qtiles()"
+            )
+
+        if dimension == "both":
+            return max([torch.max(qtile) for qtile in self.qtiles])
+
+        max_across_t = [
+            torch.max(qtile, dim=-1).values for qtile in self.qtiles
+        ]
+        max_across_t = torch.stack(max_across_t, dim=-1)
+        max_across_ft = torch.max(max_across_t, dim=-1).values
+
+        if dimension == "neither":
+            return max_across_ft
+        if dimension == "channel":
+            return torch.max(max_across_ft, dim=0).values
+        if dimension == "batch":
+            return torch.max(max_across_ft, dim=-1).values
+
+    def compute_qtiles(self, X: torch.Tensor, norm: str = "median"):
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
-        outs = [qtile(X, norm) for qtile in self.qtiles]
-        self.max_energy = max([torch.max(out) for out in outs])
-        resampled = [F.interpolate(out, num_t_bins) for out in outs]
+        self.qtiles = [qtile(X, norm) for qtile in self.qtiles_transforms]
+
+    def interpolate(self, num_f_bins: int, num_t_bins: int):
+        if self.qtiles is None:
+            raise RuntimeError(
+                "Q-tiles must first be computed with .compute_qtiles()"
+            )
+        resampled = [F.interpolate(qtile, num_t_bins) for qtile in self.qtiles]
         resampled = torch.stack(resampled, dim=-2)
         resampled = F.interpolate(resampled, (num_f_bins, num_t_bins))
         return torch.squeeze(resampled)
 
+    def forward(
+        self,
+        X: torch.Tensor,
+        num_f_bins: int,
+        num_t_bins: int,
+        norm: str = "median",
+    ):
+        self.compute_qtiles(X, norm)
+        return self.interpolate(num_f_bins, num_t_bins)
 
-class MultiQTransform(torch.nn.Module):
+
+class QScan(torch.nn.Module):
     def __init__(
         self,
         duration: float,
@@ -160,13 +199,17 @@ class MultiQTransform(torch.nn.Module):
         self.qs = self.get_qs()
         self.frange = frange
 
+        # Deliberately doing something different from GWpy here
+        # Their final frange is the intersection of the frange
+        # from each q. This implementation uses the frange of
+        # the chosen q.
         self.q_transforms = torch.nn.ModuleList(
             [
                 SingleQTransform(
                     duration=duration,
                     sample_rate=sample_rate,
                     q=q,
-                    frange=[0, torch.inf],
+                    frange=self.frange.copy(),
                     mismatch=self.mismatch,
                 )
                 for q in self.qs
@@ -184,15 +227,18 @@ class MultiQTransform(torch.nn.Module):
         ]
         return qs
 
-    def forward(self, X, num_t_bins, num_f_bins):
-        outs = [
-            transform(X, num_t_bins=num_t_bins, num_f_bins=num_f_bins)
-            for transform in self.q_transforms
-        ]
-        outs = torch.stack(outs)
+    def forward(
+        self,
+        X: torch.Tensor,
+        num_f_bins: int,
+        num_t_bins: int,
+        norm: str = "median",
+    ):
+        for transform in self.q_transforms:
+            transform.compute_qtiles(X, norm)
         idx = torch.argmax(
             torch.Tensor(
-                [transform.max_energy for transform in self.q_transforms]
+                [transform.get_max_energy() for transform in self.q_transforms]
             )
         )
-        return outs[idx]
+        return self.q_transforms[idx].interpolate(num_f_bins, num_t_bins)
