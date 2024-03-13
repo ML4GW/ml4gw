@@ -72,7 +72,7 @@ class QTile(torch.nn.Module):
         if norm:
             norm = norm.lower() if isinstance(norm, str) else norm
             if norm == "median":
-                medians = torch.median(energy, dim=-1).values
+                medians = torch.quantile(energy, q=0.5, dim=-1)
                 medians = medians.repeat(energy.shape[-1], 1, 1)
                 medians = medians.transpose(0, -1).transpose(0, 1)
                 energy /= medians
@@ -110,7 +110,7 @@ class SingleQTransform(torch.nn.Module):
         if math.isinf(self.frange[1]):  # set non-infinite upper frequency
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
         self.freqs = self.get_freqs()
-        self.qtiles_transforms = torch.nn.ModuleList(
+        self.qtile_transforms = torch.nn.ModuleList(
             [
                 QTile(self.q, freq, self.duration, sample_rate, self.mismatch)
                 for freq in self.freqs
@@ -169,7 +169,7 @@ class SingleQTransform(torch.nn.Module):
     def compute_qtiles(self, X: torch.Tensor, norm: str = "median"):
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
-        self.qtiles = [qtile(X, norm) for qtile in self.qtiles_transforms]
+        self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
 
     def interpolate(self, num_f_bins: int, num_t_bins: int):
         if self.qtiles is None:
@@ -245,7 +245,7 @@ class QScan(torch.nn.Module):
         X: torch.Tensor,
         num_f_bins: int,
         num_t_bins: int,
-        fsearch_range: List[float],
+        fsearch_range: List[float] = None,
         norm: str = "median",
     ):
         for transform in self.q_transforms:
