@@ -6,10 +6,37 @@ import torch.nn.functional as F
 
 """
 All based on https://github.com/gwpy/gwpy/blob/v3.0.8/gwpy/signal/qtransform.py
+The methods, names, and descriptions come almost entirely from GWpy.
+This code allows the Q-transform to be performed on batches of multi-channel
+input on GPU.
 """
 
 
 class QTile(torch.nn.Module):
+    """
+    Compute the row of Q-tiles for a single Q value and a single
+    frequency for a batch of multi-channel frequency series data.
+    Should really be called `QRow`, but I want to match GWpy.
+    Input data should have three dimensions or fewer.
+    If fewer, dimensions will be added until the input is
+    three-dimensional.
+
+    Args:
+        q:
+            The Q value to use in computing the Q tile
+        frequency:
+            The frequency for which to compute the Q tile in Hz
+        duration:
+            The length of time in seconds that the input frequency
+            series represents
+        sample_rate:
+            The sample rate of the original time series in Hz
+        mismatch:
+            The maximum fractional mismatch between neighboring tiles
+
+
+    """
+
     def __init__(
         self,
         q: float,
@@ -20,7 +47,7 @@ class QTile(torch.nn.Module):
     ):
         super().__init__()
         self.mismatch = mismatch
-        self.q = float(q)
+        self.q = q
         self.deltam = 2 * (self.mismatch / 3.0) ** (1 / 2.0)
         self.qprime = self.q / 11 ** (1 / 2.0)
         self.frequency = frequency
@@ -37,6 +64,9 @@ class QTile(torch.nn.Module):
         self.register_buffer("window", self.get_window())
 
     def ntiles(self):
+        """
+        Number of tiles in this frequency row
+        """
         tcum_mismatch = self.duration * 2 * torch.pi * self.frequency / self.q
         return int(2 ** torch.ceil(torch.log2(tcum_mismatch / self.deltam)))
 
@@ -45,6 +75,9 @@ class QTile(torch.nn.Module):
         return torch.arange(-half, half + 1)
 
     def get_window(self):
+        """
+        Generate the bi-square window for this row
+        """
         wfrequencies = self._get_indices() / self.duration
         xfrequencies = wfrequencies * self.qprime / self.frequency
         norm = (
@@ -55,11 +88,36 @@ class QTile(torch.nn.Module):
         return torch.Tensor((1 - xfrequencies**2) ** 2 * norm)
 
     def get_data_indices(self):
+        """
+        Get the index array of relevant frequencies for this row
+        """
         return torch.round(
             self._get_indices() + 1 + self.frequency * self.duration,
         ).type(torch.long)
 
     def forward(self, fseries: torch.Tensor, norm: str = "median"):
+        """
+        Compute the transform for this row
+
+        Args:
+            fseries:
+                Frequency series of data. Should correspond to data with
+                the duration and sample rate used to initialize this object.
+                Expected input shape is `(B, C, F)`, where F is the number
+                of samples, C is the number of channels, and B is the number
+                of batches. If less than three-dimensional, axes will be
+                added.
+            norm:
+                The method of normalization. Options are "median", "mean", or
+                `None`.
+
+        Returns:
+            The row of Q-tiles for the given Q and frequency. Output is
+            four-dimensional: `(B, C, F, T)`
+        """
+        if len(fseries.shape) > 3:
+            raise ValueError("Input data has more than 3 dimensions")
+
         while len(fseries.shape) < 3:
             fseries = fseries[None]
         windowed = fseries[..., self.indices] * self.window
@@ -72,6 +130,7 @@ class QTile(torch.nn.Module):
         if norm:
             norm = norm.lower() if isinstance(norm, str) else norm
             if norm == "median":
+                # I swear there's a better way to do this
                 medians = torch.quantile(energy, q=0.5, dim=-1)
                 medians = medians.repeat(energy.shape[-1], 1, 1)
                 medians = medians.transpose(0, -1).transpose(0, 1)
@@ -88,6 +147,26 @@ class QTile(torch.nn.Module):
 
 
 class SingleQTransform(torch.nn.Module):
+    """
+    Compute the Q-transform for a single Q value for a batch of
+    multi-channel time series data. Input data should have
+    three dimensions or fewer.
+
+    Args:
+        duration:
+            Length of the time series data in seconds
+        sample_rate:
+            Sample rate of the data in Hz
+        q:
+            The Q value to use for the Q transform
+        frange:
+            The lower and upper frequency limit to consider for
+            the transform. If unspecified, default values will
+            be chosen based on q, sample_rate, and duration
+        mismatch:
+            The maximum fractional mismatch between neighboring tiles
+    """
+
     def __init__(
         self,
         duration: float,
@@ -102,10 +181,8 @@ class SingleQTransform(torch.nn.Module):
         self.duration = duration
         self.mismatch = mismatch
 
-        # This needs to account for whatever highpassing was done for whitening
-        # Possibly include whitening in this module?
         qprime = self.q / 11 ** (1 / 2.0)
-        if self.frange[0] == 0:  # set non-zero lower frequency
+        if self.frange[0] <= 0:  # set non-zero lower frequency
             self.frange[0] = 50 * self.q / (2 * torch.pi * duration)
         if math.isinf(self.frange[1]):  # set non-infinite upper frequency
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
@@ -119,6 +196,10 @@ class SingleQTransform(torch.nn.Module):
         self.qtiles = None
 
     def get_freqs(self):
+        """
+        Calculate the frequencies that will be used in this transform.
+        For each frequency, a `QTile` is created.
+        """
         minf, maxf = self.frange
         fcum_mismatch = (
             math.log(maxf / minf) * (2 + self.q**2) ** (1 / 2.0) / 2.0
@@ -136,6 +217,18 @@ class SingleQTransform(torch.nn.Module):
     def get_max_energy(
         self, fsearch_range: List[float] = None, dimension: str = "both"
     ):
+        """
+        Gets the maximum energy value among the QTiles. The maximum can
+        be computed across all batches and channels, across all channels,
+        across all batches, or individually for each channel/batch
+        combination. This could be useful for allowing the use of different
+        Q values for different channels and batches, but the slicing would
+        be slow, so this isn't used yet.
+
+        Optionally, a pair of frequency values can be specified for
+        `fsearch_range` to restrict the frequencies in which the maximum
+        energy value is sought.
+        """
         allowed_dimensions = ["both", "neither", "channel", "batch"]
         if dimension not in allowed_dimensions:
             raise ValueError(f"Dimension must be one of {allowed_dimensions}")
@@ -167,11 +260,23 @@ class SingleQTransform(torch.nn.Module):
             return torch.max(max_across_ft, dim=-1).values
 
     def compute_qtiles(self, X: torch.Tensor, norm: str = "median"):
+        """
+        Take the FFT of the input timeseries and calculate the transform
+        for each `QTile`
+        """
+        # Computing the FFT with the same normalization and scaling as GWpy
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
         self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
 
     def interpolate(self, num_f_bins: int, num_t_bins: int):
+        """
+        Interpolate each `QTile` to the specified number of time and
+        frequency bins. Note that PyTorch does not have the same
+        interpolation methods that GWpy uses, and so the interpolated
+        spectrograms will be different even though the uninterpolated
+        values match
+        """
         if self.qtiles is None:
             raise RuntimeError(
                 "Q-tiles must first be computed with .compute_qtiles()"
@@ -193,11 +298,57 @@ class SingleQTransform(torch.nn.Module):
         num_t_bins: int,
         norm: str = "median",
     ):
+        """
+        Compute the Q-tiles and interpolate
+
+        Args:
+            X:
+                Time series of data. Should have the duration and sample rate
+                used to initialize this object. Expected input shape is
+                `(B, C, T)`, where T is the number of samples, C is the number
+                of channels, and B is the number of batches. If less than
+                three-dimensional, axes will be added during Q-tile
+                computation.
+            num_f_bins:
+                Number of frequency bins to interpolate to. Because the
+                frequency spacing of the Q-tiles is in log-space, the frequency
+                interpolation is log-spaced as well.
+            num_t_bins:
+                Number of time bins to interpolate to.
+            norm:
+                The method of interpolation used by each QTile
+
+        Returns:
+            The interpolated Q-transform for the batch of data. Output will
+            have one more dimension than the input
+        """
         self.compute_qtiles(X, norm)
         return self.interpolate(num_f_bins, num_t_bins)
 
 
 class QScan(torch.nn.Module):
+    """
+    Calculate the Q-transform of a batch of multi-channel
+    time series data for a range of Q values and return
+    the interpolated Q-transform with the highest energy.
+
+    Args:
+        duration:
+            Length of the time series data in seconds
+        sample_rate:
+            Sample rate of the data in Hz
+        qrange:
+            The lower and upper values of Q to consider. The
+            actual values of Q used for the transforms are
+            determined by the `get_qs` method
+        frange:
+            The lower and upper frequency limit to consider for
+            the transform. If unspecified, default values will
+            be chosen based on q, sample_rate, and duration
+        mismatch:
+            The maximum fractional mismatch between neighboring tiles
+    """
+
     def __init__(
         self,
         duration: float,
@@ -212,7 +363,7 @@ class QScan(torch.nn.Module):
         self.qs = self.get_qs()
         self.frange = frange
 
-        # Deliberately doing something different from GWpy here
+        # Deliberately doing something different from GWpy here.
         # Their final frange is the intersection of the frange
         # from each q. This implementation uses the frange of
         # the chosen q.
@@ -230,6 +381,9 @@ class QScan(torch.nn.Module):
         )
 
     def get_qs(self):
+        """
+        Determine the values of Q to try for the set of Q-transforms
+        """
         deltam = 2 * (self.mismatch / 3.0) ** (1 / 2.0)
         cumum = math.log(self.qrange[1] / self.qrange[0]) / 2 ** (1 / 2.0)
         nplanes = int(max(math.ceil(cumum / deltam), 1))
@@ -248,6 +402,35 @@ class QScan(torch.nn.Module):
         fsearch_range: List[float] = None,
         norm: str = "median",
     ):
+        """
+        Compute the set of QTiles for each Q transform and determine which
+        has the highest energy value. Interpolate and return the
+        corresponding set of tiles.
+
+        Args:
+            X:
+                Time series of data. Should have the duration and sample rate
+                used to initialize this object. Expected input shape is
+                `(B, C, T)`, where T is the number of samples, C is the number
+                of channels, and B is the number of batches. If less than
+                three-dimensional, axes will be added during Q-tile
+                computation.
+            num_f_bins:
+                Number of frequency bins to interpolate to. Because the
+                frequency spacing of the Q-tiles is in log-space, the frequency
+                interpolation is log-spaced as well.
+            num_t_bins:
+                Number of time bins to interpolate to.
+            fsearch_range:
+                The lower and upper frequency values within which to search
+                for the maximum energy
+            norm:
+                The method of interpolation used by each QTile
+
+        Returns:
+            An interpolated Q-transform for the batch of data. Output will
+            have one more dimension than the input
+        """
         for transform in self.q_transforms:
             transform.compute_qtiles(X, norm)
         idx = torch.argmax(
@@ -258,7 +441,4 @@ class QScan(torch.nn.Module):
                 ]
             )
         )
-        return (
-            self.q_transforms[idx].interpolate(num_f_bins, num_t_bins),
-            self.qs[idx],
-        )
+        return self.q_transforms[idx].interpolate(num_f_bins, num_t_bins)
