@@ -48,7 +48,7 @@ class QTile(torch.nn.Module):
         super().__init__()
         self.mismatch = mismatch
         self.q = q
-        self.deltam = 2 * (self.mismatch / 3.0) ** (1 / 2.0)
+        self.deltam = torch.tensor(2 * (self.mismatch / 3.0) ** (1 / 2.0))
         self.qprime = self.q / 11 ** (1 / 2.0)
         self.frequency = frequency
         self.duration = duration
@@ -210,7 +210,7 @@ class SingleQTransform(torch.nn.Module):
         fstepmin = 1 / self.duration
 
         freq_base = math.exp(2 / ((2 + self.q**2) ** (1 / 2.0)) * fstep)
-        freqs = freq_base ** torch.Tensor([i + 0.5 for i in range(nfreq)])
+        freqs = torch.Tensor([freq_base ** (i + 0.5) for i in range(nfreq)])
         freqs = (minf * freqs // fstepmin) * fstepmin
         return torch.unique(freqs)
 
