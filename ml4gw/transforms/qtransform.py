@@ -103,9 +103,8 @@ class QTile(torch.nn.Module):
             fseries:
                 Frequency series of data. Should correspond to data with
                 the duration and sample rate used to initialize this object.
-                Expected input shape is `(B, C, F)`, where F is the number
-                of samples, C is the number of channels, and B is the number
-                of batches. If less than three-dimensional, axes will be
+                Expected input shape is `(..., F)`, where F is the number
+                of samples. If less than three-dimensional, axes will be
                 added.
             norm:
                 The method of normalization. Options are "median", "mean", or
@@ -113,13 +112,11 @@ class QTile(torch.nn.Module):
 
         Returns:
             The row of Q-tiles for the given Q and frequency. Output is
-            four-dimensional: `(B, C, F, T)`
+            three-dimensional: `(B, C, T)`
         """
-        if len(fseries.shape) > 3:
-            raise ValueError("Input data has more than 3 dimensions")
-
         while len(fseries.shape) < 3:
             fseries = fseries[None]
+
         windowed = fseries[..., self.indices] * self.window
         left, right = self.padding
         padded = F.pad(windowed, (int(left), int(right)), mode="constant")
@@ -130,15 +127,10 @@ class QTile(torch.nn.Module):
         if norm:
             norm = norm.lower() if isinstance(norm, str) else norm
             if norm == "median":
-                # I swear there's a better way to do this
-                medians = torch.quantile(energy, q=0.5, dim=-1)
-                medians = medians.repeat(energy.shape[-1], 1, 1)
-                medians = medians.transpose(0, -1).transpose(0, 1)
+                medians = torch.quantile(energy, q=0.5, dim=-1, keepdim=True)
                 energy /= medians
             elif norm == "mean":
-                means = torch.mean(energy, dim=-1)
-                means = means.repeat(energy.shape[-1], 1, 1)
-                means = means.transpose(0, -1).transpose(0, 1)
+                means = torch.mean(energy, dim=-1, keepdim=True)
                 energy /= means
             else:
                 raise ValueError("Invalid normalisation %r" % norm)
@@ -255,7 +247,7 @@ class SingleQTransform(torch.nn.Module):
         if dimension == "neither":
             return max_across_ft
         if dimension == "channel":
-            return torch.max(max_across_ft, dim=0).values
+            return torch.max(max_across_ft, dim=-2).values
         if dimension == "batch":
             return torch.max(max_across_ft, dim=-1).values
 
@@ -305,7 +297,7 @@ class SingleQTransform(torch.nn.Module):
             X:
                 Time series of data. Should have the duration and sample rate
                 used to initialize this object. Expected input shape is
-                `(B, C, T)`, where T is the number of samples, C is the number
+                `(..., T)`, where T is the number of samples, C is the number
                 of channels, and B is the number of batches. If less than
                 three-dimensional, axes will be added during Q-tile
                 computation.
@@ -411,8 +403,7 @@ class QScan(torch.nn.Module):
             X:
                 Time series of data. Should have the duration and sample rate
                 used to initialize this object. Expected input shape is
-                `(B, C, T)`, where T is the number of samples, C is the number
-                of channels, and B is the number of batches. If less than
+                `(..., T)`, where T is the number of samples. If less than
                 three-dimensional, axes will be added during Q-tile
                 computation.
             num_f_bins:

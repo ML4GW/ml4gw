@@ -78,10 +78,6 @@ def test_qtile(
         rtol=1e-3,
     )
 
-    X = torch.randn(2, 2, 2, int(sample_rate * duration))
-    with pytest.raises(ValueError):
-        torch_qtile(X)
-
 
 def test_singleqtransform(
     q,
