@@ -15,7 +15,7 @@ input on GPU.
 class QTile(torch.nn.Module):
     """
     Compute the row of Q-tiles for a single Q value and a single
-    frequency for a batch of multi-channel frequency series data.
+    frequency for multi-dimensional frequency series data.
     Should really be called `QRow`, but I want to match GWpy.
     Input data should have three dimensions or fewer.
     If fewer, dimensions will be added until the input is
@@ -111,8 +111,8 @@ class QTile(torch.nn.Module):
                 `None`.
 
         Returns:
-            The row of Q-tiles for the given Q and frequency. Output is
-            three-dimensional: `(B, C, T)`
+            The row of Q-tiles for the given Q and frequency. Output is at
+            least three-dimensional: `(..., B, C, T)`
         """
         while len(fseries.shape) < 3:
             fseries = fseries[None]
@@ -140,9 +140,8 @@ class QTile(torch.nn.Module):
 
 class SingleQTransform(torch.nn.Module):
     """
-    Compute the Q-transform for a single Q value for a batch of
-    multi-channel time series data. Input data should have
-    three dimensions or fewer.
+    Compute the Q-transform for a single Q value for multi-
+    dimensional time series data.
 
     Args:
         duration:
@@ -274,12 +273,14 @@ class SingleQTransform(torch.nn.Module):
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
         resampled = [
-            F.interpolate(qtile, num_t_bins, mode="linear")
+            F.interpolate(
+                qtile[None], (qtile.shape[-2], num_t_bins), mode="bicubic"
+            )
             for qtile in self.qtiles
         ]
         resampled = torch.stack(resampled, dim=-2)
         resampled = F.interpolate(
-            resampled, (num_f_bins, num_t_bins), mode="bilinear"
+            resampled[0], (num_f_bins, num_t_bins), mode="bicubic"
         )
         return torch.squeeze(resampled)
 
@@ -297,8 +298,7 @@ class SingleQTransform(torch.nn.Module):
             X:
                 Time series of data. Should have the duration and sample rate
                 used to initialize this object. Expected input shape is
-                `(..., T)`, where T is the number of samples, C is the number
-                of channels, and B is the number of batches. If less than
+                `(..., T)`, where T is the number of samples. If less than
                 three-dimensional, axes will be added during Q-tile
                 computation.
             num_f_bins:
@@ -320,7 +320,7 @@ class SingleQTransform(torch.nn.Module):
 
 class QScan(torch.nn.Module):
     """
-    Calculate the Q-transform of a batch of multi-channel
+    Calculate the Q-transform of multi-dimensional
     time series data for a range of Q values and return
     the interpolated Q-transform with the highest energy.
 
