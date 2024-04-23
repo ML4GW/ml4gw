@@ -15,7 +15,7 @@ input on GPU.
 class QTile(torch.nn.Module):
     """
     Compute the row of Q-tiles for a single Q value and a single
-    frequency for multi-dimensional frequency series data.
+    frequency for a batch of multi-channel frequency series data.
     Should really be called `QRow`, but I want to match GWpy.
     Input data should have three dimensions or fewer.
     If fewer, dimensions will be added until the input is
@@ -103,17 +103,21 @@ class QTile(torch.nn.Module):
             fseries:
                 Frequency series of data. Should correspond to data with
                 the duration and sample rate used to initialize this object.
-                Expected input shape is `(..., F)`, where F is the number
-                of samples. If less than three-dimensional, axes will be
+                Expected input shape is `(B, C, F)`, where F is the number
+                of samples, C is the number of channels, and B is the number
+                of batches. If less than three-dimensional, axes will be
                 added.
             norm:
                 The method of normalization. Options are "median", "mean", or
                 `None`.
 
         Returns:
-            The row of Q-tiles for the given Q and frequency. Output is at
-            least three-dimensional: `(..., B, C, T)`
+            The row of Q-tiles for the given Q and frequency. Output is
+            three-dimensional: `(B, C, T)`
         """
+        if len(fseries.shape) > 3:
+            raise ValueError("Input data has more than 3 dimensions")
+
         while len(fseries.shape) < 3:
             fseries = fseries[None]
 
@@ -140,8 +144,9 @@ class QTile(torch.nn.Module):
 
 class SingleQTransform(torch.nn.Module):
     """
-    Compute the Q-transform for a single Q value for multi-
-    dimensional time series data.
+    Compute the Q-transform for a single Q value for a batch of
+    multi-channel time series data. Input data should have
+    three dimensions or fewer.
 
     Args:
         duration:
@@ -273,7 +278,8 @@ class SingleQTransform(torch.nn.Module):
         frequency bins. Note that PyTorch does not have the same
         interpolation methods that GWpy uses, and so the interpolated
         spectrograms will be different even though the uninterpolated
-        values match
+        values match. The `bicubic` interpolation method is used as
+        it seems to match GWpy most closely.
         """
         if self.qtiles is None:
             raise RuntimeError(
@@ -304,7 +310,8 @@ class SingleQTransform(torch.nn.Module):
             X:
                 Time series of data. Should have the duration and sample rate
                 used to initialize this object. Expected input shape is
-                `(..., T)`, where T is the number of samples. If less than
+                `(B, C, T)`, where T is the number of samples, C is the number
+                of channels, and B is the number of batches. If less than
                 three-dimensional, axes will be added during Q-tile
                 computation.
             norm:
@@ -330,7 +337,7 @@ class SingleQTransform(torch.nn.Module):
 
 class QScan(torch.nn.Module):
     """
-    Calculate the Q-transform of multi-dimensional
+    Calculate the Q-transform of a batch of multi-channel
     time series data for a range of Q values and return
     the interpolated Q-transform with the highest energy.
 
@@ -420,7 +427,8 @@ class QScan(torch.nn.Module):
             X:
                 Time series of data. Should have the duration and sample rate
                 used to initialize this object. Expected input shape is
-                `(..., T)`, where T is the number of samples. If less than
+                `(B, C, T)`, where T is the number of samples, C is the number
+                of channels, and B is the number of batches. If less than
                 three-dimensional, axes will be added during Q-tile
                 computation.
             fsearch_range:
