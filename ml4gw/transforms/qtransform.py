@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Optional
 
 import torch
 import torch.nn.functional as F
@@ -113,13 +113,14 @@ class QTile(torch.nn.Module):
 
         Returns:
             The row of Q-tiles for the given Q and frequency. Output is
-            four-dimensional: `(B, C, F, T)`
+            three-dimensional: `(B, C, T)`
         """
         if len(fseries.shape) > 3:
             raise ValueError("Input data has more than 3 dimensions")
 
         while len(fseries.shape) < 3:
             fseries = fseries[None]
+
         windowed = fseries[..., self.indices] * self.window
         left, right = self.padding
         padded = F.pad(windowed, (int(left), int(right)), mode="constant")
@@ -130,15 +131,10 @@ class QTile(torch.nn.Module):
         if norm:
             norm = norm.lower() if isinstance(norm, str) else norm
             if norm == "median":
-                # I swear there's a better way to do this
-                medians = torch.quantile(energy, q=0.5, dim=-1)
-                medians = medians.repeat(energy.shape[-1], 1, 1)
-                medians = medians.transpose(0, -1).transpose(0, 1)
+                medians = torch.quantile(energy, q=0.5, dim=-1, keepdim=True)
                 energy /= medians
             elif norm == "mean":
-                means = torch.mean(energy, dim=-1)
-                means = means.repeat(energy.shape[-1], 1, 1)
-                means = means.transpose(0, -1).transpose(0, 1)
+                means = torch.mean(energy, dim=-1, keepdim=True)
                 energy /= means
             else:
                 raise ValueError("Invalid normalisation %r" % norm)
@@ -157,6 +153,11 @@ class SingleQTransform(torch.nn.Module):
             Length of the time series data in seconds
         sample_rate:
             Sample rate of the data in Hz
+        spectrogram_shape:
+            The shape of the interpolated spectrogram, specified as
+            `(num_f_bins, num_t_bins)`. Because the
+            frequency spacing of the Q-tiles is in log-space, the frequency
+            interpolation is log-spaced as well.
         q:
             The Q value to use for the Q transform
         frange:
@@ -171,12 +172,14 @@ class SingleQTransform(torch.nn.Module):
         self,
         duration: float,
         sample_rate: float,
+        spectrogram_shape: tuple[int],
         q: float = 12,
         frange: List[float] = [0, torch.inf],
         mismatch: float = 0.2,
     ):
         super().__init__()
         self.q = q
+        self.spectrogram_shape = spectrogram_shape
         self.frange = frange
         self.duration = duration
         self.mismatch = mismatch
@@ -255,7 +258,7 @@ class SingleQTransform(torch.nn.Module):
         if dimension == "neither":
             return max_across_ft
         if dimension == "channel":
-            return torch.max(max_across_ft, dim=0).values
+            return torch.max(max_across_ft, dim=-2).values
         if dimension == "batch":
             return torch.max(max_across_ft, dim=-1).values
 
@@ -275,28 +278,30 @@ class SingleQTransform(torch.nn.Module):
         frequency bins. Note that PyTorch does not have the same
         interpolation methods that GWpy uses, and so the interpolated
         spectrograms will be different even though the uninterpolated
-        values match
+        values match. The `bicubic` interpolation method is used as
+        it seems to match GWpy most closely.
         """
         if self.qtiles is None:
             raise RuntimeError(
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
         resampled = [
-            F.interpolate(qtile, num_t_bins, mode="linear")
+            F.interpolate(
+                qtile[None], (qtile.shape[-2], num_t_bins), mode="bicubic"
+            )
             for qtile in self.qtiles
         ]
         resampled = torch.stack(resampled, dim=-2)
         resampled = F.interpolate(
-            resampled, (num_f_bins, num_t_bins), mode="bilinear"
+            resampled[0], (num_f_bins, num_t_bins), mode="bicubic"
         )
         return torch.squeeze(resampled)
 
     def forward(
         self,
         X: torch.Tensor,
-        num_f_bins: int,
-        num_t_bins: int,
         norm: str = "median",
+        spectrogram_shape: Optional[tuple[int]] = None,
     ):
         """
         Compute the Q-tiles and interpolate
@@ -309,19 +314,23 @@ class SingleQTransform(torch.nn.Module):
                 of channels, and B is the number of batches. If less than
                 three-dimensional, axes will be added during Q-tile
                 computation.
-            num_f_bins:
-                Number of frequency bins to interpolate to. Because the
-                frequency spacing of the Q-tiles is in log-space, the frequency
-                interpolation is log-spaced as well.
-            num_t_bins:
-                Number of time bins to interpolate to.
             norm:
                 The method of interpolation used by each QTile
+            spectrogram_shape:
+                The shape of the interpolated spectrogram, specified as
+                `(num_f_bins, num_t_bins)`. Because the
+                frequency spacing of the Q-tiles is in log-space, the frequency
+                interpolation is log-spaced as well. If not given, the shape
+                used to initialize the transform will be used.
 
         Returns:
             The interpolated Q-transform for the batch of data. Output will
             have one more dimension than the input
         """
+
+        if spectrogram_shape is None:
+            spectrogram_shape = self.spectrogram_shape
+        num_f_bins, num_t_bins = spectrogram_shape
         self.compute_qtiles(X, norm)
         return self.interpolate(num_f_bins, num_t_bins)
 
@@ -337,6 +346,11 @@ class QScan(torch.nn.Module):
             Length of the time series data in seconds
         sample_rate:
             Sample rate of the data in Hz
+        spectrogram_shape:
+            The shape of the interpolated spectrogram, specified as
+            `(num_f_bins, num_t_bins)`. Because the
+            frequency spacing of the Q-tiles is in log-space, the frequency
+            interpolation is log-spaced as well.
         qrange:
             The lower and upper values of Q to consider. The
             actual values of Q used for the transforms are
@@ -353,6 +367,7 @@ class QScan(torch.nn.Module):
         self,
         duration: float,
         sample_rate: float,
+        spectrogram_shape: tuple[int],
         qrange: List[float] = [4, 64],
         frange: List[float] = [0, torch.inf],
         mismatch: float = 0.2,
@@ -362,6 +377,7 @@ class QScan(torch.nn.Module):
         self.mismatch = mismatch
         self.qs = self.get_qs()
         self.frange = frange
+        self.spectrogram_shape = spectrogram_shape
 
         # Deliberately doing something different from GWpy here.
         # Their final frange is the intersection of the frange
@@ -372,6 +388,7 @@ class QScan(torch.nn.Module):
                 SingleQTransform(
                     duration=duration,
                     sample_rate=sample_rate,
+                    spectrogram_shape=spectrogram_shape,
                     q=q,
                     frange=self.frange.copy(),
                     mismatch=self.mismatch,
@@ -397,10 +414,9 @@ class QScan(torch.nn.Module):
     def forward(
         self,
         X: torch.Tensor,
-        num_f_bins: int,
-        num_t_bins: int,
         fsearch_range: List[float] = None,
         norm: str = "median",
+        spectrogram_shape: Optional[tuple[int]] = None,
     ):
         """
         Compute the set of QTiles for each Q transform and determine which
@@ -415,17 +431,17 @@ class QScan(torch.nn.Module):
                 of channels, and B is the number of batches. If less than
                 three-dimensional, axes will be added during Q-tile
                 computation.
-            num_f_bins:
-                Number of frequency bins to interpolate to. Because the
-                frequency spacing of the Q-tiles is in log-space, the frequency
-                interpolation is log-spaced as well.
-            num_t_bins:
-                Number of time bins to interpolate to.
             fsearch_range:
                 The lower and upper frequency values within which to search
                 for the maximum energy
             norm:
                 The method of interpolation used by each QTile
+            spectrogram_shape:
+                The shape of the interpolated spectrogram, specified as
+                `(num_f_bins, num_t_bins)`. Because the
+                frequency spacing of the Q-tiles is in log-space, the frequency
+                interpolation is log-spaced as well. If not given, the shape
+                used to initialize the transform will be used.
 
         Returns:
             An interpolated Q-transform for the batch of data. Output will
@@ -441,4 +457,7 @@ class QScan(torch.nn.Module):
                 ]
             )
         )
+        if spectrogram_shape is None:
+            spectrogram_shape = self.spectrogram_shape
+        num_f_bins, num_t_bins = spectrogram_shape
         return self.q_transforms[idx].interpolate(num_f_bins, num_t_bins)

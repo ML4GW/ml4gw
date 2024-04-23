@@ -24,13 +24,8 @@ def norm(request):
     return request.param
 
 
-@pytest.fixture(params=[64, 128])
-def num_f_bins(request):
-    return request.param
-
-
-@pytest.fixture(params=[64, 128])
-def num_t_bins(request):
+@pytest.fixture(params=[[64, 64], [64, 128], [128, 128]])
+def spectrogram_shape(request):
     return request.param
 
 
@@ -89,22 +84,26 @@ def test_singleqtransform(
     sample_rate,
     mismatch,
     norm,
-    num_f_bins,
-    num_t_bins,
+    spectrogram_shape,
 ):
     X = torch.randn(int(duration * sample_rate))
     fseries = torch.fft.rfft(X, norm="forward")
     fseries[..., 1:] *= 2
 
     qtransform = SingleQTransform(
-        duration, sample_rate, q, frange=[0, torch.inf], mismatch=mismatch
+        duration,
+        sample_rate,
+        spectrogram_shape,
+        q,
+        frange=[0, torch.inf],
+        mismatch=mismatch,
     )
 
     with pytest.raises(RuntimeError):
         qtransform.get_max_energy()
 
     with pytest.raises(RuntimeError):
-        qtransform.interpolate(num_f_bins, num_t_bins)
+        qtransform.interpolate(*spectrogram_shape)
 
     qplane = QPlane(
         q,
@@ -125,20 +124,22 @@ def test_singleqtransform(
     for t, g in zip(torch_qtiles, gwpy_qtiles):
         assert np.allclose(t.numpy(), g, rtol=1e-3)
 
-    transformed = qtransform(X, num_f_bins, num_t_bins, norm)
-    assert transformed.shape[-2] == num_f_bins
-    assert transformed.shape[-1] == num_t_bins
+    transformed = qtransform(X, norm)
+    assert list(transformed.shape[-2:]) == spectrogram_shape
 
 
 def test_get_qs(
     duration,
     sample_rate,
     mismatch,
+    spectrogram_shape,
 ):
     frange = [0, torch.inf]
     qrange = [1, 1000]
 
-    qscan = QScan(duration, sample_rate, qrange, frange, mismatch)
+    qscan = QScan(
+        duration, sample_rate, spectrogram_shape, qrange, frange, mismatch
+    )
     qtiling = QTiling(
         duration, sample_rate, qrange, frange=[0, np.inf], mismatch=mismatch
     )
