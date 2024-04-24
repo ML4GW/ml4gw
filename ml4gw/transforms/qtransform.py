@@ -1,5 +1,5 @@
 import math
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -172,7 +172,7 @@ class SingleQTransform(torch.nn.Module):
         self,
         duration: float,
         sample_rate: float,
-        spectrogram_shape: tuple[int, int],
+        spectrogram_shape: Tuple[int, int],
         q: float = 12,
         frange: List[float] = [0, torch.inf],
         mismatch: float = 0.2,
@@ -301,7 +301,7 @@ class SingleQTransform(torch.nn.Module):
         self,
         X: torch.Tensor,
         norm: str = "median",
-        spectrogram_shape: Optional[tuple[int, int]] = None,
+        spectrogram_shape: Optional[Tuple[int, int]] = None,
     ):
         """
         Compute the Q-tiles and interpolate
@@ -367,7 +367,7 @@ class QScan(torch.nn.Module):
         self,
         duration: float,
         sample_rate: float,
-        spectrogram_shape: tuple[int, int],
+        spectrogram_shape: Tuple[int, int],
         qrange: List[float] = [4, 64],
         frange: List[float] = [0, torch.inf],
         mismatch: float = 0.2,
@@ -416,7 +416,7 @@ class QScan(torch.nn.Module):
         X: torch.Tensor,
         fsearch_range: List[float] = None,
         norm: str = "median",
-        spectrogram_shape: Optional[tuple[int, int]] = None,
+        spectrogram_shape: Optional[Tuple[int, int]] = None,
     ):
         """
         Compute the set of QTiles for each Q transform and determine which
