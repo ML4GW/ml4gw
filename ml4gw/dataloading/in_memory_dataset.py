@@ -155,7 +155,7 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             # support it
             num_kernels = self.num_kernels ** len(self.X)
             return (num_kernels - 1) // self.batch_size + 1
-        
+
     def init_indices(self):
         """
         Initialize arrays of indices we'll use to slice
@@ -208,7 +208,7 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
     def __iter__(
         self,
     ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
-        
+
         indices = self.init_indices()
         for i in range(len(self)):
             # slice the array of _indices_ we'll be using to
