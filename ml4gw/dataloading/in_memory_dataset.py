@@ -220,7 +220,6 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             X = slice_kernels(self.X, idx, self.kernel_size)
             if self.y is not None:
                 y = slice_kernels(self.y, idx, self.kernel_size)
-
-            if self.y is not None:
                 yield X, y
-            yield X
+            else:
+                yield X
