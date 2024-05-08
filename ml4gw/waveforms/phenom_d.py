@@ -905,15 +905,15 @@ def phenom_d_inspiral_phase(Mf, mass_1, mass_2, eta, eta2, xi, chi1, chi2):
     sigma3 = sigma3Fit(eta, eta2, xi)
     sigma4 = sigma4Fit(eta, eta2, xi)
 
-    ins_phasing += (Mf.T * sigma1 / eta).T
-    ins_phasing += (Mf.T ** (4.0 / 3.0) * 0.75 * sigma2 / eta).T
-    ins_phasing += (Mf.T ** (5.0 / 3.0) * 0.6 * sigma3 / eta).T
-    ins_phasing += (Mf.T**2.0 * 0.5 * sigma4 / eta).T
+    ins_phasing += (Mf.mT * sigma1 / eta).mT
+    ins_phasing += (Mf.mT ** (4.0 / 3.0) * 0.75 * sigma2 / eta).mT
+    ins_phasing += (Mf.mT ** (5.0 / 3.0) * 0.6 * sigma3 / eta).mT
+    ins_phasing += (Mf.mT**2.0 * 0.5 * sigma4 / eta).mT
 
-    ins_Dphasing = (ins_Dphasing.T + sigma1 / eta).T
-    ins_Dphasing += (Mf.T ** (1.0 / 3.0) * sigma2 / eta).T
-    ins_Dphasing += (Mf.T ** (2.0 / 3.0) * sigma3 / eta).T
-    ins_Dphasing += (Mf.T * sigma4 / eta).T
+    ins_Dphasing = (ins_Dphasing.T + sigma1 / eta).mT
+    ins_Dphasing += (Mf.mT ** (1.0 / 3.0) * sigma2 / eta).mT
+    ins_Dphasing += (Mf.mT ** (2.0 / 3.0) * sigma3 / eta).mT
+    ins_Dphasing += (Mf.mT * sigma4 / eta).mT
 
     return ins_phasing, ins_Dphasing
 
@@ -925,16 +925,16 @@ def phenom_d_int_phase(Mf, eta, eta2, xi):
     # Merger phase
     # Leading beta0 is not added here
     # overall 1/eta is not multiplied
-    int_phasing = (Mf.T * beta1).T
-    int_phasing += (torch.log(Mf).T * beta2).T
-    int_phasing -= (Mf.T ** (-3.0) / 3.0 * beta3).T
+    int_phasing = (Mf.mT * beta1).mT
+    int_phasing += (torch.log(Mf).mT * beta2).mT
+    int_phasing -= (Mf.mT ** (-3.0) / 3.0 * beta3).mT
 
     # overall 1/eta is multiple in derivative of
     # intermediate phase
-    int_Dphasing = (Mf.T ** (-4.0) * beta3).T
-    int_Dphasing += (Mf.T ** (-1.0) * beta2).T
-    int_Dphasing = (int_Dphasing.T + beta1).T
-    int_Dphasing = (int_Dphasing.T / eta).T
+    int_Dphasing = (Mf.mT ** (-4.0) * beta3).mT
+    int_Dphasing += (Mf.mT ** (-1.0) * beta2).mT
+    int_Dphasing = (int_Dphasing.T + beta1).mT
+    int_Dphasing = (int_Dphasing.T / eta).mT
     return int_phasing, int_Dphasing
 
 
@@ -947,19 +947,21 @@ def phenom_d_mrd_phase(Mf, eta, eta2, chi1, chi2, xi):
 
     # merger ringdown
     fRD, fDM = fring_fdamp(eta, eta2, chi1, chi2)
-    f_minus_alpha5_fRD = (Mf.T - alpha5 * fRD).T
+    f_minus_alpha5_fRD = (Mf.t() - alpha5 * fRD).t()
 
     # Leading 1/eta is not multiplied at this stage
-    mrd_phasing = (Mf.T * alpha1).T
-    mrd_phasing -= (1 / Mf.T * alpha2).T
-    mrd_phasing += (4.0 / 3.0) * (Mf.T ** (3.0 / 4.0) * alpha3).T
-    mrd_phasing += (torch.atan(f_minus_alpha5_fRD.T / fDM) * alpha4).T
+    mrd_phasing = (Mf.t() * alpha1).t()
+    mrd_phasing -= (1 / Mf.t() * alpha2).t()
+    mrd_phasing += (4.0 / 3.0) * (Mf.t() ** (3.0 / 4.0) * alpha3).t()
+    mrd_phasing += (torch.atan(f_minus_alpha5_fRD.t() / fDM) * alpha4).t()
 
-    mrd_Dphasing = (alpha4 * fDM / (f_minus_alpha5_fRD.T**2 + fDM**2)).T
-    mrd_Dphasing += (Mf.T ** (-1.0 / 4.0) * alpha3).T
-    mrd_Dphasing += (Mf.T ** (-2.0) * alpha2).T
-    mrd_Dphasing = (mrd_Dphasing.T + alpha1).T
-    mrd_Dphasing = (mrd_Dphasing.T / eta).T
+    mrd_Dphasing = (
+        alpha4 * fDM / (f_minus_alpha5_fRD.t() ** 2 + fDM**2)
+    ).t()
+    mrd_Dphasing += (Mf.t() ** (-1.0 / 4.0) * alpha3).t()
+    mrd_Dphasing += (Mf.t() ** (-2.0) * alpha2).t()
+    mrd_Dphasing = (mrd_Dphasing.t() + alpha1).t()
+    mrd_Dphasing = (mrd_Dphasing.t() / eta).t()
 
     return mrd_phasing, mrd_Dphasing
 
@@ -984,23 +986,23 @@ def phenom_d_phase(Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi):
         PHI_fJoin_INS, eta, eta2, xi
     )
     C2Int = ins_Dphase_f1 - int_Dphase_f1
-    C1Int = ins_phase_f1 - (int_phase_f1.T / eta).T - C2Int * PHI_fJoin_INS
+    C1Int = ins_phase_f1 - (int_phase_f1.T / eta).mT - C2Int * PHI_fJoin_INS
     # C1 continuity at ringdown
-    fRDJoin = (0.5 * torch.ones_like(Mf).T * fRD).T
+    fRDJoin = (0.5 * torch.ones_like(Mf).mT * fRD).mT
     int_phase_rd, int_Dphase_rd = phenom_d_int_phase(fRDJoin, eta, eta2, xi)
     mrd_phase_rd, mrd_Dphase_rd = phenom_d_mrd_phase(
         fRDJoin, eta, eta2, chi1, chi2, xi
     )
-    PhiIntTempVal = (int_phase_rd.T / eta).T + C1Int + C2Int * fRDJoin
+    PhiIntTempVal = (int_phase_rd.T / eta).mT + C1Int + C2Int * fRDJoin
     # C2MRD = int_Dphase_rd - mrd_Dphase_rd
     C2MRD = C2Int + int_Dphase_rd - mrd_Dphase_rd
-    C1MRD = PhiIntTempVal - (mrd_phase_rd.T / eta).T - C2MRD * fRDJoin
+    C1MRD = PhiIntTempVal - (mrd_phase_rd.T / eta).mT - C2MRD * fRDJoin
 
-    int_phase = (int_phase.T / eta).T
+    int_phase = (int_phase.T / eta).mT
     int_phase += C1Int
     int_phase += Mf * C2Int
 
-    mrd_phase = (mrd_phase.T / eta).T
+    mrd_phase = (mrd_phase.T / eta).mT
     mrd_phase += C1MRD
     mrd_phase += Mf * C2MRD
 
@@ -1133,10 +1135,10 @@ def phenom_d_inspiral_amp(Mf, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22):
         + Mf_five_third.T * prefactors_five_thirds
         + Mf_seven_third.T * prefactors_seven_thirds
         + MF_eight_third.T * prefactors_eight_thirds
-        + Mf.T * prefactors_one
+        + Mf.mT * prefactors_one
         + Mf_two.T * prefactors_two
         + Mf_three.T * prefactors_three
-    ).T
+    ).mT
 
     Damp = (
         (2.0 / 3.0) / Mf_one_third.T * prefactors_two_thirds
@@ -1145,9 +1147,9 @@ def phenom_d_inspiral_amp(Mf, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22):
         + (7.0 / 3.0) * Mf_four_third.T * prefactors_seven_thirds
         + (8.0 / 3.0) * Mf_five_third.T * prefactors_eight_thirds
         + prefactors_one
-        + 2.0 * Mf.T * prefactors_two
+        + 2.0 * Mf.mT * prefactors_two
         + 3.0 * Mf_two.T * prefactors_three
-    ).T
+    ).mT
 
     return amp, Damp
 
@@ -1160,15 +1162,15 @@ def phenom_d_mrd_amp(Mf, eta, eta2, chi1, chi2, xi):
     gamma2 = gamma2_fun(eta, eta2, xi)
     gamma3 = gamma3_fun(eta, eta2, xi)
     fDMgamma3 = fDM * gamma3
-    pow2_fDMgamma3 = (torch.ones_like(Mf).T * fDMgamma3 * fDMgamma3).T
-    fminfRD = Mf - (torch.ones_like(Mf).T * fRD).T
-    exp_times_lorentzian = torch.exp(fminfRD.T * gamma2 / fDMgamma3).T
+    pow2_fDMgamma3 = (torch.ones_like(Mf).mT * fDMgamma3 * fDMgamma3).mT
+    fminfRD = Mf - (torch.ones_like(Mf).mT * fRD).mT
+    exp_times_lorentzian = torch.exp(fminfRD.mT * gamma2 / fDMgamma3).mT
     exp_times_lorentzian *= fminfRD**2 + pow2_fDMgamma3
 
-    amp = (1 / exp_times_lorentzian.T * gamma1 * gamma3 * fDM).T
-    Damp = (fminfRD.T * -2 * fDM * gamma1 * gamma3) / (
+    amp = (1 / exp_times_lorentzian.T * gamma1 * gamma3 * fDM).mT
+    Damp = (fminfRD.mT * -2 * fDM * gamma1 * gamma3) / (
         fminfRD * fminfRD + pow2_fDMgamma3
-    ).T - (gamma2 * gamma1)
+    ).mT - (gamma2 * gamma1)
     Damp = Damp.T / exp_times_lorentzian
     return amp, Damp
 
@@ -1184,7 +1186,7 @@ def phenom_d_int_amp(Mf, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi):
     gamma3 = gamma3_fun(eta, eta2, xi)
 
     fpeak = fmaxCalc(fRD, fDM, gamma2, gamma3)
-    Mf3 = (torch.ones_like(Mf).T * fpeak).T
+    Mf3 = (torch.ones_like(Mf).mT * fpeak).mT
     dfx = 0.5 * (Mf3 - Mf1)
     Mf2 = Mf1 + dfx
 
@@ -1192,7 +1194,7 @@ def phenom_d_int_amp(Mf, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi):
         Mf1, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
     )
     v3, d2 = phenom_d_mrd_amp(Mf3, eta, eta2, chi1, chi2, xi)
-    v2 = (torch.ones_like(Mf).T * AmpIntColFitCoeff(eta, eta2, xi)).T
+    v2 = (torch.ones_like(Mf).mT * AmpIntColFitCoeff(eta, eta2, xi)).mT
 
     delta_0, delta_1, delta_2, delta_3, delta_4 = delta_values(
         f1=Mf1, f2=Mf2, f3=Mf3, v1=v1, v2=v2, v3=v3, d1=d1, d2=d2
@@ -1225,7 +1227,7 @@ def phenom_d_amp(
     fRD, fDM = fring_fdamp(eta, eta2, chi1, chi2)
     Mf_peak = fmaxCalc(fRD, fDM, gamma2, gamma3)
     # Geometric peak and joining frequencies
-    Mf_peak = (torch.ones_like(Mf).T * Mf_peak).T
+    Mf_peak = (torch.ones_like(Mf).mT * Mf_peak).mT
     Mf_join_ins = 0.014 * torch.ones_like(Mf)
 
     # construct full IMR Amp
@@ -1290,9 +1292,9 @@ def phenom_d_htilde(
         Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi
     )
 
-    Psi = (Psi.T - 2 * phic).T
+    Psi = (Psi.T - 2 * phic).mT
     Psi -= Psi_ref
-    Psi -= ((Mf - Mf_ref).T * t0).T
+    Psi -= ((Mf - Mf_ref).mT * t0).mT
 
     amp, _ = phenom_d_amp(
         Mf,
@@ -1353,7 +1355,7 @@ def IMRPhenomD(
         f, chirp_mass, mass_ratio, chi1, chi2, distance, phic, f_ref
     )
 
-    hp = (htilde.T * pfac).T
-    hc = -1j * (htilde.T * cfac).T
+    hp = (htilde.mT * pfac).mT
+    hc = -1j * (htilde.mT * cfac).mT
 
     return hp, hc
