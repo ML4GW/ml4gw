@@ -227,52 +227,54 @@ def test_in_memory_dataset_coincident_stochastic(
     Xy, num_kernels, kernel_size, stride, batch_size, validate_shape
 ):
     # don't do some of the checks on errors or attributes
-    # since the shuffle flag doesn't affect any of these
+    # since the shuffle flag doesn't affect any of these;
     X, y = Xy
-    dataset = InMemoryDataset(
-        X,
-        kernel_size,
-        y=y,
-        batch_size=batch_size,
-        stride=stride,
-        coincident=True,
-        shuffle=True,
-    )
 
-    # patch randperm and call __iter__ to make sure
+    # patch return value of init_indices,
+    # (in this case, will call randperm) so that
     # we know exactly what the iteration order will be
     idx = torch.randperm(num_kernels)
-    with patch("torch.randperm", return_value=idx):
+    with patch.object(InMemoryDataset, "init_indices", return_value=idx):
+        dataset = InMemoryDataset(
+            X,
+            kernel_size,
+            y=y,
+            batch_size=batch_size,
+            stride=stride,
+            coincident=True,
+            shuffle=True,
+        )
+
         data_it = iter(dataset)
-    idx = idx.cpu().numpy()
+        idx = idx.cpu().numpy()
 
-    # now iterate through the initialized iterator and
-    # use the sampled indices to find where in the
-    # arange array we ought to be
-    num_samples = X.shape[-1]
-    for i in range(len(dataset)):
-        x = next(data_it)
-        if y is not None:
-            x, y_ = x
-            y_ = y_.cpu().numpy()
-        else:
-            y_ = None
-
-        validate_shape(i, x, len(dataset), y_)
-        for j, sample in enumerate(x.cpu().numpy()):
-            for k, channel in enumerate(sample):
-                sample_idx = i * batch_size + j
-                start_idx = idx[sample_idx]
-                start = start_idx * stride + k * num_samples
-                stop = start + kernel_size
-                expected = np.arange(start, stop).astype("float32")
-                assert (channel == expected).all(), (i, j, k)
-
+        # now iterate through the initialized iterator and
+        # use the sampled indices to find where in the
+        # arange array we ought to be
+        num_samples = X.shape[-1]
+        for i in range(len(dataset)):
+            x = next(data_it)
             if y is not None:
-                assert (y_[j] == (expected + 1)).all()
+                x, y_ = x
+                y_ = y_.cpu().numpy()
+            else:
+                y_ = None
 
-    with pytest.raises(StopIteration):
-        next(data_it)
+            validate_shape(i, x, len(dataset), y_)
+            for j, sample in enumerate(x.cpu().numpy()):
+                for k, channel in enumerate(sample):
+                    sample_idx = i * batch_size + j
+                    start_idx = idx[sample_idx]
+                    start = start_idx * stride + k * num_samples
+                    stop = start + kernel_size
+                    expected = np.arange(start, stop).astype("float32")
+                    assert (channel == expected).all(), (i, j, k)
+
+                if y is not None:
+                    assert (y_[j] == (expected + 1)).all()
+
+        with pytest.raises(StopIteration):
+            next(data_it)
 
 
 def test_in_memory_dataset_non_coincident_stochastic(
@@ -299,6 +301,11 @@ def test_in_memory_dataset_non_coincident_stochastic(
             )
         return
 
+    # lets make sure we're correctly calling
+    # torch.randint function for
+    # coincident=True, shuffle=False use case
+    samples = batches_per_epoch * batch_size
+    idx = torch.randint(num_kernels, size=(samples, 3))
     dataset = InMemoryDataset(
         X,
         kernel_size,
@@ -308,34 +315,43 @@ def test_in_memory_dataset_non_coincident_stochastic(
         shuffle=True,
         batches_per_epoch=batches_per_epoch,
     )
-
-    # same plan as the coincident test: patch the
-    # random generator we're going to use in __iter__
-    # so we can predict the iteration order
-    samples = batches_per_epoch * batch_size
-    idx = torch.randint(num_kernels, size=(samples, 3))
     with patch("torch.randint", return_value=idx) as mock:
-        data_it = iter(dataset)
+        dataset.init_indices()
+
     mock.assert_called_once_with(
         num_kernels, size=(samples, 3), device=dataset.X.device
     )
-    idx = idx.cpu().numpy()
 
-    # use the sampled indices to make sure the iteration
-    # order matches our expectations
-    num_samples = X.shape[-1]
-    for i in range(len(dataset)):
-        x = next(data_it)
-        assert x.shape == (batch_size, 3, kernel_size)
+    # Now test that the iteration order is as expected
+    # with the patched indices
+    with patch.object(InMemoryDataset, "init_indices", return_value=idx):
+        dataset = InMemoryDataset(
+            X,
+            kernel_size,
+            batch_size=batch_size,
+            stride=stride,
+            coincident=False,
+            shuffle=True,
+            batches_per_epoch=batches_per_epoch,
+        )
 
-        for j, sample in enumerate(x.cpu().numpy()):
-            for k, channel in enumerate(sample):
-                sample_idx = i * batch_size + j
-                start_idx = idx[sample_idx, k]
-                start = k * num_samples + start_idx * stride
-                stop = start + kernel_size
-                expected = np.arange(start, stop).astype("float32")
-                assert (channel == expected).all()
+        idx = idx.cpu().numpy()
+        data_it = iter(dataset)
+        # use the sampled indices to make sure the iteration
+        # order matches our expectations
+        num_samples = X.shape[-1]
+        for i in range(len(dataset)):
+            x = next(data_it)
+            assert x.shape == (batch_size, 3, kernel_size)
+
+            for j, sample in enumerate(x.cpu().numpy()):
+                for k, channel in enumerate(sample):
+                    sample_idx = i * batch_size + j
+                    start_idx = idx[sample_idx, k]
+                    start = k * num_samples + start_idx * stride
+                    stop = start + kernel_size
+                    expected = np.arange(start, stop).astype("float32")
+                    assert (channel == expected).all()
 
     with pytest.raises(StopIteration):
         next(data_it)
