@@ -136,7 +136,7 @@ and how they operate.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.base.Autoencoder.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.base.Autoencoder.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
+<dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -189,7 +189,7 @@ arbitrary <cite>output_activation</cite>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.convolutional.ConvolutionalAutoencoder.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.convolutional.ConvolutionalAutoencoder.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
+<dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -207,12 +207,12 @@ registered hooks while the latter silently ignores them.</p>
 <span id="ml4gw-nn-autoencoder-skip-connection-module"></span><h2>ml4gw.nn.autoencoder.skip_connection module<a class="headerlink" href="#module-ml4gw.nn.autoencoder.skip_connection" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.skip_connection.AddSkipConnect">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.autoencoder.skip_connection.</span></span><span class="sig-name descname"><span class="pre">AddSkipConnect</span></span><a class="headerlink" href="#ml4gw.nn.autoencoder.skip_connection.AddSkipConnect" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.autoencoder.skip_connection.</span></span><span class="sig-name descname"><span class="pre">AddSkipConnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.skip_connection.AddSkipConnect" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ml4gw.nn.autoencoder.skip_connection.SkipConnection" title="ml4gw.nn.autoencoder.skip_connection.SkipConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkipConnection</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.skip_connection.AddSkipConnect.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.skip_connection.AddSkipConnect.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
+<dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -232,7 +232,7 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.skip_connection.ConcatSkipConnect.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.skip_connection.ConcatSkipConnect.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
+<dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -252,12 +252,12 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.skip_connection.SkipConnection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.autoencoder.skip_connection.</span></span><span class="sig-name descname"><span class="pre">SkipConnection</span></span><a class="headerlink" href="#ml4gw.nn.autoencoder.skip_connection.SkipConnection" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.autoencoder.skip_connection.</span></span><span class="sig-name descname"><span class="pre">SkipConnection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.skip_connection.SkipConnection" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.skip_connection.SkipConnection.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.skip_connection.SkipConnection.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
+<dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
