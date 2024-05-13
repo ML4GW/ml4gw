@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ml4gw"
-version = "0.4.0"
+version = "0.4.2"
 description = "Tools for training torch models on gravitational wave data"
 readme = "README.md"
 authors = [
@@ -11,14 +11,8 @@ authors = [
 python = "^3.8,<3.12"
 
 # torch deps
-torch = [
-    {version = "^1.10", python = ">=3.8,<3.11"},
-    {version = "^2.0", python = ">=3.11"}
-]
-torchaudio = [
-    {version = "^0.13", python = ">=3.8,<3.11"},
-    {version = "^2.0", python = ">=3.11"}
-]
+torch = "^2.0"
+torchaudio = "^2.0"
 torchtyping = "^0.1"
 
 [tool.poetry.group.dev.dependencies]
