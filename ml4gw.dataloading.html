@@ -214,7 +214,7 @@ over 2x improvement in total throughput.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.dataloading.in_memory_dataset.InMemoryDataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.in_memory_dataset.</span></span><span class="sig-name descname"><span class="pre">InMemoryDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches_per_epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.in_memory_dataset.InMemoryDataset" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></p>
 <p>Dataset for iterating through in-memory multi-channel timeseries</p>
 <p>Dataset for arrays of timeseries data which can be stored
 in-memory all at once. Iterates through the data by sampling
@@ -273,6 +273,14 @@ with the index along the last channel moving fastest.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.dataloading.in_memory_dataset.InMemoryDataset.init_indices">
+<span class="sig-name descname"><span class="pre">init_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.in_memory_dataset.InMemoryDataset.init_indices" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize arrays of indices we'll use to slice
+through X and y at iteration time. This helps by
+taking care of building in any randomness upfront.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="ml4gw.dataloading.in_memory_dataset.InMemoryDataset.num_kernels">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_kernels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ml4gw.dataloading.in_memory_dataset.InMemoryDataset.num_kernels" title="Permalink to this definition"></a></dt>
