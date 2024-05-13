@@ -812,6 +812,26 @@ files = [
 ]
 
 [[package]]
+name = "dqsegdb2"
+version = "1.2.1"
+description = "Simplified python interface to DQSEGDB"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "dqsegdb2-1.2.1-py3-none-any.whl", hash = "sha256:4a6eb2ad66bcd596f7eebd18229674b3ae262a54480c75ac135755b0a5e8f783"},
+    {file = "dqsegdb2-1.2.1.tar.gz", hash = "sha256:6a222dbb7024de6de845ba5ad3583859cecf8ed5ce584ff5db6f01581b821f81"},
+]
+
+[package.dependencies]
+igwn-auth-utils = ">=1.0.0"
+ligo-segments = ">=1.0.0"
+
+[package.extras]
+docs = ["sphinx", "sphinx-automodapi", "sphinx-rtd-theme"]
+lint = ["flake8 (>=3.7.0)", "flake8-bandit"]
+test = ["pytest (>=2.9.2)", "pytest-cov (>=2.5.1)", "requests-mock (>=1.5.0)"]
+
+[[package]]
 name = "dynesty"
 version = "2.1.3"
 description = "A dynamic nested sampling package for computing Bayesian posteriors and evidences."
@@ -1010,6 +1030,76 @@ ssh = ["paramiko"]
 tqdm = ["tqdm"]
 
 [[package]]
+name = "gwdatafind"
+version = "1.2.0"
+description = "The GWDataFind data discovery client"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "gwdatafind-1.2.0-py3-none-any.whl", hash = "sha256:58c505ee188c1186ff81b3de5f946f289179a4f8c334f7eb45d07dd70a71bd2c"},
+    {file = "gwdatafind-1.2.0.tar.gz", hash = "sha256:8f74942e66cdb9a53030da29069110b3cb30afc2a034790957786028fb09f451"},
+]
+
+[package.dependencies]
+igwn-auth-utils = ">=0.3.1"
+ligo-segments = "*"
+
+[package.extras]
+docs = ["numpydoc", "sphinx (>=4.4.0)", "sphinx-argparse", "sphinx-automodapi", "sphinx-rtd-theme"]
+lint = ["flake8", "flake8-bandit", "flake8-docstrings", "radon"]
+test = ["pytest (>=2.8.0)", "pytest-cov", "requests-mock"]
+
+[[package]]
+name = "gwosc"
+version = "0.7.1"
+description = "A python interface to the GW Open Science data archive"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "gwosc-0.7.1-py3-none-any.whl", hash = "sha256:4cb7598f9aaf8749c032e8913c723a391784a52127397989c9f733f8c3f99558"},
+    {file = "gwosc-0.7.1.tar.gz", hash = "sha256:5328223410081731ba4ef6f3be9f13ac4b3b9a43397fa04c1f50ddeb59895816"},
+]
+
+[package.dependencies]
+requests = ">=1.0.0"
+
+[package.extras]
+docs = ["sphinx", "sphinx-automodapi", "sphinx-rtd-theme"]
+lint = ["flake8 (<5.0.0a0)", "flake8-bandit"]
+test = ["pytest (>=2.7.0)", "pytest-cov", "pytest-socket", "requests-mock (>=1.5.0)"]
+
+[[package]]
+name = "gwpy"
+version = "2.1.5"
+description = "A python package for gravitational-wave astrophysics"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "gwpy-2.1.5-py2.py3-none-any.whl", hash = "sha256:544908c43ddcd1a8253424b3ad619d8a817c26f6be5cfce14503250716fb2733"},
+    {file = "gwpy-2.1.5.tar.gz", hash = "sha256:687015973b84c0d628fa7b245ff8f6a2a7a6008aee6860f17167c87ee8394521"},
+]
+
+[package.dependencies]
+astropy = ">=4.0"
+dqsegdb2 = "*"
+gwdatafind = ">=1.1.0"
+gwosc = ">=0.5.3"
+h5py = ">=2.8.0"
+ligo-segments = ">=1.0.0"
+ligotimegps = ">=1.2.1"
+matplotlib = ">=3.3.0"
+numpy = ">=1.16"
+python-dateutil = "*"
+scipy = ">=1.2.0"
+tqdm = ">=4.10.0"
+
+[package.extras]
+conda = ["python-framel (>=8.40.1)", "python-ldas-tools-framecpp", "python-nds2-client"]
+dev = ["astropy (<5.1a0)", "ciecplib", "lalsuite", "lscsoft-glue", "maya", "pandas", "psycopg2", "pyRXP", "pycbc (>=1.13.4)", "pymysql", "python-ligo-lw (>=1.7.0)", "sqlalchemy", "uproot (>=3.11)", "uproot3"]
+docs = ["numpydoc (>=0.8.0)", "requests", "sphinx (>=4.0.0)", "sphinx-automodapi", "sphinx-material (>=0.0.32)", "sphinx-panels (>=0.6.0)", "sphinxcontrib-programoutput"]
+test = ["coverage[toml] (>=5.0)", "freezegun (>=0.3.12)", "pytest (>=3.9.1)", "pytest-cov (>=2.4.0)", "pytest-socket", "pytest-xdist", "requests-mock"]
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -1122,6 +1212,28 @@ files = [
     {file = "idna-3.7-py3-none-any.whl", hash = "sha256:82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0"},
     {file = "idna-3.7.tar.gz", hash = "sha256:028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc"},
 ]
+
+[[package]]
+name = "igwn-auth-utils"
+version = "1.1.0"
+description = "Authorisation utilities for IGWN"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "igwn-auth-utils-1.1.0.tar.gz", hash = "sha256:f993f0ed8b83538a14df7dda540eb2dcaebd26aa0b058fffa105cd6de2d16e69"},
+    {file = "igwn_auth_utils-1.1.0-py3-none-any.whl", hash = "sha256:7ddd88292c8f952f096ed71b64ce3ca2054a24f442cfc0e3f3aef52a18a1460a"},
+]
+
+[package.dependencies]
+cryptography = ">=2.3"
+requests = ">=2.14"
+safe-netrc = ">=1.0.0"
+scitokens = ">=1.7.0"
+
+[package.extras]
+docs = ["sphinx (>=4.0.0)", "sphinx-immaterial-igwn"]
+lint = ["flake8 (>=3.7.0)", "flake8-bandit"]
+test = ["pytest (>=3.9.1)", "pytest-cov", "requests-mock"]
 
 [[package]]
 name = "imagesize"
@@ -1848,6 +1960,17 @@ files = [
 
 [package.dependencies]
 six = "*"
+
+[[package]]
+name = "ligotimegps"
+version = "2.0.1"
+description = "A pure-python version of lal.LIGOTimeGPS"
+optional = false
+python-versions = ">=3.4"
+files = [
+    {file = "ligotimegps-2.0.1-py2.py3-none-any.whl", hash = "sha256:da8c1289ba1310337ef5177e7936e25ce47d4e8e6a269cbdd5e9abfc5b5db490"},
+    {file = "ligotimegps-2.0.1.tar.gz", hash = "sha256:88626c02ad9a464d1242a1147b40074792f424bafa2ab013eee629c7d1b6469c"},
+]
 
 [[package]]
 name = "lscsoft-glue"
@@ -2939,6 +3062,23 @@ files = [
 windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
+name = "pyjwt"
+version = "2.8.0"
+description = "JSON Web Token implementation in Python"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "PyJWT-2.8.0-py3-none-any.whl", hash = "sha256:59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320"},
+    {file = "PyJWT-2.8.0.tar.gz", hash = "sha256:57e28d156e3d5c10088e0c68abb90bfac3df82b40a71bd0daa20c65ccd5c23de"},
+]
+
+[package.extras]
+crypto = ["cryptography (>=3.4.0)"]
+dev = ["coverage[toml] (==5.0.4)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=6.0.0,<7.0.0)", "sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
+docs = ["sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
+tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
+
+[[package]]
 name = "pyopenssl"
 version = "24.1.0"
 description = "Python wrapper module around the OpenSSL library"
@@ -3438,6 +3578,20 @@ files = [
 ]
 
 [[package]]
+name = "safe-netrc"
+version = "1.0.1"
+description = "Safe netrc file parser"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "safe-netrc-1.0.1.tar.gz", hash = "sha256:1dcc7263b4d9ce72e0109d8e2bc9ba89c8056ccc618d26c8c94802c6fd753720"},
+    {file = "safe_netrc-1.0.1-py3-none-any.whl", hash = "sha256:5f0dd6a5e304b1da3be220f15efedbf09e50779fe90462143c228c781b9d8218"},
+]
+
+[package.extras]
+test = ["pytest"]
+
+[[package]]
 name = "scipy"
 version = "1.10.1"
 description = "Fundamental algorithms for scientific computing in Python"
@@ -3474,6 +3628,25 @@ numpy = ">=1.19.5,<1.27.0"
 dev = ["click", "doit (>=0.36.0)", "flake8", "mypy", "pycodestyle", "pydevtool", "rich-click", "typing_extensions"]
 doc = ["matplotlib (>2)", "numpydoc", "pydata-sphinx-theme (==0.9.0)", "sphinx (!=4.1.0)", "sphinx-design (>=0.2.0)"]
 test = ["asv", "gmpy2", "mpmath", "pooch", "pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
+
+[[package]]
+name = "scitokens"
+version = "1.8.1"
+description = "SciToken reference implementation library"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "scitokens-1.8.1-py3-none-any.whl", hash = "sha256:a5455d85969cd7c7b341ed8691ea89e0e446bd414a734f8443752081b049b46c"},
+    {file = "scitokens-1.8.1.tar.gz", hash = "sha256:f255383d9c7402b3fcd20d5ed26a6b407b4be8bec6f282d0af29b6275382b54d"},
+]
+
+[package.dependencies]
+cryptography = "*"
+PyJWT = ">=1.6.1"
+requests = "*"
+
+[package.extras]
+docs = ["Sphinx"]
 
 [[package]]
 name = "send2trash"
@@ -4187,4 +4360,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<3.12"
-content-hash = "66448ca3e2abf31b3af573fa4fae9f54c42a4046d6bcbc07090cafcd32ae0180"
+content-hash = "edcd434ba5ed546474ad7d931bbd964680f0baa8241f33e2dffe074a364a501b"
