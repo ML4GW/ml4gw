@@ -23,6 +23,7 @@ pytest = "^7.0"
 lalsuite = "^7.0"
 bilby = "^2.1"
 jupyter = "^1.0.0"
+gwpy = "^2.1"
 
 Sphinx = ">5.0"
 sphinx-rtd-theme = "^2.0.0"
