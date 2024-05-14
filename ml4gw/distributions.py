@@ -5,6 +5,7 @@ an integer `N` to a 1D torch `Tensor` containing `N` samples
 from the corresponding distribution.
 """
 
+import math
 from typing import Optional
 
 import torch
@@ -21,14 +22,15 @@ class Cosine(dist.Distribution):
 
     def __init__(
         self,
-        low: float = torch.as_tensor(-torch.pi / 2),
-        high: float = torch.as_tensor(torch.pi / 2),
+        low: float = -math.pi / 2,
+        high: float = math.pi / 2,
         validate_args=None,
     ):
         batch_shape = torch.Size()
         super().__init__(batch_shape, validate_args=validate_args)
-        self.low = low
-        self.norm = 1 / (torch.sin(high) - torch.sin(low))
+        self.low = torch.as_tensor(low)
+        self.high = torch.as_tensor(high)
+        self.norm = 1 / (torch.sin(self.high) - torch.sin(self.low))
 
     def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
         u = torch.rand(sample_shape, device=self.low.device)
@@ -48,13 +50,16 @@ class Sine(dist.TransformedDistribution):
 
     def __init__(
         self,
-        low: float = torch.as_tensor(0),
-        high: float = torch.as_tensor(torch.pi),
+        low: float = 0.0,
+        high: float = math.pi,
         validate_args=None,
     ):
+        low = torch.as_tensor(low)
+        high = torch.as_tensor(high)
         base_dist = Cosine(
             low - torch.pi / 2, high - torch.pi / 2, validate_args
         )
+
         super().__init__(
             base_dist,
             [
@@ -153,12 +158,12 @@ class DeltaFunction(dist.Distribution):
 
     def __init__(
         self,
-        peak: float = torch.as_tensor(0.0),
+        peak: float = 0.0,
         validate_args=None,
     ):
         batch_shape = torch.Size()
         super().__init__(batch_shape, validate_args=validate_args)
-        self.peak = peak
+        self.peak = torch.as_tensor(peak)
 
     def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
         return self.peak * torch.ones(
