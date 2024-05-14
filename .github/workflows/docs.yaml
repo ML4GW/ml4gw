@@ -8,11 +8,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - 
-      name: Build docs
-      uses: ammaraskar/sphinx-action@master
+    - name: Setup python
+      id: setup-python
+      uses: actions/setup-python@v5
       with:
-        docs-folder: "docs/"
+        python-version: '3.10'
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: false
+        virtualenvs-in-project: false
+        installer-parallel: true
+    - name: Install and Build Docs
+      run: |
+        poetry install
+        cd docs
+        make clean
+        make html
     - 
       name: Deploy pages
       uses: JamesIves/github-pages-deploy-action@v4.2.5
