@@ -5,11 +5,11 @@ an integer `N` to a 1D torch `Tensor` containing `N` samples
 from the corresponding distribution.
 """
 
+import math
 from typing import Optional
 
 import torch
 import torch.distributions as dist
-import math
 
 
 class Cosine(dist.Distribution):

@@ -1,8 +1,9 @@
+import math
+
 import numpy as np
 import pytest
-import torch
 from scipy import optimize
-import math
+
 from ml4gw import distributions
 
 # TODO: for all tests, how to validate that
