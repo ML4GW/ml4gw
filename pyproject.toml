@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ml4gw"
-version = "0.4.1"
+version = "0.4.2"
 description = "Tools for training torch models on gravitational wave data"
 readme = "README.md"
 authors = [
@@ -23,6 +23,7 @@ pytest = "^7.0"
 lalsuite = "^7.0"
 bilby = "^2.1"
 jupyter = "^1.0.0"
+gwpy = "^2.1"
 
 Sphinx = ">5.0"
 sphinx-rtd-theme = "^2.0.0"
