@@ -1,10 +1,11 @@
-import torch
-from torch import Tensor
 import numpy as np
+import torch
+
 from ml4gw.types import ScalarTensor
 
-c = 3.0e8 # speed of ligt
-G = 6.67430e-11 # gravitational constant
+c = 299792458.0  # speed of ligt
+G = 6.67430e-11  # gravitational constant
+
 
 class Ringdown(torch.nn.Module):
     """
@@ -28,29 +29,29 @@ class Ringdown(torch.nn.Module):
 
     def __call__(
         self,
-        frequency: ScalarTensor, #Hz
-        quality: ScalarTensor, 
-        epsilon: ScalarTensor,  
-        phase: ScalarTensor, #rad
-        inclination: ScalarTensor, #rad
-        distance: ScalarTensor, #Mpc
+        frequency: ScalarTensor,
+        quality: ScalarTensor,
+        epsilon: ScalarTensor,
+        phase: ScalarTensor,
+        inclination: ScalarTensor,
+        distance: ScalarTensor,
     ):
         """
         Generate ringdown waveform based on the damped sinusoid equation.
 
         Args:
-            frequency: 
-                Central frequency of the ringdown waveform
+            frequency:
+                Central frequency of the ringdown waveform in Hz
             quality:
                 Quality factor of the ringdown waveform
-            epsilon: 
+            epsilon:
                 Fraction of black hole's mass radiated as gravitational waves
-            phase: 
-                Initial phase of the ringdown waveform
+            phase (rad):
+                Initial phase of the ringdown waveform in rad
             inclination:
-                Inclination angle of the source.
-            distance: 
-                Distance to the source.
+                Inclination angle of the source in rad.
+            distance:
+                Distance to the source in Mpc.
         Returns:
             Tensors of cross and plus polarizations
         """
@@ -63,20 +64,32 @@ class Ringdown(torch.nn.Module):
         inclination = inclination.view(-1, 1)
         distance = distance.view(-1, 1)
 
-        distance = distance*(3.086e22) #conveting to meters from MPC
+        # convert Mpc to m
+        m_per_Mpc = 3.0856775814913673e22
+        distance = distance * (m_per_Mpc)
 
         # ensure all inputs are on the same device
         pi = torch.tensor([torch.pi], device=frequency.device)
 
-        # Calculate spin 
-        spin = 1 - (2 / quality)**(20 / 9)
-        # Calculate mass 
-        mass = (1 / (2 * pi)) * (c**3 / (G * frequency)) * (1 - 0.63 * (2 / quality)**(2 / 3))
+        # Calculate spin and mass
+        spin = 1 - (2 / quality) ** (20 / 9)
+        mass = (
+            (1 / (2 * pi))
+            * (c**3 / (G * frequency))
+            * (1 - 0.63 * (2 / quality) ** (2 / 3))
+        )
 
-        # Calculate amplitude 
-        F_Q = 1 + (1.34 / quality**2)
-        g_a = (1 + 0.1 * spin**2)
-        amplitude = np.sqrt(5 / 2) * epsilon * (6.67430e-11 * mass / (3e8**2)) * quality**(-0.5) * F_Q**(-0.5) * g_a**(-0.5)
+        # Calculate amplitude
+        F_Q = 1 + ((7 / 24) / quality**2)
+        g_a = 1 - 0.63 * (1 - spin) ** (3 / 10)
+        amplitude = (
+            np.sqrt(5 / 2)
+            * epsilon
+            * (G * mass / (c) ** 2)
+            * quality ** (-0.5)
+            * F_Q ** (-0.5)
+            * g_a ** (-0.5)
+        )
 
         # calculate cosines with inclination
         cos_i = torch.cos(inclination)
@@ -87,8 +100,8 @@ class Ringdown(torch.nn.Module):
         exp_term = torch.exp(-pi * frequency * self.times / quality)
         phase_term = 2 * pi * frequency * self.times + phase
 
-        a_plus = (amplitude/distance) * (1 + cos_i2) * exp_term
-        a_cross = (amplitude/distance) * (2 * sin_i) * exp_term
+        a_plus = (amplitude / distance) * (1 + cos_i2) * exp_term
+        a_cross = (amplitude / distance) * (2 * sin_i) * exp_term
 
         h_plus = a_plus * torch.cos(phase_term)
         h_cross = a_cross * torch.sin(phase_term)
