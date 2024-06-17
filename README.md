@@ -1,6 +1,6 @@
 # ML4GW
 
-Torch utilities for training neural networks in gravitational wave physics applications.
+Torch utilities for training neural networks for gravitational wave physics applications.
 
 ## Installation
 ### Pip installation
