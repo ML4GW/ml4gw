@@ -8,7 +8,7 @@ authors = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.12"
+python = "^3.8,<3.12"
 
 # torch deps
 torch = "^2.0"
@@ -21,7 +21,6 @@ pytest = "^7.0"
 
 # need lalsuite to compute gmst in injection testing
 lalsuite = "^7.0"
-numpy = "^1.26.0"
 bilby = "^2.1"
 jupyter = "^1.0.0"
 gwpy = "^2.1"
