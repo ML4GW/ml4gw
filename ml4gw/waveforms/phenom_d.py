@@ -955,7 +955,9 @@ def phenom_d_mrd_phase(Mf, eta, eta2, chi1, chi2, xi):
     mrd_phasing += (4.0 / 3.0) * (Mf.t() ** (3.0 / 4.0) * alpha3).t()
     mrd_phasing += (torch.atan(f_minus_alpha5_fRD.t() / fDM) * alpha4).t()
 
-    mrd_Dphasing = (alpha4 * fDM / (f_minus_alpha5_fRD.t() ** 2 + fDM**2)).t()
+    mrd_Dphasing = (
+        alpha4 * fDM / (f_minus_alpha5_fRD.t() ** 2 + fDM**2)
+    ).t()
     mrd_Dphasing += (Mf.t() ** (-1.0 / 4.0) * alpha3).t()
     mrd_Dphasing += (Mf.t() ** (-2.0) * alpha2).t()
     mrd_Dphasing = (mrd_Dphasing.t() + alpha1).t()
