@@ -22,7 +22,7 @@ def test_outer():
                 assert value == x[i, j] * y[i, k], (i, j, k)
 
 
-@pytest.fixture(params=[["H1"], ["H1", "L1"], ["H1", "L1", "V1"]])
+@pytest.fixture(params=[["H1"], ["H1", "L1"], ["H1", "L1", "V1", "K1"]])
 def ifos(request):
     return request.param
 
