@@ -32,6 +32,12 @@ class GroupNorm1D(torch.nn.Module):
         self.bias = torch.nn.Parameter(torch.zeros(shape))
 
     def forward(self, x):
+        if len(x.shape) != 3:
+            raise ValueError(
+                "GroupNorm1D requires 3-dimensional input, "
+                f"received {len(x.shape)} dimensional input"
+            )
+
         keepdims = self.num_groups == self.num_channels
 
         # compute group variance via the E[x**2] - E**2[x] trick

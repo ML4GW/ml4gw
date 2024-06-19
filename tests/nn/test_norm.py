@@ -49,6 +49,14 @@ def test_group_norm(num_groups, factor):
 
     norm = GroupNorm1D(num_channels, num_groups)
 
+    with pytest.raises(ValueError):
+        x = torch.randn(num_channels, 1024)
+        x = norm(x)
+
+    with pytest.raises(ValueError):
+        x = torch.randn(1, 128, num_channels, 1024)
+        x = norm(x)
+
     # update the norm layers weights so that
     # we have something interesting to compare
     norm = update_weights(norm)
