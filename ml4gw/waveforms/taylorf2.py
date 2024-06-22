@@ -1,22 +1,6 @@
 import torch
 from torchtyping import TensorType
-
-GAMMA = 0.577215664901532860606512090082402431
-"""Euler-Mascheroni constant. Same as lal.GAMMA"""
-
-MSUN_SI = 1.988409870698050731911960804878414216e30
-"""Solar mass in kg. Same as lal.MSUN_SI"""
-
-MTSUN_SI = 4.925490947641266978197229498498379006e-6
-"""1 solar mass in seconds. Same value as lal.MTSUN_SI"""
-
-PI = 3.141592653589793238462643383279502884
-"""Archimedes constant. Same as lal.PI"""
-
-MPC_SEC = 1.02927125e14
-"""
-1 Mpc in seconds.
-"""
+from ..constants import GAMMA, MTSUN_SI, PI, MPC_SEC
 
 
 class TaylorF2(torch.nn.Module):
