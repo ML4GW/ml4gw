@@ -78,7 +78,7 @@ class TaylorF2(torch.nn.Module):
         return h0
 
     def taylorf2_amplitude(
-        Mf: TensorType, mass1, mass2, eta, distance
+        self, Mf: TensorType, mass1, mass2, eta, distance
     ) -> TensorType:
         mass1_s = mass1 * MTSUN_SI
         mass2_s = mass2 * MTSUN_SI
@@ -100,6 +100,7 @@ class TaylorF2(torch.nn.Module):
         return amp
 
     def taylorf2_phase(
+        self,
         Mf: TensorType,
         mass1: TensorType,
         mass2: TensorType,

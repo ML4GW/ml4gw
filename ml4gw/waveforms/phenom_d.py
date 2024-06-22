@@ -511,7 +511,7 @@ class IMRPhenomD(TaylorF2):
 
         return fRD, fDM
 
-    def fmaxCalc(fRD, fDM, gamma2, gamma3):
+    def fmaxCalc(self, fRD, fDM, gamma2, gamma3):
         res = torch.zeros_like(gamma2)
         res = torch.abs(fRD + (-fDM * gamma3) / gamma2) * (gamma2 > 1).to(
             torch.int
@@ -525,7 +525,7 @@ class IMRPhenomD(TaylorF2):
         )
         return res
 
-    def _linear_interp_finspin(finspin):
+    def _linear_interp_finspin(self, finspin):
         # chi is a batch of final spins i.e. torch.Size([n])
         right_spin_idx = torch.bucketize(finspin, QNMData_a)
         right_spin_val = QNMData_a[right_spin_idx]
@@ -555,7 +555,7 @@ class IMRPhenomD(TaylorF2):
 
     # Utility functions taken from PhenomD utilities in lalsimulation
     # https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimIMRPhenomD_internals.c
-    def sigma1Fit(eta, eta2, xi):
+    def sigma1Fit(self, eta, eta2, xi):
         return (
             2096.551999295543
             + 1463.7493168261553 * eta
@@ -580,7 +580,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def sigma2Fit(eta, eta2, xi):
+    def sigma2Fit(self, eta, eta2, xi):
         return (
             -10114.056472621156
             - 44631.01109458185 * eta
@@ -605,7 +605,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def sigma3Fit(eta, eta2, xi):
+    def sigma3Fit(self, eta, eta2, xi):
         return (
             22933.658273436497
             + 230960.00814979506 * eta
@@ -630,7 +630,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def sigma4Fit(eta, eta2, xi):
+    def sigma4Fit(self, eta, eta2, xi):
         return (
             -14621.71522218357
             - 377812.8579387104 * eta
@@ -655,7 +655,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def gamma1_fun(eta, eta2, xi):
+    def gamma1_fun(self, eta, eta2, xi):
         return (
             0.006927402739328343
             + 0.03020474290328911 * eta
@@ -680,7 +680,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def gamma2_fun(eta, eta2, xi):
+    def gamma2_fun(self, eta, eta2, xi):
         return (
             1.010344404799477
             + 0.0008993122007234548 * eta
@@ -705,7 +705,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def gamma3_fun(eta, eta2, xi):
+    def gamma3_fun(self, eta, eta2, xi):
         return (
             1.3081615607036106
             - 0.005537729694807678 * eta
@@ -730,7 +730,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def beta1Fit(eta, eta2, xi):
+    def beta1Fit(self, eta, eta2, xi):
         return (
             97.89747327985583
             - 42.659730877489224 * eta
@@ -755,7 +755,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def beta2Fit(eta, eta2, xi):
+    def beta2Fit(self, eta, eta2, xi):
         return (
             -3.282701958759534
             - 9.051384468245866 * eta
@@ -780,7 +780,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def beta3Fit(eta, eta2, xi):
+    def beta3Fit(self, eta, eta2, xi):
         return (
             -0.000025156429818799565
             + 0.000019750256942201327 * eta
@@ -805,7 +805,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def alpha1Fit(eta, eta2, xi):
+    def alpha1Fit(self, eta, eta2, xi):
         return (
             43.31514709695348
             + 638.6332679188081 * eta
@@ -830,7 +830,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def alpha2Fit(eta, eta2, xi):
+    def alpha2Fit(self, eta, eta2, xi):
         return (
             -0.07020209449091723
             - 0.16269798450687084 * eta
@@ -855,7 +855,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def alpha3Fit(eta, eta2, xi):
+    def alpha3Fit(self, eta, eta2, xi):
         return (
             9.5988072383479
             - 397.05438595557433 * eta
@@ -880,7 +880,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def alpha4Fit(eta, eta2, xi):
+    def alpha4Fit(self, eta, eta2, xi):
         return (
             -0.02989487384493607
             + 1.4022106448583738 * eta
@@ -905,7 +905,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def alpha5Fit(eta, eta2, xi):
+    def alpha5Fit(self, eta, eta2, xi):
         return (
             0.9974408278363099
             - 0.007884449714907203 * eta
@@ -930,7 +930,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def rho1_fun(eta, eta2, xi):
+    def rho1_fun(self, eta, eta2, xi):
         return (
             3931.8979897196696
             - 17395.758706812805 * eta
@@ -955,7 +955,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def rho2_fun(eta, eta2, xi):
+    def rho2_fun(self, eta, eta2, xi):
         return (
             -40105.47653771657
             + 112253.0169706701 * eta
@@ -980,7 +980,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def rho3_fun(eta, eta2, xi):
+    def rho3_fun(self, eta, eta2, xi):
         return (
             83208.35471266537
             - 191237.7264145924 * eta
@@ -1005,7 +1005,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def FinalSpin0815(eta, eta2, chi1, chi2):
+    def FinalSpin0815(self, eta, eta2, chi1, chi2):
         Seta = torch.sqrt(1.0 - 4.0 * eta)
         Seta = torch.nan_to_num(Seta)  # avoid nan around eta = 0.25
         m1 = 0.5 * (1.0 + Seta)
@@ -1030,7 +1030,7 @@ class IMRPhenomD(TaylorF2):
             * s
         )
 
-    def PhenomInternal_EradRational0815(eta, eta2, chi1, chi2):
+    def PhenomInternal_EradRational0815(self, eta, eta2, chi1, chi2):
         Seta = torch.sqrt(1.0 - 4.0 * eta)
         m1 = 0.5 * (1.0 + Seta)
         m2 = 0.5 * (1.0 - Seta)
@@ -1067,7 +1067,7 @@ class IMRPhenomD(TaylorF2):
             * s
         )
 
-    def AmpIntColFitCoeff(eta, eta2, xi):
+    def AmpIntColFitCoeff(self, eta, eta2, xi):
         return (
             0.8149838730507785
             + 2.5747553517454658 * eta
@@ -1092,7 +1092,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def delta_values(f1, f2, f3, v1, v2, v3, d1, d2):
+    def delta_values(self, f1, f2, f3, v1, v2, v3, d1, d2):
         f12 = f1 * f1
         f13 = f1 * f12
         f14 = f1 * f13
@@ -1358,7 +1358,7 @@ class IMRPhenomD(TaylorF2):
 
         return delta_0, delta_1, delta_2, delta_3, delta_4
 
-    def chiPN(Seta, eta, chi1, chi2):
+    def chiPN(self, Seta, eta, chi1, chi2):
         chi_s = chi1 + chi2
         chi_a = chi1 - chi2
 
