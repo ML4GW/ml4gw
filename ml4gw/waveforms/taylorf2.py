@@ -40,7 +40,7 @@ class TaylorF2(torch.nn.Module):
         pfac = 0.5 * (1.0 + cfac * cfac)
 
         htilde = self.taylorf2_htilde(
-            self, f, mass1, mass2, chi1, chi2, distance, phic, f_ref
+            f, mass1, mass2, chi1, chi2, distance, phic, f_ref
         )
 
         hp = (htilde.T * pfac).T
