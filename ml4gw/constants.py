@@ -26,6 +26,9 @@ gt = G * MSUN / (C**3.0)
 G MSUN / C^3 in seconds
 """
 
+MTSUN_SI = 4.925490947641266978197229498498379006e-6
+"""1 solar mass in seconds. Same value as lal.MTSUN_SI"""
+
 m_per_Mpc = 3.085677581491367278913937957796471611e22
 """
 Meters per Mpc.
