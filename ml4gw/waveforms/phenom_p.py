@@ -60,7 +60,7 @@ class IMRPhenomPv2(IMRPhenomD):
         eta = m1 * m2 / (M * M)
         eta2 = eta * eta
         Seta = torch.sqrt(1.0 - 4.0 * eta)
-        chi = self.chiPN(Seta, eta, chi1_l, chi2_l)
+        chi = self.chiPN(Seta, eta, chi2_l, chi1_l)
         chi22 = chi2_l * chi2_l
         chi12 = chi1_l * chi1_l
         xi = -1.0 + chi
