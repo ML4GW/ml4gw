@@ -477,12 +477,65 @@ class IMRPhenomD(TaylorF2):
         int_Dphasing = (int_Dphasing.T / eta).mT
         return int_phasing, int_Dphasing
 
+    def subtract3PNSS(self, Mf, mass1, mass2, eta, eta2, xi, chi1, chi2):
+        M = mass1 + mass2
+        eta = mass1 * mass2 / M / M
+        m1byM = mass1 / M
+        m2byM = mass2 / M
+        chi1sq = chi1 * chi1
+        chi2sq = chi2 * chi2
+        v1 = (PI * Mf) ** (1.0 / 3.0)
+        v5 = v1**5.0
+        v6 = v1**6.0
+        v7 = v1**7.0
+        pfaN = 3.0 / (128.0 * eta)
+        pn_ss3 = (
+            (326.75 / 1.12 + 557.5 / 1.8 * eta) * eta * chi1 * chi2
+            + (
+                (4703.5 / 8.4 + 2935.0 / 6.0 * m1byM - 120.0 * m1byM * m1byM)
+                * m1byM
+                * m1byM
+                + (
+                    -4108.25 / 6.72
+                    - 108.5 / 1.2 * m1byM
+                    + 125.5 / 3.6 * m1byM * m1byM
+                )
+                * m1byM
+                * m1byM
+            )
+            * chi1sq
+            + (
+                (4703.5 / 8.4 + 2935.0 / 6.0 * m2byM - 120.0 * m2byM * m2byM)
+                * m2byM
+                * m2byM
+                + (
+                    -4108.25 / 6.72
+                    - 108.5 / 1.2 * m2byM
+                    + 125.5 / 3.6 * m2byM * m2byM
+                )
+                * m2byM
+                * m2byM
+            )
+            * chi2sq
+        )
+        phase_pn_ss3 = (((v6.T * pn_ss3).T / v5).T * pfaN).T
+        Dphase_pn_ss3 = ((PI * (v6.T * pn_ss3).T / (3.0 * v1 * v7)).T * pfaN).T
+        return phase_pn_ss3, Dphase_pn_ss3
+
     def phenom_d_inspiral_phase(
         self, Mf, mass_1, mass_2, eta, eta2, xi, chi1, chi2
     ):
         ins_phasing, ins_Dphasing = self.taylorf2_phase(
             Mf, mass_1, mass_2, chi1, chi2
         )
+        # subtract 3PN spin-spin term as this is in LAL's TaylorF2 implementation,
+        #  but was not available when PhenomD was tuned.
+        # refer https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimIMRPhenomD.c#L397-398
+        pn_ss3, Dpn_ss3 = self.subtract3PNSS(
+            Mf, mass_1, mass_2, eta, eta2, xi, chi1, chi2
+        )
+        ins_phasing -= pn_ss3
+        ins_Dphasing -= Dpn_ss3
 
         sigma1 = self.sigma1Fit(eta, eta2, xi)
         sigma2 = self.sigma2Fit(eta, eta2, xi)
