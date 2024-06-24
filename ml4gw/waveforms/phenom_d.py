@@ -529,9 +529,9 @@ class IMRPhenomD(TaylorF2):
         ins_phasing, ins_Dphasing = self.taylorf2_phase(
             Mf, mass_1, mass_2, chi1, chi2
         )
-        # subtract 3PN spin-spin term as this is in LAL's TaylorF2 implementation,
-        #  but was not available when PhenomD was tuned.
-        # refer https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimIMRPhenomD.c#L397-398
+        # subtract 3PN spin-spin term as this is in LAL's TaylorF2
+        # implementation, but was not available when PhenomD was tuned.
+        # refer https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimIMRPhenomD.c#L397-398 # noqa: E501
         pn_ss3, Dpn_ss3 = self.subtract3PNSS(
             Mf, mass_1, mass_2, eta, eta2, xi, chi1, chi2
         )

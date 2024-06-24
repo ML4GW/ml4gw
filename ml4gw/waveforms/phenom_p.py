@@ -265,7 +265,7 @@ class IMRPhenomPv2(IMRPhenomD):
     ):
         """
         m1, m2: in solar masses
-        phic: Orbital phase at the peak of the underlying non precessing model (rad)
+        phic: Orbital phase at the peak of the underlying non precessing model
         M: Total mass (Solar masses)
         """
 
@@ -315,13 +315,13 @@ class IMRPhenomPv2(IMRPhenomD):
         increasing sample points.
 
         Returns the one-dimensional piecewise linear interpolant to a function
-        with given discrete data points :math:`(xp, fp)`, evaluated at :math:`x`
+        with given discrete data points :math:`(xp, fp)` evaluated at :math:`x`
 
         Args:
             x: the :math:`x`-coordinates at which to evaluate the interpolated
                 values.
-            xp: the :math:`x`-coordinates of the data points, must be increasing.
-            fp: the :math:`y`-coordinates of the data points, same length as `xp`
+            xp: the :math:`x`-coordinates of data points, must be increasing.
+            fp: the :math:`y`-coordinates of data points, same length as `xp`
 
         Returns:
             the interpolated values, same size as `x`.
@@ -502,10 +502,10 @@ class IMRPhenomPv2(IMRPhenomD):
         return chi1_l, chi2_l, chip, thetaJN, alpha0, phi_aligned, zeta_polariz
 
     # TODO: add input and output types
-    def SpinWeightedY(self, theta, phi, s, l, m):
+    def SpinWeightedY(self, theta, phi, s, l, m):  # noqa: E741
         "copied from SphericalHarmonics.c in LAL"
         if s == -2:
-            if l == 2:
+            if l == 2:  # noqa: E741
                 if m == -2:
                     fac = (
                         torch.sqrt(torch.tensor(5.0 / (64.0 * PI)))
