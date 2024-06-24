@@ -97,7 +97,7 @@ class IMRPhenomPv2(IMRPhenomD):
         Y22 = self.SpinWeightedY(thetaJN, 0, -2, 2, 2)
         Y2 = torch.stack((Y2m2, Y2m1, Y20, Y21, Y22))
 
-        hPhenomDs, Dphase = self.PhenomPOneFrequency(
+        hPhenomDs, diffRDphase = self.PhenomPOneFrequency(
             fs,
             m2,
             m1,
@@ -128,7 +128,7 @@ class IMRPhenomPv2(IMRPhenomD):
             alphaNNLOoffset - alpha0,
             epsilonNNLOoffset,
         )
-        t0 = (Dphase) / (2 * PI)
+        t0 = (diffRDphase.unsqueeze(1)) / (2 * PI)
         phase_corr = torch.cos(2 * PI * fs * (t0)) - 1j * torch.sin(
             2 * PI * fs * (t0)
         )
@@ -268,14 +268,9 @@ class IMRPhenomPv2(IMRPhenomD):
 
         M_s = M * MTSUN_SI
         Mf = torch.outer(M_s, fs)
-        fRD, _ = self.phP_get_fRD_fdamp(m2, m1, chi2, chi1, chip)
-        MfRD = torch.outer(M_s, fRD)
+        fRD, _ = self.phP_get_fRD_fdamp(m1, m2, chi1, chi2, chip)
 
         phase, _ = self.phenom_d_phase(Mf, m1, m2, eta, eta2, chi1, chi2, xi)
-        Dphase = torch.diag(
-            -self.phenom_d_phase(MfRD, m1, m2, eta, eta2, chi1, chi2, xi)[1]
-            * M_s
-        ).view(-1, 1)
         phase = (phase.T - (phic + PI / 4.0)).mT
         Amp = self.phenom_d_amp(
             Mf, m1, m2, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, dist_mpc
@@ -283,10 +278,28 @@ class IMRPhenomPv2(IMRPhenomD):
         Amp0 = self.get_Amp0(Mf, eta)
         dist_s = dist_mpc * MPC_SEC
         Amp = ((Amp0 * Amp).T * (M_s**2.0) / dist_s).mT
-
         # phase -= 2. * phic; # line 1316 ???
         hPhenom = Amp * (torch.exp(-1j * phase))
-        return hPhenom, Dphase
+
+        linspace = torch.linspace(0.5, 1.5, 101)
+        fRDs = torch.outer(fRD, linspace)
+        delta_fRds = torch.median(torch.diff(fRDs, axis=1), axis=1)[0]
+        MfRDs = torch.zeros(*fRDs.shape)
+        for i in range(fRD.shape[0]):
+            MfRDs[i, :] = torch.outer(M_s, fRDs[i, :])[i, :]
+        RD_phase = self.phenom_d_phase(
+            MfRDs, m1, m2, eta, eta2, chi1, chi2, xi
+        )[0]
+        diff = torch.diff(RD_phase, axis=1)
+        diffRDphase = (diff[:, 1:] + diff[:, :-1]) / (
+            2 * delta_fRds.unsqueeze(1)
+        )
+        diffRDphase = -diffRDphase[:, 50]
+        # MfRD = torch.outer(M_s, fRD)
+        # Dphase = torch.diag(
+        #     -self.phenom_d_phase(MfRD, m1, m2, eta, eta2, chi1, chi2, xi)[1] * M_s
+        # ).view(-1, 1)
+        return hPhenom, diffRDphase
 
     # Utility functions
 
@@ -703,63 +716,6 @@ class IMRPhenomPv2(IMRPhenomD):
             1.0 - Erad
         )
         return fRD / M_s, fdamp / M_s
-
-    def phP_get_transition_frequencies(
-        self,
-        theta: TensorType,
-        gamma2: TensorType,
-        gamma3: TensorType,
-        chip: TensorType,
-    ) -> Tuple[
-        TensorType, TensorType, TensorType, TensorType, TensorType, TensorType
-    ]:
-        # m1 > m2 should hold here
-
-        m1, m2, chi1, chi2 = theta
-        M = m1 + m2
-        f_RD, f_damp = self.phP_get_fRD_fdamp(m1, m2, chi1, chi2, chip)
-
-        # Phase transition frequencies
-        f1 = 0.018 / (M * MTSUN_SI)
-        f2 = 0.5 * f_RD
-
-        # Amplitude transition frequencies
-        f3 = 0.014 / (M * MTSUN_SI)
-
-        def f4_gammaneg_gtr_1(
-            f_RD_: TensorType,
-            f_damp_: TensorType,
-            gamma3_: TensorType,
-            gamma2_: TensorType,
-        ) -> TensorType:
-            return torch.abs(f_RD_ + (-f_damp_ * gamma3_) / gamma2_)
-
-        def f4_gammaneg_less_1(
-            f_RD_: TensorType,
-            f_damp_: TensorType,
-            gamma3_: TensorType,
-            gamma2_: TensorType,
-        ) -> TensorType:
-            return torch.abs(
-                f_RD_
-                + (f_damp_ * (-1 + torch.sqrt(1 - (gamma2_) ** 2.0)) * gamma3_)
-                / gamma2_
-            )
-
-        f4 = torch.tensor(
-            torch.cond(
-                gamma2 >= 1,
-                f4_gammaneg_gtr_1,
-                f4_gammaneg_less_1,
-                (
-                    f_RD,
-                    f_damp,
-                    gamma3,
-                    gamma2,
-                ),
-            )
-        )
-        return f1, f2, f3, f4, f_RD, f_damp
 
     def get_Amp0(self, fM_s: TensorType, eta: TensorType) -> TensorType:
         Amp0 = (
