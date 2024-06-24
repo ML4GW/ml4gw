@@ -1,6 +1,8 @@
 import torch
 from torchtyping import TensorType
-from ..constants import EulerGamma as GAMMA, MTSUN_SI, PI, MPC_SEC
+
+from ..constants import MPC_SEC, MTSUN_SI, PI
+from ..constants import EulerGamma as GAMMA
 
 
 class TaylorF2(torch.nn.Module):

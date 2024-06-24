@@ -1,8 +1,9 @@
 import torch
-from .taylorf2 import TaylorF2
 from torchtyping import TensorType
+
 from ..constants import MTSUN_SI, PI
 from .phenom_d_data import QNMData_a, QNMData_fdamp, QNMData_fring
+from .taylorf2 import TaylorF2
 
 
 class IMRPhenomD(TaylorF2):

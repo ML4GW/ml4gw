@@ -1,9 +1,11 @@
-import torch
 from typing import Tuple
-from .phenom_d import IMRPhenomD
+
+import torch
 from torchtyping import TensorType
-from ..constants import MTSUN_SI, PI, MPC_SEC
-from .phenom_d_data import QNMData_a, QNMData_fring, QNMData_fdamp
+
+from ..constants import MPC_SEC, MTSUN_SI, PI
+from .phenom_d import IMRPhenomD
+from .phenom_d_data import QNMData_a, QNMData_fdamp, QNMData_fring
 
 
 class IMRPhenomPv2(IMRPhenomD):
