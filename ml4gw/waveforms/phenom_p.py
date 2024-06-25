@@ -293,7 +293,7 @@ class IMRPhenomPv2(IMRPhenomD):
         linspace = torch.linspace(0.5, 1.5, 101)
         fRDs = torch.outer(fRD, linspace)
         delta_fRds = torch.median(torch.diff(fRDs, axis=1), axis=1)[0]
-        MfRDs = torch.zeros(*fRDs.shape)
+        MfRDs = torch.zeros_like(fRDs)
         for i in range(fRD.shape[0]):
             MfRDs[i, :] = torch.outer(M_s, fRDs[i, :])[i, :]
         RD_phase = self.phenom_d_phase(
