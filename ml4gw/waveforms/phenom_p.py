@@ -1,8 +1,10 @@
+from typing import Dict, Tuple
+
 import torch
-from typing import Tuple, Dict
-from .phenom_d import IMRPhenomD
 from torchtyping import TensorType
-from ..constants import MTSUN_SI, PI, MPC_SEC
+
+from ..constants import MPC_SEC, MTSUN_SI, PI
+from .phenom_d import IMRPhenomD
 
 
 class IMRPhenomPv2(IMRPhenomD):
@@ -163,8 +165,9 @@ class IMRPhenomPv2(IMRPhenomD):
         m2 = q / (1.0 + q)  # Mass of the larger BH for unit total mass M=1.
         Sperp = chip * (
             m2 * m2
-        )  # Dimensionfull spin component in the orbital plane. S_perp = S_2_perp
-        # chi_eff = m1 * chi1_l + m2 * chi2_l  # effective spin for M=1
+        )  # Dimensionfull spin component in the orbital plane.
+        # S_perp = S_2_perp chi_eff = m1 * chi1_l + m2 * chi2_l
+        # effective spin for M=1
 
         SL = chi1_l * m1 * m1 + chi2_l * m2 * m2  # Dimensionfull aligned spin.
 
@@ -258,7 +261,7 @@ class IMRPhenomPv2(IMRPhenomD):
     ):
         """
         m1, m2: in solar masses
-        phic: Orbital phase at the peak of the underlying non precessing model (rad)
+        phic: Orbital phase at peak of the underlying non precessing model
         M: Total mass (Solar masses)
         """
 
@@ -293,7 +296,8 @@ class IMRPhenomPv2(IMRPhenomD):
         diffRDphase = -diffRDphase[:, 50]
         # MfRD = torch.outer(M_s, fRD)
         # Dphase = torch.diag(
-        #     -self.phenom_d_phase(MfRD, m1, m2, eta, eta2, chi1, chi2, xi)[1] * M_s
+        #     -self.phenom_d_phase(
+        #         MfRD, m1, m2, eta, eta2, chi1, chi2, xi)[1] * M_s
         # ).view(-1, 1)
         return hPhenom, diffRDphase
 
@@ -302,17 +306,17 @@ class IMRPhenomPv2(IMRPhenomD):
     def interpolate(
         self, x: TensorType, xp: TensorType, fp: TensorType
     ) -> TensorType:
-        """One-dimensional linear interpolation for monotonically increasing sample
-        points.
+        """One-dimensional linear interpolation for monotonically
+        increasing sample points.
 
-        Returns the one-dimensional piecewise linear interpolant to a function with
-        given discrete data points :math:`(xp, fp)`, evaluated at :math:`x`.
+        Returns the one-dimensional piecewise linear interpolant to a function
+        with given data points :math:`(xp, fp)`, evaluated at :math:`x`
 
         Args:
             x: the :math:`x`-coordinates at which to evaluate the interpolated
                 values.
-            xp: the :math:`x`-coordinates of the data points, must be increasing.
-            fp: the :math:`y`-coordinates of the data points, same length as `xp`.
+            xp: the :math:`x`-coordinates of data points, must be increasing.
+            fp: the :math:`y`-coordinates of data points, same length as `xp`.
 
         Returns:
             the interpolated values, same size as `x`.
@@ -420,7 +424,8 @@ class IMRPhenomPv2(IMRPhenomD):
         phi_aligned = -phiJ_sf
 
         # First we determine kappa
-        # in the source frame, the components of N are given in Eq (35c) of T1500606-v6
+        # in the source frame, the components of N are given in
+        # Eq (35c) of T1500606-v6
         Nx_sf = torch.sin(incl) * torch.cos(PI / 2.0 - phiRef)
         Ny_sf = torch.sin(incl) * torch.sin(PI / 2.0 - phiRef)
         Nz_sf = torch.cos(incl)
@@ -451,14 +456,17 @@ class IMRPhenomPv2(IMRPhenomD):
         thetaJN = torch.arccos(Nz_Jf)
 
         # Finally, we need to redefine the polarizations:
-        # PhenomP's polarizations are defined following Arun et al (arXiv:0810.5336)
-        # i.e. projecting the metric onto the P,Q,N triad defined with P=NxJ/|NxJ| (see (2.6) in there).
+        # PhenomP's polarizations are defined following Arun et al
+        # (arXiv:0810.5336)
+        # i.e. projecting the metric onto the P,Q,N triad defined with
+        # P=NxJ/|NxJ| (see (2.6) in there).
         # By contrast, the triad X,Y,N used in LAL
         # ("waveframe" in the nomenclature of T1500606-v6)
         # is defined in e.g. eq (35) of this document
-        # (via its components in the source frame; note we use the defautl Omega=Pi/2).
-        # Both triads differ from each other by a rotation around N by an angle \zeta
-        # and we need to rotate the polarizations accordingly by 2\zeta
+        # (via its components in the source frame;
+        # note we use the default Omega=Pi/2).
+        # Both triads differ from each other by a rotation around N by an angle
+        # \zeta and we need to rotate the polarizations accordingly by 2\zeta
 
         Xx_sf = -torch.cos(incl) * torch.sin(phiRef)
         Xy_sf = -torch.cos(incl) * torch.cos(phiRef)
@@ -470,7 +478,8 @@ class IMRPhenomPv2(IMRPhenomD):
 
         # Now the tmp_a are the components of X in the J frame
         # We need the polar angle of that vector in the P,Q basis of Arun et al
-        # P = NxJ/|NxJ| and since we put N in the (pos x)z half plane of the J frame
+        # P = NxJ/|NxJ| and since we put N in the (pos x)z half plane of the J
+        # frame
         PArunx_Jf = 0.0
         PAruny_Jf = -1.0
         PArunz_Jf = 0.0
@@ -488,10 +497,10 @@ class IMRPhenomPv2(IMRPhenomD):
         return chi1_l, chi2_l, chip, thetaJN, alpha0, phi_aligned, zeta_polariz
 
     # TODO: add input and output types
-    def SpinWeightedY(self, theta, phi, s, l, m):
+    def SpinWeightedY(self, theta, phi, s, l, m):  # noqa: E741
         "copied from SphericalHarmonics.c in LAL"
         if s == -2:
-            if l == 2:
+            if l == 2:  # noqa: E741
                 if m == -2:
                     fac = (
                         torch.sqrt(torch.tensor(5.0 / (64.0 * PI)))
