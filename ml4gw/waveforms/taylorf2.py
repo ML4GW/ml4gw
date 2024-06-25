@@ -38,8 +38,8 @@ class TaylorF2(torch.nn.Module):
             or phic.shape[0] != inclination.shape[0]
         ):
             raise RuntimeError("Tensors should have same batch size")
-        mass1 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
-        mass2 = mass_ratio * mass1
+        mass2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
+        mass1 = mass_ratio * mass2
         cfac = torch.cos(inclination)
         pfac = 0.5 * (1.0 + cfac * cfac)
 
