@@ -293,8 +293,9 @@ class IMRPhenomPv2(IMRPhenomD):
         # phase -= 2. * phic; # line 1316 ???
         hPhenom = Amp * (torch.exp(-1j * phase))
 
-        linspace = torch.linspace(0.5, 1.5, 101)
-        fRDs = torch.outer(fRD, linspace)
+        fRDs = torch.outer(
+            fRD, torch.linspace(0.5, 1.5, 101, device=fRD.device)
+        )
         delta_fRds = torch.median(torch.diff(fRDs, axis=1), axis=1)[0]
         MfRDs = torch.zeros_like(fRDs)
         for i in range(fRD.shape[0]):
