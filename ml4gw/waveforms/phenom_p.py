@@ -177,27 +177,29 @@ class IMRPhenomPv2(IMRPhenomD):
         omega_cbrt2 = omega_cbrt * omega_cbrt
         alpha = (
             (
-                angcoeffs["alphacoeff1"] / omega.T
-                + angcoeffs["alphacoeff2"] / omega_cbrt2.T
-                + angcoeffs["alphacoeff3"] / omega_cbrt.T
-                + angcoeffs["alphacoeff4"] * logomega.T
-                + angcoeffs["alphacoeff5"] * omega_cbrt.T
+                angcoeffs["alphacoeff1"] / omega.mT
+                + angcoeffs["alphacoeff2"] / omega_cbrt2.mT
+                + angcoeffs["alphacoeff3"] / omega_cbrt.mT
+                + angcoeffs["alphacoeff4"] * logomega.mT
+                + angcoeffs["alphacoeff5"] * omega_cbrt.mT
             )
             - alphaoffset
         ).mT
 
         epsilon = (
             (
-                angcoeffs["epsiloncoeff1"] / omega.T
-                + angcoeffs["epsiloncoeff2"] / omega_cbrt2.T
-                + angcoeffs["epsiloncoeff3"] / omega_cbrt.T
-                + angcoeffs["epsiloncoeff4"] * logomega.T
-                + angcoeffs["epsiloncoeff5"] * omega_cbrt.T
+                angcoeffs["epsiloncoeff1"] / omega.mT
+                + angcoeffs["epsiloncoeff2"] / omega_cbrt2.mT
+                + angcoeffs["epsiloncoeff3"] / omega_cbrt.mT
+                + angcoeffs["epsiloncoeff4"] * logomega.mT
+                + angcoeffs["epsiloncoeff5"] * omega_cbrt.mT
             )
             - epsilonoffset
         ).mT
 
-        cBetah, sBetah = self.WignerdCoefficients(omega_cbrt.T, SL, eta, Sperp)
+        cBetah, sBetah = self.WignerdCoefficients(
+            omega_cbrt.mT, SL, eta, Sperp
+        )
 
         cBetah2 = cBetah * cBetah
         cBetah3 = cBetah2 * cBetah
@@ -214,22 +216,30 @@ class IMRPhenomPv2(IMRPhenomD):
         cexp_mi_alpha = 1.0 / cexp_i_alpha
         cexp_m2i_alpha = cexp_mi_alpha * cexp_mi_alpha
         T2m = (
-            cexp_2i_alpha.T * cBetah4.T * Y2m[0]
-            - cexp_i_alpha.T * 2 * cBetah3.T * sBetah.T * Y2m[1]
-            + 1 * torch.sqrt(torch.tensor(6)) * sBetah2.T * cBetah2.T * Y2m[2]
-            - cexp_mi_alpha.T * 2 * cBetah.T * sBetah3.T * Y2m[3]
-            + cexp_m2i_alpha.T * sBetah4.T * Y2m[4]
-        ).mT
-        Tm2m = (
-            cexp_m2i_alpha.T * sBetah4.T * torch.conj(Y2m[0])
-            + cexp_mi_alpha.T * 2 * cBetah.T * sBetah3.T * torch.conj(Y2m[1])
+            cexp_2i_alpha.mT * cBetah4.mT * Y2m[0]
+            - cexp_i_alpha.mT * 2 * cBetah3.mT * sBetah.mT * Y2m[1]
             + 1
             * torch.sqrt(torch.tensor(6))
-            * sBetah2.T
-            * cBetah2.T
+            * sBetah2.mT
+            * cBetah2.mT
+            * Y2m[2]
+            - cexp_mi_alpha.mT * 2 * cBetah.mT * sBetah3.mT * Y2m[3]
+            + cexp_m2i_alpha.mT * sBetah4.mT * Y2m[4]
+        ).mT
+        Tm2m = (
+            cexp_m2i_alpha.mT * sBetah4.mT * torch.conj(Y2m[0])
+            + cexp_mi_alpha.mT
+            * 2
+            * cBetah.mT
+            * sBetah3.mT
+            * torch.conj(Y2m[1])
+            + 1
+            * torch.sqrt(torch.tensor(6))
+            * sBetah2.mT
+            * cBetah2.mT
             * torch.conj(Y2m[2])
-            + cexp_i_alpha.T * 2 * cBetah3.T * sBetah.T * torch.conj(Y2m[3])
-            + cexp_2i_alpha.T * cBetah4.T * torch.conj(Y2m[4])
+            + cexp_i_alpha.mT * 2 * cBetah3.mT * sBetah.mT * torch.conj(Y2m[3])
+            + cexp_2i_alpha.mT * cBetah4.mT * torch.conj(Y2m[4])
         ).mT
         hp_sum = T2m + Tm2m
         hc_sum = 1j * (T2m - Tm2m)
@@ -270,13 +280,13 @@ class IMRPhenomPv2(IMRPhenomD):
         fRD, _ = self.phP_get_fRD_fdamp(m1, m2, chi1, chi2, chip)
 
         phase, _ = self.phenom_d_phase(Mf, m1, m2, eta, eta2, chi1, chi2, xi)
-        phase = (phase.T - (phic + PI / 4.0)).mT
+        phase = (phase.mT - (phic + PI / 4.0)).mT
         Amp = self.phenom_d_amp(
             Mf, m1, m2, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, dist_mpc
         )[0]
         Amp0 = self.get_Amp0(Mf, eta)
         dist_s = dist_mpc * MPC_SEC
-        Amp = ((Amp0 * Amp).T * (M_s**2.0) / dist_s).mT
+        Amp = ((Amp0 * Amp).mT * (M_s**2.0) / dist_s).mT
         # phase -= 2. * phic; # line 1316 ???
         hPhenom = Amp * (torch.exp(-1j * phase))
 
