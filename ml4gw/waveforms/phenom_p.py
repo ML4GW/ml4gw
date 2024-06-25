@@ -3,15 +3,11 @@ from typing import Tuple
 from .phenom_d import IMRPhenomD
 from torchtyping import TensorType
 from ..constants import MTSUN_SI, PI, MPC_SEC
-from .phenom_d_data import QNMData_a, QNMData_fring, QNMData_fdamp
 
 
 class IMRPhenomPv2(IMRPhenomD):
     def __init__(self):
         super().__init__()
-        self.register_buffer("QNMData_a", QNMData_a)
-        self.register_buffer("QNMData_fring", QNMData_fring)
-        self.register_buffer("QNMData_fdamp", QNMData_fdamp)
 
     def forward(
         self,
@@ -709,12 +705,12 @@ class IMRPhenomPv2(IMRPhenomD):
         Erad = self.PhenomInternal_EradRational0815(
             eta_s, eta_s2, chi1_l, chi2_l
         )
-        fRD = self.interpolate(finspin, QNMData_a, QNMData_fring) / (
+        fRD = self.interpolate(finspin, self.qnmdata_a, self.qnmdata_fring) / (
             1.0 - Erad
         )
-        fdamp = self.interpolate(finspin, QNMData_a, QNMData_fdamp) / (
-            1.0 - Erad
-        )
+        fdamp = self.interpolate(
+            finspin, self.qnmdata_a, self.qnmdata_fdamp
+        ) / (1.0 - Erad)
         return fRD / M_s, fdamp / M_s
 
     def get_Amp0(self, fM_s: TensorType, eta: TensorType) -> TensorType:
