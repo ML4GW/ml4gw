@@ -699,13 +699,11 @@ class IMRPhenomPv2(IMRPhenomD):
         M = m1 + m2
         eta = m1 * m2 / (M * M)
         eta2 = eta * eta
-        q_factor = torch.where(m1 >= m2, m1 / M, m2 / M)
-        selected_chi1_l = torch.where(m1 >= m2, chi1_l, chi2_l)
-        selected_chi2_l = torch.where(m1 >= m2, chi2_l, chi1_l)
-        af_parallel = self.FinalSpin0815(
-            eta, eta2, selected_chi1_l, selected_chi2_l
-        )
-        Sperp = chip * q_factor * q_factor
+        # m1 > m2, the convention used in phenomD
+        # (not the convention of internal phenomP)
+        mass_ratio = m1 / m2
+        af_parallel = self.FinalSpin0815(eta, eta2, chi1_l, chi2_l)
+        Sperp = chip * mass_ratio * mass_ratio
         af = torch.copysign(
             torch.ones_like(af_parallel), af_parallel
         ) * torch.sqrt(Sperp * Sperp + af_parallel * af_parallel)
