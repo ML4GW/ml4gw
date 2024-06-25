@@ -188,8 +188,8 @@ def test_phenom_d(
     ).repeat(
         10, 1
     )  # repeat along batch dim for testing
-    batched_mass1 = _params[:, 0]
-    batched_mass2 = _params[:, 1]
+    batched_chirp_mass = _params[:, 0]
+    batched_mass_ratio = _params[:, 1]
     batched_chi1 = _params[:, 2]
     batched_chi2 = _params[:, 3]
     batched_distance = _params[:, 4]
@@ -197,8 +197,8 @@ def test_phenom_d(
     batched_inclination = _params[:, 6]
     hp_torch, hc_torch = waveforms.IMRPhenomD().forward(
         torch_freqs,
-        batched_mass1,
-        batched_mass2,
+        batched_chirp_mass,
+        batched_mass_ratio,
         batched_chi1,
         batched_chi2,
         batched_distance,
