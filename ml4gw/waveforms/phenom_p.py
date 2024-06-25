@@ -1,5 +1,5 @@
 import torch
-from typing import Tuple
+from typing import Tuple, Dict
 from .phenom_d import IMRPhenomD
 from torchtyping import TensorType
 from ..constants import MTSUN_SI, PI, MPC_SEC
@@ -150,7 +150,7 @@ class IMRPhenomPv2(IMRPhenomD):
         chi2_l: TensorType,
         chip: TensorType,
         M: TensorType,
-        angcoeffs: dict[str, TensorType],
+        angcoeffs: Dict[str, TensorType],
         Y2m: TensorType,
         alphaoffset: TensorType,
         epsilonoffset: TensorType,
@@ -546,7 +546,7 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def ComputeNNLOanglecoeffs(
         self, q: TensorType, chil: TensorType, chip: TensorType
-    ) -> dict[str, TensorType]:
+    ) -> Dict[str, TensorType]:
         m2 = q / (1.0 + q)
         m1 = 1.0 / (1.0 + q)
         dm = m1 - m2
