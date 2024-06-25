@@ -243,6 +243,7 @@ def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
     mass_2 = mass_1 * mass_ratio
     if mass_2 > mass_1:
         mass_1, mass_2 = mass_2, mass_1
+        mass_ratio = 1 / mass_ratio
     f_ref = 20.0
     phic = 0.0
     tc = 0.0
@@ -279,8 +280,8 @@ def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
     )
     _params = torch.tensor(
         [
-            mass_1,
-            mass_2,
+            chirp_mass,
+            mass_ratio,
             0,
             0,
             chi1z,
@@ -294,8 +295,8 @@ def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
         ]
     ).repeat(10, 1)
     # repeat along batch dim for testing
-    batched_mass1 = _params[:, 0]
-    batched_mass2 = _params[:, 1]
+    batched_chirp_mass = _params[:, 0]
+    batched_mass_ratio = _params[:, 1]
     batched_chi1x = _params[:, 2]
     batched_chi1y = _params[:, 3]
     batched_chi1z = _params[:, 4]
@@ -308,8 +309,8 @@ def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
     batched_inclination = _params[:, 11]
     hp_torch, hc_torch = waveforms.IMRPhenomPv2().forward(
         torch_freqs,
-        batched_mass1,
-        batched_mass2,
+        batched_chirp_mass,
+        batched_mass_ratio,
         batched_chi1x,
         batched_chi1y,
         batched_chi1z,
