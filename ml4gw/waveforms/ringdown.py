@@ -23,7 +23,6 @@ class Ringdown(torch.nn.Module):
 
         num = int(duration * sample_rate)
         times = torch.arange(num, dtype=torch.float64) / sample_rate
-        times -= duration / 2.0
 
         self.register_buffer("times", times)
 
