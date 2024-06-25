@@ -1,10 +1,8 @@
+import constants
 import numpy as np
 import torch
 
 from ml4gw.types import ScalarTensor
-
-c = 299792458.0  # speed of ligt
-G = 6.67430e-11  # gravitational constant
 
 
 class Ringdown(torch.nn.Module):
@@ -45,12 +43,12 @@ class Ringdown(torch.nn.Module):
                 Quality factor of the ringdown waveform
             epsilon:
                 Fraction of black hole's mass radiated as gravitational waves
-            phase (rad):
+            phase:
                 Initial phase of the ringdown waveform in rad
             inclination:
-                Inclination angle of the source in rad.
+                Inclination angle of the source in rad
             distance:
-                Distance to the source in Mpc.
+                Distance to the source in Mpc
         Returns:
             Tensors of cross and plus polarizations
         """
@@ -64,17 +62,16 @@ class Ringdown(torch.nn.Module):
         distance = distance.view(-1, 1)
 
         # convert Mpc to m
-        m_per_Mpc = 3.0856775814913673e22
-        distance = distance * (m_per_Mpc)
+        distance = distance * constants.m_per_Mpc
 
         # ensure all inputs are on the same device
-        pi = torch.tensor([torch.pi], device=frequency.device)
+        pi = torch.tensor([constants.PI], device=frequency.device)
 
         # Calculate spin and mass
         spin = 1 - (2 / quality) ** (20 / 9)
         mass = (
             (1 / (2 * pi))
-            * (c**3 / (G * frequency))
+            * (constants.C**3 / (constants.G * frequency))
             * (1 - 0.63 * (2 / quality) ** (2 / 3))
         )
 
@@ -84,7 +81,7 @@ class Ringdown(torch.nn.Module):
         amplitude = (
             np.sqrt(5 / 2)
             * epsilon
-            * (G * mass / (c) ** 2)
+            * (constants.G * mass / (constants.C) ** 2)
             * quality ** (-0.5)
             * F_Q ** (-0.5)
             * g_a ** (-0.5)
