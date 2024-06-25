@@ -56,8 +56,8 @@ def inclination(request):
 def test_taylor_f2(
     chirp_mass, mass_ratio, chi1z, chi2z, distance, inclination, sample_rate
 ):
-    mass_1 = chirp_mass * (1 + mass_ratio) ** 0.2 / mass_ratio**0.6
-    mass_2 = mass_ratio * mass_1
+    mass_2 = chirp_mass * (1 + mass_ratio) ** 0.2 / mass_ratio**0.6
+    mass_1 = mass_ratio * mass_2
     # Fix coal. phase, ref, freq.
     phic, f_ref = 0.0, 25
     params = dict(
