@@ -239,8 +239,8 @@ def test_phenom_d(
 
 
 def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
-    mass_1 = chirp_mass * (1 + mass_ratio) ** 0.2 / mass_ratio**0.6
-    mass_2 = mass_1 * mass_ratio
+    mass_2 = chirp_mass * (1 + mass_ratio) ** 0.2 / mass_ratio**0.6
+    mass_1 = mass_2 * mass_ratio
     if mass_2 > mass_1:
         mass_1, mass_2 = mass_2, mass_1
         mass_ratio = 1 / mass_ratio

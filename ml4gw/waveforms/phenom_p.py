@@ -32,8 +32,8 @@ class IMRPhenomPv2(IMRPhenomD):
         m1 must be larger than m2.
         """
 
-        m1 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
-        m2 = m1 * mass_ratio
+        m2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
+        m1 = m2 * mass_ratio
 
         # # flip m1 m2. For some reason LAL uses this convention for PhenomPv2
         m1, m2 = m2, m1
