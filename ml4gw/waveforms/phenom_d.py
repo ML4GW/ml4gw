@@ -579,37 +579,26 @@ class IMRPhenomD(TaylorF2):
         )
         return res
 
-    def parse_buffers(self, recursive=False):
-        bufs = {}
-        for name, buf in self.named_buffers(recurse=recursive):
-            bufs[name] = buf
-        return bufs
-
     def _linear_interp_finspin(self, finspin):
         # chi is a batch of final spins i.e. torch.Size([n])
-        buffers = self.parse_buffers()
-        qnmdata_a = buffers["qnmdata_a"]
-        qnmdata_fring = buffers["qnmdata_fring"]
-        qnmdata_fdamp = buffers["qnmdata_fdamp"]
-
-        right_spin_idx = torch.bucketize(finspin, qnmdata_a)
-        right_spin_val = qnmdata_a[right_spin_idx]
+        right_spin_idx = torch.bucketize(finspin, self.qnmdata_a)
+        right_spin_val = self.qnmdata_a[right_spin_idx]
         # QNMData_a is sorted, hence take the previous index
         left_spin_idx = right_spin_idx - 1
-        left_spin_val = qnmdata_a[left_spin_idx]
+        left_spin_val = self.qnmdata_a[left_spin_idx]
 
         if not torch.all(left_spin_val < right_spin_val):
             raise RuntimeError(
                 "Left value in grid should be greater than right. "
                 "Maybe be caused for extremal spin values."
             )
-        left_fring = qnmdata_fring[left_spin_idx]
-        right_fring = qnmdata_fring[right_spin_idx]
+        left_fring = self.qnmdata_fring[left_spin_idx]
+        right_fring = self.qnmdata_fring[right_spin_idx]
         slope_fring = right_fring - left_fring
         slope_fring /= right_spin_val - left_spin_val
 
-        left_fdamp = qnmdata_fdamp[left_spin_idx]
-        right_fdamp = qnmdata_fdamp[right_spin_idx]
+        left_fdamp = self.qnmdata_fdamp[left_spin_idx]
+        right_fdamp = self.qnmdata_fdamp[right_spin_idx]
         slope_fdamp = right_fdamp - left_fdamp
         slope_fdamp /= right_spin_val - left_spin_val
 
