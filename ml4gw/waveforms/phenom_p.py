@@ -339,9 +339,9 @@ class IMRPhenomPv2(IMRPhenomD):
         m = (fp[1:] - fp[:-1]) / (xp[1:] - xp[:-1])  # slope
         b = fp[:-1] - (m * xp[:-1])
 
-        indicies = torch.searchsorted(xp, x, right=False) - 1
+        indices = torch.searchsorted(xp, x, right=False) - 1
 
-        interpolated = m[indicies] * x + b[indicies]
+        interpolated = m[indices] * x + b[indices]
 
         return interpolated.reshape(original_shape)
 
