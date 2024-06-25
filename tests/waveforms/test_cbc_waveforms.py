@@ -54,8 +54,10 @@ def inclination(request):
 
 
 def test_taylor_f2(
-    mass_1, mass_2, chi1z, chi2z, distance, inclination, sample_rate
+    chirp_mass, mass_ratio, chi1z, chi2z, distance, inclination, sample_rate
 ):
+    mass_1 = chirp_mass * (1 + mass_ratio) ** 0.2 / mass_ratio**0.6
+    mass_2 = mass_ratio * mass_1
     # Fix coal. phase, ref, freq.
     phic, f_ref = 0.0, 25
     params = dict(
@@ -89,12 +91,12 @@ def test_taylor_f2(
         params["f_min"], params["f_max"], params["deltaF"]
     )
     _params = torch.tensor(
-        [mass_1, mass_2, chi1z, chi2z, distance, phic, inclination]
+        [chirp_mass, mass_ratio, chi1z, chi2z, distance, phic, inclination]
     ).repeat(
         10, 1
     )  # repeat along batch dim for testing
-    batched_mass1 = _params[:, 0]
-    batched_mass2 = _params[:, 1]
+    batched_chirp_mass = _params[:, 0]
+    batched_mass_ratio = _params[:, 1]
     batched_chi1 = _params[:, 2]
     batched_chi2 = _params[:, 3]
     batched_distance = _params[:, 4]
@@ -102,8 +104,8 @@ def test_taylor_f2(
     batched_inclination = _params[:, 6]
     hp_torch, hc_torch = waveforms.TaylorF2().forward(
         torch_freqs,
-        batched_mass1,
-        batched_mass2,
+        batched_chirp_mass,
+        batched_mass_ratio,
         batched_chi1,
         batched_chi2,
         batched_distance,
