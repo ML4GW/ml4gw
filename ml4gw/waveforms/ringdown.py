@@ -1,8 +1,9 @@
-import constants
 import numpy as np
 import torch
 
 from ml4gw.types import ScalarTensor
+
+from ..constants import PI, C, G, m_per_Mpc
 
 
 class Ringdown(torch.nn.Module):
@@ -62,16 +63,16 @@ class Ringdown(torch.nn.Module):
         distance = distance.view(-1, 1)
 
         # convert Mpc to m
-        distance = distance * constants.m_per_Mpc
+        distance = distance * m_per_Mpc
 
         # ensure all inputs are on the same device
-        pi = torch.tensor([constants.PI], device=frequency.device)
+        pi = torch.tensor([PI], device=frequency.device)
 
         # Calculate spin and mass
         spin = 1 - (2 / quality) ** (20 / 9)
         mass = (
             (1 / (2 * pi))
-            * (constants.C**3 / (constants.G * frequency))
+            * (C**3 / (G * frequency))
             * (1 - 0.63 * (2 / quality) ** (2 / 3))
         )
 
@@ -81,7 +82,7 @@ class Ringdown(torch.nn.Module):
         amplitude = (
             np.sqrt(5 / 2)
             * epsilon
-            * (constants.G * mass / (constants.C) ** 2)
+            * (G * mass / (C) ** 2)
             * quality ** (-0.5)
             * F_Q ** (-0.5)
             * g_a ** (-0.5)
