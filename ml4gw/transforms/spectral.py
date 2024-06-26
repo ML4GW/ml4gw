@@ -75,7 +75,9 @@ class SpectralDensity(torch.nn.Module):
 
         if window.size(0) != self.nperseg:
             raise ValueError(
-                "Window must have length nperseg got {}".format(window.size(0))
+                "Window must have length {} got {}".format(
+                    self.nperseg, window.size(0)
+                )
             )
         self.register_buffer("window", window)
 
