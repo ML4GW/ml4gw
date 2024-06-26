@@ -69,6 +69,7 @@ deps =
     lalsuite>=7,<8
     bilby>=1.1,<2
     gwpy>=3.0
+    numpy>=1,<2
 commands = pytest tests
 """
 

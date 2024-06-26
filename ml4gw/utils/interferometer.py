@@ -35,6 +35,12 @@ class InterferometerGeometry:
             self.vertex = torch.Tensor(
                 (4.54637409900e06, 8.42989697626e05, 4.37857696241e06)
             )
+        elif name == "K1":
+            self.x_arm = torch.Tensor((-0.3759040, -0.8361583, 0.3994189))
+            self.y_arm = torch.Tensor((0.7164378, 0.01114076, 0.6975620))
+            self.vertex = torch.Tensor(
+                (-3777336.024, 3484898.411, 3765313.697)
+            )
         else:
             raise ValueError(
                 f"{name} is not recognized as an interferometer, "
