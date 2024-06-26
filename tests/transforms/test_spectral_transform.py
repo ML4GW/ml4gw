@@ -86,8 +86,13 @@ def ndim(request):
     return request.param
 
 
+@pytest.fixture(params=["hann"])
+def window(request, fftlength, sample_rate):
+    return signal.get_window(request.param, int(fftlength * sample_rate))
+
+
 def test_spectral_density(
-    length, sample_rate, fftlength, overlap, fast, average, ndim
+    length, sample_rate, fftlength, overlap, fast, average, ndim, window
 ):
     batch_size = 8
     num_channels = 5
@@ -95,7 +100,12 @@ def test_spectral_density(
         return
 
     transform = SpectralDensity(
-        sample_rate, fftlength, overlap, average=average, fast=fast
+        sample_rate,
+        fftlength,
+        overlap,
+        average=average,
+        window=torch.Tensor(window),
+        fast=fast,
     )
 
     shape = [int(length * sample_rate)]
@@ -124,7 +134,7 @@ def test_spectral_density(
         fs=sample_rate,
         nperseg=transform.nperseg,
         noverlap=transform.nperseg - transform.nstride,
-        window=signal.windows.hann(transform.nperseg, False),
+        window=window,
         average=average,
     )
 
@@ -134,6 +144,18 @@ def test_spectral_density(
         torch_result = torch_result[..., 2:]
         scipy_result = scipy_result[..., 2:]
     assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
+
+    # test error raised if window incorrect shape
+    with pytest.raises(ValueError) as exc_info:
+        window = torch.hann_window(1)
+        transform = SpectralDensity(
+            sample_rate,
+            fftlength,
+            overlap,
+            average=average,
+            window=window,
+            fast=fast,
+        )
 
 
 @pytest.fixture(params=[0, 1])
