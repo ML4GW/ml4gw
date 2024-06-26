@@ -68,7 +68,6 @@ class SpectralDensity(torch.nn.Module):
         self.nperseg = int(fftlength * sample_rate)
         self.nstride = self.nperseg - int(overlap * sample_rate)
 
-        
         # if no window is provided, default to a hanning window;
         # validate that window is correct size
         if window is None:
@@ -76,12 +75,9 @@ class SpectralDensity(torch.nn.Module):
 
         if window.size(0) != self.nperseg:
             raise ValueError(
-                "Window must have length nperseg got {}".format(
-                    window.size(0)
-                )
+                "Window must have length nperseg got {}".format(window.size(0))
             )
         self.register_buffer("window", window)
-        
 
         # scale corresponds to "density" normalization, worth
         # considering adding this as a kwarg and changing this calc

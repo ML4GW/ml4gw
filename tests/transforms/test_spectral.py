@@ -85,9 +85,11 @@ def average(request):
 def ndim(request):
     return request.param
 
+
 @pytest.fixture(params=["hann"])
 def window(request, fftlength, sample_rate):
     return signal.get_window(request.param, int(fftlength * sample_rate))
+
 
 def test_spectral_density(
     length, sample_rate, fftlength, overlap, fast, average, ndim, window
@@ -97,9 +99,13 @@ def test_spectral_density(
     if overlap is not None and overlap >= fftlength:
         return
 
-
     transform = SpectralDensity(
-        sample_rate, fftlength, overlap, average=average, window=torch.Tensor(window), fast=fast
+        sample_rate,
+        fftlength,
+        overlap,
+        average=average,
+        window=torch.Tensor(window),
+        fast=fast,
     )
 
     shape = [int(length * sample_rate)]
@@ -132,7 +138,6 @@ def test_spectral_density(
         average=average,
     )
 
-   
     # if we're using the fast implementation, only guarantee
     # that components higher than the first two are correct
     if fast:
@@ -144,7 +149,12 @@ def test_spectral_density(
     with pytest.raises(ValueError) as exc_info:
         window = torch.hann_window(1)
         transform = SpectralDensity(
-            sample_rate, fftlength, overlap, average=average, window=window, fast=fast
+            sample_rate,
+            fftlength,
+            overlap,
+            average=average,
+            window=window,
+            fast=fast,
         )
 
 
