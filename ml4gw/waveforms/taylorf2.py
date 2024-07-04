@@ -24,10 +24,31 @@ class TaylorF2(torch.nn.Module):
         """
         TaylorF2 up to 3.5 PN in phase. Newtonian SPA amplitude.
 
+        Args:
+            f:
+                Frequency series in Hz.
+            chirp_mass:
+                Chirp mass in solar masses
+            mass_ratio:
+                Mass ratio m1/m2
+            chi1:
+                Spin of m1
+            chi2:
+                Spin of m2
+            distance:
+                Luminosity distance
+            phic:
+                Phase at coalescence
+            inclination:
+                Inclination angle
+            f_ref:
+                Reference frequency
+
         Returns:
-        --------
-        hp, hc
+            hp, hc: Tuple[torch.Tensor, torch.Tensor]
+                Plus and cross polarizations
         """
+
         # shape assumed (n_batch, params)
         if (
             chirp_mass.shape[0] != mass_ratio.shape[0]

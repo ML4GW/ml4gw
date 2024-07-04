@@ -28,9 +28,29 @@ class IMRPhenomD(TaylorF2):
         """
         IMRPhenomD waveform
 
+        Args:
+            f:
+                Frequency series in Hz.
+            chirp_mass:
+                Chirp mass in solar masses
+            mass_ratio:
+                Mass ratio m1/m2
+            chi1:
+                Spin of m1
+            chi2:
+                Spin of m2
+            distance:
+                Distance to source in Mpc
+            phic:
+                Phase at coalescence
+            inclination:
+                Inclination of the source
+            f_ref:
+                Reference frequency
+
         Returns:
-        --------
-        hp, hc
+            hp, hc: Tuple[torch.Tensor, torch.Tensor]
+                Plus and cross polarizations
         """
         # shape assumed (n_batch, params)
         if (
