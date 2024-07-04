@@ -29,7 +29,45 @@ class IMRPhenomPv2(IMRPhenomD):
         f_ref: float,
     ):
         """
-        m1 must be larger than m2.
+        IMRPhenomPv2 waveform
+
+        Parameters:
+        ----------
+        fs : torch.Tensor
+            Frequency series in Hz.
+        chirp_mass : torch.Tensor
+            Chirp mass in solar masses.
+        mass_ratio : torch.Tensor
+            Mass ratio m1/m2.
+        s1x : torch.Tensor
+            Spin component x of the first BH.
+        s1y : torch.Tensor
+            Spin component y of the first BH.
+        s1z : torch.Tensor
+            Spin component z of the first BH.
+        s2x : torch.Tensor
+            Spin component x of the second BH.
+        s2y : torch.Tensor
+            Spin component y of the second BH.
+        s2z : torch.Tensor
+            Spin component z of the second BH.
+        dist_mpc : torch.Tensor
+            Luminosity distance in Mpc.
+        tc : torch.Tensor
+            Coalescence time.
+        phiRef : torch.Tensor
+            Reference phase.
+        incl : torch.Tensor
+            Inclination angle.
+        f_ref : float
+            Reference frequency in Hz.
+
+        Returns:
+        -------
+        hp, hc: Tuple[torch.Tensor, torch.Tensor]
+            Plus and cross polarizations
+
+        Note: m1 must be larger than m2.
         """
 
         m2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
