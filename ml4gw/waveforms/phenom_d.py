@@ -94,7 +94,7 @@ class IMRPhenomD(TaylorF2):
             Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi
         )
 
-        Psi = (Psi.T - 2 * phic).mT
+        Psi = (Psi.mT - 2 * phic).mT
         Psi -= Psi_ref
         Psi -= ((Mf - Mf_ref).mT * t0).mT
 
@@ -230,11 +230,11 @@ class IMRPhenomD(TaylorF2):
         exp_times_lorentzian = torch.exp(fminfRD.mT * gamma2 / fDMgamma3).mT
         exp_times_lorentzian *= fminfRD**2 + pow2_fDMgamma3
 
-        amp = (1 / exp_times_lorentzian.T * gamma1 * gamma3 * fDM).mT
+        amp = (1 / exp_times_lorentzian.mT * gamma1 * gamma3 * fDM).mT
         Damp = (fminfRD.mT * -2 * fDM * gamma1 * gamma3) / (
             fminfRD * fminfRD + pow2_fDMgamma3
         ).mT - (gamma2 * gamma1)
-        Damp = Damp.T / exp_times_lorentzian
+        Damp = Damp.mT / exp_times_lorentzian
         return amp, Damp
 
     def phenom_d_inspiral_amp(
@@ -339,25 +339,25 @@ class IMRPhenomD(TaylorF2):
 
         amp = torch.ones_like(Mf)
         amp += (
-            Mf_two_third.T * prefactors_two_thirds
-            + Mf_four_third.T * prefactors_four_thirds
-            + Mf_five_third.T * prefactors_five_thirds
-            + Mf_seven_third.T * prefactors_seven_thirds
-            + MF_eight_third.T * prefactors_eight_thirds
+            Mf_two_third.mT * prefactors_two_thirds
+            + Mf_four_third.mT * prefactors_four_thirds
+            + Mf_five_third.mT * prefactors_five_thirds
+            + Mf_seven_third.mT * prefactors_seven_thirds
+            + MF_eight_third.mT * prefactors_eight_thirds
             + Mf.mT * prefactors_one
-            + Mf_two.T * prefactors_two
-            + Mf_three.T * prefactors_three
+            + Mf_two.mT * prefactors_two
+            + Mf_three.mT * prefactors_three
         ).mT
 
         Damp = (
-            (2.0 / 3.0) / Mf_one_third.T * prefactors_two_thirds
-            + (4.0 / 3.0) * Mf_one_third.T * prefactors_four_thirds
-            + (5.0 / 3.0) * Mf_two_third.T * prefactors_five_thirds
-            + (7.0 / 3.0) * Mf_four_third.T * prefactors_seven_thirds
-            + (8.0 / 3.0) * Mf_five_third.T * prefactors_eight_thirds
+            (2.0 / 3.0) / Mf_one_third.mT * prefactors_two_thirds
+            + (4.0 / 3.0) * Mf_one_third.mT * prefactors_four_thirds
+            + (5.0 / 3.0) * Mf_two_third.mT * prefactors_five_thirds
+            + (7.0 / 3.0) * Mf_four_third.mT * prefactors_seven_thirds
+            + (8.0 / 3.0) * Mf_five_third.mT * prefactors_eight_thirds
             + prefactors_one
             + 2.0 * Mf.mT * prefactors_two
-            + 3.0 * Mf_two.T * prefactors_three
+            + 3.0 * Mf_two.mT * prefactors_three
         ).mT
 
         return amp, Damp
@@ -385,7 +385,7 @@ class IMRPhenomD(TaylorF2):
         )
         C2Int = ins_Dphase_f1 - int_Dphase_f1
         C1Int = (
-            ins_phase_f1 - (int_phase_f1.T / eta).mT - C2Int * PHI_fJoin_INS
+            ins_phase_f1 - (int_phase_f1.mT / eta).mT - C2Int * PHI_fJoin_INS
         )
         # C1 continuity at ringdown
         fRDJoin = (0.5 * torch.ones_like(Mf).mT * fRD).mT
@@ -395,16 +395,16 @@ class IMRPhenomD(TaylorF2):
         mrd_phase_rd, mrd_Dphase_rd = self.phenom_d_mrd_phase(
             fRDJoin, eta, eta2, chi1, chi2, xi
         )
-        PhiIntTempVal = (int_phase_rd.T / eta).mT + C1Int + C2Int * fRDJoin
+        PhiIntTempVal = (int_phase_rd.mT / eta).mT + C1Int + C2Int * fRDJoin
         # C2MRD = int_Dphase_rd - mrd_Dphase_rd
         C2MRD = C2Int + int_Dphase_rd - mrd_Dphase_rd
-        C1MRD = PhiIntTempVal - (mrd_phase_rd.T / eta).mT - C2MRD * fRDJoin
+        C1MRD = PhiIntTempVal - (mrd_phase_rd.mT / eta).mT - C2MRD * fRDJoin
 
-        int_phase = (int_phase.T / eta).mT
+        int_phase = (int_phase.mT / eta).mT
         int_phase += C1Int
         int_phase += Mf * C2Int
 
-        mrd_phase = (mrd_phase.T / eta).mT
+        mrd_phase = (mrd_phase.mT / eta).mT
         mrd_phase += C1MRD
         mrd_phase += Mf * C2MRD
 
@@ -474,8 +474,8 @@ class IMRPhenomD(TaylorF2):
         # intermediate phase
         int_Dphasing = (Mf.mT ** (-4.0) * beta3).mT
         int_Dphasing += (Mf.mT ** (-1.0) * beta2).mT
-        int_Dphasing = (int_Dphasing.T + beta1).mT
-        int_Dphasing = (int_Dphasing.T / eta).mT
+        int_Dphasing = (int_Dphasing.mT + beta1).mT
+        int_Dphasing = (int_Dphasing.mT / eta).mT
         return int_phasing, int_Dphasing
 
     def subtract3PNSS(self, Mf, mass1, mass2, eta, eta2, xi, chi1, chi2):
@@ -519,8 +519,10 @@ class IMRPhenomD(TaylorF2):
             )
             * chi2sq
         )
-        phase_pn_ss3 = (((v6.T * pn_ss3).T / v5).T * pfaN).T
-        Dphase_pn_ss3 = ((PI * (v6.T * pn_ss3).T / (3.0 * v1 * v7)).T * pfaN).T
+        phase_pn_ss3 = (((v6.mT * pn_ss3).mT / v5).mT * pfaN).mT
+        Dphase_pn_ss3 = (
+            (PI * (v6.mT * pn_ss3).mT / (3.0 * v1 * v7)).mT * pfaN
+        ).mT
         return phase_pn_ss3, Dphase_pn_ss3
 
     def phenom_d_inspiral_phase(
@@ -548,7 +550,7 @@ class IMRPhenomD(TaylorF2):
         ins_phasing += (Mf.mT ** (5.0 / 3.0) * 0.6 * sigma3 / eta).mT
         ins_phasing += (Mf.mT**2.0 * 0.5 * sigma4 / eta).mT
 
-        ins_Dphasing = (ins_Dphasing.T + sigma1 / eta).mT
+        ins_Dphasing = (ins_Dphasing.mT + sigma1 / eta).mT
         ins_Dphasing += (Mf.mT ** (1.0 / 3.0) * sigma2 / eta).mT
         ins_Dphasing += (Mf.mT ** (2.0 / 3.0) * sigma3 / eta).mT
         ins_Dphasing += (Mf.mT * sigma4 / eta).mT
