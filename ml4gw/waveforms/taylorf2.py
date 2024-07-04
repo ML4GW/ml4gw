@@ -47,8 +47,8 @@ class TaylorF2(torch.nn.Module):
             f, mass1, mass2, chi1, chi2, distance, phic, f_ref
         )
 
-        hp = (htilde.T * pfac).T
-        hc = -1j * (htilde.T * cfac).T
+        hp = (htilde.mT * pfac).mT
+        hc = -1j * (htilde.mT * cfac).mT
 
         return hp, hc
 
@@ -74,7 +74,7 @@ class TaylorF2(torch.nn.Module):
         Psi, _ = self.taylorf2_phase(Mf, mass1, mass2, chi1, chi2)
         Psi_ref, _ = self.taylorf2_phase(Mf_ref, mass1, mass2, chi1, chi2)
 
-        Psi = (Psi.T - 2 * phic).T
+        Psi = (Psi.mT - 2 * phic).mT
         Psi -= Psi_ref
 
         amp0 = self.taylorf2_amplitude(Mf, mass1, mass2, eta, distance)
@@ -96,10 +96,10 @@ class TaylorF2(torch.nn.Module):
         amp0 = -4.0 * mass1_s * mass2_s * (PI / 12.0) ** 0.5
 
         amp0 /= distance * MPC_SEC
-        flux = (v10.T * FTaN).T
-        dEnergy = (v.T * dETaN).T
+        flux = (v10.mT * FTaN).mT
+        dEnergy = (v.mT * dETaN).mT
         amp = torch.sqrt(-dEnergy / flux) * v
-        amp = (amp.T * amp0).T
+        amp = (amp.mT * amp0).mT
 
         return amp
 
@@ -273,32 +273,32 @@ class TaylorF2(torch.nn.Module):
             )
         ) * chi2
         # construct power series
-        phasing = (v7.T * pfa_v7).T
-        phasing += (v6.T * pfa_v6 + v6_logv.T * pfa_v6logv).T
-        phasing += (v5.T * pfa_v5 + v5_logv.T * pfa_v5logv).T
-        phasing += (v4.T * pfa_v4).T
-        phasing += (v3.T * pfa_v3).T
-        phasing += (v2.T * pfa_v2).T
-        phasing += (v1.T * pfa_v1).T
-        phasing += (v0.T * pfa_v0).T
+        phasing = (v7.mT * pfa_v7).mT
+        phasing += (v6.mT * pfa_v6 + v6_logv.mT * pfa_v6logv).mT
+        phasing += (v5.mT * pfa_v5 + v5_logv.mT * pfa_v5logv).mT
+        phasing += (v4.mT * pfa_v4).mT
+        phasing += (v3.mT * pfa_v3).mT
+        phasing += (v2.mT * pfa_v2).mT
+        phasing += (v1.mT * pfa_v1).mT
+        phasing += (v0.mT * pfa_v0).mT
         # Divide by 0PN v-dependence
         phasing /= v5
         # Multiply by 0PN coefficient
-        phasing = (phasing.T * pfaN).T
+        phasing = (phasing.mT * pfaN).mT
 
         # Derivative of phase w.r.t Mf
         # dPhi/dMf = dPhi/dv dv/dMf
-        Dphasing = (2.0 * v7.T * pfa_v7).T
-        Dphasing += (v6.T * (pfa_v6 + pfa_v6logv)).T
-        Dphasing += (v6_logv.T * pfa_v6logv).T
-        Dphasing += (v5.T * pfa_v5logv).T
-        Dphasing += (-1.0 * v4.T * pfa_v4).T
-        Dphasing += (-2.0 * v3.T * pfa_v3).T
-        Dphasing += (-3.0 * v2.T * pfa_v2).T
-        Dphasing += (-4.0 * v1.T * pfa_v1).T
+        Dphasing = (2.0 * v7.mT * pfa_v7).mT
+        Dphasing += (v6.mT * (pfa_v6 + pfa_v6logv)).mT
+        Dphasing += (v6_logv.mT * pfa_v6logv).mT
+        Dphasing += (v5.mT * pfa_v5logv).mT
+        Dphasing += (-1.0 * v4.mT * pfa_v4).mT
+        Dphasing += (-2.0 * v3.mT * pfa_v3).mT
+        Dphasing += (-3.0 * v2.mT * pfa_v2).mT
+        Dphasing += (-4.0 * v1.mT * pfa_v1).mT
         Dphasing += -5.0 * v0
         Dphasing /= 3.0 * v1 * v7
         Dphasing *= PI
-        Dphasing = (Dphasing.T * pfaN).T
+        Dphasing = (Dphasing.mT * pfaN).mT
 
         return phasing, Dphasing
