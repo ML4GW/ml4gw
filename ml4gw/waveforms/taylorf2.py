@@ -26,19 +26,19 @@ class TaylorF2(torch.nn.Module):
 
         Args:
             f:
-                Frequency array
+                Frequency series in Hz.
             chirp_mass:
-                Chirp mass
+                Chirp mass in solar masses
             mass_ratio:
-                Mass ratio
+                Mass ratio m1/m2
             chi1:
-                Spin 1
+                Spin of m1
             chi2:
-                Spin 2
+                Spin of m2
             distance:
                 Luminosity distance
             phic:
-                Phase
+                Phase at coalescence
             inclination:
                 Inclination angle
             f_ref:

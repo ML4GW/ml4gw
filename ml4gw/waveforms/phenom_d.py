@@ -30,7 +30,7 @@ class IMRPhenomD(TaylorF2):
 
         Args:
             f:
-                Frequency
+                Frequency series in Hz.
             chirp_mass:
                 Chirp mass in solar masses
             mass_ratio:
