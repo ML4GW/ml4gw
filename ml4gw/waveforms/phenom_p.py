@@ -62,8 +62,8 @@ class IMRPhenomPv2(IMRPhenomD):
                 Reference frequency in Hz.
 
         Returns:
-            hp, hc: Tuple[torch.Tensor, torch.Tensor]
-                Plus and cross polarizations
+            hc, hp: Tuple[torch.Tensor, torch.Tensor]
+                Cross and plus polarizations
 
         Note: m1 must be larger than m2.
         """
@@ -180,7 +180,7 @@ class IMRPhenomPv2(IMRPhenomD):
         s2z = torch.sin(2 * zeta_polariz).unsqueeze(1)
         hplus = c2z * hp + s2z * hc
         hcross = c2z * hc - s2z * hp
-        return hplus, hcross
+        return hcross, hplus
 
     def PhenomPCoreTwistUp(
         self,

@@ -102,7 +102,7 @@ def test_taylor_f2(
     batched_distance = _params[:, 4]
     batched_phic = _params[:, 5]
     batched_inclination = _params[:, 6]
-    hp_torch, hc_torch = waveforms.TaylorF2()(
+    hc_torch, hp_torch = waveforms.TaylorF2()(
         torch_freqs,
         batched_chirp_mass,
         batched_mass_ratio,
@@ -195,7 +195,7 @@ def test_phenom_d(
     batched_distance = _params[:, 4]
     batched_phic = _params[:, 5]
     batched_inclination = _params[:, 6]
-    hp_torch, hc_torch = waveforms.IMRPhenomD()(
+    hc_torch, hp_torch = waveforms.IMRPhenomD()(
         torch_freqs,
         batched_chirp_mass,
         batched_mass_ratio,
@@ -307,7 +307,7 @@ def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
     batched_tc = _params[:, 9]
     batched_phic = _params[:, 10]
     batched_inclination = _params[:, 11]
-    hp_torch, hc_torch = waveforms.IMRPhenomPv2()(
+    hc_torch, hp_torch = waveforms.IMRPhenomPv2()(
         torch_freqs,
         batched_chirp_mass,
         batched_mass_ratio,

@@ -45,8 +45,8 @@ class TaylorF2(torch.nn.Module):
                 Reference frequency
 
         Returns:
-            hp, hc: Tuple[torch.Tensor, torch.Tensor]
-                Plus and cross polarizations
+            hc, hp: Tuple[torch.Tensor, torch.Tensor]
+                Cross and plus polarizations
         """
 
         # shape assumed (n_batch, params)
@@ -71,7 +71,7 @@ class TaylorF2(torch.nn.Module):
         hp = (htilde.mT * pfac).mT
         hc = -1j * (htilde.mT * cfac).mT
 
-        return hp, hc
+        return hc, hp
 
     def taylorf2_htilde(
         self,
