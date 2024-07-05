@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 import pytest
+import torch
 from scipy import optimize
 
 from ml4gw import distributions
@@ -14,7 +15,7 @@ def test_log_uniform():
     sampler = distributions.LogUniform(math.e, math.e**2)
     samples = sampler.sample((10,))
     assert len(samples) == 10
-    assert ((math.e <= samples) & (math.e**2 <= 100)).all()
+    assert ((torch.e <= samples) & (torch.e**2 <= 100)).all()
 
     # check that the mean is roughly correct
     # (within three standard deviations)
