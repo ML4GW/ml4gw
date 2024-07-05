@@ -4,7 +4,6 @@ from specified distributions. Each callable should map from
 an integer `N` to a 1D torch `Tensor` containing `N` samples
 from the corresponding distribution.
 """
-
 import math
 from typing import Optional
 
