@@ -30,7 +30,7 @@ class SineGaussian(torch.nn.Module):
 
         self.register_buffer("times", times)
 
-    def __call__(
+    def forward(
         self,
         quality: ScalarTensor,
         frequency: ScalarTensor,

@@ -49,8 +49,8 @@ class IMRPhenomD(TaylorF2):
                 Reference frequency
 
         Returns:
-            hp, hc: Tuple[torch.Tensor, torch.Tensor]
-                Plus and cross polarizations
+            hc, hp: Tuple[torch.Tensor, torch.Tensor]
+                Cross and plus polarizations
         """
         # shape assumed (n_batch, params)
         if (
@@ -72,7 +72,7 @@ class IMRPhenomD(TaylorF2):
         hp = (htilde.mT * pfac).mT
         hc = -1j * (htilde.mT * cfac).mT
 
-        return hp, hc
+        return hc, hp
 
     def phenom_d_htilde(
         self,
