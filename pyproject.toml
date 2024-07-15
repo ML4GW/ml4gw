@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ml4gw"
-version = "0.4.2"
+version = "0.5.0"
 description = "Tools for training torch models on gravitational wave data"
 readme = "README.md"
 authors = [
@@ -14,6 +14,7 @@ python = "^3.8,<3.12"
 torch = "^2.0"
 torchaudio = "^2.0"
 torchtyping = "^0.1"
+numpy = "<2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.16"
@@ -69,6 +70,7 @@ deps =
     lalsuite>=7,<8
     bilby>=1.1,<2
     gwpy>=3.0
+    numpy>=1,<2
 commands = pytest tests
 """
 

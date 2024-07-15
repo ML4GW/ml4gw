@@ -34,6 +34,10 @@ class SpectralDensity(torch.nn.Module):
         average:
             Aggregation method to use for combining windowed FFTs.
             Allowed values are `"mean"` and `"median"`.
+        window:
+            Window array to multiply by each FFT window before
+            FFT computation. Should have length `nperseg`.
+            Defaults to a hanning window.
         fast:
             Whether to use a faster spectral density computation that
             support cross spectral density, or a slower one which does
@@ -47,6 +51,7 @@ class SpectralDensity(torch.nn.Module):
         fftlength: float,
         overlap: Optional[float] = None,
         average: str = "mean",
+        window: Optional[torch.Tensor] = None,
         fast: bool = False,
     ) -> None:
         if overlap is None:
@@ -63,11 +68,18 @@ class SpectralDensity(torch.nn.Module):
         self.nperseg = int(fftlength * sample_rate)
         self.nstride = self.nperseg - int(overlap * sample_rate)
 
-        # TODOs: Do we allow for arbitrary windows?
-        # Making this buffer persistent in case we want
-        # to implement this down the line, so that custom
-        # windows can be loaded in.
-        self.register_buffer("window", torch.hann_window(self.nperseg))
+        # if no window is provided, default to a hanning window;
+        # validate that window is correct size
+        if window is None:
+            window = torch.hann_window(self.nperseg)
+
+        if window.size(0) != self.nperseg:
+            raise ValueError(
+                "Window must have length {} got {}".format(
+                    self.nperseg, window.size(0)
+                )
+            )
+        self.register_buffer("window", window)
 
         # scale corresponds to "density" normalization, worth
         # considering adding this as a kwarg and changing this calc

@@ -1,8 +1,9 @@
+import math
+
 import numpy as np
 import pytest
 import torch
 from scipy import optimize
-from torch import pi
 
 from ml4gw import distributions
 
@@ -11,7 +12,7 @@ from ml4gw import distributions
 
 
 def test_log_uniform():
-    sampler = distributions.LogUniform(torch.e, torch.e**2)
+    sampler = distributions.LogUniform(math.e, math.e**2)
     samples = sampler.sample((10,))
     assert len(samples) == 10
     assert ((torch.e <= samples) & (torch.e**2 <= 100)).all()
@@ -32,9 +33,9 @@ def test_cosine():
     sampler = distributions.Cosine()
     samples = sampler.sample((10,))
     assert len(samples) == 10
-    assert ((-pi / 2 <= samples) & (samples <= pi / 2)).all()
+    assert ((-math.pi / 2 <= samples) & (samples <= math.pi / 2)).all()
 
-    sampler = distributions.Cosine(torch.as_tensor(-3), torch.as_tensor(5))
+    sampler = distributions.Cosine(-3, 5)
     samples = sampler.sample((100,))
     assert len(samples) == 100
     assert ((-3 <= samples) & (samples <= 5)).all()
@@ -82,6 +83,6 @@ def test_power_law():
 
 
 def test_delta_function():
-    sampler = distributions.DeltaFunction(peak=torch.as_tensor(20))
+    sampler = distributions.DeltaFunction(peak=20)
     samples = sampler.sample((10,))
     assert (samples == 20).all()

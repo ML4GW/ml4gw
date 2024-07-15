@@ -30,7 +30,7 @@ class SineGaussian(torch.nn.Module):
 
         self.register_buffer("times", times)
 
-    def __call__(
+    def forward(
         self,
         quality: ScalarTensor,
         frequency: ScalarTensor,
@@ -60,7 +60,7 @@ class SineGaussian(torch.nn.Module):
         Returns:
             Tensors of cross and plus polarizations
         """
-
+        dtype = frequency.dtype
         # add dimension for calculating waveforms in batch
         frequency = frequency.view(-1, 1)
         quality = quality.view(-1, 1)
@@ -105,8 +105,7 @@ class SineGaussian(torch.nn.Module):
         cross = fac.imag * h0_cross
         plus = fac.real * h0_plus
 
-        # TODO dtype as argument?
-        cross = cross.double()
-        plus = plus.double()
+        cross = cross.to(dtype)
+        plus = plus.to(dtype)
 
         return cross, plus
