@@ -5,7 +5,6 @@ import pytest
 import torch
 from scipy import optimize
 
-
 from ml4gw import distributions
 
 # TODO: for all tests, how to validate that
