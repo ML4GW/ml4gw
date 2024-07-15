@@ -5,7 +5,6 @@ an integer `N` to a 1D torch `Tensor` containing `N` samples
 from the corresponding distribution.
 """
 import math
-
 from typing import Optional
 
 import torch
@@ -59,7 +58,6 @@ class Sine(dist.TransformedDistribution):
         base_dist = Cosine(
             low - torch.pi / 2, high - torch.pi / 2, validate_args
         )
-
 
         super().__init__(
             base_dist,
