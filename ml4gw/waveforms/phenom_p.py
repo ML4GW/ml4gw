@@ -27,6 +27,7 @@ class IMRPhenomPv2(IMRPhenomD):
         phiRef: TensorType,
         incl: TensorType,
         f_ref: float,
+        *args, **kwargs
     ):
         """
         IMRPhenomPv2 waveform
