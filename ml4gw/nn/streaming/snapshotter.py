@@ -85,7 +85,7 @@ class Snapshotter(torch.nn.Module):
     def get_initial_state(self):
         return torch.zeros((self.num_channels, self.state_size))
 
-    # TODO: use torchtyping annotations to make
+    # TODO: use jaxtyping annotations to make
     # clear what the expected shapes are
     def forward(
         self, update: torch.Tensor, snapshot: Optional[torch.Tensor] = None

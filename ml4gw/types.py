@@ -1,10 +1,11 @@
-from torchtyping import TensorType
+from jaxtyping import Float
+from torch import Tensor
 
-WaveformTensor = TensorType["batch", "num_ifos", "time"]
-PSDTensor = TensorType["num_ifos", "frequency"]
-ScalarTensor = TensorType["batch"]
-VectorGeometry = TensorType["batch", "space"]
-TensorGeometry = TensorType["batch", "space", "space"]
-NetworkVertices = TensorType["num_ifos", 3]
-NetworkDetectorTensors = TensorType["num_ifos", 3, 3]
-TimeSeriesTensor = TensorType["num_channels", "time"]
+WaveformTensor = Float[Tensor, "batch num_ifos time"]
+PSDTensor = Float[Tensor, "num_ifos frequency"]
+ScalarTensor = Float[Tensor, "batch"]
+VectorGeometry = Float[Tensor, "batch space"]
+TensorGeometry = Float[Tensor, "batch space space"]
+NetworkVertices = Float[Tensor, "num_ifos 3"]
+NetworkDetectorTensors = Float[Tensor, "num_ifos 3 3"]
+TimeSeriesTensor = Float[Tensor, "num_channels time"]

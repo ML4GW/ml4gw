@@ -10,10 +10,11 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8,<3.12"
 
+jaxtyping = "^0.2"
+
 # torch deps
 torch = "^2.0"
 torchaudio = "^2.0"
-torchtyping = "^0.1"
 numpy = "<2.0.0"
 
 [tool.poetry.group.dev.dependencies]

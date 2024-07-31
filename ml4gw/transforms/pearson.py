@@ -61,7 +61,7 @@ class ShiftedPearsonCorrelation(torch.nn.Module):
                     )
                 )
 
-    # TODO: torchtyping annotate
+    # TODO: jaxtyping annotate
     def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
         self._shape_checks(x, y)
         dim = x.size(-1)
