@@ -1,5 +1,5 @@
 import torch
-from torchtyping import TensorType
+from jaxtyping import Array, Float
 
 from ..constants import MTSUN_SI, PI
 from .phenom_d_data import QNMData_a, QNMData_fdamp, QNMData_fring
@@ -15,14 +15,14 @@ class IMRPhenomD(TaylorF2):
 
     def forward(
         self,
-        f: TensorType,
-        chirp_mass: TensorType,
-        mass_ratio: TensorType,
-        chi1: TensorType,
-        chi2: TensorType,
-        distance: TensorType,
-        phic: TensorType,
-        inclination: TensorType,
+        f: Float[Array, ""],
+        chirp_mass: Float[Array, ""],
+        mass_ratio: Float[Array, ""],
+        chi1: Float[Array, ""],
+        chi2: Float[Array, ""],
+        distance: Float[Array, ""],
+        phic: Float[Array, ""],
+        inclination: Float[Array, ""],
         f_ref: float,
     ):
         """
@@ -76,13 +76,13 @@ class IMRPhenomD(TaylorF2):
 
     def phenom_d_htilde(
         self,
-        f: TensorType,
-        chirp_mass: TensorType,
-        mass_ratio: TensorType,
-        chi1: TensorType,
-        chi2: TensorType,
-        distance: TensorType,
-        phic: TensorType,
+        f: Float[Array, ""],
+        chirp_mass: Float[Array, ""],
+        mass_ratio: Float[Array, ""],
+        chi1: Float[Array, ""],
+        chi2: Float[Array, ""],
+        distance: Float[Array, ""],
+        phic: Float[Array, ""],
         f_ref: float,
     ):
         total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6

@@ -1,16 +1,13 @@
 from typing import Optional, Union
 
 import torch
+from jaxtyping import Array, Float, Int64
 from torch.nn.functional import unfold
-from torchtyping import TensorType
 
-# need to define these for flake8 compatibility
-batch = time = channel = None  # noqa
-
-TimeSeriesTensor = Union[TensorType["time"], TensorType["channel", "time"]]
+TimeSeriesTensor = Union[Float[Array, " time"], Float[Array, "channel time"]]
 
 BatchTimeSeriesTensor = Union[
-    TensorType["batch", "time"], TensorType["batch", "channel", "time"]
+    Float[Array, "batch time"], Float[Array, "batch channel time"]
 ]
 
 
@@ -83,8 +80,8 @@ def unfold_windows(
 
 
 def slice_kernels(
-    x: Union[TimeSeriesTensor, TensorType["batch", "channel", "time"]],
-    idx: TensorType[..., torch.int64],
+    x: Union[TimeSeriesTensor, Float[Array, "batch channel time"]],
+    idx: Int64[Array, "..."],
     kernel_size: int,
 ) -> BatchTimeSeriesTensor:
     """Slice kernels from single or multichannel timeseries

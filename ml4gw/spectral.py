@@ -12,7 +12,7 @@ https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 from typing import Optional, Union
 
 import torch
-from torchtyping import TensorType
+from jaxtyping import Array, Float
 
 from ml4gw import types
 
@@ -337,7 +337,7 @@ def spectral_density(
 
 def truncate_inverse_power_spectrum(
     psd: types.PSDTensor,
-    fduration: Union[TensorType["time"], float],
+    fduration: Union[Float[Array, "time"], float],
     sample_rate: float,
     highpass: Optional[float] = None,
 ) -> types.PSDTensor:
@@ -449,7 +449,7 @@ def normalize_by_psd(
 def whiten(
     X: types.WaveformTensor,
     psd: types.PSDTensor,
-    fduration: Union[TensorType["time"], float],
+    fduration: Union[Float[Array, "time"], float],
     sample_rate: float,
     highpass: Optional[float] = None,
 ) -> types.WaveformTensor:
