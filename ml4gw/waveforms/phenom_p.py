@@ -1,7 +1,8 @@
 from typing import Dict, Tuple
 
 import torch
-from jaxtyping import Array, Float
+from jaxtyping import Float
+from torch import Tensor
 
 from ..constants import MPC_SEC, MTSUN_SI, PI
 from .phenom_d import IMRPhenomD
@@ -13,19 +14,19 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def forward(
         self,
-        fs: Float[Array, ""],
-        chirp_mass: Float[Array, ""],
-        mass_ratio: Float[Array, ""],
-        s1x: Float[Array, ""],
-        s1y: Float[Array, ""],
-        s1z: Float[Array, ""],
-        s2x: Float[Array, ""],
-        s2y: Float[Array, ""],
-        s2z: Float[Array, ""],
-        dist_mpc: Float[Array, ""],
-        tc: Float[Array, ""],
-        phiRef: Float[Array, ""],
-        incl: Float[Array, ""],
+        fs: Float[Tensor, ""],
+        chirp_mass: Float[Tensor, ""],
+        mass_ratio: Float[Tensor, ""],
+        s1x: Float[Tensor, ""],
+        s1y: Float[Tensor, ""],
+        s1z: Float[Tensor, ""],
+        s2x: Float[Tensor, ""],
+        s2y: Float[Tensor, ""],
+        s2z: Float[Tensor, ""],
+        dist_mpc: Float[Tensor, ""],
+        tc: Float[Tensor, ""],
+        phiRef: Float[Tensor, ""],
+        incl: Float[Tensor, ""],
         f_ref: float,
     ):
         """
@@ -184,18 +185,18 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def PhenomPCoreTwistUp(
         self,
-        fHz: Float[Array, ""],
-        hPhenom: Float[Array, ""],
-        eta: Float[Array, ""],
-        chi1_l: Float[Array, ""],
-        chi2_l: Float[Array, ""],
-        chip: Float[Array, ""],
-        M: Float[Array, ""],
-        angcoeffs: Dict[str, Float[Array, ""]],
-        Y2m: Float[Array, ""],
-        alphaoffset: Float[Array, ""],
-        epsilonoffset: Float[Array, ""],
-    ) -> Tuple[Float[Array, ""], Float[Array, ""]]:
+        fHz: Float[Tensor, ""],
+        hPhenom: Float[Tensor, ""],
+        eta: Float[Tensor, ""],
+        chi1_l: Float[Tensor, ""],
+        chi2_l: Float[Tensor, ""],
+        chip: Float[Tensor, ""],
+        M: Float[Tensor, ""],
+        angcoeffs: Dict[str, Float[Tensor, ""]],
+        Y2m: Float[Tensor, ""],
+        alphaoffset: Float[Tensor, ""],
+        epsilonoffset: Float[Tensor, ""],
+    ) -> Tuple[Float[Tensor, ""], Float[Tensor, ""]]:
         assert angcoeffs is not None
         assert Y2m is not None
         f = fHz * MTSUN_SI * M.unsqueeze(1)  # Frequency in geometric units
@@ -354,8 +355,11 @@ class IMRPhenomPv2(IMRPhenomD):
     # Utility functions
 
     def interpolate(
-        self, x: Float[Array, ""], xp: Float[Array, ""], fp: Float[Array, ""]
-    ) -> Float[Array, ""]:
+        self,
+        x: Float[Tensor, ""],
+        xp: Float[Tensor, ""],
+        fp: Float[Tensor, ""],
+    ) -> Float[Tensor, ""]:
         """One-dimensional linear interpolation for monotonically
         increasing sample points.
 
@@ -385,7 +389,7 @@ class IMRPhenomPv2(IMRPhenomD):
 
         return interpolated.reshape(original_shape)
 
-    def ROTATEZ(self, angle: Float[Array, ""], x, y, z):
+    def ROTATEZ(self, angle: Float[Tensor, ""], x, y, z):
         tmp_x = x * torch.cos(angle) - y * torch.sin(angle)
         tmp_y = x * torch.sin(angle) + y * torch.cos(angle)
         return tmp_x, tmp_y, z
@@ -396,8 +400,8 @@ class IMRPhenomPv2(IMRPhenomD):
         return tmp_x, y, tmp_z
 
     def L2PNR(
-        self, v: Float[Array, ""], eta: Float[Array, ""]
-    ) -> Float[Array, ""]:
+        self, v: Float[Tensor, ""], eta: Float[Tensor, ""]
+    ) -> Float[Tensor, ""]:
         eta2 = eta**2
         x = v**2
         x2 = x**2
@@ -414,25 +418,25 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def convert_spins(
         self,
-        m1: Float[Array, ""],
-        m2: Float[Array, ""],
+        m1: Float[Tensor, ""],
+        m2: Float[Tensor, ""],
         f_ref: float,
-        phiRef: Float[Array, ""],
-        incl: Float[Array, ""],
-        s1x: Float[Array, ""],
-        s1y: Float[Array, ""],
-        s1z: Float[Array, ""],
-        s2x: Float[Array, ""],
-        s2y: Float[Array, ""],
-        s2z: Float[Array, ""],
+        phiRef: Float[Tensor, ""],
+        incl: Float[Tensor, ""],
+        s1x: Float[Tensor, ""],
+        s1y: Float[Tensor, ""],
+        s1z: Float[Tensor, ""],
+        s2x: Float[Tensor, ""],
+        s2y: Float[Tensor, ""],
+        s2z: Float[Tensor, ""],
     ) -> Tuple[
-        Float[Array, ""],
-        Float[Array, ""],
-        Float[Array, ""],
-        Float[Array, ""],
-        Float[Array, ""],
-        Float[Array, ""],
-        Float[Array, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
     ]:
         M = m1 + m2
         m1_2 = m1 * m1
@@ -594,11 +598,11 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def WignerdCoefficients(
         self,
-        v: Float[Array, ""],
-        SL: Float[Array, ""],
-        eta: Float[Array, ""],
-        Sp: Float[Array, ""],
-    ) -> Tuple[Float[Array, ""], Float[Array, ""]]:
+        v: Float[Tensor, ""],
+        SL: Float[Tensor, ""],
+        eta: Float[Tensor, ""],
+        Sp: Float[Tensor, ""],
+    ) -> Tuple[Float[Tensor, ""], Float[Tensor, ""]]:
         # We define the shorthand s := Sp / (L + SL)
         L = self.L2PNR(v, eta)
         s = (Sp / (L + SL)).mT
@@ -611,10 +615,10 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def ComputeNNLOanglecoeffs(
         self,
-        q: Float[Array, ""],
-        chil: Float[Array, ""],
-        chip: Float[Array, ""],
-    ) -> Dict[str, Float[Array, ""]]:
+        q: Float[Tensor, ""],
+        chil: Float[Tensor, ""],
+        chip: Float[Tensor, ""],
+    ) -> Dict[str, Float[Tensor, ""]]:
         m2 = q / (1.0 + q)
         m1 = 1.0 / (1.0 + q)
         dm = m1 - m2
@@ -739,12 +743,12 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def FinalSpin_inplane(
         self,
-        m1: Float[Array, ""],
-        m2: Float[Array, ""],
-        chi1_l: Float[Array, ""],
-        chi2_l: Float[Array, ""],
-        chip: Float[Array, ""],
-    ) -> Float[Array, ""]:
+        m1: Float[Tensor, ""],
+        m2: Float[Tensor, ""],
+        chi1_l: Float[Tensor, ""],
+        chi2_l: Float[Tensor, ""],
+        chip: Float[Tensor, ""],
+    ) -> Float[Tensor, ""]:
         M = m1 + m2
         eta = m1 * m2 / (M * M)
         eta2 = eta * eta
@@ -760,7 +764,7 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def phP_get_fRD_fdamp(
         self, m1, m2, chi1_l, chi2_l, chip
-    ) -> Tuple[Float[Array, ""], Float[Array, ""]]:
+    ) -> Tuple[Float[Tensor, ""], Float[Tensor, ""]]:
         # m1 > m2 should hold here
         finspin = self.FinalSpin_inplane(m1, m2, chi1_l, chi2_l, chip)
         m1_s = m1 * MTSUN_SI
@@ -780,8 +784,8 @@ class IMRPhenomPv2(IMRPhenomD):
         return fRD / M_s, fdamp / M_s
 
     def get_Amp0(
-        self, fM_s: Float[Array, ""], eta: Float[Array, ""]
-    ) -> Float[Array, ""]:
+        self, fM_s: Float[Tensor, ""], eta: Float[Tensor, ""]
+    ) -> Float[Tensor, ""]:
         Amp0 = (
             (2.0 / 3.0 * eta.unsqueeze(1)) ** (1.0 / 2.0)
             * (fM_s) ** (-7.0 / 6.0)

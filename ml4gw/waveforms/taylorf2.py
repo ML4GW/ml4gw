@@ -1,5 +1,6 @@
 import torch
-from jaxtyping import Array, Float
+from jaxtyping import Float
+from torch import Tensor
 
 from ..constants import MPC_SEC, MTSUN_SI, PI
 from ..constants import EulerGamma as GAMMA
@@ -11,14 +12,14 @@ class TaylorF2(torch.nn.Module):
 
     def forward(
         self,
-        f: Float[Array, ""],
-        chirp_mass: Float[Array, ""],
-        mass_ratio: Float[Array, ""],
-        chi1: Float[Array, ""],
-        chi2: Float[Array, ""],
-        distance: Float[Array, ""],
-        phic: Float[Array, ""],
-        inclination: Float[Array, ""],
+        f: Float[Tensor, ""],
+        chirp_mass: Float[Tensor, ""],
+        mass_ratio: Float[Tensor, ""],
+        chi1: Float[Tensor, ""],
+        chi2: Float[Tensor, ""],
+        distance: Float[Tensor, ""],
+        phic: Float[Tensor, ""],
+        inclination: Float[Tensor, ""],
         f_ref: float,
     ):
         """
@@ -75,13 +76,13 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_htilde(
         self,
-        f: Float[Array, ""],
-        mass1: Float[Array, ""],
-        mass2: Float[Array, ""],
-        chi1: Float[Array, ""],
-        chi2: Float[Array, ""],
-        distance: Float[Array, ""],
-        phic: Float[Array, ""],
+        f: Float[Tensor, ""],
+        mass1: Float[Tensor, ""],
+        mass2: Float[Tensor, ""],
+        chi1: Float[Tensor, ""],
+        chi2: Float[Tensor, ""],
+        distance: Float[Tensor, ""],
+        phic: Float[Tensor, ""],
         f_ref: float,
     ):
         mass1_s = mass1 * MTSUN_SI
@@ -103,8 +104,8 @@ class TaylorF2(torch.nn.Module):
         return h0
 
     def taylorf2_amplitude(
-        self, Mf: Float[Array, ""], mass1, mass2, eta, distance
-    ) -> Float[Array, ""]:
+        self, Mf: Float[Tensor, ""], mass1, mass2, eta, distance
+    ) -> Float[Tensor, ""]:
         mass1_s = mass1 * MTSUN_SI
         mass2_s = mass2 * MTSUN_SI
         v = (PI * Mf) ** (1.0 / 3.0)
@@ -126,12 +127,12 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_phase(
         self,
-        Mf: Float[Array, ""],
-        mass1: Float[Array, ""],
-        mass2: Float[Array, ""],
-        chi1: Float[Array, ""],
-        chi2: Float[Array, ""],
-    ) -> Float[Array, ""]:
+        Mf: Float[Tensor, ""],
+        mass1: Float[Tensor, ""],
+        mass2: Float[Tensor, ""],
+        chi1: Float[Tensor, ""],
+        chi2: Float[Tensor, ""],
+    ) -> Float[Tensor, ""]:
         """
         Calculate the inspiral phase for the TaylorF2.
         """

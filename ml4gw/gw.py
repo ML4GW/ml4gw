@@ -13,7 +13,8 @@ https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 from typing import List, Tuple, Union
 
 import torch
-from jaxtyping import Array, Float
+from jaxtyping import Float
+from torch import Tensor
 
 from ml4gw.types import (
     NetworkDetectorTensors,
@@ -67,7 +68,7 @@ def compute_antenna_responses(
     phi: ScalarTensor,
     detector_tensors: NetworkDetectorTensors,
     modes: List[str],
-) -> Float[Array, "batch polarizations num_ifos"]:
+) -> Float[Tensor, "batch polarizations num_ifos"]:
     """
     Compute the antenna pattern factors of a batch of
     waveforms as a function of the sky parameters of
@@ -197,7 +198,7 @@ def compute_observed_strain(
     detector_tensors: NetworkDetectorTensors,
     detector_vertices: NetworkVertices,
     sample_rate: float,
-    **polarizations: Float[Array, "batch time"],
+    **polarizations: Float[Tensor, "batch time"],
 ) -> WaveformTensor:
     """
     Compute the strain timeseries $h(t)$ observed by a network
@@ -289,8 +290,8 @@ def compute_ifo_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Array, " frequency"], None] = None,
-) -> Float[Array, "batch num_ifos"]:
+    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+) -> Float[Tensor, "batch num_ifos"]:
     r"""Compute the SNRs of a batch of interferometer responses
 
     Compute the signal to noise ratio (SNR) of individual
@@ -390,7 +391,7 @@ def compute_network_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Array, " frequency"], None] = None,
+    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> ScalarTensor:
     r"""
     Compute the total SNR from a gravitational waveform
@@ -440,7 +441,7 @@ def reweight_snrs(
     target_snrs: Union[float, ScalarTensor],
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Array, " frequency"], None] = None,
+    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> WaveformTensor:
     """Scale interferometer responses such that they have a desired SNR
 

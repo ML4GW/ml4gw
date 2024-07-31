@@ -1,13 +1,14 @@
 from typing import Optional, Union
 
 import torch
-from jaxtyping import Array, Float, Int64
+from jaxtyping import Float, Int64
+from torch import Tensor
 from torch.nn.functional import unfold
 
-TimeSeriesTensor = Union[Float[Array, " time"], Float[Array, "channel time"]]
+TimeSeriesTensor = Union[Float[Tensor, " time"], Float[Tensor, "channel time"]]
 
 BatchTimeSeriesTensor = Union[
-    Float[Array, "batch time"], Float[Array, "batch channel time"]
+    Float[Tensor, "batch time"], Float[Tensor, "batch channel time"]
 ]
 
 
@@ -80,8 +81,8 @@ def unfold_windows(
 
 
 def slice_kernels(
-    x: Union[TimeSeriesTensor, Float[Array, "batch channel time"]],
-    idx: Int64[Array, "..."],
+    x: Union[TimeSeriesTensor, Float[Tensor, "batch channel time"]],
+    idx: Int64[Tensor, "..."],
     kernel_size: int,
 ) -> BatchTimeSeriesTensor:
     """Slice kernels from single or multichannel timeseries
