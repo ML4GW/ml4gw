@@ -32,6 +32,8 @@ class TestHdf5TimeSeriesDataset:
         data_dir.mkdir(exist_ok=True)
 
         fnames = {"a.h5": 10, "b.h5": 4, "c.h5": 6}
+        fnames = {data_dir / fname: length for fname, length in fnames.items()}
+
         idx = 0
         keys = sorted(fnames)
         for fname in keys:
@@ -98,11 +100,11 @@ class TestHdf5TimeSeriesDataset:
         # really weak check: let's at least confirm
         # that we sample the 10s segment  more than
         # we sample the 4s segment.
-        counts = {fname: 0 for fname in dataset.fnames}
+        counts = {fname.name: 0 for fname in dataset.fnames}
         for _ in range(10):
             fnames = dataset.sample_fnames((10,))
             for fname in fnames:
-                counts[fname] += 1
+                counts[fname.name] += 1
         assert counts["a.h5"] > counts["b.h5"]
 
     def test_sample_batch(self, dataset, kernel_size, coincident):
