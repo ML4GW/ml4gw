@@ -2,6 +2,7 @@ from collections.abc import Callable, Sequence
 from typing import Optional
 
 import torch
+from torch import Tensor
 
 from ml4gw.nn.autoencoder.base import Autoencoder
 from ml4gw.nn.autoencoder.skip_connection import SkipConnection
@@ -64,12 +65,12 @@ class ConvBlock(Autoencoder):
         self.encode_norm = norm(out_channels)
         self.decode_norm = norm(decode_channels)
 
-    def encode(self, X):
+    def encode(self, X: Tensor) -> Tensor:
         X = self.encode_layer(X)
         X = self.encode_norm(X)
         return self.activation(X)
 
-    def decode(self, X):
+    def decode(self, X: Tensor) -> Tensor:
         X = self.decode_layer(X)
         X = self.decode_norm(X)
         return self.output_activation(X)
@@ -144,13 +145,15 @@ class ConvolutionalAutoencoder(Autoencoder):
             self.blocks.append(block)
             in_channels = channels * groups
 
-    def decode(self, *X, states=None, input_size: Optional[int] = None):
+    def decode(
+        self, *X, states=None, input_size: Optional[int] = None
+    ) -> Tensor:
         X = super().decode(*X, states=states)
         if input_size is not None:
             return match_size(X, input_size)
         return X
 
-    def forward(self, X):
+    def forward(self, X: Tensor) -> Tensor:
         input_size = X.size(-1)
         X = super().forward(X)
         return match_size(X, input_size)

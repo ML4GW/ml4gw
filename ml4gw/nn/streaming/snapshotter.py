@@ -1,6 +1,7 @@
 from typing import Optional, Sequence, Tuple
 
 import torch
+from torch import Tensor
 
 from ml4gw.utils.slicing import unfold_windows
 
@@ -82,14 +83,14 @@ class Snapshotter(torch.nn.Module):
         self.channels_per_snapshot = channels_per_snapshot
         self.num_channels = num_channels
 
-    def get_initial_state(self):
+    def get_initial_state(self) -> Tensor:
         return torch.zeros((self.num_channels, self.state_size))
 
     # TODO: use jaxtyping annotations to make
     # clear what the expected shapes are
     def forward(
-        self, update: torch.Tensor, snapshot: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, ...]:
+        self, update: Tensor, snapshot: Optional[Tensor] = None
+    ) -> Tuple[Tensor, ...]:
         if snapshot is None:
             snapshot = self.get_initial_state()
 

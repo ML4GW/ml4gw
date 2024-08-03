@@ -1,10 +1,9 @@
 from typing import Optional, Tuple
 
 import torch
+from torch import Tensor
 
 from ml4gw.utils.slicing import unfold_windows
-
-Tensor = torch.Tensor
 
 
 class OnlineAverager(torch.nn.Module):
@@ -70,12 +69,12 @@ class OnlineAverager(torch.nn.Module):
         weights = unfold_windows(weights, weight_size, update_size)
         self.register_buffer("weights", weights)
 
-    def get_initial_state(self):
+    def get_initial_state(self) -> Tensor:
         return torch.zeros((self.num_channels, self.state_size))
 
     def forward(
-        self, update: torch.Tensor, state: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, update: Tensor, state: Optional[Tensor] = None
+    ) -> Tuple[Tensor, Tensor]:
         if state is None:
             state = self.get_initial_state()
 

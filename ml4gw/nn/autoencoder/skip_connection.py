@@ -1,31 +1,32 @@
 import torch
+from torch import Tensor
 
 from ml4gw.nn.autoencoder.utils import match_size
 
 
 class SkipConnection(torch.nn.Module):
-    def forward(self, X: torch.Tensor, state: torch.Tensor):
+    def forward(self, X: Tensor, state: Tensor) -> Tensor:
         return match_size(X, state.size(-1))
 
-    def get_out_channels(self, in_channels):
+    def get_out_channels(self, in_channels: int) -> int:
         return in_channels
 
 
 class AddSkipConnect(SkipConnection):
-    def forward(self, X, state):
+    def forward(self, X: Tensor, state: Tensor) -> Tensor:
         X = super().forward(X, state)
         return X + state
 
 
 class ConcatSkipConnect(SkipConnection):
-    def __init__(self, groups: int = 1):
+    def __init__(self, groups: int = 1) -> None:
         super().__init__()
         self.groups = groups
 
-    def get_out_channels(self, in_channels):
+    def get_out_channels(self, in_channels: int) -> int:
         return 2 * in_channels
 
-    def forward(self, X, state):
+    def forward(self, X: Tensor, state: Tensor) -> Tensor:
         X = super().forward(X, state)
         if self.groups == 1:
             return torch.cat([X, state], dim=1)

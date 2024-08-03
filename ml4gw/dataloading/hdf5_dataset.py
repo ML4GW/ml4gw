@@ -161,7 +161,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     x[b, c] = f[self.channels[c]][i : i + self.kernel_size]
         return torch.Tensor(x)
 
-    def __iter__(self) -> torch.Tensor:
+    def __iter__(self) -> WaveformTensor:
         worker_info = torch.utils.data.get_worker_info()
         if worker_info is None:
             num_batches = self.batches_per_epoch
