@@ -13,7 +13,7 @@ BatchTimeSeriesTensor = Union[
 
 
 def unfold_windows(
-    x: torch.Tensor,
+    x: Tensor,
     window_size: int,
     stride: int,
     drop_last: bool = True,

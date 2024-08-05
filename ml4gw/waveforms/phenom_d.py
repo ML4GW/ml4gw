@@ -16,14 +16,14 @@ class IMRPhenomD(TaylorF2):
 
     def forward(
         self,
-        f: Float[Tensor, ""],
-        chirp_mass: Float[Tensor, ""],
-        mass_ratio: Float[Tensor, ""],
-        chi1: Float[Tensor, ""],
-        chi2: Float[Tensor, ""],
-        distance: Float[Tensor, ""],
-        phic: Float[Tensor, ""],
-        inclination: Float[Tensor, ""],
+        f: Float[Tensor, " signals"],
+        chirp_mass: Float[Tensor, " signals"],
+        mass_ratio: Float[Tensor, " signals"],
+        chi1: Float[Tensor, " signals"],
+        chi2: Float[Tensor, " signals"],
+        distance: Float[Tensor, " signals"],
+        phic: Float[Tensor, " signals"],
+        inclination: Float[Tensor, " signals"],
         f_ref: float,
     ):
         """
@@ -77,13 +77,13 @@ class IMRPhenomD(TaylorF2):
 
     def phenom_d_htilde(
         self,
-        f: Float[Tensor, ""],
-        chirp_mass: Float[Tensor, ""],
-        mass_ratio: Float[Tensor, ""],
-        chi1: Float[Tensor, ""],
-        chi2: Float[Tensor, ""],
-        distance: Float[Tensor, ""],
-        phic: Float[Tensor, ""],
+        f: Float[Tensor, " signals"],
+        chirp_mass: Float[Tensor, " signals"],
+        mass_ratio: Float[Tensor, " signals"],
+        chi1: Float[Tensor, " signals"],
+        chi2: Float[Tensor, " signals"],
+        distance: Float[Tensor, " signals"],
+        phic: Float[Tensor, " signals"],
         f_ref: float,
     ):
         total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6

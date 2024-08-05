@@ -1,6 +1,7 @@
 from typing import Optional, Tuple
 
 import torch
+from jaxtyping import Float
 from torch import Tensor
 
 from ml4gw.utils.slicing import unfold_windows
@@ -69,12 +70,14 @@ class OnlineAverager(torch.nn.Module):
         weights = unfold_windows(weights, weight_size, update_size)
         self.register_buffer("weights", weights)
 
-    def get_initial_state(self) -> Tensor:
+    def get_initial_state(self) -> Float[Tensor, "channel time"]:
         return torch.zeros((self.num_channels, self.state_size))
 
     def forward(
-        self, update: Tensor, state: Optional[Tensor] = None
-    ) -> Tuple[Tensor, Tensor]:
+        self,
+        update: Float[Tensor, "batch channel time1"],
+        state: Optional[Float[Tensor, "channel time2"]] = None,
+    ) -> Tuple[Float[Tensor, "channel time3"], Float[Tensor, "channel time4"]]:
         if state is None:
             state = self.get_initial_state()
 

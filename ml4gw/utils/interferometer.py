@@ -4,7 +4,7 @@ import torch
 # based on values from
 # https://lscsoft.docs.ligo.org/lalsuite/lal/_l_a_l_detectors_8h_source.html
 class InterferometerGeometry:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         if name == "H1":
             self.x_arm = torch.Tensor(
                 (-0.22389266154, +0.79983062746, +0.55690487831)
