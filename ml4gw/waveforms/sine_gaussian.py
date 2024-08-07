@@ -37,6 +37,7 @@ class SineGaussian(torch.nn.Module):
         hrss: ScalarTensor,
         phase: ScalarTensor,
         eccentricity: ScalarTensor,
+        *args, **kwargs
     ):
         """
         Generate lalinference implementation of a sine-Gaussian waveform.
