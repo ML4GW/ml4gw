@@ -2,9 +2,7 @@ from io import BytesIO
 
 import numpy as np
 import pytest
-import scipy
 import torch
-from packaging import version
 from scipy import signal
 
 from ml4gw.transforms.spectral import SpectralDensity
@@ -281,24 +279,6 @@ def test_transform_with_csd(
             average=average,
         )
     assert scipy_result.shape == torch_result.shape
-
-    scipy_version = version.parse(scipy.__version__)
-    num_windows = (x.shape[-1] - transform.nperseg) // transform.nstride + 1
-    if (
-        average == "median"
-        and scipy_version < version.parse("1.9")
-        and num_windows > 1
-    ):
-        # scipy actually had a bug in the median calc for
-        # csd, see this issue:
-        # https://github.com/scipy/scipy/issues/15601
-        try:
-            from scipy.signal.spectral import _median_bias
-        except ImportError:
-            from scipy.signal._spectral_py import _median_bias
-
-        scipy_result *= _median_bias(num_freq_bins)
-        scipy_result /= _median_bias(num_windows)
 
     if fast:
         torch_result = torch_result[..., 2:]
