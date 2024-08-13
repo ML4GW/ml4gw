@@ -3,7 +3,11 @@ from typing import Dict, List
 
 import torch
 import torch.nn.functional as F
+from jaxtyping import Float
+from torch import Tensor
 from torchaudio.transforms import Spectrogram
+
+from ml4gw.types import TimeSeries3d
 
 
 class MultiResolutionSpectrogram(torch.nn.Module):
@@ -122,7 +126,9 @@ class MultiResolutionSpectrogram(torch.nn.Module):
 
         return [dict(zip(kwargs, col)) for col in zip(*kwargs.values())]
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, X: TimeSeries3d
+    ) -> Float[Tensor, "batch channel frequency time"]:
         """
         Calculate spectrograms of the input tensor and
         combine them into a single spectrogram

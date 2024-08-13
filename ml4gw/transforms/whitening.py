@@ -1,9 +1,15 @@
-from typing import Optional
+from typing import Optional, Union
 
 import torch
 
 from ml4gw import spectral
 from ml4gw.transforms.transform import FittableSpectralTransform
+from ml4gw.types import (
+    FrequencySeries1d,
+    FrequencySeries1to3d,
+    TimeSeries1d,
+    TimeSeries3d,
+)
 
 
 class Whiten(torch.nn.Module):
@@ -58,7 +64,9 @@ class Whiten(torch.nn.Module):
         window = torch.hann_window(size, dtype=torch.float64)
         self.register_buffer("window", window)
 
-    def forward(self, X: torch.Tensor, psd: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, X: TimeSeries3d, psd: FrequencySeries1to3d
+    ) -> TimeSeries3d:
         """
         Whiten a batch of multichannel timeseries by a
         background power spectral density.
@@ -142,7 +150,7 @@ class FixedWhiten(FittableSpectralTransform):
     def fit(
         self,
         fduration: float,
-        *background: torch.Tensor,
+        *background: Union[TimeSeries1d, FrequencySeries1d],
         fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
         overlap: Optional[float] = None
@@ -224,7 +232,7 @@ class FixedWhiten(FittableSpectralTransform):
         fduration = torch.Tensor([fduration])
         self.build(psd=psd, fduration=fduration)
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    def forward(self, X: TimeSeries3d) -> TimeSeries3d:
         """
         Whiten the input timeseries tensor using the
         PSD fit by the `.fit` method, which must be
