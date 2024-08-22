@@ -16,6 +16,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
+from ml4gw.constants import C
 from ml4gw.types import (
     NetworkDetectorTensors,
     NetworkVertices,
@@ -26,8 +27,6 @@ from ml4gw.types import (
     WaveformTensor,
 )
 from ml4gw.utils.interferometer import InterferometerGeometry
-
-SPEED_OF_LIGHT = 299792458.0  # m/s
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
@@ -161,7 +160,7 @@ def shift_responses(
     # Divide by c in the second line so that we only
     # need to multiply the array by a single float
     dt = -(omega * vertices).sum(axis=-1)
-    dt *= sample_rate / SPEED_OF_LIGHT
+    dt *= sample_rate / C
     dt = torch.trunc(dt).type(torch.int64)
 
     # rolling by gathering implementation based on
