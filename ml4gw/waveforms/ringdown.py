@@ -1,9 +1,8 @@
 import numpy as np
 import torch
 
+from ml4gw.constants import PI, C, G, m_per_Mpc
 from ml4gw.types import ScalarTensor
-
-from ..constants import PI, C, G, m_per_Mpc
 
 
 class Ringdown(torch.nn.Module):
