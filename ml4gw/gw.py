@@ -30,12 +30,6 @@ from ml4gw.utils.interferometer import InterferometerGeometry
 SPEED_OF_LIGHT = 299792458.0  # m/s
 
 
-# define some tensor shapes we'll reuse a bit
-# up front. Need to assign these variables so
-# that static linters don't give us name errors
-# batch = num_ifos = polarizations = time = frequency = space = None  # noqa
-
-
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
     """
     Compute the outer product of two batches of vectors
