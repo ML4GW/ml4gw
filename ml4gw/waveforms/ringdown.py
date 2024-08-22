@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from ml4gw.constants import PI, C, G, m_per_Mpc
-from ml4gw.types import ScalarTensor
+from ml4gw.types import BatchTensor
 
 
 class Ringdown(torch.nn.Module):
@@ -26,12 +26,12 @@ class Ringdown(torch.nn.Module):
 
     def forward(
         self,
-        frequency: ScalarTensor,
-        quality: ScalarTensor,
-        epsilon: ScalarTensor,
-        phase: ScalarTensor,
-        inclination: ScalarTensor,
-        distance: ScalarTensor,
+        frequency: BatchTensor,
+        quality: BatchTensor,
+        epsilon: BatchTensor,
+        phase: BatchTensor,
+        inclination: BatchTensor,
+        distance: BatchTensor,
     ):
         """
         Generate ringdown waveform based on the damped sinusoid equation.

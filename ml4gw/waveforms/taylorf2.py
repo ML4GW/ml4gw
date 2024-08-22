@@ -3,7 +3,7 @@ from jaxtyping import Float
 
 from ml4gw.constants import MPC_SEC, MTSUN_SI, PI
 from ml4gw.constants import EulerGamma as GAMMA
-from ml4gw.types import FrequencySeries1d, ScalarTensor
+from ml4gw.types import BatchTensor, FrequencySeries1d
 
 
 class TaylorF2(torch.nn.Module):
@@ -13,13 +13,13 @@ class TaylorF2(torch.nn.Module):
     def forward(
         self,
         f: FrequencySeries1d,
-        chirp_mass: ScalarTensor,
-        mass_ratio: ScalarTensor,
-        chi1: ScalarTensor,
-        chi2: ScalarTensor,
-        distance: ScalarTensor,
-        phic: ScalarTensor,
-        inclination: ScalarTensor,
+        chirp_mass: BatchTensor,
+        mass_ratio: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
+        inclination: BatchTensor,
         f_ref: float,
     ):
         """
@@ -77,12 +77,12 @@ class TaylorF2(torch.nn.Module):
     def taylorf2_htilde(
         self,
         f: FrequencySeries1d,
-        mass1: ScalarTensor,
-        mass2: ScalarTensor,
-        chi1: ScalarTensor,
-        chi2: ScalarTensor,
-        distance: ScalarTensor,
-        phic: ScalarTensor,
+        mass1: BatchTensor,
+        mass2: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
         f_ref: float,
     ) -> Float[FrequencySeries1d, " batch"]:
         mass1_s = mass1 * MTSUN_SI
@@ -105,11 +105,11 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_amplitude(
         self,
-        Mf: ScalarTensor,
-        mass1: ScalarTensor,
-        mass2: ScalarTensor,
-        eta: ScalarTensor,
-        distance: ScalarTensor,
+        Mf: BatchTensor,
+        mass1: BatchTensor,
+        mass2: BatchTensor,
+        eta: BatchTensor,
+        distance: BatchTensor,
     ) -> Float[FrequencySeries1d, " batch"]:
         mass1_s = mass1 * MTSUN_SI
         mass2_s = mass2 * MTSUN_SI
@@ -132,11 +132,11 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_phase(
         self,
-        Mf: ScalarTensor,
-        mass1: ScalarTensor,
-        mass2: ScalarTensor,
-        chi1: ScalarTensor,
-        chi2: ScalarTensor,
+        Mf: BatchTensor,
+        mass1: BatchTensor,
+        mass2: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
     ) -> Float[FrequencySeries1d, " batch"]:
         """
         Calculate the inspiral phase for the TaylorF2.

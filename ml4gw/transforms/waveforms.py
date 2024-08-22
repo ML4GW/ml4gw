@@ -5,7 +5,7 @@ from jaxtyping import Float
 from torch import Tensor
 
 from ml4gw import gw
-from ml4gw.types import ScalarTensor
+from ml4gw.types import BatchTensor
 
 
 # TODO: should these live in ml4gw.waveforms submodule?
@@ -76,9 +76,9 @@ class WaveformProjector(torch.nn.Module):
 
     def forward(
         self,
-        dec: ScalarTensor,
-        psi: ScalarTensor,
-        phi: ScalarTensor,
+        dec: BatchTensor,
+        psi: BatchTensor,
+        phi: BatchTensor,
         **polarizations: Float[Tensor, "batch time"],
     ):
         ifo_responses = gw.compute_observed_strain(

@@ -4,7 +4,7 @@ import torch
 
 from ml4gw.gw import compute_network_snr
 from ml4gw.transforms.transform import FittableSpectralTransform
-from ml4gw.types import ScalarTensor, TimeSeries2d, WaveformTensor
+from ml4gw.types import BatchTensor, TimeSeries2d, WaveformTensor
 
 
 class SnrRescaler(FittableSpectralTransform):
@@ -60,7 +60,7 @@ class SnrRescaler(FittableSpectralTransform):
     def forward(
         self,
         responses: WaveformTensor,
-        target_snrs: Optional[ScalarTensor] = None,
+        target_snrs: Optional[BatchTensor] = None,
     ):
         snrs = compute_network_snr(
             responses, self.background, self.sample_rate, self.mask

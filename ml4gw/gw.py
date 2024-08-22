@@ -18,10 +18,10 @@ from torch import Tensor
 
 from ml4gw.constants import C
 from ml4gw.types import (
+    BatchTensor,
     NetworkDetectorTensors,
     NetworkVertices,
     PSDTensor,
-    ScalarTensor,
     TensorGeometry,
     VectorGeometry,
     WaveformTensor,
@@ -56,9 +56,9 @@ polarization_funcs = {
 
 
 def compute_antenna_responses(
-    theta: ScalarTensor,
-    psi: ScalarTensor,
-    phi: ScalarTensor,
+    theta: BatchTensor,
+    psi: BatchTensor,
+    phi: BatchTensor,
     detector_tensors: NetworkDetectorTensors,
     modes: List[str],
 ) -> Float[Tensor, "batch polarizations num_ifos"]:
@@ -141,8 +141,8 @@ def compute_antenna_responses(
 
 def shift_responses(
     responses: WaveformTensor,
-    theta: ScalarTensor,
-    phi: ScalarTensor,
+    theta: BatchTensor,
+    phi: BatchTensor,
     vertices: NetworkVertices,
     sample_rate: float,
 ) -> WaveformTensor:
@@ -185,9 +185,9 @@ def shift_responses(
 
 
 def compute_observed_strain(
-    dec: ScalarTensor,
-    psi: ScalarTensor,
-    phi: ScalarTensor,
+    dec: BatchTensor,
+    psi: BatchTensor,
+    phi: BatchTensor,
     detector_tensors: NetworkDetectorTensors,
     detector_vertices: NetworkVertices,
     sample_rate: float,
@@ -385,7 +385,7 @@ def compute_network_snr(
     psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, Float[Tensor, " frequency"], None] = None,
-) -> ScalarTensor:
+) -> BatchTensor:
     r"""
     Compute the total SNR from a gravitational waveform
     from a network of interferometers. The total SNR for
@@ -431,7 +431,7 @@ def compute_network_snr(
 
 def reweight_snrs(
     responses: WaveformTensor,
-    target_snrs: Union[float, ScalarTensor],
+    target_snrs: Union[float, BatchTensor],
     psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, Float[Tensor, " frequency"], None] = None,

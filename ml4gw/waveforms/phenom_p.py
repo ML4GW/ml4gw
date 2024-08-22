@@ -5,7 +5,7 @@ from jaxtyping import Float
 from torch import Tensor
 
 from ml4gw.constants import MPC_SEC, MTSUN_SI, PI
-from ml4gw.types import FrequencySeries1d, ScalarTensor
+from ml4gw.types import BatchTensor, FrequencySeries1d
 
 from .phenom_d import IMRPhenomD
 
@@ -17,18 +17,18 @@ class IMRPhenomPv2(IMRPhenomD):
     def forward(
         self,
         fs: FrequencySeries1d,
-        chirp_mass: ScalarTensor,
-        mass_ratio: ScalarTensor,
-        s1x: ScalarTensor,
-        s1y: ScalarTensor,
-        s1z: ScalarTensor,
-        s2x: ScalarTensor,
-        s2y: ScalarTensor,
-        s2z: ScalarTensor,
-        dist_mpc: ScalarTensor,
-        tc: ScalarTensor,
-        phiRef: ScalarTensor,
-        incl: ScalarTensor,
+        chirp_mass: BatchTensor,
+        mass_ratio: BatchTensor,
+        s1x: BatchTensor,
+        s1y: BatchTensor,
+        s1z: BatchTensor,
+        s2x: BatchTensor,
+        s2y: BatchTensor,
+        s2z: BatchTensor,
+        dist_mpc: BatchTensor,
+        tc: BatchTensor,
+        phiRef: BatchTensor,
+        incl: BatchTensor,
         f_ref: float,
     ):
         """
@@ -188,17 +188,17 @@ class IMRPhenomPv2(IMRPhenomD):
     def PhenomPCoreTwistUp(
         self,
         fHz: FrequencySeries1d,
-        hPhenom: ScalarTensor,
-        eta: ScalarTensor,
-        chi1_l: ScalarTensor,
-        chi2_l: ScalarTensor,
-        chip: ScalarTensor,
-        M: ScalarTensor,
-        angcoeffs: Dict[str, ScalarTensor],
-        Y2m: ScalarTensor,
-        alphaoffset: ScalarTensor,
-        epsilonoffset: ScalarTensor,
-    ) -> Tuple[ScalarTensor, ScalarTensor]:
+        hPhenom: BatchTensor,
+        eta: BatchTensor,
+        chi1_l: BatchTensor,
+        chi2_l: BatchTensor,
+        chip: BatchTensor,
+        M: BatchTensor,
+        angcoeffs: Dict[str, BatchTensor],
+        Y2m: BatchTensor,
+        alphaoffset: BatchTensor,
+        epsilonoffset: BatchTensor,
+    ) -> Tuple[BatchTensor, BatchTensor]:
         assert angcoeffs is not None
         assert Y2m is not None
         f = fHz * MTSUN_SI * M.unsqueeze(1)  # Frequency in geometric units
@@ -391,7 +391,7 @@ class IMRPhenomPv2(IMRPhenomD):
 
         return interpolated.reshape(original_shape)
 
-    def ROTATEZ(self, angle: ScalarTensor, x, y, z):
+    def ROTATEZ(self, angle: BatchTensor, x, y, z):
         tmp_x = x * torch.cos(angle) - y * torch.sin(angle)
         tmp_y = x * torch.sin(angle) + y * torch.cos(angle)
         return tmp_x, tmp_y, z
@@ -403,9 +403,9 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def L2PNR(
         self,
-        v: ScalarTensor,
-        eta: ScalarTensor,
-    ) -> ScalarTensor:
+        v: BatchTensor,
+        eta: BatchTensor,
+    ) -> BatchTensor:
         eta2 = eta**2
         x = v**2
         x2 = x**2
@@ -422,25 +422,25 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def convert_spins(
         self,
-        m1: ScalarTensor,
-        m2: ScalarTensor,
+        m1: BatchTensor,
+        m2: BatchTensor,
         f_ref: float,
-        phiRef: ScalarTensor,
-        incl: ScalarTensor,
-        s1x: ScalarTensor,
-        s1y: ScalarTensor,
-        s1z: ScalarTensor,
-        s2x: ScalarTensor,
-        s2y: ScalarTensor,
-        s2z: ScalarTensor,
+        phiRef: BatchTensor,
+        incl: BatchTensor,
+        s1x: BatchTensor,
+        s1y: BatchTensor,
+        s1z: BatchTensor,
+        s2x: BatchTensor,
+        s2y: BatchTensor,
+        s2z: BatchTensor,
     ) -> Tuple[
-        ScalarTensor,
-        ScalarTensor,
-        ScalarTensor,
-        ScalarTensor,
-        ScalarTensor,
-        ScalarTensor,
-        ScalarTensor,
+        BatchTensor,
+        BatchTensor,
+        BatchTensor,
+        BatchTensor,
+        BatchTensor,
+        BatchTensor,
+        BatchTensor,
     ]:
         M = m1 + m2
         m1_2 = m1 * m1
@@ -602,11 +602,11 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def WignerdCoefficients(
         self,
-        v: ScalarTensor,
-        SL: ScalarTensor,
-        eta: ScalarTensor,
-        Sp: ScalarTensor,
-    ) -> Tuple[ScalarTensor, ScalarTensor]:
+        v: BatchTensor,
+        SL: BatchTensor,
+        eta: BatchTensor,
+        Sp: BatchTensor,
+    ) -> Tuple[BatchTensor, BatchTensor]:
         # We define the shorthand s := Sp / (L + SL)
         L = self.L2PNR(v, eta)
         s = (Sp / (L + SL)).mT
@@ -619,10 +619,10 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def ComputeNNLOanglecoeffs(
         self,
-        q: ScalarTensor,
-        chil: ScalarTensor,
-        chip: ScalarTensor,
-    ) -> Dict[str, ScalarTensor]:
+        q: BatchTensor,
+        chil: BatchTensor,
+        chip: BatchTensor,
+    ) -> Dict[str, BatchTensor]:
         m2 = q / (1.0 + q)
         m1 = 1.0 / (1.0 + q)
         dm = m1 - m2
@@ -747,12 +747,12 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def FinalSpin_inplane(
         self,
-        m1: ScalarTensor,
-        m2: ScalarTensor,
-        chi1_l: ScalarTensor,
-        chi2_l: ScalarTensor,
-        chip: ScalarTensor,
-    ) -> ScalarTensor:
+        m1: BatchTensor,
+        m2: BatchTensor,
+        chi1_l: BatchTensor,
+        chi2_l: BatchTensor,
+        chip: BatchTensor,
+    ) -> BatchTensor:
         M = m1 + m2
         eta = m1 * m2 / (M * M)
         eta2 = eta * eta
@@ -768,7 +768,7 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def phP_get_fRD_fdamp(
         self, m1, m2, chi1_l, chi2_l, chip
-    ) -> Tuple[ScalarTensor, ScalarTensor]:
+    ) -> Tuple[BatchTensor, BatchTensor]:
         # m1 > m2 should hold here
         finspin = self.FinalSpin_inplane(m1, m2, chi1_l, chi2_l, chip)
         m1_s = m1 * MTSUN_SI
@@ -787,7 +787,7 @@ class IMRPhenomPv2(IMRPhenomD):
         ) / (1.0 - Erad)
         return fRD / M_s, fdamp / M_s
 
-    def get_Amp0(self, fM_s: ScalarTensor, eta: ScalarTensor) -> ScalarTensor:
+    def get_Amp0(self, fM_s: BatchTensor, eta: BatchTensor) -> BatchTensor:
         Amp0 = (
             (2.0 / 3.0 * eta.unsqueeze(1)) ** (1.0 / 2.0)
             * (fM_s) ** (-7.0 / 6.0)

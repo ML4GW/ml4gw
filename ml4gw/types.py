@@ -5,7 +5,7 @@ from torch import Tensor
 
 WaveformTensor = Float[Tensor, "batch num_ifos time"]
 PSDTensor = Float[Tensor, "num_ifos frequency"]
-ScalarTensor = Float[Tensor, "batch"]
+BatchTensor = Float[Tensor, "batch"]
 VectorGeometry = Float[Tensor, "batch space"]
 TensorGeometry = Float[Tensor, "batch space space"]
 NetworkVertices = Float[Tensor, "num_ifos 3"]

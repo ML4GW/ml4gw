@@ -2,7 +2,7 @@ import torch
 from jaxtyping import Float
 
 from ml4gw.constants import MTSUN_SI, PI
-from ml4gw.types import FrequencySeries1d, ScalarTensor
+from ml4gw.types import BatchTensor, FrequencySeries1d
 
 from .phenom_d_data import QNMData_a, QNMData_fdamp, QNMData_fring
 from .taylorf2 import TaylorF2
@@ -18,13 +18,13 @@ class IMRPhenomD(TaylorF2):
     def forward(
         self,
         f: FrequencySeries1d,
-        chirp_mass: ScalarTensor,
-        mass_ratio: ScalarTensor,
-        chi1: ScalarTensor,
-        chi2: ScalarTensor,
-        distance: ScalarTensor,
-        phic: ScalarTensor,
-        inclination: ScalarTensor,
+        chirp_mass: BatchTensor,
+        mass_ratio: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
+        inclination: BatchTensor,
         f_ref: float,
     ):
         """
@@ -79,12 +79,12 @@ class IMRPhenomD(TaylorF2):
     def phenom_d_htilde(
         self,
         f: FrequencySeries1d,
-        chirp_mass: ScalarTensor,
-        mass_ratio: ScalarTensor,
-        chi1: ScalarTensor,
-        chi2: ScalarTensor,
-        distance: ScalarTensor,
-        phic: ScalarTensor,
+        chirp_mass: BatchTensor,
+        mass_ratio: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
         f_ref: float,
     ) -> Float[FrequencySeries1d, " batch"]:
         total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6

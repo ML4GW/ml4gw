@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 
-from ml4gw.types import ScalarTensor
+from ml4gw.types import BatchTensor
 
 
 def semi_major_minor_from_e(e: Tensor):
@@ -32,11 +32,11 @@ class SineGaussian(torch.nn.Module):
 
     def forward(
         self,
-        quality: ScalarTensor,
-        frequency: ScalarTensor,
-        hrss: ScalarTensor,
-        phase: ScalarTensor,
-        eccentricity: ScalarTensor,
+        quality: BatchTensor,
+        frequency: BatchTensor,
+        hrss: BatchTensor,
+        phase: BatchTensor,
+        eccentricity: BatchTensor,
     ):
         """
         Generate lalinference implementation of a sine-Gaussian waveform.
