@@ -1,5 +1,8 @@
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
+from ml4gw.types import TimeSeries1to3d
 from ml4gw.utils.slicing import unfold_windows
 
 
@@ -40,7 +43,7 @@ class ShiftedPearsonCorrelation(torch.nn.Module):
         super().__init__()
         self.max_shift = max_shift
 
-    def _shape_checks(self, x: torch.Tensor, y: torch.Tensor):
+    def _shape_checks(self, x: TimeSeries1to3d, y: TimeSeries1to3d):
         if x.ndim > 3:
             raise ValueError(
                 "Tensor x can only have up to 3 dimensions "
@@ -61,8 +64,9 @@ class ShiftedPearsonCorrelation(torch.nn.Module):
                     )
                 )
 
-    # TODO: torchtyping annotate
-    def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: TimeSeries1to3d, y: TimeSeries1to3d
+    ) -> Float[Tensor, "windows ..."]:
         self._shape_checks(x, y)
         dim = x.size(-1)
 

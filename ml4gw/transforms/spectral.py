@@ -1,8 +1,11 @@
 from typing import Optional
 
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
 from ml4gw.spectral import fast_spectral_density, spectral_density
+from ml4gw.types import FrequencySeries1to3d, TimeSeries1to3d
 
 
 class SpectralDensity(torch.nn.Module):
@@ -51,7 +54,9 @@ class SpectralDensity(torch.nn.Module):
         fftlength: float,
         overlap: Optional[float] = None,
         average: str = "mean",
-        window: Optional[torch.Tensor] = None,
+        window: Optional[
+            Float[Tensor, " {int(fftlength*sample_rate)}"]
+        ] = None,
         fast: bool = False,
     ) -> None:
         if overlap is None:
@@ -93,7 +98,9 @@ class SpectralDensity(torch.nn.Module):
         self.average = average
         self.fast = fast
 
-    def forward(self, x: torch.Tensor, y: Optional[torch.Tensor] = None):
+    def forward(
+        self, x: TimeSeries1to3d, y: Optional[TimeSeries1to3d] = None
+    ) -> FrequencySeries1to3d:
         if self.fast:
             return fast_spectral_density(
                 x,

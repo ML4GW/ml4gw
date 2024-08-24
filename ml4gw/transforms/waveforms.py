@@ -1,8 +1,11 @@
 from typing import List, Optional
 
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
 from ml4gw import gw
+from ml4gw.types import BatchTensor
 
 
 # TODO: should these live in ml4gw.waveforms submodule?
@@ -10,8 +13,8 @@ from ml4gw import gw
 class WaveformSampler(torch.nn.Module):
     def __init__(
         self,
-        parameters: Optional[torch.Tensor] = None,
-        **polarizations: torch.Tensor,
+        parameters: Optional[Float[Tensor, "batch num_params"]] = None,
+        **polarizations: Float[Tensor, "batch time"],
     ):
         super().__init__()
         # make sure we have the same number of waveforms
@@ -29,7 +32,7 @@ class WaveformSampler(torch.nn.Module):
             elif num_waveforms is None:
                 num_waveforms = tensor.shape[0]
 
-            self.polarizations[polarization] = torch.Tensor(tensor)
+            self.polarizations[polarization] = Tensor(tensor)
 
         if parameters is not None and len(parameters) != num_waveforms:
             raise ValueError(
@@ -73,10 +76,10 @@ class WaveformProjector(torch.nn.Module):
 
     def forward(
         self,
-        dec: gw.ScalarTensor,
-        psi: gw.ScalarTensor,
-        phi: gw.ScalarTensor,
-        **polarizations,
+        dec: BatchTensor,
+        psi: BatchTensor,
+        phi: BatchTensor,
+        **polarizations: Float[Tensor, "batch time"],
     ):
         ifo_responses = gw.compute_observed_strain(
             dec,

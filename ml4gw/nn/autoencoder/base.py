@@ -1,7 +1,8 @@
 from collections.abc import Sequence
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 import torch
+from torch import Tensor
 
 from ml4gw.nn.autoencoder.skip_connection import SkipConnection
 
@@ -27,12 +28,16 @@ class Autoencoder(torch.nn.Module):
     and how they operate.
     """
 
-    def __init__(self, skip_connection: Optional[SkipConnection] = None):
+    def __init__(
+        self, skip_connection: Optional[SkipConnection] = None
+    ) -> None:
         super().__init__()
         self.skip_connection = skip_connection
         self.blocks = torch.nn.ModuleList()
 
-    def encode(self, *X: torch.Tensor, return_states: bool = False):
+    def encode(
+        self, *X: Tensor, return_states: bool = False
+    ) -> Union[Tensor, Tuple[Tensor, Sequence]]:
         states = []
         for block in self.blocks:
             if isinstance(X, tuple):
@@ -48,7 +53,7 @@ class Autoencoder(torch.nn.Module):
             return X, states[:-1]
         return X
 
-    def decode(self, *X, states: Optional[Sequence[torch.Tensor]] = None):
+    def decode(self, *X, states: Optional[Sequence[Tensor]] = None) -> Tensor:
         if self.skip_connection is not None and states is None:
             raise ValueError(
                 "Must pass intermediate states when autoencoder "
@@ -76,7 +81,7 @@ class Autoencoder(torch.nn.Module):
                 X = self.skip_connection(X, state)
         return X
 
-    def forward(self, *X):
+    def forward(self, *X: Tensor) -> Tensor:
         return_states = self.skip_connection is not None
         X = self.encode(*X, return_states=return_states)
         if return_states:
@@ -84,6 +89,6 @@ class Autoencoder(torch.nn.Module):
         else:
             states = None
 
-        if isinstance(X, torch.Tensor):
+        if isinstance(X, Tensor):
             X = (X,)
         return self.decode(*X, states=states)
