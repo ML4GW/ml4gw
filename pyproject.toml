@@ -62,7 +62,7 @@ include_trailing_comma = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{38,39,310,311}
+envlist = py{38,39,310,311,312}
 isolated_build = true
 
 [gh-actions]
@@ -71,8 +71,9 @@ python =
     3.9: py39
     3.10: py310
     3.11: py311
+    3.12: py312
 
-[testenv:py{38,39,310,311}]
+[testenv:py{38,39,310,311,312}]
 deps = 
     pytest>=7,<8
     lalsuite>=7,<8
