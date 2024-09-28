@@ -1,6 +1,7 @@
 """
-Adaption of code from https://github.com/dottormale/Qtransform
+Adaptation of code from https://github.com/dottormale/Qtransform
 """
+
 from typing import Optional, Tuple
 
 import torch
@@ -8,9 +9,59 @@ import torch.nn.functional as F
 from torch import Tensor
 
 
-class SplineInterpolateBase(torch.nn.Module):
-    def __init__(self):
+class SplineInterpolate(torch.nn.Module):
+    def __init__(
+        self,
+        kx=3,
+        ky=3,
+        sx=0.001,
+        sy=0.001,
+        x_in: Optional[Tensor] = None,
+        y_in: Optional[Tensor] = None,
+        x_out: Optional[Tensor] = None,
+        y_out: Optional[Tensor] = None,
+        logf: Optional[bool] = False,
+    ):
         super().__init__()
+        self.kx = kx
+        self.ky = ky
+        self.sx = sx
+        self.sy = sy
+        self.logf = logf
+        self.register_buffer("x_in", x_in)
+        self.register_buffer("y_in", y_in)
+        self.register_buffer("x_out", x_out)
+        self.register_buffer("y_out", y_out)
+
+        if self.x_in is not None:
+            tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(
+                x_in, kx, sx
+            )
+            self.register_buffer("tx", tx)
+            self.register_buffer("Bx", Bx)
+            self.register_buffer("BxT_Bx", BxT_Bx)
+        if self.y_in is not None:
+            ty, By, ByT_By = self._compute_knots_and_basis_matrices(
+                y_in, ky, sy
+            )
+            self.register_buffer("ty", ty)
+            self.register_buffer("By", By)
+            self.register_buffer("ByT_By", ByT_By)
+
+        if self.x_out is not None:
+            if self.x_in is None:
+                raise ValueError(
+                    "If x_out is specified, x_in must also be given"
+                )
+            Bx_out = self.bspline_basis_natural(x_out, kx, self.tx)
+            self.register_buffer("Bx_out", Bx_out)
+        if self.y_out is not None:
+            if self.y_in is None:
+                raise ValueError(
+                    "If y_out is specified, y_in must also be given"
+                )
+            By_out = self.bspline_basis_natural(y_out, ky, self.ty)
+            self.register_buffer("By_out", By_out)
 
     def _compute_knots_and_basis_matrices(self, x, k, s):
         knots = self.generate_natural_knots(x, k)
@@ -137,6 +188,8 @@ class SplineInterpolateBase(torch.nn.Module):
             Tensor containing the kth-order B-spline basis functions
         """
 
+        if len(x) == 1:
+            return torch.eye(1)
         n = x.shape[0]
         m = t.shape[0] - k - 1
 
@@ -156,162 +209,11 @@ class SplineInterpolateBase(torch.nn.Module):
 
         return b[:, :, -1]
 
-
-class SplineInterpolate1D(SplineInterpolateBase):
-    def __init__(
-        self,
-        k=3,
-        s=0.001,
-        x_in: Optional[Tensor] = None,
-        x_out: Optional[Tensor] = None,
-    ):
-        super().__init__()
-        self.k = k
-        self.s = s
-        self.register_buffer("x_in", x_in)
-        self.register_buffer("x_out", x_out)
-
-        if self.x_in is not None:
-            tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(x_in, k, s)
-            self.register_buffer("t", tx)
-            self.register_buffer("B", Bx)
-            self.register_buffer("B_T_B", BxT_Bx)
-
-        if self.x_out is not None:
-            if self.x_in is None:
-                raise ValueError(
-                    "If x_out is specified, x_in must also be given"
-                )
-            Bx_out = self.bspline_basis_natural(x_out, k, self.tx)
-            self.register_buffer("Bx_out", Bx_out)
-
-    def univariate_spline_fit_natural(self, Z):
-        B_T_z = self.Bx.transpose(-2, -1) @ Z.unsqueeze(
-            -1
-        )  # (batch_size, m, 1)
-        # Solve the linear system for each batch
-        coef = torch.linalg.solve(
-            self.BxT_Bx.expand(Z.size(0), -1, -1), B_T_z
-        ).squeeze(-1)
-        return coef
-
-    def evaluate_univariate_spline(self, C: Tensor):
-        """
-        Evaluate a bivariate spline on a grid of x and y points.
-
-        Args:
-            C: Coefficient tensor of shape (batch_size, mx, my).
-
-        Returns:
-            Z_interp: Interpolated values at the grid points.
-        """
-        # Perform batched matrix multiplication:
-        # (batch_size, n, m) @ (batch_size, m, 1) -> (batch_size, n)
-        return (self.Bx_out.unsqueeze(0) @ C.unsqueeze(-1)).squeeze(-1)
-
-    def forward(
-        self,
-        Z: Tensor,
-        x_in: Optional[Tensor] = None,
-        x_out: Optional[Tensor] = None,
-    ) -> Tensor:
-        if x_out is None and self.x_out is None:
-            raise ValueError(
-                "Output x-coordinates were not specified in either object "
-                "creation or in forward call"
-            )
-
-        if len(Z.shape) > 3:
-            raise ValueError("Input data has more than 3 dimensions")
-
-        while len(Z.shape) < 3:
-            Z = Z.unsqueeze(0)
-
-        nx_points = Z.shape[-1:]
-
-        if self.x_in is None and x_in is None:
-            x_in = torch.linspace(-1, 1, nx_points)
-
-        if x_in is not None:
-            self.x_in = x_in if x_in is not None else self.x_in
-            (
-                self.tx,
-                self.Bx,
-                self.BxT_Bx,
-            ) = self._compute_knots_and_basis_matrices(
-                self.x_in, self.kx, self.sx
-            )
-        if x_out is not None:
-            self.x_out = x_out if x_out is not None else self.x_out
-            self.Bx_out = self.bspline_basis_natural(
-                self.x_out, self.kx, self.tx
-            )
-
-        coef = self.univariate_spline_fit_natural(Z)
-        Z_interp = self.evaluateunivariate_spline(coef)
-        return Z_interp
-
-
-class SplineInterpolate2D(SplineInterpolateBase):
-    def __init__(
-        self,
-        kx=3,
-        ky=3,
-        sx=0.001,
-        sy=0.001,
-        x_in: Optional[Tensor] = None,
-        y_in: Optional[Tensor] = None,
-        x_out: Optional[Tensor] = None,
-        y_out: Optional[Tensor] = None,
-        logf: Optional[bool] = False,
-    ):
-        super().__init__()
-        self.kx = kx
-        self.ky = ky
-        self.sx = sx
-        self.sy = sy
-        self.logf = logf
-        self.register_buffer("x_in", x_in)
-        self.register_buffer("y_in", y_in)
-        self.register_buffer("x_out", x_out)
-        self.register_buffer("y_out", y_out)
-
-        if self.x_in is not None:
-            tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(
-                x_in, kx, sx
-            )
-            self.register_buffer("tx", tx)
-            self.register_buffer("Bx", Bx)
-            self.register_buffer("BxT_Bx", BxT_Bx)
-        if self.y_in is not None:
-            ty, By, ByT_By = self._compute_knots_and_basis_matrices(
-                y_in, ky, sy
-            )
-            self.register_buffer("ty", ty)
-            self.register_buffer("By", By)
-            self.register_buffer("ByT_By", ByT_By)
-
-        if self.x_out is not None:
-            if self.x_in is None:
-                raise ValueError(
-                    "If x_out is specified, x_in must also be given"
-                )
-            Bx_out = self.bspline_basis_natural(x_out, kx, self.tx)
-            self.register_buffer("Bx_out", Bx_out)
-        if self.y_out is not None:
-            if self.y_in is None:
-                raise ValueError(
-                    "If y_out is specified, y_in must also be given"
-                )
-            By_out = self.bspline_basis_natural(y_out, ky, self.ty)
-            self.register_buffer("By_out", By_out)
-
     def bivariate_spline_fit_natural(self, Z):
 
         # Adding batch dimension handling
         ByT_Z_Bx = (
-            torch.einsum("ij,bcjk->bcik", self.By.T, Z.transpose(-2, -1))
-            @ self.Bx
+            torch.einsum("ij,bcjk->bcik", self.By.T, Z) @ self.Bx
         )  # (batch, channel, my, mx)
         E = torch.linalg.solve(self.ByT_By, ByT_Z_Bx)  # (batch_size, my, mx)
         C = torch.linalg.solve(self.BxT_Bx, E.transpose(-2, -1)).transpose(
@@ -351,7 +253,7 @@ class SplineInterpolate2D(SplineInterpolateBase):
 
         if y_out is None and self.y_out is None:
             raise ValueError(
-                "Output x-coordinates were not specified in either object "
+                "Output y-coordinates were not specified in either object "
                 "creation or in forward call"
             )
 
@@ -372,33 +274,21 @@ class SplineInterpolate2D(SplineInterpolateBase):
                 y_in = torch.linspace(-1, 1, ny_points)
 
         if x_in is not None:
-            self.x_in = x_in if x_in is not None else self.x_in
             (
                 self.tx,
                 self.Bx,
                 self.BxT_Bx,
-            ) = self._compute_knots_and_basis_matrices(
-                self.x_in, self.kx, self.sx
-            )
+            ) = self._compute_knots_and_basis_matrices(x_in, self.kx, self.sx)
         if y_in is not None:
-            self.y_in = y_in if y_in is not None else self.y_in
             (
                 self.ty,
                 self.By,
                 self.ByT_By,
-            ) = self._compute_knots_and_basis_matrices(
-                self.y_in, self.ky, self.sy
-            )
+            ) = self._compute_knots_and_basis_matrices(y_in, self.ky, self.sy)
         if x_out is not None:
-            self.x_out = x_out if x_out is not None else self.x_out
-            self.Bx_out = self.bspline_basis_natural(
-                self.x_out, self.kx, self.tx
-            )
+            self.Bx_out = self.bspline_basis_natural(x_out, self.kx, self.tx)
         if y_out is not None:
-            self.y_out = y_out if y_out is not None else self.y_out
-            self.By_out = self.bspline_basis_natural(
-                self.y_out, self.ky, self.ty
-            )
+            self.By_out = self.bspline_basis_natural(y_out, self.ky, self.ty)
 
         coef = self.bivariate_spline_fit_natural(Z)
         Z_interp = self.evaluate_bivariate_spline(coef)

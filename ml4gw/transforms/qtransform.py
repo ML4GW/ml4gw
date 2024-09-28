@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from jaxtyping import Float, Int
 from torch import Tensor
 
+from ml4gw.transforms.spline_interpolation import SplineInterpolate
 from ml4gw.types import FrequencySeries1to3d, TimeSeries1to3d, TimeSeries3d
 
 """
@@ -37,7 +38,6 @@ class QTile(torch.nn.Module):
             The sample rate of the original time series in Hz
         mismatch:
             The maximum fractional mismatch between neighboring tiles
-
 
     """
 
@@ -100,7 +100,9 @@ class QTile(torch.nn.Module):
         ).type(torch.long)
 
     def forward(
-        self, fseries: FrequencySeries1to3d, norm: str = "median"
+        self,
+        fseries: FrequencySeries1to3d,
+        norm: str = "median",
     ) -> TimeSeries1to3d:
         """
         Compute the transform for this row
@@ -144,7 +146,7 @@ class QTile(torch.nn.Module):
                 energy /= means
             else:
                 raise ValueError("Invalid normalisation %r" % norm)
-            return energy.type(torch.float32)
+            energy = energy.type(torch.float32)
         return energy
 
 
@@ -198,11 +200,45 @@ class SingleQTransform(torch.nn.Module):
         self.freqs = self.get_freqs()
         self.qtile_transforms = torch.nn.ModuleList(
             [
-                QTile(self.q, freq, self.duration, sample_rate, self.mismatch)
+                QTile(
+                    q=self.q,
+                    frequency=freq,
+                    duration=self.duration,
+                    sample_rate=sample_rate,
+                    mismatch=self.mismatch,
+                )
                 for freq in self.freqs
             ]
         )
         self.qtiles = None
+
+        self.qtile_interpolators = torch.nn.ModuleList(
+            [
+                SplineInterpolate(
+                    kx=3,
+                    x_in=torch.linspace(-1, 1, qtile.ntiles()),
+                    y_in=torch.linspace(-1, 1, 1),
+                    x_out=torch.linspace(-1, 1, spectrogram_shape[1]),
+                    y_out=torch.linspace(-1, 1, 1),
+                )
+                for qtile in self.qtile_transforms
+            ]
+        )
+
+        t_in = t_out = torch.linspace(-1, 1, spectrogram_shape[1])
+        f_in = self.freqs
+        f_out = torch.logspace(
+            math.log10(f_in[0]), math.log10(f_in[-1]), spectrogram_shape[0]
+        )
+
+        self.interpolator = SplineInterpolate(
+            kx=3,
+            ky=3,
+            x_in=t_in,
+            y_in=f_in,
+            x_out=t_out,
+            y_out=f_out,
+        )
 
     def get_freqs(self) -> Float[Tensor, " nfreq"]:
         """
@@ -268,7 +304,11 @@ class SingleQTransform(torch.nn.Module):
         if dimension == "batch":
             return torch.max(max_across_ft, dim=-1).values
 
-    def compute_qtiles(self, X: TimeSeries1to3d, norm: str = "median") -> None:
+    def compute_qtiles(
+        self,
+        X: TimeSeries1to3d,
+        norm: str = "median",
+    ) -> None:
         """
         Take the FFT of the input timeseries and calculate the transform
         for each `QTile`
@@ -278,7 +318,7 @@ class SingleQTransform(torch.nn.Module):
         X[..., 1:] *= 2
         self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
 
-    def interpolate(self, num_f_bins: int, num_t_bins: int) -> TimeSeries3d:
+    def interpolate(self) -> TimeSeries3d:
         """
         Interpolate each `QTile` to the specified number of time and
         frequency bins. Note that PyTorch does not have the same
@@ -291,17 +331,16 @@ class SingleQTransform(torch.nn.Module):
             raise RuntimeError(
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
-        resampled = [
-            F.interpolate(
-                qtile[None], (qtile.shape[-2], num_t_bins), mode="bicubic"
-            )
-            for qtile in self.qtiles
-        ]
-        resampled = torch.stack(resampled, dim=-2)
-        resampled = F.interpolate(
-            resampled[0], (num_f_bins, num_t_bins), mode="bicubic"
+        time_interped = torch.stack(
+            [
+                interpolator(qtile)
+                for qtile, interpolator in zip(
+                    self.qtiles, self.qtile_interpolators
+                )
+            ],
+            dim=-2,
         )
-        return torch.squeeze(resampled)
+        return self.interpolator(time_interped.squeeze())
 
     def forward(
         self,
@@ -334,11 +373,8 @@ class SingleQTransform(torch.nn.Module):
             have one more dimension than the input
         """
 
-        if spectrogram_shape is None:
-            spectrogram_shape = self.spectrogram_shape
-        num_f_bins, num_t_bins = spectrogram_shape
         self.compute_qtiles(X, norm)
-        return self.interpolate(num_f_bins, num_t_bins)
+        return self.interpolate()
 
 
 class QScan(torch.nn.Module):
