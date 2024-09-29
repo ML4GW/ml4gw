@@ -263,7 +263,7 @@ class SplineInterpolate(torch.nn.Module):
             return torch.linalg.solve(self.BxT_Bx, Z_Bx.mT).mT
 
         # Adding batch/channel dimension handling
-        # ByT @ Z @ Bx
+        # ByT @ Z @ BxW
         ByT_Z_Bx = torch.einsum("ij,bcik,kl->bcjl", self.By, Z, self.Bx)
         # (ByT @ By)^-1 @ (ByT @ Z @ Bx) = By^-1 @ Z @ Bx
         E = torch.linalg.solve(self.ByT_By, ByT_Z_Bx)
