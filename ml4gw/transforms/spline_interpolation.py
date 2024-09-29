@@ -213,21 +213,16 @@ class SplineInterpolate(torch.nn.Module):
 
         if len(Z.shape) == 3:
             Z_Bx = torch.matmul(Z, self.Bx)
+            # ((BxT @ Bx)^-1 @ (Z @ Bx)T)T = Z @ BxT^-1
             return torch.linalg.solve(self.BxT_Bx, Z_Bx.mT).mT
 
         # Adding batch/channel dimension handling
         # ByT @ Z @ Bx
-        ByT_Z_Bx = torch.einsum(
-            "ij,bcik,kl->bcjl", self.By, Z, self.Bx
-        )  # (batch, channel, my, mx)
+        ByT_Z_Bx = torch.einsum("ij,bcik,kl->bcjl", self.By, Z, self.Bx)
         # (ByT @ By)^-1 @ (ByT @ Z @ Bx) = By^-1 @ Z @ Bx
-        E = torch.linalg.solve(
-            self.ByT_By, ByT_Z_Bx
-        )  # (batch, channel my, mx)
+        E = torch.linalg.solve(self.ByT_By, ByT_Z_Bx)
         # ((BxT @ Bx)^-1 @ (By^-1 @ Z @ Bx)T)T = By^-1 @ Z @ BxT^-1
-        return torch.linalg.solve(
-            self.BxT_Bx, E.mT
-        ).mT  # (batch, channel, mx, my)
+        return torch.linalg.solve(self.BxT_Bx, E.mT).mT
 
     def evaluate_bivariate_spline(self, C: Tensor):
         """

@@ -212,16 +212,21 @@ class SingleQTransform(torch.nn.Module):
         )
         self.qtiles = None
 
+        ntiles = [qtile.ntiles() for qtile in self.qtile_transforms]
+        unique_ntiles = sorted(list(set(ntiles)))
+        # Feels like there should be a better way to do this
+        idx = torch.arange(len(ntiles))
+        self.stack_idx = [idx[Tensor(ntiles) == n] for n in unique_ntiles]
         self.qtile_interpolators = torch.nn.ModuleList(
             [
                 SplineInterpolate(
                     kx=3,
-                    x_in=torch.linspace(-1, 1, qtile.ntiles()),
-                    y_in=torch.linspace(-1, 1, 1),
+                    x_in=torch.linspace(-1, 1, tiles),
+                    y_in=torch.linspace(-1, 1, len(idx)),
                     x_out=torch.linspace(-1, 1, spectrogram_shape[1]),
-                    y_out=torch.linspace(-1, 1, 1),
+                    y_out=torch.linspace(-1, 1, len(idx)),
                 )
-                for qtile in self.qtile_transforms
+                for tiles, idx in zip(unique_ntiles, self.stack_idx)
             ]
         )
 
@@ -317,6 +322,10 @@ class SingleQTransform(torch.nn.Module):
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
         self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
+        self.qtiles = [
+            torch.stack([self.qtiles[i] for i in idx], dim=-2)
+            for idx in self.stack_idx
+        ]
 
     def interpolate(self) -> TimeSeries3d:
         """
@@ -331,7 +340,7 @@ class SingleQTransform(torch.nn.Module):
             raise RuntimeError(
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
-        time_interped = torch.stack(
+        time_interped = torch.cat(
             [
                 interpolator(qtile)
                 for qtile, interpolator in zip(
@@ -340,7 +349,7 @@ class SingleQTransform(torch.nn.Module):
             ],
             dim=-2,
         )
-        return self.interpolator(time_interped.squeeze())
+        return self.interpolator(time_interped)
 
     def forward(
         self,
