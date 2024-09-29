@@ -211,16 +211,23 @@ class SplineInterpolate(torch.nn.Module):
 
     def bivariate_spline_fit_natural(self, Z):
 
-        # Adding batch dimension handling
-        ByT_Z_Bx = (
-            torch.einsum("ij,bcjk->bcik", self.By.T, Z) @ self.Bx
-        )  # (batch, channel, my, mx)
-        E = torch.linalg.solve(self.ByT_By, ByT_Z_Bx)  # (batch_size, my, mx)
-        C = torch.linalg.solve(self.BxT_Bx, E.transpose(-2, -1)).transpose(
-            -2, -1
-        )  # (batch_size, channel, mx, my)
+        if len(Z.shape) == 3:
+            Z_Bx = torch.matmul(Z, self.Bx)
+            return torch.linalg.solve(self.BxT_Bx, Z_Bx.mT).mT
 
-        return C
+        # Adding batch/channel dimension handling
+        # ByT @ Z @ Bx
+        ByT_Z_Bx = torch.einsum(
+            "ij,bcik,kl->bcjl", self.By, Z, self.Bx
+        )  # (batch, channel, my, mx)
+        # (ByT @ By)^-1 @ (ByT @ Z @ Bx) = By^-1 @ Z @ Bx
+        E = torch.linalg.solve(
+            self.ByT_By, ByT_Z_Bx
+        )  # (batch, channel my, mx)
+        # ((BxT @ Bx)^-1 @ (By^-1 @ Z @ Bx)T)T = By^-1 @ Z @ BxT^-1
+        return torch.linalg.solve(
+            self.BxT_Bx, E.mT
+        ).mT  # (batch, channel, mx, my)
 
     def evaluate_bivariate_spline(self, C: Tensor):
         """
@@ -233,9 +240,9 @@ class SplineInterpolate(torch.nn.Module):
             Z_interp: Interpolated values at the grid points.
         """
         # Perform matrix multiplication using einsum to get Z_interp
-        return torch.einsum(
-            "ik,bckm,mj->bcij", self.By_out, C, self.Bx_out.transpose(-2, -1)
-        )
+        if len(C.shape) == 3:
+            return torch.matmul(C, self.Bx_out.mT)
+        return torch.einsum("ik,bckm,mj->bcij", self.By_out, C, self.Bx_out.mT)
 
     def forward(
         self,
@@ -260,8 +267,8 @@ class SplineInterpolate(torch.nn.Module):
         if len(Z.shape) > 4:
             raise ValueError("Input data has more than 4 dimensions")
 
-        while len(Z.shape) < 4:
-            Z = Z.unsqueeze(0)
+        # while len(Z.shape) < 4:
+        #     Z = Z.unsqueeze(-2)
 
         ny_points, nx_points = Z.shape[-2:]
 
