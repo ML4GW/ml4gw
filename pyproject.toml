@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ml4gw"
-version = "0.5.0"
+version = "0.5.1"
 description = "Tools for training torch models on gravitational wave data"
 readme = "README.md"
 authors = [
