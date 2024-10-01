@@ -103,7 +103,7 @@ def test_singleqtransform(
         qtransform.get_max_energy()
 
     with pytest.raises(RuntimeError):
-        qtransform.interpolate(*spectrogram_shape)
+        qtransform.interpolate()
 
     qplane = QPlane(
         q,
