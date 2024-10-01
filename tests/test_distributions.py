@@ -67,7 +67,7 @@ def test_power_law():
     bins = ebins[1:] + ebins[:-1]
     bins *= 0.5
 
-    popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
+    popt, _ = optimize.curve_fit(foo, bins, counts)
     # popt[1] is the index
     assert popt[1] == pytest.approx(2, rel=1e-1)
 
@@ -77,7 +77,7 @@ def test_power_law():
     counts, ebins = np.histogram(samples, bins=100)
     bins = ebins[1:] + ebins[:-1]
     bins *= 0.5
-    popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
+    popt, _ = optimize.curve_fit(foo, bins, counts)
     # popt[1] is the index
     assert popt[1] == pytest.approx(-1, rel=1e-1)
 

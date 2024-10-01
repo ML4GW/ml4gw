@@ -3,6 +3,10 @@ from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
+from jaxtyping import Float, Int
+from torch import Tensor
+
+from ml4gw.types import FrequencySeries1to3d, TimeSeries1to3d, TimeSeries3d
 
 """
 All based on https://github.com/gwpy/gwpy/blob/v3.0.8/gwpy/signal/qtransform.py
@@ -44,7 +48,7 @@ class QTile(torch.nn.Module):
         duration: float,
         sample_rate: float,
         mismatch: float,
-    ):
+    ) -> None:
         super().__init__()
         self.mismatch = mismatch
         self.q = q
@@ -63,18 +67,18 @@ class QTile(torch.nn.Module):
         self.register_buffer("indices", self.get_data_indices())
         self.register_buffer("window", self.get_window())
 
-    def ntiles(self):
+    def ntiles(self) -> int:
         """
         Number of tiles in this frequency row
         """
         tcum_mismatch = self.duration * 2 * torch.pi * self.frequency / self.q
         return int(2 ** torch.ceil(torch.log2(tcum_mismatch / self.deltam)))
 
-    def _get_indices(self):
+    def _get_indices(self) -> Int[Tensor, " windowsize"]:
         half = int((self.windowsize - 1) / 2)
         return torch.arange(-half, half + 1)
 
-    def get_window(self):
+    def get_window(self) -> Float[Tensor, " windowsize"]:
         """
         Generate the bi-square window for this row
         """
@@ -87,7 +91,7 @@ class QTile(torch.nn.Module):
         )
         return torch.Tensor((1 - xfrequencies**2) ** 2 * norm)
 
-    def get_data_indices(self):
+    def get_data_indices(self) -> Int[Tensor, " windowsize"]:
         """
         Get the index array of relevant frequencies for this row
         """
@@ -95,7 +99,9 @@ class QTile(torch.nn.Module):
             self._get_indices() + 1 + self.frequency * self.duration,
         ).type(torch.long)
 
-    def forward(self, fseries: torch.Tensor, norm: str = "median"):
+    def forward(
+        self, fseries: FrequencySeries1to3d, norm: str = "median"
+    ) -> TimeSeries1to3d:
         """
         Compute the transform for this row
 
@@ -176,7 +182,7 @@ class SingleQTransform(torch.nn.Module):
         q: float = 12,
         frange: List[float] = [0, torch.inf],
         mismatch: float = 0.2,
-    ):
+    ) -> None:
         super().__init__()
         self.q = q
         self.spectrogram_shape = spectrogram_shape
@@ -198,7 +204,7 @@ class SingleQTransform(torch.nn.Module):
         )
         self.qtiles = None
 
-    def get_freqs(self):
+    def get_freqs(self) -> Float[Tensor, " nfreq"]:
         """
         Calculate the frequencies that will be used in this transform.
         For each frequency, a `QTile` is created.
@@ -262,7 +268,7 @@ class SingleQTransform(torch.nn.Module):
         if dimension == "batch":
             return torch.max(max_across_ft, dim=-1).values
 
-    def compute_qtiles(self, X: torch.Tensor, norm: str = "median"):
+    def compute_qtiles(self, X: TimeSeries1to3d, norm: str = "median") -> None:
         """
         Take the FFT of the input timeseries and calculate the transform
         for each `QTile`
@@ -272,7 +278,7 @@ class SingleQTransform(torch.nn.Module):
         X[..., 1:] *= 2
         self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
 
-    def interpolate(self, num_f_bins: int, num_t_bins: int):
+    def interpolate(self, num_f_bins: int, num_t_bins: int) -> TimeSeries3d:
         """
         Interpolate each `QTile` to the specified number of time and
         frequency bins. Note that PyTorch does not have the same
@@ -299,7 +305,7 @@ class SingleQTransform(torch.nn.Module):
 
     def forward(
         self,
-        X: torch.Tensor,
+        X: TimeSeries1to3d,
         norm: str = "median",
         spectrogram_shape: Optional[Tuple[int, int]] = None,
     ):
@@ -371,7 +377,7 @@ class QScan(torch.nn.Module):
         qrange: List[float] = [4, 64],
         frange: List[float] = [0, torch.inf],
         mismatch: float = 0.2,
-    ):
+    ) -> None:
         super().__init__()
         self.qrange = qrange
         self.mismatch = mismatch
@@ -397,7 +403,7 @@ class QScan(torch.nn.Module):
             ]
         )
 
-    def get_qs(self):
+    def get_qs(self) -> List[float]:
         """
         Determine the values of Q to try for the set of Q-transforms
         """
@@ -413,7 +419,7 @@ class QScan(torch.nn.Module):
 
     def forward(
         self,
-        X: torch.Tensor,
+        X: TimeSeries1to3d,
         fsearch_range: List[float] = None,
         norm: str = "median",
         spectrogram_shape: Optional[Tuple[int, int]] = None,

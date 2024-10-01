@@ -12,14 +12,18 @@ https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 from typing import Optional, Union
 
 import torch
-from torchtyping import TensorType
+from jaxtyping import Float
+from torch import Tensor
 
-from ml4gw import types
+from ml4gw.types import (
+    FrequencySeries1to3d,
+    PSDTensor,
+    TimeSeries1to3d,
+    WaveformTensor,
+)
 
-time = None
 
-
-def median(x, axis):
+def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     """
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
@@ -33,7 +37,7 @@ def median(x, axis):
 
 
 def _validate_shapes(
-    x: torch.Tensor, nperseg: int, y: Optional[torch.Tensor] = None
+    x: Tensor, nperseg: int, y: Optional[Tensor] = None
 ) -> None:
     if x.shape[-1] < nperseg:
         raise ValueError(
@@ -83,14 +87,14 @@ def _validate_shapes(
 
 
 def fast_spectral_density(
-    x: torch.Tensor,
+    x: TimeSeries1to3d,
     nperseg: int,
     nstride: int,
-    window: torch.Tensor,
-    scale: torch.Tensor,
+    window: Float[Tensor, " {nperseg//2+1}"],
+    scale: float,
     average: str = "median",
-    y: Optional[torch.Tensor] = None,
-) -> torch.Tensor:
+    y: Optional[TimeSeries1to3d] = None,
+) -> FrequencySeries1to3d:
     """
     Compute the power spectral density of a multichannel
     timeseries or a batch of multichannel timeseries, or
@@ -107,9 +111,9 @@ def fast_spectral_density(
             The timeseries tensor whose power spectral density
             to compute, or for cross spectral density the
             timeseries whose fft will be conjugated. Can have
-            shape either
-            `(batch_size, num_channels, length * sample_rate)`
-            or `(num_channels, length * sample_rate)`.
+            shape `(batch_size, num_channels, length * sample_rate)`,
+            `(num_channels, length * sample_rate)`, or
+            `(length * sample_rate)`.
         nperseg:
             Number of samples included in each FFT window
         nstride:
@@ -150,7 +154,7 @@ def fast_spectral_density(
             channel in `x` across _all_ of `x`'s batch elements.
     Returns:
         Tensor of power spectral densities of `x` or its cross spectral
-            density with the timeseries in `y`.
+        density with the timeseries in `y`.
     """
 
     _validate_shapes(x, nperseg, y)
@@ -240,17 +244,16 @@ def fast_spectral_density(
 
 
 def spectral_density(
-    x: torch.Tensor,
+    x: TimeSeries1to3d,
     nperseg: int,
     nstride: int,
-    window: torch.Tensor,
-    scale: torch.Tensor,
+    window: Float[Tensor, " {nperseg//2+1}"],
+    scale: float,
     average: str = "median",
-) -> torch.Tensor:
+) -> FrequencySeries1to3d:
     """
     Compute the power spectral density of a multichannel
-    timeseries or a batch of multichannel timeseries, or
-    the cross power spectral density of two such timeseries.
+    timeseries or a batch of multichannel timeseries.
     This implementation is exact for all frequency bins, but
     slower than the fast implementation.
 
@@ -259,9 +262,9 @@ def spectral_density(
             The timeseries tensor whose power spectral density
             to compute, or for cross spectral density the
             timeseries whose fft will be conjugated. Can have
-            shape either
-            `(batch_size, num_channels, length * sample_rate)`
-            or `(num_channels, length * sample_rate)`.
+            shape `(batch_size, num_channels, length * sample_rate)`,
+            `(num_channels, length * sample_rate)`, or
+            `(length * sample_rate)`.
         nperseg:
             Number of samples included in each FFT window
         nstride:
@@ -336,11 +339,11 @@ def spectral_density(
 
 
 def truncate_inverse_power_spectrum(
-    psd: types.PSDTensor,
-    fduration: Union[TensorType["time"], float],
+    psd: PSDTensor,
+    fduration: Union[Float[Tensor, " time"], float],
     sample_rate: float,
     highpass: Optional[float] = None,
-) -> types.PSDTensor:
+) -> PSDTensor:
     """
     Truncate the length of the time domain response
     of a whitening filter built using the specified
@@ -399,7 +402,7 @@ def truncate_inverse_power_spectrum(
     q = torch.fft.irfft(inv_asd, n=N, norm="forward", dim=-1)
 
     # taper the edges of the TD filter
-    if isinstance(fduration, torch.Tensor):
+    if isinstance(fduration, Tensor):
         pad = fduration.size(-1) // 2
         window = fduration
     else:
@@ -422,8 +425,8 @@ def truncate_inverse_power_spectrum(
 
 
 def normalize_by_psd(
-    X: types.WaveformTensor,
-    psd: types.PSDTensor,
+    X: WaveformTensor,
+    psd: PSDTensor,
     sample_rate: float,
     pad: int,
 ):
@@ -447,12 +450,12 @@ def normalize_by_psd(
 
 
 def whiten(
-    X: types.WaveformTensor,
-    psd: types.PSDTensor,
-    fduration: Union[TensorType["time"], float],
+    X: WaveformTensor,
+    psd: PSDTensor,
+    fduration: Union[Float[Tensor, " time"], float],
     sample_rate: float,
     highpass: Optional[float] = None,
-) -> types.WaveformTensor:
+) -> WaveformTensor:
     """
     Whiten a batch of timeseries using the specified
     background one-sided power spectral densities (PSDs),
@@ -460,7 +463,8 @@ def whiten(
     `fduration` and possibly to highpass filter.
 
     Args:
-        X: batch of multichannel timeseries to whiten
+        X:
+            batch of multichannel timeseries to whiten
         psd:
             PSDs use to whiten the data. The frequency
             response of the whitening filter will be roughly
@@ -496,7 +500,7 @@ def whiten(
 
     # figure out how much data we'll need to slice
     # off after whitening
-    if isinstance(fduration, torch.Tensor):
+    if isinstance(fduration, Tensor):
         pad = fduration.size(-1) // 2
     else:
         pad = int(fduration * sample_rate / 2)

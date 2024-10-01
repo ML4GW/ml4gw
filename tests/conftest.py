@@ -17,7 +17,7 @@ def compare_against_numpy():
     def compare(value, expected):
         sigma = 0.01
         prob = 0.9999
-        N = np.product(expected.shape)
+        N = np.prod(expected.shape)
         tol = sigma * erfinv(prob ** (1 / N)) * 2**0.5
         np.testing.assert_allclose(value, expected, rtol=tol)
 

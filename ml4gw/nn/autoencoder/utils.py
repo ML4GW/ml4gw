@@ -1,7 +1,8 @@
 import torch
+from torch import Tensor
 
 
-def match_size(X: torch.Tensor, target_size: int):
+def match_size(X: Tensor, target_size: int) -> Tensor:
     diff = target_size - X.size(-1)
     left = int(diff // 2)
     right = diff - left

@@ -13,26 +13,20 @@ https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
 from typing import List, Tuple, Union
 
 import torch
-from torchtyping import TensorType
+from jaxtyping import Float
+from torch import Tensor
 
+from ml4gw.constants import C
 from ml4gw.types import (
+    BatchTensor,
     NetworkDetectorTensors,
     NetworkVertices,
     PSDTensor,
-    ScalarTensor,
     TensorGeometry,
     VectorGeometry,
     WaveformTensor,
 )
 from ml4gw.utils.interferometer import InterferometerGeometry
-
-SPEED_OF_LIGHT = 299792458.0  # m/s
-
-
-# define some tensor shapes we'll reuse a bit
-# up front. Need to assign these variables so
-# that static linters don't give us name errors
-batch = num_ifos = polarizations = time = frequency = space = None  # noqa
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
@@ -62,12 +56,12 @@ polarization_funcs = {
 
 
 def compute_antenna_responses(
-    theta: ScalarTensor,
-    psi: ScalarTensor,
-    phi: ScalarTensor,
+    theta: BatchTensor,
+    psi: BatchTensor,
+    phi: BatchTensor,
     detector_tensors: NetworkDetectorTensors,
     modes: List[str],
-) -> TensorType["batch", "polarizations", "num_ifos"]:
+) -> Float[Tensor, "batch polarizations num_ifos"]:
     """
     Compute the antenna pattern factors of a batch of
     waveforms as a function of the sky parameters of
@@ -147,8 +141,8 @@ def compute_antenna_responses(
 
 def shift_responses(
     responses: WaveformTensor,
-    theta: ScalarTensor,
-    phi: ScalarTensor,
+    theta: BatchTensor,
+    phi: BatchTensor,
     vertices: NetworkVertices,
     sample_rate: float,
 ) -> WaveformTensor:
@@ -166,7 +160,7 @@ def shift_responses(
     # Divide by c in the second line so that we only
     # need to multiply the array by a single float
     dt = -(omega * vertices).sum(axis=-1)
-    dt *= sample_rate / SPEED_OF_LIGHT
+    dt *= sample_rate / C
     dt = torch.trunc(dt).type(torch.int64)
 
     # rolling by gathering implementation based on
@@ -191,13 +185,13 @@ def shift_responses(
 
 
 def compute_observed_strain(
-    dec: ScalarTensor,
-    psi: ScalarTensor,
-    phi: ScalarTensor,
+    dec: BatchTensor,
+    psi: BatchTensor,
+    phi: BatchTensor,
     detector_tensors: NetworkDetectorTensors,
     detector_vertices: NetworkVertices,
     sample_rate: float,
-    **polarizations: TensorType["batch", "time"],
+    **polarizations: Float[Tensor, "batch time"],
 ) -> WaveformTensor:
     """
     Compute the strain timeseries $h(t)$ observed by a network
@@ -289,8 +283,8 @@ def compute_ifo_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, TensorType["frequency"], None] = None,
-) -> TensorType["batch", "num_ifos"]:
+    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+) -> Float[Tensor, "batch num_ifos"]:
     r"""Compute the SNRs of a batch of interferometer responses
 
     Compute the signal to noise ratio (SNR) of individual
@@ -390,8 +384,8 @@ def compute_network_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, TensorType["frequency"], None] = None,
-) -> ScalarTensor:
+    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+) -> BatchTensor:
     r"""
     Compute the total SNR from a gravitational waveform
     from a network of interferometers. The total SNR for
@@ -437,10 +431,10 @@ def compute_network_snr(
 
 def reweight_snrs(
     responses: WaveformTensor,
-    target_snrs: Union[float, ScalarTensor],
+    target_snrs: Union[float, BatchTensor],
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, TensorType["frequency"], None] = None,
+    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> WaveformTensor:
     """Scale interferometer responses such that they have a desired SNR
 

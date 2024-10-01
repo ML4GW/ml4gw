@@ -2,8 +2,9 @@ from typing import Optional
 
 import torch
 
-from ml4gw import gw
+from ml4gw.gw import compute_network_snr
 from ml4gw.transforms.transform import FittableSpectralTransform
+from ml4gw.types import BatchTensor, TimeSeries2d, WaveformTensor
 
 
 class SnrRescaler(FittableSpectralTransform):
@@ -34,7 +35,7 @@ class SnrRescaler(FittableSpectralTransform):
 
     def fit(
         self,
-        *background: torch.Tensor,
+        *background: TimeSeries2d,
         fftlength: Optional[float] = None,
         overlap: Optional[float] = None,
     ):
@@ -58,10 +59,10 @@ class SnrRescaler(FittableSpectralTransform):
 
     def forward(
         self,
-        responses: gw.WaveformTensor,
-        target_snrs: Optional[gw.ScalarTensor] = None,
+        responses: WaveformTensor,
+        target_snrs: Optional[BatchTensor] = None,
     ):
-        snrs = gw.compute_network_snr(
+        snrs = compute_network_snr(
             responses, self.background, self.sample_rate, self.mask
         )
         if target_snrs is None:
