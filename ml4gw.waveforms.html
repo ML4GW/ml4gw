@@ -109,7 +109,8 @@
 <dt class="sig sig-object py" id="ml4gw.waveforms.generator.ParameterSampler.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.ParameterSampler.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
+<p>Should be overridden by all subclasses.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">{N}']</span></code>]</span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the recipe for forward pass needs to be defined within
@@ -129,7 +130,8 @@ registered hooks while the latter silently ignores them.</p>
 <dt class="sig sig-object py" id="ml4gw.waveforms.generator.WaveformGenerator.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.WaveformGenerator.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
+<p>Should be overridden by all subclasses.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">{N}']</span></code>]]</span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the recipe for forward pass needs to be defined within
@@ -225,14 +227,14 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Frequency series in Hz.</p></li>
-<li><p><strong>chirp_mass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Chirp mass in solar masses</p></li>
-<li><p><strong>mass_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Mass ratio m1/m2</p></li>
-<li><p><strong>chi1</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Spin of m1</p></li>
-<li><p><strong>chi2</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Spin of m2</p></li>
-<li><p><strong>distance</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Distance to source in Mpc</p></li>
-<li><p><strong>phic</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Phase at coalescence</p></li>
-<li><p><strong>inclination</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Inclination of the source</p></li>
+<li><p><strong>f</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code></span>) -- Frequency series in Hz.</p></li>
+<li><p><strong>chirp_mass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Chirp mass in solar masses</p></li>
+<li><p><strong>mass_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Mass ratio m1/m2</p></li>
+<li><p><strong>chi1</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin of m1</p></li>
+<li><p><strong>chi2</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin of m2</p></li>
+<li><p><strong>distance</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Distance to source in Mpc</p></li>
+<li><p><strong>phic</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Phase at coalescence</p></li>
+<li><p><strong>inclination</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Inclination of the source</p></li>
 <li><p><strong>f_ref</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Reference frequency</p></li>
 </ul>
 </dd>
@@ -277,7 +279,12 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.IMRPhenomD.phenom_d_htilde">
 <span class="sig-name descname"><span class="pre">phenom_d_htilde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chirp_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.phenom_d.IMRPhenomD.phenom_d_htilde" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">batch</span> <span class="pre">frequency']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.waveforms.phenom_d.IMRPhenomD.phenom_d_inspiral_amp">
@@ -385,11 +392,11 @@ for details on parameter definitions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frequency</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Central frequency of the sine-Gaussian waveform</p></li>
-<li><p><strong>quality</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Quality factor of the sine-Gaussian waveform</p></li>
-<li><p><strong>hrss</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Hrss of the sine-Gaussian waveform</p></li>
-<li><p><strong>phase</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Phase of the sine-Gaussian waveform</p></li>
-<li><p><strong>eccentricity</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Eccentricity of the sine-Gaussian waveform.
+<li><p><strong>frequency</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Central frequency of the sine-Gaussian waveform</p></li>
+<li><p><strong>quality</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Quality factor of the sine-Gaussian waveform</p></li>
+<li><p><strong>hrss</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Hrss of the sine-Gaussian waveform</p></li>
+<li><p><strong>phase</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Phase of the sine-Gaussian waveform</p></li>
+<li><p><strong>eccentricity</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Eccentricity of the sine-Gaussian waveform.
 Controls the relative amplitudes of the
 hplus and hcross polarizations.</p></li>
 </ul>
@@ -421,14 +428,14 @@ hplus and hcross polarizations.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Frequency series in Hz.</p></li>
-<li><p><strong>chirp_mass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Chirp mass in solar masses</p></li>
-<li><p><strong>mass_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Mass ratio m1/m2</p></li>
-<li><p><strong>chi1</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Spin of m1</p></li>
-<li><p><strong>chi2</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Spin of m2</p></li>
-<li><p><strong>distance</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Luminosity distance</p></li>
-<li><p><strong>phic</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Phase at coalescence</p></li>
-<li><p><strong>inclination</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span>) -- Inclination angle</p></li>
+<li><p><strong>f</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code></span>) -- Frequency series in Hz.</p></li>
+<li><p><strong>chirp_mass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Chirp mass in solar masses</p></li>
+<li><p><strong>mass_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Mass ratio m1/m2</p></li>
+<li><p><strong>chi1</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin of m1</p></li>
+<li><p><strong>chi2</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin of m2</p></li>
+<li><p><strong>distance</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Luminosity distance</p></li>
+<li><p><strong>phic</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Phase at coalescence</p></li>
+<li><p><strong>inclination</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Inclination angle</p></li>
 <li><p><strong>f_ref</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Reference frequency</p></li>
 </ul>
 </dd>
@@ -450,7 +457,7 @@ hplus and hcross polarizations.</p></li>
 <span class="sig-name descname"><span class="pre">taylorf2_amplitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.taylorf2.TaylorF2.taylorf2_amplitude" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">batch</span> <span class="pre">frequency']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -458,7 +465,12 @@ hplus and hcross polarizations.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.TaylorF2.taylorf2_htilde">
 <span class="sig-name descname"><span class="pre">taylorf2_htilde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.taylorf2.TaylorF2.taylorf2_htilde" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">batch</span> <span class="pre">frequency']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.waveforms.taylorf2.TaylorF2.taylorf2_phase">
@@ -466,7 +478,7 @@ hplus and hcross polarizations.</p></li>
 <dd><p>Calculate the inspiral phase for the TaylorF2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorType</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">batch</span> <span class="pre">frequency']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>

@@ -138,7 +138,7 @@ be <cite>(2 * max_shifts + 1, B, C)</cite>.</p>
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.pearson.ShiftedPearsonCorrelation.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">']</span></code></span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the recipe for forward pass needs to be defined within
@@ -190,7 +190,7 @@ of the timeseries <cite>X</cite> and sets these values to the
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.scaler.ChannelWiseScaler.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"> <span class="pre">time']</span></code></span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the recipe for forward pass needs to be defined within
@@ -259,7 +259,7 @@ a <cite>NotImplementedError</cite> will be raised.</p>
 as <cite>None</cite>, this will be set to <cite>fftlength / 2</cite>.</p></li>
 <li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Aggregation method to use for combining windowed FFTs.
 Allowed values are <cite>&quot;mean&quot;</cite> and <cite>&quot;median&quot;</cite>.</p></li>
-<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Window array to multiply by each FFT window before
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">{int(fftlength*sample_rate)}']</span></code>]</span>) -- Window array to multiply by each FFT window before
 FFT computation. Should have length <cite>nperseg</cite>.
 Defaults to a hanning window.</p></li>
 <li><p><strong>fast</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- Whether to use a faster spectral density computation that
@@ -273,7 +273,8 @@ exact for the two lowest frequency bins.</p></li>
 <dt class="sig sig-object py" id="ml4gw.transforms.spectral.SpectralDensity.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectral.SpectralDensity.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
+<p>Should be overridden by all subclasses.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the recipe for forward pass needs to be defined within
@@ -326,7 +327,7 @@ length</p></li>
 combine them into a single spectrogram</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Batch of multichannel timeseries which will
+<dd class="field-odd"><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span>) -- Batch of multichannel timeseries which will
 be used to calculate the multi-resolution
 spectrogram. Should have the shape
 <cite>(B, C, T)</cite>, where <cite>B</cite> is the number of
@@ -334,7 +335,7 @@ batches, <cite>C</cite> is the  number of channels,
 and <cite>T</cite> is the number of time samples.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency</span> <span class="pre">time']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -351,7 +352,12 @@ and <cite>T</cite> is the number of time samples.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.transform.FittableSpectralTransform.normalize_psd">
 <span class="sig-name descname"><span class="pre">normalize_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_freqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.transform.FittableSpectralTransform.normalize_psd" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -452,7 +458,7 @@ at the expense of longer filter settle-in
 time. As such <cite>fduration / 2</cite> seconds of data
 will be removed from each edge of whitened
 timeseries.</p></li>
-<li><p><strong>*background</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- 1D arrays capturing the signal to be used to
+<li><p><strong>*background</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>]</span>) -- 1D arrays capturing the signal to be used to
 whiten each channel at call time. If <cite>fftlength</cite>
 is left as <cite>None</cite>, it will be assumed that these
 already represent frequency-domain data that will
@@ -496,7 +502,7 @@ PSD fit by the <cite>.fit</cite> method, which must be
 called _before_ the first call to <cite>.forward</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -545,12 +551,12 @@ background power spectral density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Batch of multichannel timeseries to whiten.
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span>) -- Batch of multichannel timeseries to whiten.
 Should have the shape (B, C, N), where
 B is the batch size, C is the number of
 channels, and N is the number of seconds
 in the timeseries times <cite>self.sample_rate</cite>.</p></li>
-<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Power spectral density used to whiten the
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span>) -- Power spectral density used to whiten the
 provided timeseries. Can be either 1D, 2D,
 or 3D, with the last dimension representing
 power at each frequency value. All other
@@ -566,7 +572,7 @@ for <cite>ml4gw.spectral.whiten</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">

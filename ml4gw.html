@@ -161,7 +161,8 @@ each timeseries with probability <cite>prob</cite>.</p>
 <dt class="sig sig-object py" id="ml4gw.augmentations.SignalInverter.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalInverter.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
+<p>Should be overridden by all subclasses.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'*batch</span> <span class="pre">time']</span></code></span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the recipe for forward pass needs to be defined within
@@ -189,7 +190,8 @@ each timeseries with probability <cite>prob</cite>.</p>
 <dt class="sig sig-object py" id="ml4gw.augmentations.SignalReverser.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalReverser.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
+<p>Should be overridden by all subclasses.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'*batch</span> <span class="pre">time']</span></code></span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Although the recipe for forward pass needs to be defined within
@@ -227,6 +229,9 @@ from the corresponding distribution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<em>Tensor</em>) -- </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -350,7 +355,7 @@ implementation made available in bilby:</p>
 <span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">breathing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.breathing" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">space</span> <span class="pre">space']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -366,23 +371,23 @@ calculated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle of each source in radians relative
+<li><p><strong>theta</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Angle of each source in radians relative
 to the celestial equator</p></li>
-<li><p><strong>psi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's
+<li><p><strong>psi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Angle in radians between each source's
 natural polarization basis and the basis
 which has the 0th unit vector pointing along
 the celestial equator</p></li>
-<li><p><strong>phi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's right
+<li><p><strong>phi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Angle in radians between each source's right
 ascension and the right ascension of the
 geocenter</p></li>
-<li><p><strong>detector_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Detector tensor for each of the interferometers
+<li><p><strong>detector_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3</span> <span class="pre">3']</span></code></span>) -- Detector tensor for each of the interferometers
 for which a response is being calculated, stacked
 along the 0th axis</p></li>
 <li><p><strong>modes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Which polarization modes to compute the response for</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">polarizations</span> <span class="pre">num_ifos']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
@@ -419,9 +424,9 @@ and $S_n^{(j)}$ is the backround PSD at the $j$th interferometer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- A batch of interferometer responses to a batch of
+<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span>) -- A batch of interferometer responses to a batch of
 raw gravitational waveforms</p></li>
-<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The one-sided power spectral density of the background
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- The one-sided power spectral density of the background
 noise at each interferometer to which a response
 in <cite>responses</cite> has been calculated. If 2D, each row of
 <cite>psd</cite> will be assumed to be the background PSD for each
@@ -432,7 +437,7 @@ two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p><
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
@@ -441,7 +446,7 @@ will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Batch of SNRs computed for each interferometer</p>
@@ -462,7 +467,7 @@ the total number of interferometers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- A batch of interferometer responses to a batch of
+<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span>) -- A batch of interferometer responses to a batch of
 raw gravitational waveforms</p></li>
 <li><p><strong>backgrounds</strong> -- The one-sided power spectral density of the background
 noise at each interferometer to which a response
@@ -475,7 +480,7 @@ two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p><
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
@@ -484,7 +489,7 @@ will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Batch of SNRs for each waveform across the interferometer network</p>
@@ -502,19 +507,19 @@ the indicated sky parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dec</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Declination of each source in radians relative
+<li><p><strong>dec</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Declination of each source in radians relative
 to the celestial north</p></li>
-<li><p><strong>psi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's
+<li><p><strong>psi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Angle in radians between each source's
 natural polarization basis and the basis
 which has the 0th unit vector pointing along
 the celestial equator</p></li>
-<li><p><strong>phi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Angle in radians between each source's right
+<li><p><strong>phi</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Angle in radians between each source's right
 ascension and the right ascension of the
 geocenter</p></li>
-<li><p><strong>detector_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Detector tensor for each of the interferometers
+<li><p><strong>detector_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3</span> <span class="pre">3']</span></code></span>) -- Detector tensor for each of the interferometers
 for which observed strain is being calculated,
 stacked along the 0th axis</p></li>
-<li><p><strong>detector_vertices</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Vertices for each interferometer's spatial location
+<li><p><strong>detector_vertices</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3']</span></code></span>) -- Vertices for each interferometer's spatial location
 relative to the geocenter. Used to compute delay
 between the waveform observed at the geocenter and
 the one observed at the detector site. To avoid
@@ -527,7 +532,7 @@ polarizations are <cite>cross</cite>, <cite>plus</cite>, and <cite>breathing</ci
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor representing the observed strain at each
@@ -541,7 +546,7 @@ interferometer for each waveform.</p>
 <span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">cross</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.cross" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">space</span> <span class="pre">space']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -557,7 +562,7 @@ of those interferometers.</p>
 <dd class="field-odd"><p><strong>ifos</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Names of the interferometers whose geometry to retrieve</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3</span> <span class="pre">3']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3']</span></code>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A concatenation of the detector tensors of each interferometer
@@ -572,7 +577,7 @@ A concatenation of the vertices of each interferometer</p>
 <dd><p>Compute the outer product of two batches of vectors</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">space</span> <span class="pre">space']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -582,7 +587,7 @@ A concatenation of the vertices of each interferometer</p>
 <span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">plus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.plus" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">space</span> <span class="pre">space']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -594,11 +599,11 @@ A concatenation of the vertices of each interferometer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- A batch of interferometer responses to a batch of
+<li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span>) -- A batch of interferometer responses to a batch of
 raw gravitational waveforms</p></li>
-<li><p><strong>target_snrs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Either a tensor of desired SNRs for each waveform,
+<li><p><strong>target_snrs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span>) -- Either a tensor of desired SNRs for each waveform,
 or a single SNR to which all waveforms should be scaled.</p></li>
-<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The one-sided power spectral density of the background
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- The one-sided power spectral density of the background
 noise at each interferometer to which a response
 in <cite>responses</cite> has been calculated. If 2D, each row of
 <cite>psd</cite> will be assumed to be the background PSD for each
@@ -609,7 +614,7 @@ two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p><
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
@@ -618,7 +623,7 @@ will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Rescaled interferometer responses</p>
@@ -631,7 +636,7 @@ will contribute to the SNR calculation.</p></li>
 <span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">shift_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.shift_responses" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -659,24 +664,24 @@ frequency components are going to be discarded anyway.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The timeseries tensor whose power spectral density
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor whose power spectral density
 to compute, or for cross spectral density the
 timeseries whose fft will be conjugated. Can have
-shape either
-<cite>(batch_size, num_channels, length * sample_rate)</cite>
-or <cite>(num_channels, length * sample_rate)</cite>.</p></li>
+shape <cite>(batch_size, num_channels, length * sample_rate)</cite>,
+<cite>(num_channels, length * sample_rate)</cite>, or
+<cite>(length * sample_rate)</cite>.</p></li>
 <li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
 <li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
-<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Window array to multiply by each FFT window before
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">{nperseg//2+1}']</span></code></span>) -- Window array to multiply by each FFT window before
 FFT computation. Should have length <cite>nperseg // 2 + 1</cite>.</p></li>
-<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
 desired units for output tensor (e.g. letting this equal
 <cite>1 / (sample_rate * (window**2).sum())</cite> will give output
 units of density, $text{Hz}^-1$$.</p></li>
 <li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- How to aggregate the contributions of each FFT window to
 the spectral density. Allowed options are <cite>'mean'</cite> and
 <cite>'median'</cite>.</p></li>
-<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Timeseries tensor to compute cross spectral density
+<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- Timeseries tensor to compute cross spectral density
 with <cite>x</cite>. If left as <cite>None</cite>, <cite>x</cite>'s power spectral
 density will be returned. Otherwise, if <cite>x</cite> is 1D,
 <cite>y</cite> must also be 1D. If <cite>x</cite> is 2D, the assumption
@@ -700,14 +705,11 @@ channel in <cite>x</cite> across _all_ of <cite>x</cite>'s batch elements.</p></
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>Tensor of power spectral densities of <cite>x</cite> or its cross spectral</dt><dd><p>density with the timeseries in <cite>y</cite>.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p>Tensor of power spectral densities of <cite>x</cite> or its cross spectral
+density with the timeseries in <cite>y</cite>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -719,6 +721,11 @@ channel in <cite>x</cite> across _all_ of <cite>x</cite>'s batch elements.</p></
 behavior for an even number of elements and includes
 the same bias correction used by scipy's implementation.
 see <a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066</a> # noqa</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">']</span></code></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -730,24 +737,23 @@ see <a class="reference external" href="https://github.com/scipy/scipy/blob/main
 <dt class="sig sig-object py" id="ml4gw.spectral.spectral_density">
 <span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">spectral_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nperseg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.spectral_density" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the power spectral density of a multichannel
-timeseries or a batch of multichannel timeseries, or
-the cross power spectral density of two such timeseries.
+timeseries or a batch of multichannel timeseries.
 This implementation is exact for all frequency bins, but
 slower than the fast implementation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The timeseries tensor whose power spectral density
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor whose power spectral density
 to compute, or for cross spectral density the
 timeseries whose fft will be conjugated. Can have
-shape either
-<cite>(batch_size, num_channels, length * sample_rate)</cite>
-or <cite>(num_channels, length * sample_rate)</cite>.</p></li>
+shape <cite>(batch_size, num_channels, length * sample_rate)</cite>,
+<cite>(num_channels, length * sample_rate)</cite>, or
+<cite>(length * sample_rate)</cite>.</p></li>
 <li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
 <li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
-<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Window array to multiply by each FFT window before
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">{nperseg//2+1}']</span></code></span>) -- Window array to multiply by each FFT window before
 FFT computation. Should have length <cite>nperseg // 2 + 1</cite>.</p></li>
-<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
 desired units for output tensor (e.g. letting this equal
 <cite>1 / (sample_rate * (window**2).sum())</cite> will give output
 units of density, $text{Hz}^-1$$.</p></li>
@@ -757,7 +763,7 @@ the spectral density. Allowed options are <cite>'mean'</cite> and
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -777,9 +783,9 @@ to which the whitening filter will be applied.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- The one-sided power spectraul density used
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- The one-sided power spectraul density used
 to construct a whitening filter.</p></li>
-<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
 response of a whitening filter built using
 this PSD, or a window of this length to taper
 the edges of the time domain response of the
@@ -794,7 +800,7 @@ as <cite>None</cite>, no highpass filtering will be applied.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
@@ -817,8 +823,8 @@ modified to have the desired time domain response length
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- batch of multichannel timeseries to whiten</p></li>
-<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- PSDs use to whiten the data. The frequency
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span>) -- batch of multichannel timeseries to whiten</p></li>
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- PSDs use to whiten the data. The frequency
 response of the whitening filter will be roughly
 the inverse of the square root of this PSD, ensuring
 that data from the same distribution will have
@@ -828,7 +834,7 @@ using the same PSDs. If 3D, each batch element will
 be whitened by the PSDs contained along the 0th
 dimenion of <cite>psd</cite>, and so the first two dimensions
 of <cite>X</cite> and <cite>psd</cite> should match.</p></li>
-<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
 response of a whitening filter built using
 this PSD, or a window of this length to taper
 the edges of the time domain response of the
@@ -845,7 +851,7 @@ highpass filtering will be applied.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">

@@ -191,7 +191,7 @@ over 2x improvement in total throughput.</p></li>
 <dd><p>Sample a single batch of multichannel timeseries</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -224,13 +224,13 @@ arguments. See their descriptions for details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Timeseries data to be iterated through. Should have
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channels</span> <span class="pre">time']</span></code></span>) -- Timeseries data to be iterated through. Should have
 shape <cite>(num_channels, length * sample_rate)</cite>. Windows
 will be sampled from the time (1st) dimension for all
 channels along the channel (0th) dimension.</p></li>
 <li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The length of the windows to sample from <cite>X</cite> in units
 of samples.</p></li>
-<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Target timeseries to be iterated through. If specified,
+<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">time']</span></code>]</span>) -- Target timeseries to be iterated through. If specified,
 should be a single channel and have shape
 <cite>(length * sample_rate,)</cite>. If left as <cite>None</cite>, only windows
 sampled from <cite>X</cite> will be returned during iteration.
