@@ -406,7 +406,7 @@ class SingleQTransform(torch.nn.Module):
             (num_f_bins, num_t_bins),
             mode=self.interpolation_method,
         )
-        return self.interpolator(time_interped)
+        return torch.squeeze(resampled)
 
     def forward(
         self,
