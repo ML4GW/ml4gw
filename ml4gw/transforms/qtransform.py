@@ -349,10 +349,6 @@ class SingleQTransform(torch.nn.Module):
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
         self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
-        self.qtiles = [
-            torch.stack([self.qtiles[i] for i in idx], dim=-2)
-            for idx in self.stack_idx
-        ]
 
     def interpolate(self) -> TimeSeries3d:
         if self.qtiles is None:
@@ -360,11 +356,15 @@ class SingleQTransform(torch.nn.Module):
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
         if self.interpolation_method == "spline":
+            qtiles = [
+                torch.stack([self.qtiles[i] for i in idx], dim=-2)
+                for idx in self.stack_idx
+            ]
             time_interped = torch.cat(
                 [
                     interpolator(qtile)
                     for qtile, interpolator in zip(
-                        self.qtiles, self.qtile_interpolators
+                        qtiles, self.qtile_interpolators
                     )
                 ],
                 dim=-2,
