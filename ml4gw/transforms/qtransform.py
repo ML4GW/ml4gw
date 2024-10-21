@@ -366,10 +366,6 @@ class SingleQTransform(torch.nn.Module):
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
         self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
-        self.qtiles = [
-            torch.stack([self.qtiles[i] for i in idx], dim=-2)
-            for idx in self.stack_idx
-        ]
 
     def interpolate(self) -> TimeSeries3d:
         if self.qtiles is None:
