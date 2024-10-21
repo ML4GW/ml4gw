@@ -86,7 +86,7 @@ class SplineInterpolate(torch.nn.Module):
         Returns:
             Tensor of knot positions.
         """
-        return F.pad(x[None], (k, k), mode="replicate").squeeze(0)
+        return F.pad(x[None], (k, k), mode="replicate")[0]
 
     def compute_L_R(
         self,

@@ -174,6 +174,19 @@ class SingleQTransform(torch.nn.Module):
             be chosen based on q, sample_rate, and duration
         mismatch:
             The maximum fractional mismatch between neighboring tiles
+        interpolation_method:
+            The method by which to interpolate each `QTile` to the specified
+            number of time and frequency bins. The acceptable values are
+            "bilinear", "bicubic", and "spline". The "bilinear" and "bicubic"
+            options will use PyTorch's built-in interpolation modes, while
+            "spline" will use the custom Torch-based implementation in
+            `ml4gw`, as PyTorch does not have spline-based intertpolation.
+            The "spline" mode is most similar to the results of GWpy's
+            Q-transform, which uses `scipy` to do spline interpolation.
+            However, it is also the slowest and most memory intensive due to
+            the matrix equation solving steps. Therefore, the default method
+            is "bicubic" as it produces the most similar results while
+            optimizing for computing performance.
     """
 
     def __init__(
@@ -184,6 +197,7 @@ class SingleQTransform(torch.nn.Module):
         q: float = 12,
         frange: List[float] = [0, torch.inf],
         mismatch: float = 0.2,
+        interpolation_method: str = "bicubic",
     ) -> None:
         super().__init__()
         self.q = q
@@ -191,6 +205,13 @@ class SingleQTransform(torch.nn.Module):
         self.frange = frange
         self.duration = duration
         self.mismatch = mismatch
+
+        if interpolation_method not in ["bilinear", "bicubic", "splin"]:
+            raise ValueError(
+                "Interpolation method must be either 'bilinear', 'bicubic', "
+                f"or 'spline'; got {interpolation_method}"
+            )
+        self.interpolation_method = interpolation_method
 
         qprime = self.q / 11 ** (1 / 2.0)
         if self.frange[0] <= 0:  # set non-zero lower frequency
@@ -212,6 +233,10 @@ class SingleQTransform(torch.nn.Module):
         )
         self.qtiles = None
 
+        if self.interpolation_method == "spline":
+            self._set_up_spline_interp()
+
+    def _set_up_spline_interp(self):
         ntiles = [qtile.ntiles() for qtile in self.qtile_transforms]
         unique_ntiles = sorted(list(set(ntiles)))
         # Feels like there should be a better way to do this
@@ -221,19 +246,21 @@ class SingleQTransform(torch.nn.Module):
             [
                 SplineInterpolate(
                     kx=3,
-                    x_in=torch.linspace(-1, 1, tiles),
-                    y_in=torch.linspace(-1, 1, len(idx)),
-                    x_out=torch.linspace(-1, 1, spectrogram_shape[1]),
-                    y_out=torch.linspace(-1, 1, len(idx)),
+                    x_in=torch.arange(0, 1, 1 / tiles),
+                    y_in=torch.linspace(0, 1, len(idx)),
+                    x_out=torch.arange(0, 1, 1 / self.spectrogram_shape[1]),
+                    y_out=torch.linspace(0, 1, len(idx)),
                 )
                 for tiles, idx in zip(unique_ntiles, self.stack_idx)
             ]
         )
 
-        t_in = t_out = torch.linspace(-1, 1, spectrogram_shape[1])
+        t_in = t_out = torch.arange(0, 1, 1 / self.spectrogram_shape[1])
         f_in = self.freqs
         f_out = torch.logspace(
-            math.log10(f_in[0]), math.log10(f_in[-1]), spectrogram_shape[0]
+            math.log10(self.frange[0]),
+            math.log10(self.frange[-1]),
+            self.spectrogram_shape[0],
         )
 
         self.interpolator = SplineInterpolate(
@@ -328,34 +355,42 @@ class SingleQTransform(torch.nn.Module):
         ]
 
     def interpolate(self) -> TimeSeries3d:
-        """
-        Interpolate each `QTile` to the specified number of time and
-        frequency bins. Note that PyTorch does not have the same
-        interpolation methods that GWpy uses, and so the interpolated
-        spectrograms will be different even though the uninterpolated
-        values match. The `bicubic` interpolation method is used as
-        it seems to match GWpy most closely.
-        """
         if self.qtiles is None:
             raise RuntimeError(
                 "Q-tiles must first be computed with .compute_qtiles()"
             )
-        time_interped = torch.cat(
-            [
-                interpolator(qtile)
-                for qtile, interpolator in zip(
-                    self.qtiles, self.qtile_interpolators
-                )
-            ],
-            dim=-2,
+        if self.interpolation_method == "spline":
+            time_interped = torch.cat(
+                [
+                    interpolator(qtile)
+                    for qtile, interpolator in zip(
+                        self.qtiles, self.qtile_interpolators
+                    )
+                ],
+                dim=-2,
+            )
+            return self.interpolator(time_interped)
+        num_f_bins, num_t_bins = self.spectrogram_shape
+        resampled = [
+            F.interpolate(
+                qtile[None],
+                (qtile.shape[-2], num_t_bins),
+                mode=self.interpolation_method,
+            )
+            for qtile in self.qtiles
+        ]
+        resampled = torch.stack(resampled, dim=-2)
+        resampled = F.interpolate(
+            resampled[0],
+            (num_f_bins, num_t_bins),
+            mode=self.interpolation_method,
         )
-        return self.interpolator(time_interped)
+        return torch.squeeze(resampled)
 
     def forward(
         self,
         X: TimeSeries1to3d,
         norm: str = "median",
-        spectrogram_shape: Optional[Tuple[int, int]] = None,
     ):
         """
         Compute the Q-tiles and interpolate
@@ -369,13 +404,7 @@ class SingleQTransform(torch.nn.Module):
                 three-dimensional, axes will be added during Q-tile
                 computation.
             norm:
-                The method of interpolation used by each QTile
-            spectrogram_shape:
-                The shape of the interpolated spectrogram, specified as
-                `(num_f_bins, num_t_bins)`. Because the
-                frequency spacing of the Q-tiles is in log-space, the frequency
-                interpolation is log-spaced as well. If not given, the shape
-                used to initialize the transform will be used.
+                The method of normalization used by each QTile
 
         Returns:
             The interpolated Q-transform for the batch of data. Output will
