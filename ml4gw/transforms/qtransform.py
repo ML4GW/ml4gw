@@ -1,4 +1,5 @@
 import math
+import warnings
 from typing import List, Optional, Tuple
 
 import torch
@@ -206,7 +207,16 @@ class SingleQTransform(torch.nn.Module):
         self.duration = duration
         self.mismatch = mismatch
 
-        if interpolation_method not in ["bilinear", "bicubic", "splin"]:
+        # If q is too large, the minimum of the frange computed
+        # below will be larger than the maximum
+        max_q = torch.pi * duration * sample_rate / 50 - 11 ** (0.5)
+        if q >= max_q:
+            raise ValueError(
+                "The given q value is too large for the given duration and "
+                f"sample rate. The maximum allowable value is {max_q}"
+            )
+
+        if interpolation_method not in ["bilinear", "bicubic", "spline"]:
             raise ValueError(
                 "Interpolation method must be either 'bilinear', 'bicubic', "
                 f"or 'spline'; got {interpolation_method}"
@@ -218,6 +228,7 @@ class SingleQTransform(torch.nn.Module):
             self.frange[0] = 50 * self.q / (2 * torch.pi * duration)
         if math.isinf(self.frange[1]):  # set non-infinite upper frequency
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
+
         self.freqs = self.get_freqs()
         self.qtile_transforms = torch.nn.ModuleList(
             [
@@ -244,12 +255,14 @@ class SingleQTransform(torch.nn.Module):
         idx = torch.arange(len(ntiles))
         self.stack_idx = [idx[Tensor(ntiles) == n] for n in unique_ntiles]
 
-        t_out = torch.arange(0, self.duration, 1 / self.spectrogram_shape[1])
+        t_out = torch.arange(
+            0, self.duration, self.duration / self.spectrogram_shape[1]
+        )
         self.qtile_interpolators = torch.nn.ModuleList(
             [
                 SplineInterpolate(
                     kx=3,
-                    x_in=torch.arange(0, self.duration, 1 / tiles),
+                    x_in=torch.arange(0, self.duration, self.duration / tiles),
                     y_in=torch.arange(len(idx)),
                     x_out=t_out,
                     y_out=torch.arange(len(idx)),
@@ -291,7 +304,8 @@ class SingleQTransform(torch.nn.Module):
 
         freq_base = math.exp(2 / ((2 + self.q**2) ** (1 / 2.0)) * fstep)
         freqs = torch.Tensor([freq_base ** (i + 0.5) for i in range(nfreq)])
-        freqs = (minf * freqs // fstepmin) * fstepmin
+        # Cast freqs to float64 to avoid off-by-ones from rounding
+        freqs = (minf * freqs.double() // fstepmin) * fstepmin
         return torch.unique(freqs)
 
     def get_max_energy(
@@ -458,9 +472,16 @@ class QScan(torch.nn.Module):
         super().__init__()
         self.qrange = qrange
         self.mismatch = mismatch
-        self.qs = self.get_qs()
         self.frange = frange
         self.spectrogram_shape = spectrogram_shape
+        max_q = torch.pi * duration * sample_rate / 50 - 11 ** (0.5)
+        self.qs = self.get_qs()
+        if self.qs[-1] >= max_q:
+            warnings.warn(
+                "Some Q values exceed the maximum allowable Q value of "
+                f"{max_q}. The list of Q values to be tested in this "
+                "scan will be truncated to avoid those values."
+            )
 
         # Deliberately doing something different from GWpy here.
         # Their final frange is the intersection of the frange
@@ -477,6 +498,7 @@ class QScan(torch.nn.Module):
                     mismatch=self.mismatch,
                 )
                 for q in self.qs
+                if q < max_q
             ]
         )
 
@@ -492,6 +514,7 @@ class QScan(torch.nn.Module):
             self.qrange[0] * math.exp(2 ** (1 / 2.0) * dq * (i + 0.5))
             for i in range(nplanes)
         ]
+
         return qs
 
     def forward(
