@@ -238,24 +238,27 @@ class SingleQTransform(torch.nn.Module):
 
     def _set_up_spline_interp(self):
         ntiles = [qtile.ntiles() for qtile in self.qtile_transforms]
+        # For efficiency, we'll stack all qtiles of the same length before
+        # interpolating, so we need to figure out which those are
         unique_ntiles = sorted(list(set(ntiles)))
-        # Feels like there should be a better way to do this
         idx = torch.arange(len(ntiles))
         self.stack_idx = [idx[Tensor(ntiles) == n] for n in unique_ntiles]
+
+        t_out = torch.arange(0, self.duration, 1 / self.spectrogram_shape[1])
         self.qtile_interpolators = torch.nn.ModuleList(
             [
                 SplineInterpolate(
                     kx=3,
-                    x_in=torch.arange(0, 1, 1 / tiles),
-                    y_in=torch.linspace(0, 1, len(idx)),
-                    x_out=torch.arange(0, 1, 1 / self.spectrogram_shape[1]),
-                    y_out=torch.linspace(0, 1, len(idx)),
+                    x_in=torch.arange(0, self.duration, 1 / tiles),
+                    y_in=torch.arange(len(idx)),
+                    x_out=t_out,
+                    y_out=torch.arange(len(idx)),
                 )
                 for tiles, idx in zip(unique_ntiles, self.stack_idx)
             ]
         )
 
-        t_in = t_out = torch.arange(0, 1, 1 / self.spectrogram_shape[1])
+        t_in = t_out
         f_in = self.freqs
         f_out = torch.logspace(
             math.log10(self.frange[0]),

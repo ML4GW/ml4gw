@@ -12,41 +12,38 @@ from torch import Tensor
 class SplineInterpolate(torch.nn.Module):
     def __init__(
         self,
-        kx=3,
-        ky=3,
-        sx=0.001,
-        sy=0.001,
-        x_in: Optional[Tensor] = None,
-        y_in: Optional[Tensor] = None,
+        x_in: Tensor,
+        kx: int = 3,
+        ky: int = 3,
+        sx: float = 0.001,
+        sy: float = 0.001,
+        y_in: Optional[Tensor] = Tensor(
+            [
+                1,
+            ]
+        ),
         x_out: Optional[Tensor] = None,
         y_out: Optional[Tensor] = None,
-        logf: Optional[bool] = False,
     ):
         super().__init__()
         self.kx = kx
         self.ky = ky
         self.sx = sx
         self.sy = sy
-        self.logf = logf
         self.register_buffer("x_in", x_in)
         self.register_buffer("y_in", y_in)
         self.register_buffer("x_out", x_out)
         self.register_buffer("y_out", y_out)
 
-        if self.x_in is not None:
-            tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(
-                x_in, kx, sx
-            )
-            self.register_buffer("tx", tx)
-            self.register_buffer("Bx", Bx)
-            self.register_buffer("BxT_Bx", BxT_Bx)
-        if self.y_in is not None:
-            ty, By, ByT_By = self._compute_knots_and_basis_matrices(
-                y_in, ky, sy
-            )
-            self.register_buffer("ty", ty)
-            self.register_buffer("By", By)
-            self.register_buffer("ByT_By", ByT_By)
+        tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(x_in, kx, sx)
+        self.register_buffer("tx", tx)
+        self.register_buffer("Bx", Bx)
+        self.register_buffer("BxT_Bx", BxT_Bx)
+
+        ty, By, ByT_By = self._compute_knots_and_basis_matrices(y_in, ky, sy)
+        self.register_buffer("ty", ty)
+        self.register_buffer("By", By)
+        self.register_buffer("ByT_By", ByT_By)
 
         if self.x_out is not None:
             if self.x_in is None:
@@ -242,8 +239,6 @@ class SplineInterpolate(torch.nn.Module):
     def forward(
         self,
         Z: Tensor,
-        x_in: Optional[Tensor] = None,
-        y_in: Optional[Tensor] = None,
         x_out: Optional[Tensor] = None,
         y_out: Optional[Tensor] = None,
     ) -> Tensor:
@@ -254,39 +249,23 @@ class SplineInterpolate(torch.nn.Module):
             )
 
         if y_out is None and self.y_out is None:
-            raise ValueError(
-                "Output y-coordinates were not specified in either object "
-                "creation or in forward call"
-            )
+            y_out = self.y_in
 
         if len(Z.shape) > 4:
             raise ValueError("Input data has more than 4 dimensions")
 
-        # while len(Z.shape) < 4:
-        #     Z = Z.unsqueeze(-2)
+        # Expand Z to have 4 dimensions
+        while len(Z.shape) < 4:
+            Z = Z.unsqueeze(-2)
 
-        ny_points, nx_points = Z.shape[-2:]
+        if Z.shape[-2:] != torch.Size([len(self.y_in), len(self.x_in)]):
+            raise ValueError(
+                "The spatial dimensions of the data tensor do not match "
+                "the given input dimensions. "
+                f"Expected [{len(self.y_in)}, {len(self.x_in)}], but got "
+                f"[{Z.shape[-2]}, {Z.shape[-1]}]"
+            )
 
-        if self.x_in is None and x_in is None:
-            x_in = torch.linspace(-1, 1, nx_points)
-        if self.y_in is None and y_in is None:
-            if self.logf:
-                y_in = torch.logspace(-1, 1, ny_points)
-            else:
-                y_in = torch.linspace(-1, 1, ny_points)
-
-        if x_in is not None:
-            (
-                self.tx,
-                self.Bx,
-                self.BxT_Bx,
-            ) = self._compute_knots_and_basis_matrices(x_in, self.kx, self.sx)
-        if y_in is not None:
-            (
-                self.ty,
-                self.By,
-                self.ByT_By,
-            ) = self._compute_knots_and_basis_matrices(y_in, self.ky, self.sy)
         if x_out is not None:
             self.Bx_out = self.bspline_basis_natural(x_out, self.kx, self.tx)
         if y_out is not None:
