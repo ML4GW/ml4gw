@@ -236,12 +236,7 @@ class SplineInterpolate(torch.nn.Module):
             return torch.matmul(C, self.Bx_out.mT)
         return torch.einsum("ik,bckm,mj->bcij", self.By_out, C, self.Bx_out.mT)
 
-    def forward(
-        self,
-        Z: Tensor,
-        x_out: Optional[Tensor] = None,
-        y_out: Optional[Tensor] = None,
-    ) -> Tensor:
+    def _validate_inputs(self, Z, x_out, y_out):
         if x_out is None and self.x_out is None:
             raise ValueError(
                 "Output x-coordinates were not specified in either object "
@@ -251,12 +246,27 @@ class SplineInterpolate(torch.nn.Module):
         if y_out is None and self.y_out is None:
             y_out = self.y_in
 
-        if len(Z.shape) > 4:
+        dims = len(Z.shape)
+        if dims > 4:
             raise ValueError("Input data has more than 4 dimensions")
 
+        if len(self.y_in) > 1 and dims == 1:
+            raise ValueError(
+                "An input y-coordinate array with length greater than 1 "
+                "was given, but the input data is 1-dimensional. Expected "
+                "input data to be at least 2-dimensional"
+            )
+
         # Expand Z to have 4 dimensions
+        # There are 6 valid input shapes: (w), (b, w), (b, c, w),
+        # (h, w), (b, h, w), and (b, c, h, w).
+
+        # If the input y coordinate array has length 1,
+        # assume the first dimension(s) are batch dimensions
+        # and that no height dimension is included in Z
+        idx = -2 if len(self.y_in) == 1 else -3
         while len(Z.shape) < 4:
-            Z = Z.unsqueeze(-2)
+            Z = Z.unsqueeze(idx)
 
         if Z.shape[-2:] != torch.Size([len(self.y_in), len(self.x_in)]):
             raise ValueError(
@@ -265,6 +275,17 @@ class SplineInterpolate(torch.nn.Module):
                 f"Expected [{len(self.y_in)}, {len(self.x_in)}], but got "
                 f"[{Z.shape[-2]}, {Z.shape[-1]}]"
             )
+
+        return Z, y_out
+
+    def forward(
+        self,
+        Z: Tensor,
+        x_out: Optional[Tensor] = None,
+        y_out: Optional[Tensor] = None,
+    ) -> Tensor:
+
+        Z, y_out = self._validate_inputs(Z, x_out, y_out)
 
         if x_out is not None:
             self.Bx_out = self.bspline_basis_natural(x_out, self.kx, self.tx)
