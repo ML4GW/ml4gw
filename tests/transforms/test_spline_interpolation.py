@@ -42,7 +42,7 @@ class TestSplineInterpolate:
         # interpolations is about 0.9990, with some minor fluctuations.
         # Would be nice to know why the torch interpolation is
         # consistently smaller
-        assert np.allclose(actual, expected, rtol=1e-2)
+        assert np.allclose(actual, expected, rtol=5e-3)
 
     def test_2d_interpolation(self, x_out_len, y_out_len):
         x_in = np.linspace(0, 10, 100)
