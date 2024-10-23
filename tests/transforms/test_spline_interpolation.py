@@ -50,8 +50,8 @@ class TestSplineInterpolate:
             y_out=Tensor(y_out),
             kx=3,
             ky=3,
-            sx=0,
-            sy=0,
+            # sx=0,
+            # sy=0,
         )
         actual = torch_spline(Tensor(data)).squeeze().numpy()
 

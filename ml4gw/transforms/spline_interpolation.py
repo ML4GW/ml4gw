@@ -10,18 +10,74 @@ from torch import Tensor
 
 
 class SplineInterpolate(torch.nn.Module):
+    """
+    Perform 1D or 2D spline interpolation based on De Boor's method.
+    Supports batched, multi-channel inputs, so acceptable data
+    shapes are `(width)`, `(height, width)`, `(batch, width)`,
+    `(batch, height, width)`, `(batch, channel, width)`, and
+    `(batch, channel, height, width)`.
+
+    During initialization of this Module, both the desired input
+    and output coordinate Tensors can be specified to allow
+    pre-computation of the B-spline basis matrices, though the only
+    mandatory argument is the coordinates of the data along the
+    `width` dimension. If no argument is given for coordinates along
+    the `height` dimension, it is assumed that 1D interpolation is
+    desired.
+
+    Unlike scipy's implementation of spline interpolation, the data
+    to be interpolated is not passed until actually calling the
+    object. This is useful for cases where the input and output
+    coordinates are known in advance, but the data is not, so that
+    the interpolator can be set up ahead of time.
+
+    WARNING: compared to scipy's spline interpolation, this method
+    produces edge artifacts when the output coordinates are near
+    the boundaries of the input coordinates. Therefore, it is
+    recommended to interpolate only to coordinates that are well
+    within the input coordinate range (around 25 data points on
+    all sides).
+
+    Args:
+        x_in:
+            Coordinates of the width dimension of the data
+        y_in:
+            Coordinates of the height dimension of the data. If not
+            specified, it is assumed the 1D interpolation is desired,
+            and so the default value is a Tensor of length 1
+        kx:
+            Degree of spline interpolation along the width dimension.
+            Default is cubic.
+        ky:
+            Degree of spline interpolation along the height dimension.
+            Default is cubic.
+        sx:
+            Regularization factor to avoid singularities during matrix
+            inversion for interpolation along the width dimension. Not
+            to be confused with the `s` parameter in scipy's spline
+            methods, which controls the number of knots.
+        sy:
+            Regularization factor to avoid singularities during matrix
+            inversion for interpolation along the height dimension.
+        x_out:
+            Coordinates for the data to be interpolated to along the
+            width dimension. If not specified during initialization,
+            this must be specified during the object call.
+        y_out:
+            Coordinates for the data to be interpolated to along the
+            height dimension. If not specified during initialization,
+            this must be specified during the object call.
+
+    """
+
     def __init__(
         self,
         x_in: Tensor,
+        y_in: Tensor = Tensor([1]),
         kx: int = 3,
         ky: int = 3,
         sx: float = 0.001,
         sy: float = 0.001,
-        y_in: Optional[Tensor] = Tensor(
-            [
-                1,
-            ]
-        ),
         x_out: Optional[Tensor] = None,
         y_out: Optional[Tensor] = None,
     ):
@@ -284,6 +340,30 @@ class SplineInterpolate(torch.nn.Module):
         x_out: Optional[Tensor] = None,
         y_out: Optional[Tensor] = None,
     ) -> Tensor:
+        """
+        Compute the interpolated data
+
+        Args:
+            Z:
+                Tensor of data to be interpolated. Must be between 1 and 4
+                dimensions. The shape of the tensor must agree with the
+                input coordinates given on initialization. If `y_in` was
+                not specified during initialization, it is assumed that
+                Z does not have a height dimension.
+            x_out:
+                Coordinates to interpolate the data to along the width
+                dimension. Overrides any value that was set during
+                initialization.
+            y_out:
+                Coordinates to interpolate the data to along the height
+                dimension. Overrides any value that was set during
+                initialization.
+
+        Returns:
+            A 4D tensor with shape `(batch, channel, height, width)`.
+            Depending on the input data shape, many of these dimensions
+            may have length 1.
+        """
 
         Z, y_out = self._validate_inputs(Z, x_out, y_out)
 
