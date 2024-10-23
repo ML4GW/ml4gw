@@ -35,8 +35,9 @@ class SplineInterpolate(torch.nn.Module):
     produces edge artifacts when the output coordinates are near
     the boundaries of the input coordinates. Therefore, it is
     recommended to interpolate only to coordinates that are well
-    within the input coordinate range (around 25 data points on
-    all sides).
+    within the input coordinate range. Unfortunately, the specific
+    definition of "well within" changes based on the size of the
+    data, so some testing may be required to get good results.
 
     Args:
         x_in:
@@ -102,17 +103,9 @@ class SplineInterpolate(torch.nn.Module):
         self.register_buffer("ByT_By", ByT_By)
 
         if self.x_out is not None:
-            if self.x_in is None:
-                raise ValueError(
-                    "If x_out is specified, x_in must also be given"
-                )
             Bx_out = self.bspline_basis_natural(x_out, kx, self.tx)
             self.register_buffer("Bx_out", Bx_out)
         if self.y_out is not None:
-            if self.y_in is None:
-                raise ValueError(
-                    "If y_out is specified, y_in must also be given"
-                )
             By_out = self.bspline_basis_natural(y_out, ky, self.ty)
             self.register_buffer("By_out", By_out)
 
