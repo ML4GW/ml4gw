@@ -167,7 +167,12 @@ def test_get_qs(
     qrange = [1, 1000]
 
     qscan = QScan(
-        duration, sample_rate, spectrogram_shape, qrange, frange, mismatch
+        duration,
+        sample_rate,
+        spectrogram_shape,
+        qrange,
+        frange,
+        mismatch=mismatch,
     )
     qtiling = QTiling(
         duration, sample_rate, qrange, frange=[0, np.inf], mismatch=mismatch
