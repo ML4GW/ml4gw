@@ -174,3 +174,7 @@ def test_get_qs(
     )
 
     assert np.allclose(qscan.get_qs(), qtiling.qs)
+
+    # Just check that the QScan runs
+    data = torch.randn(int(sample_rate * duration))
+    _ = qscan(data)

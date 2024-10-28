@@ -1,6 +1,6 @@
 import math
 import warnings
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -467,6 +467,7 @@ class QScan(torch.nn.Module):
         spectrogram_shape: Tuple[int, int],
         qrange: List[float] = [4, 64],
         frange: List[float] = [0, torch.inf],
+        interpolation_method="bicubic",
         mismatch: float = 0.2,
     ) -> None:
         super().__init__()
@@ -495,6 +496,7 @@ class QScan(torch.nn.Module):
                     spectrogram_shape=spectrogram_shape,
                     q=q,
                     frange=self.frange.copy(),
+                    interpolation_method=interpolation_method,
                     mismatch=self.mismatch,
                 )
                 for q in self.qs
@@ -522,7 +524,6 @@ class QScan(torch.nn.Module):
         X: TimeSeries1to3d,
         fsearch_range: List[float] = None,
         norm: str = "median",
-        spectrogram_shape: Optional[Tuple[int, int]] = None,
     ):
         """
         Compute the set of QTiles for each Q transform and determine which
@@ -542,12 +543,6 @@ class QScan(torch.nn.Module):
                 for the maximum energy
             norm:
                 The method of interpolation used by each QTile
-            spectrogram_shape:
-                The shape of the interpolated spectrogram, specified as
-                `(num_f_bins, num_t_bins)`. Because the
-                frequency spacing of the Q-tiles is in log-space, the frequency
-                interpolation is log-spaced as well. If not given, the shape
-                used to initialize the transform will be used.
 
         Returns:
             An interpolated Q-transform for the batch of data. Output will
@@ -563,7 +558,4 @@ class QScan(torch.nn.Module):
                 ]
             )
         )
-        if spectrogram_shape is None:
-            spectrogram_shape = self.spectrogram_shape
-        num_f_bins, num_t_bins = spectrogram_shape
-        return self.q_transforms[idx].interpolate(num_f_bins, num_t_bins)
+        return self.q_transforms[idx].interpolate()
