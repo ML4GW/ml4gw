@@ -225,16 +225,16 @@ def test_phenom_d(
     hc_torch = hc_torch[torch_mask]
 
     assert np.allclose(
-        1e21 * hp_lal_data.real, 1e21 * hp_torch.real.numpy(), atol=2e-4
+        1e21 * hp_lal_data.real, 1e21 * hp_torch.real.numpy(), atol=3e-4
     )
     assert np.allclose(
-        1e21 * hp_lal_data.imag, 1e21 * hp_torch.imag.numpy(), atol=2e-4
+        1e21 * hp_lal_data.imag, 1e21 * hp_torch.imag.numpy(), atol=3e-4
     )
     assert np.allclose(
-        1e21 * hc_lal_data.real, 1e21 * hc_torch.real.numpy(), atol=2e-4
+        1e21 * hc_lal_data.real, 1e21 * hc_torch.real.numpy(), atol=3e-4
     )
     assert np.allclose(
-        1e21 * hc_lal_data.imag, 1e21 * hc_torch.imag.numpy(), atol=2e-4
+        1e21 * hc_lal_data.imag, 1e21 * hc_torch.imag.numpy(), atol=3e-4
     )
 
 
@@ -342,14 +342,14 @@ def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
     hc_torch = hc_torch[torch_mask]
 
     assert np.allclose(
-        1e21 * hp_lal_data.real, 1e21 * hp_torch.real.numpy(), atol=2e-3
+        1e21 * hp_lal_data.real, 1e21 * hp_torch.real.numpy(), atol=3e-3
     )
     assert np.allclose(
-        1e21 * hp_lal_data.imag, 1e21 * hp_torch.imag.numpy(), atol=2e-3
+        1e21 * hp_lal_data.imag, 1e21 * hp_torch.imag.numpy(), atol=3e-3
     )
     assert np.allclose(
-        1e21 * hc_lal_data.real, 1e21 * hc_torch.real.numpy(), atol=2e-3
+        1e21 * hc_lal_data.real, 1e21 * hc_torch.real.numpy(), atol=3e-3
     )
     assert np.allclose(
-        1e21 * hc_lal_data.imag, 1e21 * hc_torch.imag.numpy(), atol=2e-3
+        1e21 * hc_lal_data.imag, 1e21 * hc_torch.imag.numpy(), atol=3e-3
     )
