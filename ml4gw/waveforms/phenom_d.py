@@ -2,6 +2,7 @@ import torch
 from jaxtyping import Float
 
 from ml4gw.constants import MTSUN_SI, PI
+from ml4gw.transforms import SplineInterpolate
 from ml4gw.types import BatchTensor, FrequencySeries1d
 
 from .phenom_d_data import QNMData_a, QNMData_fdamp, QNMData_fring
@@ -583,7 +584,9 @@ class IMRPhenomD(TaylorF2):
         finspin = self.FinalSpin0815(eta, eta2, chi1, chi2)
         Erad = self.PhenomInternal_EradRational0815(eta, eta2, chi1, chi2)
 
-        fRD, fDM = self._linear_interp_finspin(finspin)
+        spline_interpolant = SplineInterpolate(self.qnmdata_a, kx=3, sx=1e-8)
+        fRD = spline_interpolant(self.qnmdata_fring, x_out=finspin).squeeze()
+        fDM = spline_interpolant(self.qnmdata_fdamp, x_out=finspin).squeeze()
         fRD /= 1.0 - Erad
         fDM /= 1.0 - Erad
 
