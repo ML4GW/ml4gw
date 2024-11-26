@@ -441,7 +441,7 @@ def normalize_by_psd(
 
     # convert back to the time domain and normalize
     # TODO: what's this normalization factor?
-    X = torch.fft.irfft(X_tilde, norm="forward", dim=-1)
+    X = torch.fft.irfft(X_tilde, n=X.shape[-1], norm="forward", dim=-1)
     X = X.float() / sample_rate**0.5
 
     # slice off corrupted data at edges of kernel
