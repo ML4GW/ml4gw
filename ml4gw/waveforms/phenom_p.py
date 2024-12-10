@@ -71,6 +71,9 @@ class IMRPhenomPv2(IMRPhenomD):
         Note: m1 must be larger than m2.
         """
 
+        if tc is None:
+            tc = torch.zeros_like(chirp_mass)
+
         m2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
         m1 = m2 * mass_ratio
 
@@ -154,9 +157,6 @@ class IMRPhenomPv2(IMRPhenomD):
             xi,
             distance,
         )
-
-        if tc is None:
-            tc = torch.zeros_like(chirp_mass)
 
         hp, hc = self.PhenomPCoreTwistUp(
             fs,
