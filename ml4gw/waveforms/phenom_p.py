@@ -156,7 +156,7 @@ class IMRPhenomPv2(IMRPhenomD):
         )
 
         if tc is None:
-            tc = torch.zeros_like(fs)
+            tc = torch.zeros_like(chirp_mass)
 
         hp, hc = self.PhenomPCoreTwistUp(
             fs,
