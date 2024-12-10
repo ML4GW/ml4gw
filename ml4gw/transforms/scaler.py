@@ -36,7 +36,9 @@ class ChannelWiseScaler(FittableTransform):
         self.register_buffer("mean", mean)
         self.register_buffer("std", std)
 
-    def fit(self, X: Float[Tensor, "... time"]) -> None:
+    def fit(
+        self, X: Float[Tensor, "... time"], std_reg: Optional[float] = 0.0
+    ) -> None:
         """Fit the scaling parameters to a timeseries
 
         Computes the channel-wise mean and standard deviation
@@ -59,7 +61,7 @@ class ChannelWiseScaler(FittableTransform):
                 "Can't fit channel wise mean and standard deviation "
                 "from tensor of shape {}".format(X.shape)
             )
-
+        std += std_reg * torch.ones_like(std)
         super().build(mean=mean, std=std)
 
     def forward(
