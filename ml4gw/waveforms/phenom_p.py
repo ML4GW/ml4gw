@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import torch
 from jaxtyping import Float
@@ -25,11 +25,11 @@ class IMRPhenomPv2(IMRPhenomD):
         s2x: BatchTensor,
         s2y: BatchTensor,
         s2z: BatchTensor,
-        dist_mpc: BatchTensor,
-        tc: BatchTensor,
-        phiRef: BatchTensor,
-        incl: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
+        inclination: BatchTensor,
         f_ref: float,
+        tc: Optional[BatchTensor] = None,
     ):
         """
         IMRPhenomPv2 waveform
@@ -53,13 +53,13 @@ class IMRPhenomPv2(IMRPhenomD):
                 Spin component y of the second BH.
             s2z :
                 Spin component z of the second BH.
-            dist_mpc :
+            distance :
                 Luminosity distance in Mpc.
             tc :
                 Coalescence time.
-            phiRef :
+            phic :
                 Reference phase.
-            incl :
+            inclination :
                 Inclination angle.
             f_ref :
                 Reference frequency in Hz.
@@ -70,6 +70,9 @@ class IMRPhenomPv2(IMRPhenomD):
 
         Note: m1 must be larger than m2.
         """
+
+        if tc is None:
+            tc = torch.zeros_like(chirp_mass)
 
         m2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
         m1 = m2 * mass_ratio
@@ -89,7 +92,7 @@ class IMRPhenomPv2(IMRPhenomD):
             phi_aligned,
             zeta_polariz,
         ) = self.convert_spins(
-            m1, m2, f_ref, phiRef, incl, s1x, s1y, s1z, s2x, s2y, s2z
+            m1, m2, f_ref, phic, inclination, s1x, s1y, s1z, s2x, s2y, s2z
         )
 
         phic = 2 * phi_aligned
@@ -152,7 +155,7 @@ class IMRPhenomPv2(IMRPhenomD):
             phic,
             M,
             xi,
-            dist_mpc,
+            distance,
         )
 
         hp, hc = self.PhenomPCoreTwistUp(
@@ -309,7 +312,7 @@ class IMRPhenomPv2(IMRPhenomD):
         phic,
         M,
         xi,
-        dist_mpc,
+        distance,
     ):
         """
         m1, m2: in solar masses
@@ -324,10 +327,10 @@ class IMRPhenomPv2(IMRPhenomD):
         phase, _ = self.phenom_d_phase(Mf, m1, m2, eta, eta2, chi1, chi2, xi)
         phase = (phase.mT - (phic + PI / 4.0)).mT
         Amp = self.phenom_d_amp(
-            Mf, m1, m2, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, dist_mpc
+            Mf, m1, m2, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, distance
         )[0]
         Amp0 = self.get_Amp0(Mf, eta)
-        dist_s = dist_mpc * MPC_SEC
+        dist_s = distance * MPC_SEC
         Amp = ((Amp0 * Amp).mT * (M_s**2.0) / dist_s).mT
         # phase -= 2. * phic; # line 1316 ???
         hPhenom = Amp * (torch.exp(-1j * phase))
@@ -425,8 +428,8 @@ class IMRPhenomPv2(IMRPhenomD):
         m1: BatchTensor,
         m2: BatchTensor,
         f_ref: float,
-        phiRef: BatchTensor,
-        incl: BatchTensor,
+        phic: BatchTensor,
+        inclination: BatchTensor,
         s1x: BatchTensor,
         s1y: BatchTensor,
         s1z: BatchTensor,
@@ -486,9 +489,9 @@ class IMRPhenomPv2(IMRPhenomD):
         # First we determine kappa
         # in the source frame, the components of N are given in
         # Eq (35c) of T1500606-v6
-        Nx_sf = torch.sin(incl) * torch.cos(PI / 2.0 - phiRef)
-        Ny_sf = torch.sin(incl) * torch.sin(PI / 2.0 - phiRef)
-        Nz_sf = torch.cos(incl)
+        Nx_sf = torch.sin(inclination) * torch.cos(PI / 2.0 - phic)
+        Ny_sf = torch.sin(inclination) * torch.sin(PI / 2.0 - phic)
+        Nz_sf = torch.cos(inclination)
 
         tmp_x = Nx_sf
         tmp_y = Ny_sf
@@ -528,9 +531,9 @@ class IMRPhenomPv2(IMRPhenomD):
         # Both triads differ from each other by a rotation around N by an angle
         # \zeta and we need to rotate the polarizations accordingly by 2\zeta
 
-        Xx_sf = -torch.cos(incl) * torch.sin(phiRef)
-        Xy_sf = -torch.cos(incl) * torch.cos(phiRef)
-        Xz_sf = torch.sin(incl)
+        Xx_sf = -torch.cos(inclination) * torch.sin(phic)
+        Xy_sf = -torch.cos(inclination) * torch.cos(phic)
+        Xz_sf = torch.sin(inclination)
         tmp_x, tmp_y, tmp_z = Xx_sf, Xy_sf, Xz_sf
         tmp_x, tmp_y, tmp_z = self.ROTATEZ(-phiJ_sf, tmp_x, tmp_y, tmp_z)
         tmp_x, tmp_y, tmp_z = self.ROTATEY(-thetaJ_sf, tmp_x, tmp_y, tmp_z)

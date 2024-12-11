@@ -318,10 +318,10 @@ def test_phenom_p(chirp_mass, mass_ratio, chi1z, chi2z, distance, sample_rate):
         batched_chi2y,
         batched_chi2z,
         batched_distance,
-        batched_tc,
         batched_phic,
         batched_inclination,
         f_ref,
+        batched_tc,
     )
 
     assert hp_torch.shape[0] == 10  # entire batch is returned
