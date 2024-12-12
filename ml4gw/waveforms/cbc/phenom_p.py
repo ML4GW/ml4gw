@@ -6,6 +6,7 @@ from torch import Tensor
 
 from ml4gw.constants import MPC_SEC, MTSUN_SI, PI
 from ml4gw.types import BatchTensor, FrequencySeries1d
+from ml4gw.waveforms.conversion import rotate_y, rotate_z
 
 from .phenom_d import IMRPhenomD
 
@@ -394,16 +395,6 @@ class IMRPhenomPv2(IMRPhenomD):
 
         return interpolated.reshape(original_shape)
 
-    def ROTATEZ(self, angle: BatchTensor, x, y, z):
-        tmp_x = x * torch.cos(angle) - y * torch.sin(angle)
-        tmp_y = x * torch.sin(angle) + y * torch.cos(angle)
-        return tmp_x, tmp_y, z
-
-    def ROTATEY(self, angle, x, y, z):
-        tmp_x = x * torch.cos(angle) + z * torch.sin(angle)
-        tmp_z = -x * torch.sin(angle) + z * torch.cos(angle)
-        return tmp_x, y, tmp_z
-
     def L2PNR(
         self,
         v: BatchTensor,
@@ -497,24 +488,24 @@ class IMRPhenomPv2(IMRPhenomD):
         tmp_y = Ny_sf
         tmp_z = Nz_sf
 
-        tmp_x, tmp_y, tmp_z = self.ROTATEZ(-phiJ_sf, tmp_x, tmp_y, tmp_z)
-        tmp_x, tmp_y, tmp_z = self.ROTATEY(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_z(-phiJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_y(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
 
         kappa = -torch.arctan2(tmp_y, tmp_x)
 
         # Then we determine alpha0, by rotating LN
         tmp_x, tmp_y, tmp_z = 0, 0, 1
-        tmp_x, tmp_y, tmp_z = self.ROTATEZ(-phiJ_sf, tmp_x, tmp_y, tmp_z)
-        tmp_x, tmp_y, tmp_z = self.ROTATEY(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
-        tmp_x, tmp_y, tmp_z = self.ROTATEZ(kappa, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_z(-phiJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_y(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_z(kappa, tmp_x, tmp_y, tmp_z)
 
         alpha0 = torch.arctan2(tmp_y, tmp_x)
 
         # Finally we determine thetaJ, by rotating N
         tmp_x, tmp_y, tmp_z = Nx_sf, Ny_sf, Nz_sf
-        tmp_x, tmp_y, tmp_z = self.ROTATEZ(-phiJ_sf, tmp_x, tmp_y, tmp_z)
-        tmp_x, tmp_y, tmp_z = self.ROTATEY(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
-        tmp_x, tmp_y, tmp_z = self.ROTATEZ(kappa, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_z(-phiJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_y(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_z(kappa, tmp_x, tmp_y, tmp_z)
         Nx_Jf, Nz_Jf = tmp_x, tmp_z
         thetaJN = torch.arccos(Nz_Jf)
 
@@ -535,9 +526,9 @@ class IMRPhenomPv2(IMRPhenomD):
         Xy_sf = -torch.cos(inclination) * torch.cos(phic)
         Xz_sf = torch.sin(inclination)
         tmp_x, tmp_y, tmp_z = Xx_sf, Xy_sf, Xz_sf
-        tmp_x, tmp_y, tmp_z = self.ROTATEZ(-phiJ_sf, tmp_x, tmp_y, tmp_z)
-        tmp_x, tmp_y, tmp_z = self.ROTATEY(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
-        tmp_x, tmp_y, tmp_z = self.ROTATEZ(kappa, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_z(-phiJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_y(-thetaJ_sf, tmp_x, tmp_y, tmp_z)
+        tmp_x, tmp_y, tmp_z = rotate_z(kappa, tmp_x, tmp_y, tmp_z)
 
         # Now the tmp_a are the components of X in the J frame
         # We need the polar angle of that vector in the P,Q basis of Arun et al

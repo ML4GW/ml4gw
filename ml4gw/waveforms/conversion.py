@@ -19,40 +19,50 @@ def rotate_y(angle, x, y, z):
 def XLALSimInspiralLN(
     total_mass: BatchTensor, eta: BatchTensor, v: BatchTensor
 ):
+    """
+    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2173 # noqa
+    """
     return total_mass**2 * eta / v
 
 
 def XLALSimInspiralL_2PN(eta: BatchTensor):
+    """
+    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2181 # noqa
+    """
     return 1.5 + eta / 6.0
 
 
 def bilby_spins_to_lalsim(
-    thetajn: BatchTensor,
-    phijl: BatchTensor,
-    theta1: BatchTensor,
-    theta2: BatchTensor,
-    phi12: BatchTensor,
-    chi1: BatchTensor,
-    chi2: BatchTensor,
+    theta_jn: BatchTensor,
+    phi_jl: BatchTensor,
+    tilt_1: BatchTensor,
+    tilt_2: BatchTensor,
+    phi_12: BatchTensor,
+    a_1: BatchTensor,
+    a_2: BatchTensor,
     mass_1: BatchTensor,
     mass_2: BatchTensor,
     f_ref: float,
     phi_ref: BatchTensor,
 ):
     """
-    See
+    Converts between bilby spin and lalsimulation spin conventions.
+
+    See https://github.com/bilby-dev/bilby/blob/cccdf891e82d46319e69dbfdf48c4970b4e9a727/bilby/gw/conversion.py#L105 # noqa
+    and https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiral.c#L3594 # noqa
 
     Args:
-        thetaJN:
-            zenith angle between J and N (rad)
-        phiJL:
-           azimuthal angle of L_N on its cone about J
-        theta1:
-        theta2:
-        phi12:
-        chi1:
-        chi2:
-        mass_1:
+        theta_jn: BatchTensor,
+        phi_jl: BatchTensor,
+        tilt_1: BatchTensor,
+        tilt_2: BatchTensor,
+        phi_12: BatchTensor,
+        a_1: BatchTensor,
+        a_2: BatchTensor,
+        mass_1: BatchTensor,
+        mass_2: BatchTensor,
+        f_ref: float,
+        phi_ref: BatchTensor,
     """
 
     # check if f_ref is valid
@@ -76,12 +86,12 @@ def bilby_spins_to_lalsim(
     # separation vector, but wrt to binary separation vector
     # at phiref=0.
 
-    s1hatx = torch.sin(theta1) * torch.cos(phi_ref)
-    s1haty = torch.sin(theta1) * torch.sin(phi_ref)
-    s1hatz = torch.cos(theta1)
-    s2hatx = torch.sin(theta2) * torch.cos(phi12 + phi_ref)
-    s2haty = torch.sin(theta2) * torch.sin(phi12 + phi_ref)
-    s2hatz = torch.cos(theta2)
+    s1hatx = torch.sin(tilt_1) * torch.cos(phi_ref)
+    s1haty = torch.sin(tilt_1) * torch.sin(phi_ref)
+    s1hatz = torch.cos(tilt_1)
+    s2hatx = torch.sin(tilt_2) * torch.cos(phi_12 + phi_ref)
+    s2haty = torch.sin(tilt_2) * torch.sin(phi_12 + phi_ref)
+    s2hatz = torch.cos(tilt_2)
 
     total_mass = mass_1 + mass_2
 
@@ -95,12 +105,12 @@ def bilby_spins_to_lalsim(
     l_mag = XLALSimInspiralLN(total_mass, eta, v0) * (
         1.0 + v0 * v0 * XLALSimInspiralL_2PN(eta)
     )
-    s1x = mass_1 * mass_1 * chi1 * s1hatx
-    s1y = mass_1 * mass_1 * chi1 * s1haty
-    s1z = mass_1 * mass_1 * chi1 * s1hatz
-    s2x = mass_2 * mass_2 * chi2 * s2hatx
-    s2y = mass_2 * mass_2 * chi2 * s2haty
-    s2z = mass_2 * mass_2 * chi2 * s2hatz
+    s1x = mass_1 * mass_1 * a_1 * s1hatx
+    s1y = mass_1 * mass_1 * a_1 * s1haty
+    s1z = mass_1 * mass_1 * a_1 * s1hatz
+    s2x = mass_2 * mass_2 * a_2 * s2hatx
+    s2y = mass_2 * mass_2 * a_2 * s2haty
+    s2z = mass_2 * mass_2 * a_2 * s2hatz
     Jx = s1x + s2x
     Jy = s1y + s2y
     Jz = l_mag + s1z + s2z
@@ -127,16 +137,16 @@ def bilby_spins_to_lalsim(
     # Rotation 3: Rotate about new z-axis by phiJL to put L at desired
     # azimuth about J. Note that is currently in x-z plane towards -x
     # (i.e. azimuth=pi). Hence we rotate about z by phiJL - LAL_PI
-    lnh_x, lnh_y, lnh_z = rotate_z(phijl - PI, lnh_x, lnh_y, lnh_z)
-    s1hatx, s1haty, s1hatz = rotate_z(phijl - PI, s1hatx, s1haty, s1hatz)
-    s2hatx, s2haty, s2hatz = rotate_z(phijl - PI, s2hatx, s2haty, s2hatz)
+    lnh_x, lnh_y, lnh_z = rotate_z(phi_jl - PI, lnh_x, lnh_y, lnh_z)
+    s1hatx, s1haty, s1hatz = rotate_z(phi_jl - PI, s1hatx, s1haty, s1hatz)
+    s2hatx, s2haty, s2hatz = rotate_z(phi_jl - PI, s2hatx, s2haty, s2hatz)
 
     # The cosinus of the angle between L and N is the scalar
     # product of the two vectors.
     # We do not need to perform additional rotation to compute it.
     Nx = 0.0
-    Ny = torch.sin(thetajn)
-    Nz = torch.cos(thetajn)
+    Ny = torch.sin(theta_jn)
+    Nz = torch.cos(theta_jn)
     incl = torch.acos(Nx * lnh_x + Ny * lnh_y + Nz * lnh_z)
 
     # Rotation 4-5: Now J is along z and N in y-z plane, inclined from J
@@ -167,11 +177,11 @@ def bilby_spins_to_lalsim(
         PI / 2.0 - phiN - phi_ref, s2hatx, s2haty, s2hatz
     )
 
-    s1x = s1hatx * chi1
-    s1y = s1haty * chi1
-    s1z = s1hatz * chi1
-    s2x = s2hatx * chi2
-    s2y = s2haty * chi2
-    s2z = s2hatz * chi2
+    s1x = s1hatx * a_1
+    s1y = s1haty * a_1
+    s1z = s1hatz * a_1
+    s2x = s2hatx * a_2
+    s2y = s2haty * a_2
+    s2z = s2hatz * a_2
 
     return incl, s1x, s1y, s1z, s2x, s2y, s2z

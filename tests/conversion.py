@@ -4,7 +4,7 @@ from lalsimulation import SimInspiralTransformPrecessingNewInitialConditions
 from torch.distributions import Uniform
 
 from ml4gw.constants import MSUN
-from ml4gw.conversion import bilby_spins_to_lalsim
+from ml4gw.waveforms.conversion import bilby_spins_to_lalsim
 
 
 def test_bilby_to_lalsim_spins():
