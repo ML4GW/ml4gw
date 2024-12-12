@@ -14,7 +14,7 @@ def duration(request):
     return request.param
 
 
-@pytest.fixture(params=[2048, 4096])
+@pytest.fixture(params=[1024, 2048])
 def sample_rate(request):
     return request.param
 
@@ -29,7 +29,7 @@ def spectrogram_shape(request):
     return request.param
 
 
-@pytest.fixture(params=[12, 100])
+@pytest.fixture(params=[12, 50])
 def q(request):
     return request.param
 
@@ -39,8 +39,13 @@ def mismatch(request):
     return request.param
 
 
-@pytest.fixture(params=[128, 512])
+@pytest.fixture(params=[128, 256])
 def frequency(request):
+    return request.param
+
+
+@pytest.fixture(params=["bilinear", "bicubic", "spline"])
+def interpolation_method(request):
     return request.param
 
 
@@ -85,10 +90,33 @@ def test_singleqtransform(
     mismatch,
     norm,
     spectrogram_shape,
+    interpolation_method,
 ):
     X = torch.randn(int(duration * sample_rate))
     fseries = torch.fft.rfft(X, norm="forward")
     fseries[..., 1:] *= 2
+
+    with pytest.raises(ValueError):
+        qtransform = SingleQTransform(
+            duration,
+            sample_rate,
+            spectrogram_shape,
+            q,
+            frange=[0, torch.inf],
+            mismatch=mismatch,
+            interpolation_method="nonsense",
+        )
+
+    with pytest.raises(ValueError):
+        qtransform = SingleQTransform(
+            duration,
+            sample_rate,
+            spectrogram_shape,
+            q=1000,
+            frange=[0, torch.inf],
+            mismatch=mismatch,
+            interpolation_method="nonsense",
+        )
 
     qtransform = SingleQTransform(
         duration,
@@ -97,13 +125,14 @@ def test_singleqtransform(
         q,
         frange=[0, torch.inf],
         mismatch=mismatch,
+        interpolation_method=interpolation_method,
     )
 
     with pytest.raises(RuntimeError):
         qtransform.get_max_energy()
 
     with pytest.raises(RuntimeError):
-        qtransform.interpolate(*spectrogram_shape)
+        qtransform.interpolate()
 
     qplane = QPlane(
         q,
@@ -138,10 +167,19 @@ def test_get_qs(
     qrange = [1, 1000]
 
     qscan = QScan(
-        duration, sample_rate, spectrogram_shape, qrange, frange, mismatch
+        duration,
+        sample_rate,
+        spectrogram_shape,
+        qrange,
+        frange,
+        mismatch=mismatch,
     )
     qtiling = QTiling(
         duration, sample_rate, qrange, frange=[0, np.inf], mismatch=mismatch
     )
 
     assert np.allclose(qscan.get_qs(), qtiling.qs)
+
+    # Just check that the QScan runs
+    data = torch.randn(int(sample_rate * duration))
+    _ = qscan(data)

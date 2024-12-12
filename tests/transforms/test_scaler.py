@@ -37,6 +37,16 @@ def test_scaler_1d():
     assert torch.isclose(x, y, rtol=1e-6).all().item()
 
 
+def test_scaler_regularization():
+    scaler_non_reg = ChannelWiseScaler(num_channels=2)
+    scaler_reg = ChannelWiseScaler(num_channels=2)
+    X = torch.ones(2, 100).type(torch.float32)
+    scaler_non_reg.fit(X)
+    scaler_reg.fit(X, std_reg=1e-8)
+    assert torch.all(scaler_non_reg.std == 0)
+    assert torch.all(scaler_reg.std > 0)
+
+
 def test_scaler_2d():
     num_channels = 4
     scaler = ChannelWiseScaler(num_channels)
