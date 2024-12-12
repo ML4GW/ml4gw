@@ -8,25 +8,25 @@ from ml4gw.waveforms.conversion import bilby_spins_to_lalsim
 
 
 def test_bilby_to_lalsim_spins():
-    thetajn = Uniform(0, torch.pi).sample((100,))
-    phijl = Uniform(0, torch.pi).sample((100,))
-    theta1 = Uniform(0, torch.pi).sample((100,))
-    theta2 = Uniform(0, torch.pi).sample((100,))
-    phi12 = Uniform(0, torch.pi).sample((100,))
-    chi1 = Uniform(0, 0.99).sample((100,))
-    chi2 = Uniform(0, 0.99).sample((100,))
-    mass_1 = Uniform(5, 100).sample((100,))
-    mass_2 = Uniform(5, 100).sample((100,))
+    theta_jn = Uniform(0, torch.pi).sample((100,))
+    phi_jl = Uniform(0, 2 * torch.pi).sample((100,))
+    tilt_1 = Uniform(0, torch.pi).sample((100,))
+    tilt_2 = Uniform(0, torch.pi).sample((100,))
+    phi_12 = Uniform(0, 2 * torch.pi).sample((100,))
+    a_1 = Uniform(0, 0.99).sample((100,))
+    a_2 = Uniform(0, 0.99).sample((100,))
+    mass_1 = Uniform(3, 100).sample((100,))
+    mass_2 = Uniform(3, 100).sample((100,))
     f_ref = 40.0
     phi_ref = Uniform(0, torch.pi).sample((100,))
     incl, s1x, s1y, s1z, s2x, s2y, s2z = bilby_spins_to_lalsim(
-        thetajn,
-        phijl,
-        theta1,
-        theta2,
-        phi12,
-        chi1,
-        chi2,
+        theta_jn,
+        phi_jl,
+        tilt_1,
+        tilt_2,
+        phi_12,
+        a_1,
+        a_2,
         mass_1,
         mass_2,
         f_ref,
@@ -43,13 +43,13 @@ def test_bilby_to_lalsim_spins():
             lal_s2y,
             lal_s2z,
         ) = SimInspiralTransformPrecessingNewInitialConditions(
-            thetajn[i].item(),
-            phijl[i].item(),
-            theta1[i].item(),
-            theta2[i].item(),
-            phi12[i].item(),
-            chi1[i].item(),
-            chi2[i].item(),
+            theta_jn[i].item(),
+            phi_jl[i].item(),
+            tilt_1[i].item(),
+            tilt_2[i].item(),
+            phi_12[i].item(),
+            a_1[i].item(),
+            a_2[i].item(),
             mass_1[i].item() * MSUN,
             mass_2[i].item() * MSUN,
             f_ref,
