@@ -66,9 +66,9 @@ def bilby_spins_to_lalsim(
     """
 
     # check if f_ref is valid
-    if f_ref == 0.0:
+    if f_ref <= 0.0:
         raise ValueError(
-            "f_ref = 0 is invalid. "
+            "f_ref <= 0 is invalid. "
             "Please pass in the starting GW frequency instead."
         )
 
