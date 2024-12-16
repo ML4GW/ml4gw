@@ -590,18 +590,19 @@ class IMRPhenomD(TaylorF2):
         return fRD, fDM
 
     def fmaxCalc(self, fRD, fDM, gamma2, gamma3):
-        res = torch.zeros_like(gamma2)
-        res = torch.abs(fRD + (-fDM * gamma3) / gamma2) * (gamma2 > 1).to(
-            torch.int
-        ) + torch.abs(
-            fRD
-            + (fDM * (-1 + torch.sqrt(1 - gamma2 * gamma2)) * gamma3) / gamma2
-        ) * (
-            gamma2 <= 1
-        ).to(
-            torch.int
-        )
-        return res
+        mask = gamma2 <= 1
+        # calculate result for gamma2 <= 1 case
+        sqrt_term = torch.sqrt(1 - gamma2.pow(2))
+        result_case1 = fRD + (fDM * (-1 + sqrt_term) * gamma3) / gamma2
+
+        # calculate result for gamma2 > 1 case
+        # i.e. don't add sqrt term
+        result_case2 = fRD + (-fDM * gamma3) / gamma2
+
+        # combine results using mask
+        result = torch.where(mask, result_case1, result_case2)
+
+        return torch.abs(result)
 
     def _linear_interp_finspin(self, finspin):
         # chi is a batch of final spins i.e. torch.Size([n])
