@@ -90,6 +90,7 @@ class IMRPhenomD(TaylorF2):
         total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6
         mass_1 = total_mass / (1 + mass_ratio)
         mass_2 = mass_1 * mass_ratio
+
         eta = (chirp_mass / total_mass) ** (5 / 3)
         eta2 = eta * eta
         Seta = torch.sqrt(1.0 - 4.0 * eta)
@@ -122,8 +123,6 @@ class IMRPhenomD(TaylorF2):
 
         amp, _ = self.phenom_d_amp(
             Mf,
-            mass_1,
-            mass_2,
             eta,
             eta2,
             Seta,
@@ -132,7 +131,6 @@ class IMRPhenomD(TaylorF2):
             chi12,
             chi22,
             xi,
-            distance,
         )
 
         amp_0 = self.taylorf2_amplitude(
@@ -146,8 +144,6 @@ class IMRPhenomD(TaylorF2):
     def phenom_d_amp(
         self,
         Mf,
-        mass_1,
-        mass_2,
         eta,
         eta2,
         Seta,
@@ -156,7 +152,6 @@ class IMRPhenomD(TaylorF2):
         chi12,
         chi22,
         xi,
-        distance,
     ):
         ins_amp, ins_Damp = self.phenom_d_inspiral_amp(
             Mf, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
@@ -213,6 +208,7 @@ class IMRPhenomD(TaylorF2):
         gamma3 = self.gamma3_fun(eta, eta2, xi)
 
         fpeak = self.fmaxCalc(fRD, fDM, gamma2, gamma3)
+
         Mf3 = (torch.ones_like(Mf).mT * fpeak).mT
         dfx = 0.5 * (Mf3 - Mf1)
         Mf2 = Mf1 + dfx
@@ -221,6 +217,7 @@ class IMRPhenomD(TaylorF2):
             Mf1, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
         )
         v3, d2 = self.phenom_d_mrd_amp(Mf3, eta, eta2, chi1, chi2, xi)
+
         v2 = (
             torch.ones_like(Mf).mT * self.AmpIntColFitCoeff(eta, eta2, xi)
         ).mT
@@ -248,7 +245,9 @@ class IMRPhenomD(TaylorF2):
         gamma3 = self.gamma3_fun(eta, eta2, xi)
         fDMgamma3 = fDM * gamma3
         pow2_fDMgamma3 = (torch.ones_like(Mf).mT * fDMgamma3 * fDMgamma3).mT
+
         fminfRD = Mf - (torch.ones_like(Mf).mT * fRD).mT
+
         exp_times_lorentzian = torch.exp(fminfRD.mT * gamma2 / fDMgamma3).mT
         exp_times_lorentzian *= fminfRD**2 + pow2_fDMgamma3
 
@@ -257,6 +256,7 @@ class IMRPhenomD(TaylorF2):
             fminfRD * fminfRD + pow2_fDMgamma3
         ).mT - (gamma2 * gamma1)
         Damp = Damp.mT / exp_times_lorentzian
+
         return amp, Damp
 
     def phenom_d_inspiral_amp(
@@ -580,7 +580,7 @@ class IMRPhenomD(TaylorF2):
         return ins_phasing, ins_Dphasing
 
     def fring_fdamp(self, eta, eta2, chi1, chi2):
-        finspin = self.FinalSpin0815(eta, eta2, chi1, chi2)
+        finspin = self.FinalSpin0815(eta, chi1, chi2)
         Erad = self.PhenomInternal_EradRational0815(eta, eta2, chi1, chi2)
 
         fRD, fDM = self._linear_interp_finspin(finspin)
@@ -590,18 +590,19 @@ class IMRPhenomD(TaylorF2):
         return fRD, fDM
 
     def fmaxCalc(self, fRD, fDM, gamma2, gamma3):
-        res = torch.zeros_like(gamma2)
-        res = torch.abs(fRD + (-fDM * gamma3) / gamma2) * (gamma2 > 1).to(
-            torch.int
-        ) + torch.abs(
-            fRD
-            + (fDM * (-1 + torch.sqrt(1 - gamma2 * gamma2)) * gamma3) / gamma2
-        ) * (
-            gamma2 <= 1
-        ).to(
-            torch.int
-        )
-        return res
+        mask = gamma2 <= 1
+        # calculate result for gamma2 <= 1 case
+        sqrt_term = torch.sqrt(1 - gamma2.pow(2))
+        result_case1 = fRD + (fDM * (-1 + sqrt_term) * gamma3) / gamma2
+
+        # calculate result for gamma2 > 1 case
+        # i.e. don't add sqrt term
+        result_case2 = fRD + (-fDM * gamma3) / gamma2
+
+        # combine results using mask
+        result = torch.where(mask, result_case1, result_case2)
+
+        return torch.abs(result)
 
     def _linear_interp_finspin(self, finspin):
         # chi is a batch of final spins i.e. torch.Size([n])
@@ -1083,7 +1084,7 @@ class IMRPhenomD(TaylorF2):
             * xi
         )
 
-    def FinalSpin0815(self, eta, eta2, chi1, chi2):
+    def FinalSpin0815(self, eta, chi1, chi2):
         Seta = torch.sqrt(1.0 - 4.0 * eta)
         Seta = torch.nan_to_num(Seta)  # avoid nan around eta = 0.25
         m1 = 0.5 * (1.0 + Seta)
@@ -1091,6 +1092,10 @@ class IMRPhenomD(TaylorF2):
         m1s = m1 * m1
         m2s = m2 * m2
         s = m1s * chi1 + m2s * chi2
+        return self.FinalSpin0815_s(eta, s)
+
+    def FinalSpin0815_s(self, eta, s):
+        eta2 = eta * eta
         eta3 = eta2 * eta
         s2 = s * s
         s3 = s2 * s

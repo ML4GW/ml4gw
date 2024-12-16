@@ -4,6 +4,7 @@ from jaxtyping import Float
 from ml4gw.constants import MPC_SEC, MTSUN_SI, PI
 from ml4gw.constants import EulerGamma as GAMMA
 from ml4gw.types import BatchTensor, FrequencySeries1d
+from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
 
 
 class TaylorF2(torch.nn.Module):
@@ -31,7 +32,7 @@ class TaylorF2(torch.nn.Module):
             chirp_mass:
                 Chirp mass in solar masses
             mass_ratio:
-                Mass ratio m1/m2
+                Mass ratio m1 / m2, which by convention is <= 1.
             chi1:
                 Spin of m1
             chi2:
@@ -60,8 +61,10 @@ class TaylorF2(torch.nn.Module):
             or phic.shape[0] != inclination.shape[0]
         ):
             raise RuntimeError("Tensors should have same batch size")
-        mass2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
-        mass1 = mass_ratio * mass2
+
+        mass1, mass2 = chirp_mass_and_mass_ratio_to_components(
+            chirp_mass, mass_ratio
+        )
         cfac = torch.cos(inclination)
         pfac = 0.5 * (1.0 + cfac * cfac)
 
