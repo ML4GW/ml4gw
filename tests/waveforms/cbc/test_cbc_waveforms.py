@@ -406,9 +406,6 @@ def test_phenom_p():
         hp_lal_data = hp_lal.data.data[lal_mask]
         hc_lal_data = hc_lal.data.data[lal_mask]
 
-        np.savetxt("hp_lal_data", hp_lal_data.real)
-        np.savetxt("hp_ml4gw_data", hp_ml4gw.real.numpy())
-
         assert np.allclose(
             1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
         )
