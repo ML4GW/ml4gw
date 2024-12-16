@@ -7,6 +7,7 @@ from astropy import units as u
 from torch.distributions import Uniform
 
 import ml4gw.waveforms as waveforms
+from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
 
 
 @pytest.fixture(params=[256, 1024, 2048])
@@ -108,8 +109,9 @@ def test_taylor_f2(
     theta_jn,
     sample_rate,
 ):
-    mass_2 = chirp_mass * (1 + mass_ratio) ** 0.2 / mass_ratio**0.6
-    mass_1 = mass_ratio * mass_2
+    mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
+        chirp_mass, mass_ratio
+    )
 
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
@@ -235,9 +237,9 @@ def test_phenom_d(
     sample_rate,
     f_ref,
 ):
-    total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6
-    mass_1 = total_mass / (1 + mass_ratio)
-    mass_2 = mass_1 * mass_ratio
+    mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
+        chirp_mass, mass_ratio
+    )
 
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
