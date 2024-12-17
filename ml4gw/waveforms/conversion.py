@@ -32,6 +32,23 @@ def XLALSimInspiralL_2PN(eta: BatchTensor):
     return 1.5 + eta / 6.0
 
 
+def chirp_mass_and_mass_ratio_to_components(
+    chirp_mass: BatchTensor, mass_ratio: BatchTensor
+):
+    """
+    Compute component masses from chirp mass and mass ratio.
+    Args:
+        chirp_mass: Tensor of chirp mass values
+        mass_ratio:
+            Tensor of mass ratio values, `m2 / m1`,
+            where m1 >= m2, so that mass_ratio <= 1
+    """
+    total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6
+    mass_1 = total_mass / (1 + mass_ratio)
+    mass_2 = mass_1 * mass_ratio
+    return mass_1, mass_2
+
+
 def bilby_spins_to_lalsim(
     theta_jn: BatchTensor,
     phi_jl: BatchTensor,
