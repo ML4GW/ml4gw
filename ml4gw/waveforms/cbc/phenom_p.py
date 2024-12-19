@@ -1,19 +1,17 @@
 """
-    Based on the JAX implementation of IMRPhenomPv2 from 
+    Based on the JAX implementation of IMRPhenomPv2 from
     https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
 """
 
+from types import BatchTensor, FrequencySeries1d
 from typing import Dict, Optional, Tuple
 
 import torch
-from jaxtyping import Float
-from torch import Tensor
-
 from constants import MPC_SEC, MTSUN_SI, PI
-from types import BatchTensor, FrequencySeries1d
 from conversion import rotate_y, rotate_z
-
+from jaxtyping import Float
 from phenom_d import IMRPhenomD
+from torch import Tensor
 
 
 class IMRPhenomPv2(IMRPhenomD):
@@ -339,7 +337,7 @@ class IMRPhenomPv2(IMRPhenomD):
         hPhenom = Amp * (torch.exp(-1j * phase))
 
         # calculating derivative of phase with frequency following
-        # https://git.ligo.org/lscsoft/lalsuite/-/blame/master/lalsimulation/lib/LALSimIMRPhenomP.c?page=2#L1057
+        # https://git.ligo.org/lscsoft/lalsuite/-/blame/master/lalsimulation/lib/LALSimIMRPhenomP.c?page=2#L1057 # noqa: E501
         n_fixed = 1000
         x = torch.linspace(0.8, 1.2, n_fixed, device=fRD.device)
         fRDs = torch.outer(fRD, x)
