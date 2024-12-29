@@ -7,7 +7,10 @@ from astropy import units as u
 from torch.distributions import Uniform
 
 import ml4gw.waveforms as waveforms
-from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
+from ml4gw.waveforms.conversion import (
+    bilby_spins_to_lalsim,
+    chirp_mass_and_mass_ratio_to_components,
+)
 
 
 @pytest.fixture(params=[256, 1024, 2048])
@@ -299,7 +302,6 @@ def test_phenom_d(
         )
 
         hc_ml4gw = hc_ml4gw[0]
-
         hp_ml4gw = hp_ml4gw[0]
 
         hp_lal_data = hp_lal.data.data[lal_mask]
@@ -322,41 +324,64 @@ def test_phenom_d(
         )
 
 
-def test_phenom_p():
-    chirp_mass = torch.tensor([15.0, 30.0])
-    mass_ratio = torch.tensor([0.99, 0.5])
-    chi1z = torch.tensor([0.0, 0.5])
-    chi2z = torch.tensor([-0.1, 0.1])
-    distance = torch.tensor([100.0, 1000.0])
-    sample_rate = 2048
+def test_phenom_p(
+    chirp_mass,
+    mass_ratio,
+    distance,
+    phase,
+    sample_rate,
+    f_ref,
+    theta_jn,
+    phi_jl,
+    tilt_1,
+    tilt_2,
+    phi_12,
+    a_1,
+    a_2,
+):
+    mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
+        chirp_mass, mass_ratio
+    )
+    (
+        inclination,
+        chi1x,
+        chi1y,
+        chi1z,
+        chi2x,
+        chi2y,
+        chi2z,
+    ) = bilby_spins_to_lalsim(
+        theta_jn,
+        phi_jl,
+        tilt_1,
+        tilt_2,
+        phi_12,
+        a_1,
+        a_2,
+        mass_1,
+        mass_2,
+        f_ref,
+        phase,
+    )
 
-    mass_2 = chirp_mass * (1 + mass_ratio) ** 0.2 / mass_ratio**0.6
-    mass_1 = mass_2 * mass_ratio
-
-    f_ref = 20.0
-    phic = 0.0
     tc = 0.0
-    inclination = 0.0
 
-    for i in range(chirp_mass.shape[0]):
-        m1, m2 = mass_1[i], mass_2[i]
-        mr = mass_ratio[i]
-        if m2 > m1:
-            m1, m2 = m2, m1
-            mr = 1 / mr
+    # compare each waveform with lalsimulation
+    for i in range(len(chirp_mass)):
 
+        # construct lalinference params
         params = dict(
-            m1=m1.item() * lal.MSUN_SI,
-            m2=m2.item() * lal.MSUN_SI,
-            S1x=0,
-            S1y=0,
+            m1=mass_1[i].item() * lal.MSUN_SI,
+            m2=mass_2[i].item() * lal.MSUN_SI,
+            S1x=chi1x[i].item(),
+            S1y=chi1y[i].item(),
             S1z=chi1z[i].item(),
-            S2x=0,
-            S2y=0,
+            S2x=chi2x[i].item(),
+            S2y=chi2y[i].item(),
             S2z=chi2z[i].item(),
             distance=(distance[i].item() * u.Mpc).to("m").value,
-            inclination=inclination,
-            phiRef=phic,
+            inclination=inclination[i].item(),
+            phiRef=phase[i].item(),
             longAscNodes=0.0,
             eccentricity=0.0,
             meanPerAno=0.0,
@@ -388,16 +413,16 @@ def test_phenom_p():
         hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
             torch_freqs,
             chirp_mass[i][None],
-            torch.tensor([mr]),
-            torch.tensor([0.0]),
-            torch.tensor([0.0]),
+            mass_ratio[i][None],
+            chi1x[i][None],
+            chi1y[i][None],
             chi1z[i][None],
-            torch.tensor([0.0]),
-            torch.tensor([0.0]),
+            chi2x[i][None],
+            chi2y[i][None],
             chi2z[i][None],
             distance[i][None],
-            torch.tensor([phic]),
-            torch.tensor([inclination]),
+            phase[i][None],
+            inclination[i][None],
             f_ref,
             torch.tensor([tc]),
         )
@@ -409,14 +434,14 @@ def test_phenom_p():
         hc_lal_data = hc_lal.data.data[lal_mask]
 
         assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
+            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
         )
         assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
+            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
         )
         assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
+            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
         )
         assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
+            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
         )
