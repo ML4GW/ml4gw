@@ -324,16 +324,37 @@ class IMRPhenomPv2(IMRPhenomD):
         """
         M_s = M * MTSUN_SI
         Mf = torch.outer(M_s, fs)
-        fRD, _ = self.phP_get_fRD_fdamp(m1, m2, chi1, chi2, chip)
-        phase, _ = self.phenom_d_phase(Mf, m1, m2, eta, eta2, chi1, chi2, xi)
+        fRD, fDM = self.phP_get_fRD_fdamp(m1, m2, chi1, chi2, chip)
+        # pass M_s * ringdown and M_s * damping frequency to PhenomD functions
+        MfRD, MfDM = M_s * fRD, M_s * fDM
+
+        phase, _ = self.phenom_d_phase(
+            Mf, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
+        )
         phase = (phase.mT - (phic + PI / 4.0)).mT
+        # why are they subtracting 2*phic?
+        # https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimIMRPhenomP.c#L1316
+
         Amp = self.phenom_d_amp(
-            Mf, m1, m2, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, distance
+            Mf,
+            m1,
+            m2,
+            eta,
+            eta2,
+            Seta,
+            chi1,
+            chi2,
+            chi12,
+            chi22,
+            xi,
+            distance,
+            MfRD,
+            MfDM,
         )[0]
         Amp0 = self.get_Amp0(Mf, eta)
         dist_s = distance * MPC_SEC
         Amp = ((Amp0 * Amp).mT * (M_s**2.0) / dist_s).mT
-        # phase -= 2. * phic; # line 1316 ???
+
         hPhenom = Amp * (torch.exp(-1j * phase))
 
         # calculating derivative of phase with frequency following
@@ -346,7 +367,7 @@ class IMRPhenomPv2(IMRPhenomD):
         for i in range(fRD.shape[0]):
             MfRDs[i, :] = torch.outer(M_s, fRDs[i, :])[i, :]
         RD_phase = self.phenom_d_phase(
-            MfRDs, m1, m2, eta, eta2, chi1, chi2, xi
+            MfRDs, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
         )[0]
         diff = torch.diff(RD_phase, axis=1)
         diffRDphase = (diff[:, 1:] + diff[:, :-1]) / (
