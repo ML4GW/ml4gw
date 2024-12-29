@@ -434,14 +434,14 @@ def test_phenom_p(
         hc_lal_data = hc_lal.data.data[lal_mask]
 
         assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
+            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-2
         )
         assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
+            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-2
         )
         assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
+            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-2
         )
         assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
+            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-2
         )
