@@ -1,13 +1,21 @@
+"""
+    Based on the JAX implementation of IMRPhenomPv2 from
+    https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
+"""
+
 from typing import Dict, Optional, Tuple
 
 import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.constants import MPC_SEC, MTSUN_SI, PI
-from ml4gw.types import BatchTensor, FrequencySeries1d
-from ml4gw.waveforms.conversion import rotate_y, rotate_z
-
+from ...constants import MPC_SEC, MTSUN_SI, PI
+from ...types import BatchTensor, FrequencySeries1d
+from ..conversion import (
+    chirp_mass_and_mass_ratio_to_components,
+    rotate_y,
+    rotate_z,
+)
 from .phenom_d import IMRPhenomD
 
 
@@ -75,15 +83,15 @@ class IMRPhenomPv2(IMRPhenomD):
         if tc is None:
             tc = torch.zeros_like(chirp_mass)
 
-        m2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
-        m1 = m2 * mass_ratio
+        m1, m2 = chirp_mass_and_mass_ratio_to_components(
+            chirp_mass, mass_ratio
+        )
 
         # # flip m1 m2. For some reason LAL uses this convention for PhenomPv2
         m1, m2 = m2, m1
         s1x, s2x = s2x, s1x
         s1y, s2y = s2y, s1y
         s1z, s2z = s2z, s1z
-
         (
             chi1_l,
             chi2_l,
@@ -320,42 +328,61 @@ class IMRPhenomPv2(IMRPhenomD):
         phic: Orbital phase at peak of the underlying non precessing model
         M: Total mass (Solar masses)
         """
-
         M_s = M * MTSUN_SI
         Mf = torch.outer(M_s, fs)
-        fRD, _ = self.phP_get_fRD_fdamp(m1, m2, chi1, chi2, chip)
+        fRD, fDM = self.phP_get_fRD_fdamp(m1, m2, chi1, chi2, chip)
+        # pass M_s * ringdown and M_s * damping frequency to PhenomD functions
+        MfRD, MfDM = M_s * fRD, M_s * fDM
 
-        phase, _ = self.phenom_d_phase(Mf, m1, m2, eta, eta2, chi1, chi2, xi)
+        phase, _ = self.phenom_d_phase(
+            Mf, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
+        )
         phase = (phase.mT - (phic + PI / 4.0)).mT
+        # why are they subtracting 2*phic?
+        # https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimIMRPhenomP.c#L1316
+
         Amp = self.phenom_d_amp(
-            Mf, m1, m2, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, distance
+            Mf,
+            m1,
+            m2,
+            eta,
+            eta2,
+            Seta,
+            chi1,
+            chi2,
+            chi12,
+            chi22,
+            xi,
+            distance,
+            MfRD,
+            MfDM,
         )[0]
         Amp0 = self.get_Amp0(Mf, eta)
         dist_s = distance * MPC_SEC
         Amp = ((Amp0 * Amp).mT * (M_s**2.0) / dist_s).mT
-        # phase -= 2. * phic; # line 1316 ???
+
         hPhenom = Amp * (torch.exp(-1j * phase))
 
-        fRDs = torch.outer(
-            fRD, torch.linspace(0.5, 1.5, 101, device=fRD.device)
-        )
-        delta_fRds = torch.median(torch.diff(fRDs, axis=1), axis=1)[0]
+        # calculating derivative of phase with frequency following
+        # https://git.ligo.org/lscsoft/lalsuite/-/blame/master/lalsimulation/lib/LALSimIMRPhenomP.c?page=2#L1057 # noqa: E501
+        n_fixed = 1000
+        x = torch.linspace(0.8, 1.2, n_fixed, device=fRD.device)
+        fRDs = torch.outer(fRD, x)
+        delta_fRds = (1.2 * fRD - 0.8 * fRD) / (n_fixed - 1)
         MfRDs = torch.zeros_like(fRDs)
         for i in range(fRD.shape[0]):
             MfRDs[i, :] = torch.outer(M_s, fRDs[i, :])[i, :]
         RD_phase = self.phenom_d_phase(
-            MfRDs, m1, m2, eta, eta2, chi1, chi2, xi
+            MfRDs, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
         )[0]
         diff = torch.diff(RD_phase, axis=1)
         diffRDphase = (diff[:, 1:] + diff[:, :-1]) / (
             2 * delta_fRds.unsqueeze(1)
         )
-        diffRDphase = -diffRDphase[:, 50]
-        # MfRD = torch.outer(M_s, fRD)
-        # Dphase = torch.diag(
-        #     -self.phenom_d_phase(
-        #         MfRD, m1, m2, eta, eta2, chi1, chi2, xi)[1] * M_s
-        # ).view(-1, 1)
+        # interpolate at x = 1, as thats the same as f = fRD
+        diffRDphase = -self.interpolate(
+            torch.tensor([1]), x[1:-1], diffRDphase
+        )
         return hPhenom, diffRDphase
 
     # Utility functions
@@ -752,9 +779,9 @@ class IMRPhenomPv2(IMRPhenomD):
         eta2 = eta * eta
         # m1 > m2, the convention used in phenomD
         # (not the convention of internal phenomP)
-        mass_ratio = m1 / m2
+        q_factor = m1 / M
         af_parallel = self.FinalSpin0815(eta, eta2, chi1_l, chi2_l)
-        Sperp = chip * mass_ratio * mass_ratio
+        Sperp = chip * q_factor * q_factor
         af = torch.copysign(
             torch.ones_like(af_parallel), af_parallel
         ) * torch.sqrt(Sperp * Sperp + af_parallel * af_parallel)
