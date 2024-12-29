@@ -3,15 +3,16 @@
     https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
 """
 
-from types import BatchTensor, FrequencySeries1d
 from typing import Dict, Optional, Tuple
 
 import torch
-from constants import MPC_SEC, MTSUN_SI, PI
-from conversion import rotate_y, rotate_z
 from jaxtyping import Float
-from phenom_d import IMRPhenomD
 from torch import Tensor
+
+from ...constants import MPC_SEC, MTSUN_SI, PI
+from ...types import BatchTensor, FrequencySeries1d
+from ..conversion import rotate_y, rotate_z
+from .phenom_d import IMRPhenomD
 
 
 class IMRPhenomPv2(IMRPhenomD):
