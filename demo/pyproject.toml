@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "ml4gw-tutorial"
+version = "0.1.0"
+description = "Notebook introducing aspects of the ml4gw library"
+authors = ["William Benoit"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+ml4gw = "0.6.1"
+matplotlib = "3.10.0"
+h5py = "^3.12"
+torchmetrics = "1.6.0"
+lightning = "2.4.0"
+rich = ">=10.2.2"
+jupyter = "^1.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
