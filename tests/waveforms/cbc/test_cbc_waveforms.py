@@ -14,7 +14,7 @@ from ml4gw.waveforms.conversion import (
 
 # number of samples to draw from
 # the distributions for testing
-N_SAMPLES = 10
+N_SAMPLES = 100
 
 
 @pytest.fixture(params=[256, 1024, 2048])
