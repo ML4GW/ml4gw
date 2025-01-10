@@ -12,9 +12,10 @@ from ml4gw.waveforms.conversion import (
     chirp_mass_and_mass_ratio_to_components,
 )
 
-# number of samples to draw from 
+# number of samples to draw from
 # the distributions for testing
 N_SAMPLES = 10
+
 
 @pytest.fixture(params=[256, 1024, 2048])
 def sample_rate(request):
@@ -73,6 +74,7 @@ def phi_jl(request):
 def distance(request):
     dist = Uniform(100, 300)
     return dist.sample((N_SAMPLES,))
+
 
 @pytest.fixture()
 def distance_far(request):
@@ -537,7 +539,7 @@ def test_phenom_p(
         torch.tensor([tc]).repeat(10),
     )
 
-    # check batch against lal 
+    # check batch against lal
     assert np.allclose(
         1e21 * hp_lal_data.real, 1e21 * hp_ml4gw[0].real.numpy(), atol=1e-2
     )
@@ -554,15 +556,22 @@ def test_phenom_p(
     # check batch against each other
     for i in range(9):
         assert np.allclose(
-            1e21 * hp_ml4gw[0].real.numpy(), 1e21 * hp_ml4gw[i + 1].real.numpy(), atol=1e-2
+            1e21 * hp_ml4gw[0].real.numpy(),
+            1e21 * hp_ml4gw[i + 1].real.numpy(),
+            atol=1e-2,
         )
         assert np.allclose(
-            1e21 * hp_ml4gw[0].imag.numpy(), 1e21 * hp_ml4gw[i + 1].imag.numpy(), atol=1e-2
+            1e21 * hp_ml4gw[0].imag.numpy(),
+            1e21 * hp_ml4gw[i + 1].imag.numpy(),
+            atol=1e-2,
         )
         assert np.allclose(
-            1e21 * hc_ml4gw[0].real.numpy(), 1e21 * hc_ml4gw[i + 1].real.numpy(), atol=1e-2
+            1e21 * hc_ml4gw[0].real.numpy(),
+            1e21 * hc_ml4gw[i + 1].real.numpy(),
+            atol=1e-2,
         )
         assert np.allclose(
-            1e21 * hc_ml4gw[0].imag.numpy(), 1e21 * hc_ml4gw[i + 1].imag.numpy(), atol=1e-2
+            1e21 * hc_ml4gw[0].imag.numpy(),
+            1e21 * hc_ml4gw[i + 1].imag.numpy(),
+            atol=1e-2,
         )
-
