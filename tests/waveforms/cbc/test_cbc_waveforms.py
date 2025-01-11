@@ -386,7 +386,7 @@ def test_phenom_p(
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
 
-        # test far (> 300 Mpc) waveforms (O(1e-3) agreement)
+        # test far (> 400 Mpc) waveforms (O(1e-3) agreement)
 
         # construct lalinference params
         params = dict(
@@ -465,7 +465,7 @@ def test_phenom_p(
             1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
         )
 
-        # test close (< 300 Mpc) waveforms  (O(1e-2) agreement)
+        # test close (< 400 Mpc) waveforms  (O(1e-2) agreement)
         params["distance"] = (distance_close[i].item() * u.Mpc).to("m").value
         hp_lal, hc_lal = lalsimulation.SimInspiralChooseFDWaveform(**params)
 
