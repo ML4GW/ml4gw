@@ -72,7 +72,7 @@ def phi_jl(request):
 
 @pytest.fixture()
 def distance(request):
-    dist = Uniform(100, 300)
+    dist = Uniform(100, 3000)
     return dist.sample((N_SAMPLES,))
 
 
