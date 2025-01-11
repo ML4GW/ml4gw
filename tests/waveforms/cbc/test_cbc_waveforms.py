@@ -78,13 +78,13 @@ def distance(request):
 
 @pytest.fixture()
 def distance_far(request):
-    dist = Uniform(300, 3000)
+    dist = Uniform(400, 3000)
     return dist.sample((N_SAMPLES,))
 
 
 @pytest.fixture()
 def distance_close(request):
-    dist = Uniform(100, 300)
+    dist = Uniform(100, 400)
     return dist.sample((N_SAMPLES,))
 
 
