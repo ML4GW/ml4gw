@@ -32,6 +32,10 @@ class WhitenModuleTest:
     def highpass(self, request):
         return request.param
 
+    @pytest.fixture(params=[None, 512])
+    def lowpass(self, request):
+        return request.param
+
     def get_psds(self, background, fftlength):
         nperseg = int(fftlength * self.sample_rate)
         window = torch.hann_window(nperseg)
@@ -52,14 +56,14 @@ class TestWhiten(WhitenModuleTest):
     fduration = 1
 
     @pytest.fixture
-    def transform(self, highpass):
-        return Whiten(self.fduration, self.sample_rate, highpass)
+    def transform(self, highpass, lowpass):
+        return Whiten(self.fduration, self.sample_rate, highpass, lowpass)
 
     def test_init(self, transform):
         assert transform.window.size(0) == 8192
 
     def test_forward(
-        self, transform, X, background, highpass, validate_whitened
+        self, transform, X, background, highpass, lowpass, validate_whitened
     ):
         background = self.get_psds(background, 2)
         background = torch.stack(background)
@@ -70,7 +74,11 @@ class TestWhiten(WhitenModuleTest):
             X.size(-1) - self.fduration * self.sample_rate,
         )
         validate_whitened(
-            whitened, highpass, self.sample_rate, 1 / self.whiten_length
+            whitened,
+            highpass,
+            lowpass,
+            self.sample_rate,
+            1 / self.whiten_length,
         )
 
 
@@ -102,7 +110,7 @@ class TestFixedWhiten(WhitenModuleTest):
         assert str(exc.value).startswith("Must fit parameters")
 
     def test_fit_time_domain(
-        self, transform, background, X, highpass, validate_whitened
+        self, transform, background, X, highpass, lowpass, validate_whitened
     ):
         # ensure that calling with the wrong number
         # of background channels raises an error
@@ -112,7 +120,9 @@ class TestFixedWhiten(WhitenModuleTest):
 
         # fit to the background and ensure that the
         # parameter values have been set to nonzero values
-        transform.fit(2, *background, fftlength=2, highpass=highpass)
+        transform.fit(
+            2, *background, fftlength=2, highpass=highpass, lowpass=lowpass
+        )
         assert (transform.psd != 0).all().item()
         assert (transform.fduration == 2).item()
 
@@ -120,11 +130,15 @@ class TestFixedWhiten(WhitenModuleTest):
         # that the values come out as expected
         whitened = transform(X)
         validate_whitened(
-            whitened, highpass, self.sample_rate, 1 / self.whiten_length
+            whitened,
+            highpass,
+            lowpass,
+            self.sample_rate,
+            1 / self.whiten_length,
         )
 
     def test_fit_freq_domain(
-        self, transform, background, X, highpass, validate_whitened
+        self, transform, background, X, highpass, lowpass, validate_whitened
     ):
         # first check if fftlength == self.whiten_length,
         # the fit psd should match the psds used to fit
@@ -134,7 +148,7 @@ class TestFixedWhiten(WhitenModuleTest):
         with patch(
             "ml4gw.transforms.whitening"
             ".spectral.truncate_inverse_power_spectrum",
-            new=lambda x, _, __, ___: x,
+            new=lambda x, _, __, ___, ____: x,
         ):
             transform.fit(2, *psds)
         assert (transform.fduration == 2).item()
@@ -144,9 +158,9 @@ class TestFixedWhiten(WhitenModuleTest):
             )
 
         # now do a fit with a more realistic
-        # fftlength, fduration, and highpass
+        # fftlength, fduration, highpass, and lowpass
         psds = self.get_psds(background, 2)
-        transform.fit(2, *psds, highpass=highpass)
+        transform.fit(2, *psds, highpass=highpass, lowpass=lowpass)
         assert (transform.psd != 0).all().item()
         assert (transform.fduration == 2).item()
 
@@ -154,7 +168,11 @@ class TestFixedWhiten(WhitenModuleTest):
         # that the values come out as expected
         whitened = transform(X)
         validate_whitened(
-            whitened, highpass, self.sample_rate, 1 / self.whiten_length
+            whitened,
+            highpass,
+            lowpass,
+            self.sample_rate,
+            1 / self.whiten_length,
         )
 
     def test_io(self, transform, background, tmp_path):
