@@ -45,6 +45,10 @@ class Whiten(torch.nn.Module):
             Cutoff frequency to apply highpass filtering
             during whitening. If left as `None`, no highpass
             filtering will be performed.
+        lowpass:
+            Cutoff frequency to apply lowpass filtering
+            during whitening. If left as `None`, no lowpass
+            filtering will be performed.
     """
 
     def __init__(
@@ -52,11 +56,13 @@ class Whiten(torch.nn.Module):
         fduration: float,
         sample_rate: float,
         highpass: Optional[float] = None,
+        lowpass: Optional[float] = None,
     ) -> None:
         super().__init__()
         self.fduration = fduration
         self.sample_rate = sample_rate
         self.highpass = highpass
+        self.lowpass = lowpass
 
         # register a window up front to signify our
         # fduration at inference time
@@ -104,6 +110,7 @@ class Whiten(torch.nn.Module):
             fduration=self.window,
             sample_rate=self.sample_rate,
             highpass=self.highpass,
+            lowpass=self.lowpass,
         )
 
 
@@ -153,6 +160,7 @@ class FixedWhiten(FittableSpectralTransform):
         *background: Union[TimeSeries1d, FrequencySeries1d],
         fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
+        lowpass: Optional[float] = None,
         overlap: Optional[float] = None
     ) -> None:
         """
@@ -200,6 +208,13 @@ class FixedWhiten(FittableSpectralTransform):
                 in the frequency bins below this value to 0.
                 If left as `None`, the fit filter won't have any
                 highpass filtering properties.
+            lowpass:
+                Cutoff frequency, in Hz, used for lowpass filtering
+                with the fit whitening filter. This is achieved by
+                setting the frequency response of the fit PSDs
+                in the frequency bins above this value to 0.
+                If left as `None`, the fit filter won't have any
+                lowpass filtering properties.
             overlap:
                 Overlap between FFT frames used to convert
                 time-domain data to the frequency domain via
@@ -224,7 +239,7 @@ class FixedWhiten(FittableSpectralTransform):
             x = x.view(1, 1, -1)
 
             psd = spectral.truncate_inverse_power_spectrum(
-                x, fduration, self.sample_rate, highpass
+                x, fduration, self.sample_rate, highpass, lowpass
             )
             psds.append(psd[0, 0])
         psd = torch.stack(psds)
