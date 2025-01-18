@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["unit-tests"]
     types:
-      types:
+      - completed
 
 jobs:
   test:
