@@ -63,7 +63,7 @@ legacy_tox_ini = """
 envlist = py{39,310,311,312}
 isolated_build = true
 
-[tool.coverage.run]
+[coverage:run]
 relative_files = true
 
 [gh-actions]
