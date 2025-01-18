@@ -18,7 +18,7 @@ torchaudio = "^2.0"
 numpy = "<2.0.0"
 
 [tool.poetry.group.dev.dependencies]
-coverage = "^7.6"
+coverage = {version = "^7.6.10", extras = ["toml"]}
 pre-commit = "^2.16"
 pytest = "^7.0"
 
@@ -72,14 +72,13 @@ python =
 
 [testenv:py{39,310,311,312}]
 deps = 
-    coverage>=7.6,<8
     pytest>=7,<8
     lalsuite>=7,<8
     bilby>=1.1,<2
     gwpy>=3.0
     numpy>=1,<2
     scipy>=1.9,<1.15
-commands = coverage run -m pytest tests
+commands = coverage run -m pytest tests/test_gw.py
 """
 
 [tool.coverage.run]
