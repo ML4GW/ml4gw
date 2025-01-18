@@ -63,9 +63,6 @@ legacy_tox_ini = """
 envlist = py{39,310,311,312}
 isolated_build = true
 
-[coverage:run]
-relative_files = true
-
 [gh-actions]
 python =
     3.9: py39
@@ -84,6 +81,9 @@ deps =
     scipy>=1.9,<1.15
 commands = coverage run -m pytest tests
 """
+
+[tool.coverage.run]
+relative_files = true
 
 [build-system]
 requires = ["poetry-core"]
