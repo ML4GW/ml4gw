@@ -82,7 +82,7 @@ deps =
     gwpy>=3.0
     numpy>=1,<2
     scipy>=1.9,<1.15
-commands = coverage -m pytest tests
+commands = coverage run -m pytest tests
 """
 
 [build-system]
