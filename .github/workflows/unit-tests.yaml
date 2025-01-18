@@ -37,6 +37,7 @@ jobs:
       run: |
         tox -e py${pyver//./}
         ls -a
+        echo $COVERAGE_FILE
 
     - name: Store coverage file
       uses: actions/upload-artifact@v4
