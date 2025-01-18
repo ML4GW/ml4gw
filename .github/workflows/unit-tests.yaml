@@ -34,3 +34,7 @@ jobs:
       env:
         pyver: ${{ matrix.python-version }}
       run: tox -e py${pyver//./}
+
+    -
+      name: Coveralls
+      uses: coverallsapp/github-action@v2
