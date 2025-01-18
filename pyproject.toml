@@ -72,12 +72,14 @@ python =
 
 [testenv:py{39,310,311,312}]
 deps = 
+    coverage>=7.6,<8
     pytest>=7,<8
     lalsuite>=7,<8
     bilby>=1.1,<2
     gwpy>=3.0
     numpy>=1,<2
     scipy>=1.9,<1.15
+extras = toml
 commands = coverage run -m pytest tests/test_gw.py
 """
 
