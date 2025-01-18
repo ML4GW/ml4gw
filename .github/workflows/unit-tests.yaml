@@ -33,8 +33,10 @@ jobs:
       name: run tests
       env:
         pyver: ${{ matrix.python-version }}
-        COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
-      run: tox -e py${pyver//./}
+        COVERAGE_FILE: .coverage.${{ matrix.python-version }}
+      run: |
+        tox -e py${pyver//./}
+        ls -a
 
     - name: Store coverage file
       uses: actions/upload-artifact@v4
