@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="python">
+<html class="writer-html5" lang="python" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -15,9 +15,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=a888008e"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="_static/documentation_options.js?v=d048f138"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -96,15 +96,15 @@
            <div itemprop="articleBody">
              
   <section id="ml4gw-transforms-package">
-<h1>ml4gw.transforms package<a class="headerlink" href="#ml4gw-transforms-package" title="Permalink to this heading"></a></h1>
+<h1>ml4gw.transforms package<a class="headerlink" href="#ml4gw-transforms-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="module-ml4gw.transforms.pearson">
-<span id="ml4gw-transforms-pearson-module"></span><h2>ml4gw.transforms.pearson module<a class="headerlink" href="#module-ml4gw.transforms.pearson" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-pearson-module"></span><h2>ml4gw.transforms.pearson module<a class="headerlink" href="#module-ml4gw.transforms.pearson" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.pearson.ShiftedPearsonCorrelation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.pearson.</span></span><span class="sig-name descname"><span class="pre">ShiftedPearsonCorrelation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_shift</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.pearson.ShiftedPearsonCorrelation" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.pearson.</span></span><span class="sig-name descname"><span class="pre">ShiftedPearsonCorrelation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_shift</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.pearson.ShiftedPearsonCorrelation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Compute the [Pearson correlation]
 (<a class="reference external" href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">https://en.wikipedia.org/wiki/Pearson_correlation_coefficient</a>)
@@ -135,7 +135,7 @@ be <cite>(2 * max_shifts + 1, B, C)</cite>.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.pearson.ShiftedPearsonCorrelation.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.pearson.ShiftedPearsonCorrelation.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.pearson.ShiftedPearsonCorrelation.forward" title="Link to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.
 :rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">']</span></code></span></p>
@@ -152,10 +152,10 @@ registered hooks while the latter silently ignores them.</p>
 
 </section>
 <section id="module-ml4gw.transforms.scaler">
-<span id="ml4gw-transforms-scaler-module"></span><h2>ml4gw.transforms.scaler module<a class="headerlink" href="#module-ml4gw.transforms.scaler" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-scaler-module"></span><h2>ml4gw.transforms.scaler module<a class="headerlink" href="#module-ml4gw.transforms.scaler" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.scaler.ChannelWiseScaler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.scaler.</span></span><span class="sig-name descname"><span class="pre">ChannelWiseScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.scaler.ChannelWiseScaler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.scaler.</span></span><span class="sig-name descname"><span class="pre">ChannelWiseScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.scaler.ChannelWiseScaler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ml4gw.transforms.transform.FittableTransform" title="ml4gw.transforms.transform.FittableTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">FittableTransform</span></code></a></p>
 <p>Scale timeseries channels to be zero mean unit variance</p>
 <p>Scales timeseries channels by the mean and standard
@@ -173,7 +173,7 @@ to be 1D (single channel).</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.scaler.ChannelWiseScaler.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.scaler.ChannelWiseScaler.fit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.scaler.ChannelWiseScaler.fit" title="Link to this definition"></a></dt>
 <dd><p>Fit the scaling parameters to a timeseries</p>
 <p>Computes the channel-wise mean and standard deviation
 of the timeseries <cite>X</cite> and sets these values to the
@@ -187,7 +187,7 @@ of the timeseries <cite>X</cite> and sets these values to the
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.scaler.ChannelWiseScaler.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.scaler.ChannelWiseScaler.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.scaler.ChannelWiseScaler.forward" title="Link to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.
 :rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"> <span class="pre">time']</span></code></span></p>
@@ -204,19 +204,19 @@ registered hooks while the latter silently ignores them.</p>
 
 </section>
 <section id="module-ml4gw.transforms.snr_rescaler">
-<span id="ml4gw-transforms-snr-rescaler-module"></span><h2>ml4gw.transforms.snr_rescaler module<a class="headerlink" href="#module-ml4gw.transforms.snr_rescaler" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-snr-rescaler-module"></span><h2>ml4gw.transforms.snr_rescaler module<a class="headerlink" href="#module-ml4gw.transforms.snr_rescaler" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.snr_rescaler.SnrRescaler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.snr_rescaler.</span></span><span class="sig-name descname"><span class="pre">SnrRescaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.snr_rescaler.SnrRescaler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.snr_rescaler.</span></span><span class="sig-name descname"><span class="pre">SnrRescaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.snr_rescaler.SnrRescaler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ml4gw.transforms.transform.FittableSpectralTransform" title="ml4gw.transforms.transform.FittableSpectralTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">FittableSpectralTransform</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.snr_rescaler.SnrRescaler.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">background</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.snr_rescaler.SnrRescaler.fit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">background</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.snr_rescaler.SnrRescaler.fit" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.snr_rescaler.SnrRescaler.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_snrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.snr_rescaler.SnrRescaler.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_snrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.snr_rescaler.SnrRescaler.forward" title="Link to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -232,10 +232,10 @@ registered hooks while the latter silently ignores them.</p>
 
 </section>
 <section id="module-ml4gw.transforms.spectral">
-<span id="ml4gw-transforms-spectral-module"></span><h2>ml4gw.transforms.spectral module<a class="headerlink" href="#module-ml4gw.transforms.spectral" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-spectral-module"></span><h2>ml4gw.transforms.spectral module<a class="headerlink" href="#module-ml4gw.transforms.spectral" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.spectral.SpectralDensity">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralDensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectral.SpectralDensity" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.spectral.</span></span><span class="sig-name descname"><span class="pre">SpectralDensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectral.SpectralDensity" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Transform for computing either the power spectral density
 of a batch of multichannel timeseries, or the cross spectral
@@ -259,7 +259,7 @@ a <cite>NotImplementedError</cite> will be raised.</p>
 as <cite>None</cite>, this will be set to <cite>fftlength / 2</cite>.</p></li>
 <li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Aggregation method to use for combining windowed FFTs.
 Allowed values are <cite>&quot;mean&quot;</cite> and <cite>&quot;median&quot;</cite>.</p></li>
-<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'</span> <span class="pre">{int(fftlength*sample_rate)}']</span></code>]</span>) -- Window array to multiply by each FFT window before
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{int(fftlength*sample_rate)}']</span></code>]</span>) -- Window array to multiply by each FFT window before
 FFT computation. Should have length <cite>nperseg</cite>.
 Defaults to a hanning window.</p></li>
 <li><p><strong>fast</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- Whether to use a faster spectral density computation that
@@ -271,7 +271,7 @@ exact for the two lowest frequency bins.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.spectral.SpectralDensity.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectral.SpectralDensity.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectral.SpectralDensity.forward" title="Link to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.
 :rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
@@ -288,10 +288,10 @@ registered hooks while the latter silently ignores them.</p>
 
 </section>
 <section id="module-ml4gw.transforms.spectrogram">
-<span id="ml4gw-transforms-spectrogram-module"></span><h2>ml4gw.transforms.spectrogram module<a class="headerlink" href="#module-ml4gw.transforms.spectrogram" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-spectrogram-module"></span><h2>ml4gw.transforms.spectrogram module<a class="headerlink" href="#module-ml4gw.transforms.spectrogram" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.spectrogram.MultiResolutionSpectrogram">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.spectrogram.</span></span><span class="sig-name descname"><span class="pre">MultiResolutionSpectrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectrogram.MultiResolutionSpectrogram" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.spectrogram.</span></span><span class="sig-name descname"><span class="pre">MultiResolutionSpectrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectrogram.MultiResolutionSpectrogram" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Create a batch of multi-resolution spectrograms
 from a batch of timeseries. Input is expected to
@@ -322,7 +322,7 @@ length</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.spectrogram.MultiResolutionSpectrogram.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectrogram.MultiResolutionSpectrogram.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spectrogram.MultiResolutionSpectrogram.forward" title="Link to this definition"></a></dt>
 <dd><p>Calculate spectrograms of the input tensor and
 combine them into a single spectrogram</p>
 <dl class="field-list simple">
@@ -344,14 +344,14 @@ and <cite>T</cite> is the number of time samples.</p>
 
 </section>
 <section id="module-ml4gw.transforms.transform">
-<span id="ml4gw-transforms-transform-module"></span><h2>ml4gw.transforms.transform module<a class="headerlink" href="#module-ml4gw.transforms.transform" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-transform-module"></span><h2>ml4gw.transforms.transform module<a class="headerlink" href="#module-ml4gw.transforms.transform" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.transform.FittableSpectralTransform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.transform.</span></span><span class="sig-name descname"><span class="pre">FittableSpectralTransform</span></span><a class="headerlink" href="#ml4gw.transforms.transform.FittableSpectralTransform" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.transform.</span></span><span class="sig-name descname"><span class="pre">FittableSpectralTransform</span></span><a class="headerlink" href="#ml4gw.transforms.transform.FittableSpectralTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ml4gw.transforms.transform.FittableTransform" title="ml4gw.transforms.transform.FittableTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">FittableTransform</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.transform.FittableSpectralTransform.normalize_psd">
-<span class="sig-name descname"><span class="pre">normalize_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_freqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.transform.FittableSpectralTransform.normalize_psd" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">normalize_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_freqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.transform.FittableSpectralTransform.normalize_psd" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
@@ -363,25 +363,25 @@ and <cite>T</cite> is the number of time samples.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.transform.FittableTransform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.transform.</span></span><span class="sig-name descname"><span class="pre">FittableTransform</span></span><a class="headerlink" href="#ml4gw.transforms.transform.FittableTransform" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.transform.</span></span><span class="sig-name descname"><span class="pre">FittableTransform</span></span><a class="headerlink" href="#ml4gw.transforms.transform.FittableTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.transform.FittableTransform.build">
-<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.transform.FittableTransform.build" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.transform.FittableTransform.build" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="module-ml4gw.transforms.waveforms">
-<span id="ml4gw-transforms-waveforms-module"></span><h2>ml4gw.transforms.waveforms module<a class="headerlink" href="#module-ml4gw.transforms.waveforms" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-waveforms-module"></span><h2>ml4gw.transforms.waveforms module<a class="headerlink" href="#module-ml4gw.transforms.waveforms" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformProjector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.waveforms.</span></span><span class="sig-name descname"><span class="pre">WaveformProjector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ifos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformProjector" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.waveforms.</span></span><span class="sig-name descname"><span class="pre">WaveformProjector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ifos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformProjector" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformProjector.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">polarizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformProjector.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">polarizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformProjector.forward" title="Link to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -397,11 +397,11 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformSampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.waveforms.</span></span><span class="sig-name descname"><span class="pre">WaveformSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">polarizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformSampler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.waveforms.</span></span><span class="sig-name descname"><span class="pre">WaveformSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">polarizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformSampler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformSampler.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformSampler.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformSampler.forward" title="Link to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -417,10 +417,10 @@ registered hooks while the latter silently ignores them.</p>
 
 </section>
 <section id="module-ml4gw.transforms.whitening">
-<span id="ml4gw-transforms-whitening-module"></span><h2>ml4gw.transforms.whitening module<a class="headerlink" href="#module-ml4gw.transforms.whitening" title="Permalink to this heading"></a></h2>
+<span id="ml4gw-transforms-whitening-module"></span><h2>ml4gw.transforms.whitening module<a class="headerlink" href="#module-ml4gw.transforms.whitening" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedWhiten">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">FixedWhiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float64</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">FixedWhiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float64</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ml4gw.transforms.transform.FittableSpectralTransform" title="ml4gw.transforms.transform.FittableSpectralTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">FittableSpectralTransform</span></code></a></p>
 <p>Transform that whitens timeseries by a fixed
 power spectral density that's determined by
@@ -439,7 +439,7 @@ frequency bins in the fit PSD.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedWhiten.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">background</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.fit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">background</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.fit" title="Link to this definition"></a></dt>
 <dd><p>Compute the PSD of channel-wise background to
 use to whiten timeseries at call time. PSDs will
 be resampled to have
@@ -496,7 +496,7 @@ be set to half of <cite>fftlength</cite> by default.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedWhiten.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.forward" title="Link to this definition"></a></dt>
 <dd><p>Whiten the input timeseries tensor using the
 PSD fit by the <cite>.fit</cite> method, which must be
 called _before_ the first call to <cite>.forward</cite>.</p>
@@ -511,7 +511,7 @@ called _before_ the first call to <cite>.forward</cite>.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.Whiten">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">Whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">Whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Normalize the frequency content of timeseries
 data by a provided power spectral density, such
@@ -545,7 +545,7 @@ filtering will be performed.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.Whiten.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten.forward" title="Link to this definition"></a></dt>
 <dd><p>Whiten a batch of multichannel timeseries by a
 background power spectral density.</p>
 <dl class="field-list simple">
@@ -589,7 +589,7 @@ be (B, C, N - <cite>fduration * sample_rate</cite>).</p>
 
 </section>
 <section id="module-ml4gw.transforms">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ml4gw.transforms" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ml4gw.transforms" title="Link to this heading"></a></h2>
 </section>
 </section>
 
