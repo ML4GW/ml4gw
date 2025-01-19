@@ -80,7 +80,7 @@ deps =
     numpy>=1,<2
     scipy>=1.9,<1.15
 pass_env = COVERAGE_FILE
-commands = coverage run -m pytest tests/utils/test_slicing.py
+commands = coverage run -m pytest tests/transforms
 """
 
 [tool.coverage.run]
