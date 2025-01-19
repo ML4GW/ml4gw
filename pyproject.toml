@@ -84,7 +84,7 @@ commands = coverage run -m pytest tests/utils/test_slicing.py
 """
 
 [tool.coverage.run]
-source = ["ml4gw/**/*"]
+source = ["ml4gw"]
 relative_files = true
 
 [build-system]
