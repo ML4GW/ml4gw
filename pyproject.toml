@@ -80,7 +80,7 @@ deps =
     numpy>=1,<2
     scipy>=1.9,<1.15
 pass_env = COVERAGE_FILE
-commands = coverage run -m pytest tests/transforms
+commands = coverage run -m pytest tests
 """
 
 [tool.coverage.run]
