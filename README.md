@@ -3,6 +3,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ml4gw) 
 ![GitHub License](https://img.shields.io/github/license/ML4GW/ml4gw)
 ![Test status](https://github.com/ML4GW/ml4gw/actions/workflows/unit-tests.yaml/badge.svg)
+![Coverage badge](https://raw.githubusercontent.com/ML4GW/ml4gw/python-coverage-comment-action-data/badge.svg)
 
 Torch utilities for training neural networks in gravitational wave physics applications.
 
