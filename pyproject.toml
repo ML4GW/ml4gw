@@ -18,6 +18,7 @@ torchaudio = "^2.0"
 numpy = "<2.0.0"
 
 [tool.poetry.group.dev.dependencies]
+coverage = {version = "^7.6.10", extras = ["toml"]}
 pre-commit = "^2.16"
 pytest = "^7.0"
 
@@ -25,7 +26,7 @@ pytest = "^7.0"
 lalsuite = "^7.0"
 bilby = "^2.1"
 jupyter = "^1.0.0"
-gwpy = "^2.1"
+gwpy = "^3.0"
 
 # versions >= 1.9. fix issue with median calculation 
 # https://github.com/scipy/scipy/issues/15601
@@ -71,14 +72,20 @@ python =
 
 [testenv:py{39,310,311,312}]
 deps = 
+    coverage[toml]>=7.6,<8
     pytest>=7,<8
     lalsuite>=7,<8
     bilby>=1.1,<2
     gwpy>=3.0
     numpy>=1,<2
     scipy>=1.9,<1.15
-commands = pytest tests
+pass_env = COVERAGE_FILE
+commands = coverage run -m pytest tests
 """
+
+[tool.coverage.run]
+source = ["ml4gw"]
+relative_files = true
 
 [build-system]
 requires = ["poetry-core"]

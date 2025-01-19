@@ -1,0 +1,37 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: ml4gw
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ethan
+    family-names: Marx
+    email: emarx@mit.edu
+    affiliation: MIT
+    orcid: 'https://orcid.org/0009-0000-4183-7876'
+  - given-names: William
+    family-names: Benoit
+    email: benoi090@umn.edu
+    affiliation: University of Minnesota
+    orcid: 'https://orcid.org/0000-0003-4750-9413'
+  - given-names: Deep
+    family-names: Chatterjee
+    email: deep1018@mit.edu
+    affiliation: MIT
+    orcid: 'https://orcid.org/0000-0003-0038-5468'
+  - given-names: Ravi
+    family-names: Kumar
+    email: ravi.kr@iitb.ac.in
+    affiliation: Indian Institute of Technology Bombay
+  - given-names: Alec
+    family-names: Gunny
+repository-code: 'https://github.com/ML4GW/ml4gw'
+abstract: >-
+  Torch utilities for doing machine learning in gravitational wave physics
+keywords:
+  - Gravitational waves
+  - Machine learning
