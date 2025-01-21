@@ -439,7 +439,7 @@ frequency bins in the fit PSD.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedWhiten.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">background</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.fit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">background</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.fit" title="Link to this definition"></a></dt>
 <dd><p>Compute the PSD of channel-wise background to
 use to whiten timeseries at call time. PSDs will
 be resampled to have
@@ -481,6 +481,12 @@ setting the frequency response of the fit PSDs
 in the frequency bins below this value to 0.
 If left as <cite>None</cite>, the fit filter won't have any
 highpass filtering properties.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Cutoff frequency, in Hz, used for lowpass filtering
+with the fit whitening filter. This is achieved by
+setting the frequency response of the fit PSDs
+in the frequency bins above this value to 0.
+If left as <cite>None</cite>, the fit filter won't have any
+lowpass filtering properties.</p></li>
 <li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Overlap between FFT frames used to convert
 time-domain data to the frequency domain via
 Welch's method. If <cite>fftlength</cite> is <cite>None</cite>, this
@@ -511,7 +517,7 @@ called _before_ the first call to <cite>.forward</cite>.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.Whiten">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">Whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">Whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Normalize the frequency content of timeseries
 data by a provided power spectral density, such
@@ -539,6 +545,9 @@ of the whitened timeseries.</p></li>
 time is expected to be sampled</p></li>
 <li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Cutoff frequency to apply highpass filtering
 during whitening. If left as <cite>None</cite>, no highpass
+filtering will be performed.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Cutoff frequency to apply lowpass filtering
+during whitening. If left as <cite>None</cite>, no lowpass
 filtering will be performed.</p></li>
 </ul>
 </dd>
