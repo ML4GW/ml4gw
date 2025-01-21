@@ -10,7 +10,7 @@ from ml4gw.waveforms.cbc import coefficients
 
 
 def chirp_time_bound(
-    fstart: float,
+    fstart: BatchTensor,
     mass_1: BatchTensor,
     mass_2: BatchTensor,
     s1: BatchTensor,
@@ -103,8 +103,9 @@ def ringdown_time_bound(
 
 
 def frequency_isco(mass_1: BatchTensor, mass_2: BatchTensor):
-    mass_1 = (mass_1 * MSUN).double()
-    mass_2 = (mass_2 * MSUN).double()
     return (
-        1.0 / 9.0**1.5 * torch.pi * (mass_1 + mass_2) * MTSUN_SI / MSUN
-    ).float()
+        1.0
+        / (
+            (9.0**1.5) * torch.pi * (mass_1 + mass_2) * MTSUN_SI / MSUN
+        ).float()
+    )

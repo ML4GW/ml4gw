@@ -8,7 +8,7 @@ from ml4gw.waveforms.cbc import utils
 NUM_SAMPLES = 100
 
 
-@pytest.fixture(params=[10.0, 20.0, 30.0, 40.0, 50.0])
+@pytest.fixture(params=[torch.rand(NUM_SAMPLES) + 1 * 15])
 def fstart(request):
     return torch.tensor(request.param).double()
 
@@ -40,7 +40,9 @@ def test_chirp_time_bound(masses, spins, fstart):
     s1, s2 = spins
 
     result = utils.chirp_time_bound(fstart, m1, m2, s1, s2)
-    for i, (m1_val, m2_val, s1_val, s2_val) in enumerate(zip(m1, m2, s1, s2)):
+    for i, (fstart, m1_val, m2_val, s1_val, s2_val) in enumerate(
+        zip(fstart, m1, m2, s1, s2)
+    ):
         expected = lalsimulation.SimInspiralChirpTimeBound(
             fstart.item(),
             m1_val.item(),
@@ -103,6 +105,7 @@ def test_chirp_start_frequency_bound(fstart, spins, masses):
     m1, m2 = masses
     s1, s2 = spins
     tchirp = utils.chirp_time_bound(fstart, m1, m2, s1, s2)
+    print(tchirp)
     result = utils.chirp_start_frequency_bound(tchirp, m1, m2)
 
     for i, (tchirp_val, m1_val, m2_val) in enumerate(zip(tchirp, m1, m2)):
