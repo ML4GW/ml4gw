@@ -343,6 +343,7 @@ def truncate_inverse_power_spectrum(
     fduration: Union[Float[Tensor, " time"], float],
     sample_rate: float,
     highpass: Optional[float] = None,
+    lowpass: Optional[float] = None,
 ) -> PSDTensor:
     """
     Truncate the length of the time domain response
@@ -375,6 +376,10 @@ def truncate_inverse_power_spectrum(
             If specified, will zero out the frequency response
             of all frequencies below this value in Hz. If left
             as `None`, no highpass filtering will be applied.
+        lowpass:
+            If specified, will zero out the frequency response
+            of all frequencies above this value in Hz. If left
+            as `None`, no lowpass filtering will be applied.
     Returns:
         The PSD with its time domain response truncated
             to `fduration` and any highpassed frequencies
@@ -388,12 +393,15 @@ def truncate_inverse_power_spectrum(
     # impulse response function
     inv_asd = 1 / psd**0.5
 
-    # zero our leading frequencies if we want the
-    # filter to perform highpass filtering
+    # zero out frequencies if we want the filter
+    # to perform highpass/lowpass filtering
+    df = sample_rate / N
     if highpass is not None:
-        df = sample_rate / N
         idx = int(highpass / df)
         inv_asd[:, :, :idx] = 0
+    if lowpass is not None:
+        idx = int(lowpass / df)
+        inv_asd[:, :, idx:] = 0
 
     if inv_asd.size(-1) % 2:
         inv_asd[:, :, -1] = 0
@@ -455,12 +463,13 @@ def whiten(
     fduration: Union[Float[Tensor, " time"], float],
     sample_rate: float,
     highpass: Optional[float] = None,
+    lowpass: Optional[float] = None,
 ) -> WaveformTensor:
     """
     Whiten a batch of timeseries using the specified
     background one-sided power spectral densities (PSDs),
     modified to have the desired time domain response length
-    `fduration` and possibly to highpass filter.
+    `fduration` and possibly to highpass/lowpass filter.
 
     Args:
         X:
@@ -493,6 +502,11 @@ def whiten(
             the data, setting the frequency response in the
             whitening filter to 0. If left as `None`, no
             highpass filtering will be applied.
+        lowpass:
+            The frequency in Hz at which to lowpass filter
+            the data, setting the frequency response in the
+            whitening filter to 0. If left as `None`, no
+            lowpass filtering will be applied.
     Returns:
         Batch of whitened multichannel timeseries with
             `fduration / 2` seconds trimmed from each side.
@@ -529,7 +543,11 @@ def whiten(
     # truncate it to have the desired
     # time domain response length
     psd = truncate_inverse_power_spectrum(
-        psd, fduration, sample_rate, highpass
+        psd,
+        fduration,
+        sample_rate,
+        highpass,
+        lowpass,
     )
 
     return normalize_by_psd(X, psd, sample_rate, pad)
