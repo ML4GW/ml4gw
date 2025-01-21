@@ -394,13 +394,12 @@ def truncate_inverse_power_spectrum(
     inv_asd = 1 / psd**0.5
 
     # zero out frequencies if we want the filter
-    # filter to perform highpass/lowpass filtering
+    # to perform highpass/lowpass filtering
+    df = sample_rate / N
     if highpass is not None:
-        df = sample_rate / N
         idx = int(highpass / df)
         inv_asd[:, :, :idx] = 0
     if lowpass is not None:
-        df = sample_rate / N
         idx = int(lowpass / df)
         inv_asd[:, :, idx:] = 0
 
