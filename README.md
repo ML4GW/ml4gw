@@ -26,7 +26,7 @@
 | ml4gw/nn/streaming/\_\_init\_\_.py        |        2 |        0 |    100% |           |
 | ml4gw/nn/streaming/online\_average.py     |       49 |        4 |     92% |82, 90-91, 115 |
 | ml4gw/nn/streaming/snapshotter.py         |       35 |        2 |     94% |   96, 110 |
-| ml4gw/spectral.py                         |      144 |        2 |     99% |  324, 510 |
+| ml4gw/spectral.py                         |      147 |        2 |     99% |  324, 524 |
 | ml4gw/transforms/\_\_init\_\_.py          |        9 |        0 |    100% |           |
 | ml4gw/transforms/pearson.py               |       28 |        3 |     89% |48, 53, 60 |
 | ml4gw/transforms/qtransform.py            |      172 |       14 |     92% |149, 328, 336-338, 345-354 |
@@ -37,7 +37,7 @@
 | ml4gw/transforms/spline\_interpolation.py |      105 |        4 |     96% |261-263, 285, 364 |
 | ml4gw/transforms/transform.py             |       38 |        0 |    100% |           |
 | ml4gw/transforms/waveforms.py             |       42 |        2 |     95% |     58-59 |
-| ml4gw/transforms/whitening.py             |       47 |        1 |     98% |       243 |
+| ml4gw/transforms/whitening.py             |       48 |        1 |     98% |       258 |
 | ml4gw/types.py                            |       18 |        0 |    100% |           |
 | ml4gw/utils/interferometer.py             |       20 |        1 |     95% |        45 |
 | ml4gw/utils/slicing.py                    |      103 |        5 |     95% |62-64, 178, 296 |
@@ -52,7 +52,7 @@
 | ml4gw/waveforms/cbc/taylorf2.py           |      105 |        1 |     99% |        63 |
 | ml4gw/waveforms/conversion.py             |       81 |        1 |     99% |        87 |
 | ml4gw/waveforms/generator.py              |       18 |        0 |    100% |           |
-|                                 **TOTAL** | **2728** |  **283** | **90%** |           |
+|                                 **TOTAL** | **2732** |  **283** | **90%** |           |
 
 
 ## Setup coverage badge
