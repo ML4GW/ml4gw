@@ -226,8 +226,8 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         )
 
         # lastly, slice the waveforms based on the requested duration
-        cross = cross[-self.size :]
-        plus = plus[-self.size :]
+        cross = cross[..., -self.size :]
+        plus = plus[..., -self.size :]
 
         # TODO: implement and apply butterworth
         # highpass filter in torch
