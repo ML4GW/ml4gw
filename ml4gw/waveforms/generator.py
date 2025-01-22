@@ -131,11 +131,14 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
             parameters["mass_2"].double() * MSUN,
         )
 
+        device = mass_1.device
+
         s1z, s2z = parameters["s1z"], parameters["s2z"]
         total_mass = mass_1 + mass_2
 
         f_min = torch.minimum(
-            utils.frequency_isco(mass_1, mass_2), torch.tensor(self.f_min)
+            utils.frequency_isco(mass_1, mass_2),
+            torch.tensor(self.f_min, device=device),
         )
         s = utils.final_black_hole_spin_bound(s1z, s2z)
         tmerge = utils.merge_time_bound(
@@ -156,7 +159,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         # get smallest df corresponding to longest chirp length,
         # which will make sure there is no wrap around effects.
         df = min(1.0 / (chirplen.max() / self.sample_rate), self.delta_f)
-        frequencies = self.get_frequencies(df)
+        frequencies = self.get_frequencies(df).to(mass_1.device)
 
         # downselect to frequencies above fstart,
         # and generate the waveform at the specified frequencies
@@ -179,14 +182,16 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         taper_size = taper_mask.sum(axis=1)
         max_taper_size = taper_size.max()
         taper = torch.nan_to_num(
-            torch.arange(max_taper_size) / taper_size[:, None],
+            torch.arange(max_taper_size, device=device) / taper_size[:, None],
             nan=1.0,
             posinf=1.0,
             neginf=1.0,
         )
         taper = 0.5 - 0.5 * torch.cos(torch.pi * taper)
 
-        mask = torch.arange(max_taper_size).expand(batch_size, -1)
+        mask = torch.arange(max_taper_size, device=device).expand(
+            batch_size, -1
+        )
         mask = mask <= taper_size.unsqueeze(1)
         taper[~mask] = 1.0
 
@@ -199,10 +204,8 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         # requested frequencies with the waveform values
 
         shape = (batch_size, int(self.nyquist / df) + 1)
-        hc_spectrum = torch.zeros(
-            shape, dtype=cross.dtype, device=cross.device
-        )
-        hp_spectrum = torch.zeros(shape, dtype=plus.dtype, device=plus.device)
+        hc_spectrum = torch.zeros(shape, dtype=cross.dtype, device=device)
+        hp_spectrum = torch.zeros(shape, dtype=plus.dtype, device=device)
 
         hc_spectrum[:, freq_mask] = cross
         hp_spectrum[:, freq_mask] = plus
