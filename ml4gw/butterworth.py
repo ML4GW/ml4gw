@@ -5,6 +5,11 @@ from torchaudio.functional import filtfilt
 
 from .constants import PI
 
+"""
+    Heavily based on the scipy implementation of the butterworth filter
+    https://github.com/scipy/scipy/blob/1f470dc51df333a93108008cd0743be559cfb6f4/scipy/signal/_filter_design.py # noqa: E501
+"""
+
 
 def _buttap(N):
     """Return (z,p,k) for analog prototype of Nth-order Butterworth filter.
@@ -40,7 +45,7 @@ def _relative_degree(z, p):
         return degree
 
 
-def lp2lp_zpk(z, p, k, wo=1.0):
+def _lp2lp_zpk(z, p, k, wo=1.0):
     z = torch.atleast_1d(z)
     p = torch.atleast_1d(p)
     wo = float(wo)  # Avoid int wraparound
@@ -58,7 +63,7 @@ def lp2lp_zpk(z, p, k, wo=1.0):
     return z_lp, p_lp, k_lp
 
 
-def lp2hp_zpk(z, p, k, wo=1.0):
+def _lp2hp_zpk(z, p, k, wo=1.0):
     z = torch.atleast_1d(z)
     p = torch.atleast_1d(p)
     wo = float(wo)
@@ -79,7 +84,7 @@ def lp2hp_zpk(z, p, k, wo=1.0):
     return z_hp, p_hp, k_hp
 
 
-def lp2bp_zpk(z, p, k, wo=1.0, bw=1.0):
+def _lp2bp_zpk(z, p, k, wo=1.0, bw=1.0):
     z = torch.atleast_1d(z)
     p = torch.atleast_1d(p)
     wo = float(wo)
@@ -118,7 +123,7 @@ def lp2bp_zpk(z, p, k, wo=1.0, bw=1.0):
     return z_bp, p_bp, k_bp
 
 
-def lp2bs_zpk(z, p, k, wo=1.0, bw=1.0):
+def _lp2bs_zpk(z, p, k, wo=1.0, bw=1.0):
     z = torch.atleast_1d(z)
     p = torch.atleast_1d(p)
     wo = float(wo)
@@ -169,13 +174,13 @@ def _validate_fs(fs, allow_none=True):
         if not allow_none:
             raise ValueError("Sampling frequency can not be none.")
     else:  # should be float
-        if size(fs) != 1:
+        if _size(fs) != 1:
             raise ValueError("Sampling frequency fs must be a single scalar.")
         fs = float(fs)
     return fs
 
 
-def bilinear_zpk(z, p, k, fs):
+def _bilinear_zpk(z, p, k, fs):
     z = torch.atleast_1d(z)
     p = torch.atleast_1d(p)
 
@@ -198,27 +203,27 @@ def bilinear_zpk(z, p, k, fs):
     return z_z, p_z, k_z
 
 
-def zpk2tf(z, p, k):
+def _zpk2tf(z, p, k):
     z = torch.atleast_1d(z)
     k = torch.atleast_1d(k)
     if len(z.shape) > 1:
-        temp = poly(z[0])
+        temp = _poly(z[0])
         b = torch.empty((z.shape[0], z.shape[1] + 1), temp.dtype.char)
         if len(k) == 1:
             k = [k[0]] * z.shape[0]
         for i in range(z.shape[0]):
-            b[i] = k[i] * poly(z[i])
+            b[i] = k[i] * _poly(z[i])
     else:
-        b = k * poly(z)
-    a = torch.atleast_1d(poly(p))
+        b = k * _poly(z)
+    a = torch.atleast_1d(_poly(p))
     a, b = a.real, b.real
     return b, a
 
 
-def size(t):
+def _size(t):
     try:
         shape = t.shape
-        if type(shape) == torch.Size:
+        if type(shape) == torch._size:
             return torch.prod(torch.tensor(shape)).item()
         else:
             return np.prod(shape)
@@ -226,9 +231,9 @@ def size(t):
         return 1
 
 
-def poly(seq):
+def _poly(seq):
     """
-    Find the coefficients of a polynomial with given sequence of roots.
+    Find the coefficients of a _polynomial with given sequence of roots.
     """
     seq = torch.atleast_1d(seq)
     if len(seq) == 0:
@@ -242,7 +247,7 @@ def poly(seq):
         return p
 
 
-def iirfilter(N, Wn, btype="low", analog=False, fs=None):
+def _iirfilter(N, Wn, btype="low", analog=False, fs=None):
     z, p, k = _buttap(N)
 
     if not analog:
@@ -262,16 +267,16 @@ def iirfilter(N, Wn, btype="low", analog=False, fs=None):
 
     # transform to lowpass, bandpass, highpass, or bandstop
     if btype in ("lowpass", "highpass", "low", "high"):
-        if size(Wn) != 1:
+        if _size(Wn) != 1:
             raise ValueError(
                 "Must specify a single critical frequency Wn "
                 "for lowpass or highpass filter"
             )
 
         if btype == "lowpass" or btype == "low":
-            z, p, k = lp2lp_zpk(z, p, k, wo=warped)
+            z, p, k = _lp2lp_zpk(z, p, k, wo=warped)
         elif btype == "highpass" or btype == "high":
-            z, p, k = lp2hp_zpk(z, p, k, wo=warped)
+            z, p, k = _lp2hp_zpk(z, p, k, wo=warped)
     elif btype in ("bandpass", "bandstop"):
         try:
             bw = warped[1] - warped[0]
@@ -282,21 +287,21 @@ def iirfilter(N, Wn, btype="low", analog=False, fs=None):
                 "bandpass or bandstop filter"
             ) from e
         if btype == "bandpass":
-            z, p, k = lp2bp_zpk(z, p, k, wo=wo, bw=bw)
+            z, p, k = _lp2bp_zpk(z, p, k, wo=wo, bw=bw)
         elif btype == "bandstop":
-            z, p, k = lp2bs_zpk(z, p, k, wo=wo, bw=bw)
+            z, p, k = _lp2bs_zpk(z, p, k, wo=wo, bw=bw)
     else:
-        raise NotImplementedError(f"'{btype}' not implemented in iirfilter.")
+        raise NotImplementedError(f"'{btype}' not implemented in _iirfilter.")
 
     # Find discrete equivalent if necessary
     if not analog:
-        z, p, k = bilinear_zpk(z, p, k, fs=fs)
+        z, p, k = _bilinear_zpk(z, p, k, fs=fs)
 
     # Transform to proper out type (numer-denom)
-    return zpk2tf(z, p, k)
+    return _zpk2tf(z, p, k)
 
 
-def butter_filter_torch(data, cutoff, fs, order, btype):
-    b, a = iirfilter(order, cutoff, btype=btype, analog=False, fs=fs)
+def butterworth(data, cutoff, fs, order, btype):
+    b, a = _iirfilter(order, cutoff, btype=btype, analog=False, fs=fs)
     filtered_data = filtfilt(data, a, b, clamp=False)
     return filtered_data, b, a
