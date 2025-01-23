@@ -1,7 +1,9 @@
 import torch
-from torchtyping import TensorType
+from jaxtyping import Float
 
-from ..constants import MTSUN_SI, PI
+from ml4gw.constants import MTSUN_SI, PI
+from ml4gw.types import BatchTensor, FrequencySeries1d
+
 from .phenom_d_data import QNMData_a, QNMData_fdamp, QNMData_fring
 from .taylorf2 import TaylorF2
 
@@ -15,14 +17,14 @@ class IMRPhenomD(TaylorF2):
 
     def forward(
         self,
-        f: TensorType,
-        chirp_mass: TensorType,
-        mass_ratio: TensorType,
-        chi1: TensorType,
-        chi2: TensorType,
-        distance: TensorType,
-        phic: TensorType,
-        inclination: TensorType,
+        f: FrequencySeries1d,
+        chirp_mass: BatchTensor,
+        mass_ratio: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
+        inclination: BatchTensor,
         f_ref: float,
     ):
         """
@@ -76,15 +78,15 @@ class IMRPhenomD(TaylorF2):
 
     def phenom_d_htilde(
         self,
-        f: TensorType,
-        chirp_mass: TensorType,
-        mass_ratio: TensorType,
-        chi1: TensorType,
-        chi2: TensorType,
-        distance: TensorType,
-        phic: TensorType,
+        f: FrequencySeries1d,
+        chirp_mass: BatchTensor,
+        mass_ratio: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
         f_ref: float,
-    ):
+    ) -> Float[FrequencySeries1d, " batch"]:
         total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6
         mass_1 = total_mass / (1 + mass_ratio)
         mass_2 = mass_1 * mass_ratio
@@ -155,20 +157,30 @@ class IMRPhenomD(TaylorF2):
         chi22,
         xi,
         distance,
+        fRD=None,  # used for passing ringdown frequency from phenom_p
+        fDM=None,  # used for passing damping frequency from phenom_p
     ):
         ins_amp, ins_Damp = self.phenom_d_inspiral_amp(
             Mf, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
         )
         int_amp, int_Damp = self.phenom_d_int_amp(
-            Mf, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi
+            Mf, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, fRD, fDM
         )
         mrd_amp, mrd_Damp = self.phenom_d_mrd_amp(
-            Mf, eta, eta2, chi1, chi2, xi
+            Mf, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
 
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
-        fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
+
+        # merger ringdown
+        if (fRD is None) != (fDM is None):
+            raise ValueError(
+                "Both fRD and fDM must either be provided or both be None"
+            )
+        if (fRD is None) and (fDM is None):
+            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
+
         Mf_peak = self.fmaxCalc(fRD, fDM, gamma2, gamma3)
         # Geometric peak and joining frequencies
         Mf_peak = (torch.ones_like(Mf).mT * Mf_peak).mT
@@ -199,10 +211,27 @@ class IMRPhenomD(TaylorF2):
         return amp, Damp
 
     def phenom_d_int_amp(
-        self, Mf, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi
+        self,
+        Mf,
+        eta,
+        eta2,
+        Seta,
+        chi1,
+        chi2,
+        chi12,
+        chi22,
+        xi,
+        fRD=None,  # used for passing ringdown frequency from phenom_p
+        fDM=None,  # used for passing damping frequency from phenom_p
     ):
         # merger ringdown
-        fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
+        if (fRD is None) != (fDM is None):
+            raise ValueError(
+                "Both fRD and fDM must either be provided or both be None"
+            )
+        if (fRD is None) and (fDM is None):
+            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
+
         # Geometric frequency definition from PhenomD header file
         AMP_fJoin_INS = 0.014
 
@@ -218,7 +247,9 @@ class IMRPhenomD(TaylorF2):
         v1, d1 = self.phenom_d_inspiral_amp(
             Mf1, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
         )
-        v3, d2 = self.phenom_d_mrd_amp(Mf3, eta, eta2, chi1, chi2, xi)
+        v3, d2 = self.phenom_d_mrd_amp(
+            Mf3, eta, eta2, chi1, chi2, xi, fRD, fDM
+        )
         v2 = (
             torch.ones_like(Mf).mT * self.AmpIntColFitCoeff(eta, eta2, xi)
         ).mT
@@ -237,9 +268,18 @@ class IMRPhenomD(TaylorF2):
         )
         return amp, Damp
 
-    def phenom_d_mrd_amp(self, Mf, eta, eta2, chi1, chi2, xi):
+    # fRD and fDM are to be passed for generating phenom_p waveforms
+    # and remain None for phenom_d
+    def phenom_d_mrd_amp(
+        self, Mf, eta, eta2, chi1, chi2, xi, fRD=None, fDM=None
+    ):
         # merger ringdown
-        fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
+        if (fRD is None) != (fDM is None):
+            raise ValueError(
+                "Both fRD and fDM must either be provided or both be None"
+            )
+        if (fRD is None) and (fDM is None):
+            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
         gamma1 = self.gamma1_fun(eta, eta2, xi)
         gamma2 = self.gamma2_fun(eta, eta2, xi)
@@ -382,17 +422,26 @@ class IMRPhenomD(TaylorF2):
 
         return amp, Damp
 
-    def phenom_d_phase(self, Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi):
+    # fRD and fDM are to be passed for generating phenom_p waveforms
+    # and remain None for phenom_d
+    def phenom_d_phase(
+        self, Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD=None, fDM=None
+    ):
         ins_phase, ins_Dphase = self.phenom_d_inspiral_phase(
             Mf, mass_1, mass_2, eta, eta2, xi, chi1, chi2
         )
         int_phase, int_Dphase = self.phenom_d_int_phase(Mf, eta, eta2, xi)
         mrd_phase, mrd_Dphase = self.phenom_d_mrd_phase(
-            Mf, eta, eta2, chi1, chi2, xi
+            Mf, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
 
         # merger ringdown
-        fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
+        if (fRD is None) != (fDM is None):
+            raise ValueError(
+                "Both fRD and fDM must either be provided or both be None"
+            )
+        if (fRD is None) and (fDM is None):
+            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
         # definitions in Eq. (35) of arXiv:1508.07253
         # PHI_fJoin_INS in header LALSimIMRPhenomD.h
         # C1 continuity at intermediate region i.e. f_1
@@ -413,7 +462,7 @@ class IMRPhenomD(TaylorF2):
             fRDJoin, eta, eta2, xi
         )
         mrd_phase_rd, mrd_Dphase_rd = self.phenom_d_mrd_phase(
-            fRDJoin, eta, eta2, chi1, chi2, xi
+            fRDJoin, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
         PhiIntTempVal = (int_phase_rd.mT / eta).mT + C1Int + C2Int * fRDJoin
         # C2MRD = int_Dphase_rd - mrd_Dphase_rd
@@ -452,7 +501,11 @@ class IMRPhenomD(TaylorF2):
 
         return phasing, Dphasing
 
-    def phenom_d_mrd_phase(self, Mf, eta, eta2, chi1, chi2, xi):
+    # fRD and fDM are to be passed for generating phenom_p waveforms
+    # and remain None for phenom_d
+    def phenom_d_mrd_phase(
+        self, Mf, eta, eta2, chi1, chi2, xi, fRD=None, fDM=None
+    ):
         alpha1 = self.alpha1Fit(eta, eta2, xi)
         alpha2 = self.alpha2Fit(eta, eta2, xi)
         alpha3 = self.alpha3Fit(eta, eta2, xi)
@@ -460,9 +513,14 @@ class IMRPhenomD(TaylorF2):
         alpha5 = self.alpha5Fit(eta, eta2, xi)
 
         # merger ringdown
-        fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
-        f_minus_alpha5_fRD = (Mf.t() - alpha5 * fRD).t()
+        if (fRD is None) != (fDM is None):
+            raise ValueError(
+                "Both fRD and fDM must either be provided or both be None"
+            )
+        if (fRD is None) and (fDM is None):
+            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
+        f_minus_alpha5_fRD = (Mf.t() - alpha5 * fRD).t()
         # Leading 1/eta is not multiplied at this stage
         mrd_phasing = (Mf.t() * alpha1).t()
         mrd_phasing -= (1 / Mf.t() * alpha2).t()
@@ -588,18 +646,19 @@ class IMRPhenomD(TaylorF2):
         return fRD, fDM
 
     def fmaxCalc(self, fRD, fDM, gamma2, gamma3):
-        res = torch.zeros_like(gamma2)
-        res = torch.abs(fRD + (-fDM * gamma3) / gamma2) * (gamma2 > 1).to(
-            torch.int
-        ) + torch.abs(
-            fRD
-            + (fDM * (-1 + torch.sqrt(1 - gamma2 * gamma2)) * gamma3) / gamma2
-        ) * (
-            gamma2 <= 1
-        ).to(
-            torch.int
-        )
-        return res
+        mask = gamma2 <= 1
+        # calculate result for gamma2 <= 1 case
+        sqrt_term = torch.sqrt(1 - gamma2.pow(2))
+        result_case1 = fRD + (fDM * (-1 + sqrt_term) * gamma3) / gamma2
+
+        # calculate result for gamma2 > 1 case
+        # i.e. don't add sqrt term
+        result_case2 = fRD + (-fDM * gamma3) / gamma2
+
+        # combine results using mask
+        result = torch.where(mask, result_case1, result_case2)
+
+        return torch.abs(result)
 
     def _linear_interp_finspin(self, finspin):
         # chi is a batch of final spins i.e. torch.Size([n])

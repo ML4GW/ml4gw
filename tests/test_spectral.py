@@ -2,9 +2,7 @@ from functools import partial
 
 import numpy as np
 import pytest
-import scipy
 import torch
-from packaging import version
 from scipy import signal
 
 from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
@@ -260,21 +258,6 @@ def test_fast_spectral_density_with_y(
         )
     assert scipy_result.shape == torch_result.shape
 
-    scipy_version = version.parse(scipy.__version__)
-    num_windows = (x.shape[-1] - nperseg) // nstride + 1
-    if (
-        average == "median"
-        and scipy_version < version.parse("1.9")
-        and num_windows > 1
-    ):
-        # scipy actually had a bug in the median calc for
-        # csd, see this issue:
-        # https://github.com/scipy/scipy/issues/15601
-        from scipy.signal.spectral import _median_bias
-
-        scipy_result *= _median_bias(num_freq_bins)
-        scipy_result /= _median_bias(num_windows)
-
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
     compare_against_numpy(torch_result, scipy_result)
@@ -358,6 +341,11 @@ def highpass(request):
     return request.param
 
 
+@pytest.fixture(params=[None, 512])
+def lowpass(request):
+    return request.param
+
+
 @pytest.fixture(params=[64, 128])
 def whiten_length(request):
     return request.param
@@ -371,6 +359,7 @@ def background_length(request):
 def test_whiten(
     fduration,
     highpass,
+    lowpass,
     ndim,
     whiten_length,
     validate_whitened,
@@ -421,21 +410,23 @@ def test_whiten(
 
     size = int(whiten_length * sample_rate)
     X = mean + std * torch.randn(batch_size, num_channels, size)
-    whitened = whiten(X, psd, fduration, sample_rate, highpass)
+    whitened = whiten(X, psd, fduration, sample_rate, highpass, lowpass)
     expected_size = int((whiten_length - fduration) * sample_rate)
     assert whitened.shape == (batch_size, num_channels, expected_size)
 
-    validate_whitened(whitened, highpass, sample_rate, 1 / whiten_length)
+    validate_whitened(
+        whitened, highpass, lowpass, sample_rate, 1 / whiten_length
+    )
 
     # inject a gaussian pulse into the timeseries and
     # ensure that its max value comes out to the same place
     # adapted from gwpy's tests
     # https://github.com/gwpy/gwpy/blob/e9f687e8d34720d9d386a6bd7f95e3b759264739/gwpy/timeseries/tests/test_timeseries.py#L1285  # noqa
     t = np.arange(size) / sample_rate - whiten_length / 2
-    glitch = torch.Tensor(signal.gausspulse(t, bw=100))
+    glitch = torch.Tensor(signal.gausspulse(t, fc=128, bw=2))
     glitch = 10 * std * glitch
     inj = X + glitch
-    whitened = whiten(inj, psd, fduration, sample_rate, highpass)
+    whitened = whiten(inj, psd, fduration, sample_rate, highpass, lowpass)
     maxs = whitened.argmax(-1) / sample_rate + fduration / 2
     target = torch.ones_like(maxs) * whiten_length / 2
     torch.testing.assert_close(maxs, target, rtol=0, atol=0.01)

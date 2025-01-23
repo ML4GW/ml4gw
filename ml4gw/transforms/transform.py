@@ -3,6 +3,7 @@ from typing import Optional
 import torch
 
 from ml4gw.spectral import spectral_density
+from ml4gw.types import FrequencySeries1to3d, TimeSeries1to3d
 
 
 class FittableTransform(torch.nn.Module):
@@ -43,12 +44,12 @@ class FittableTransform(torch.nn.Module):
 class FittableSpectralTransform(FittableTransform):
     def normalize_psd(
         self,
-        x,
+        x: TimeSeries1to3d,
         sample_rate: float,
         num_freqs: int,
         fftlength: Optional[float] = None,
         overlap: Optional[float] = None,
-    ):
+    ) -> FrequencySeries1to3d:
         # if we specified an FFT length, convert
         # the (assumed) time-domain data to the
         # frequency domain
@@ -68,7 +69,7 @@ class FittableSpectralTransform(FittableTransform):
                 scale=scale,
             )
 
-        # add two dummy dimensions in case we need to inerpolate
+        # add two dummy dimensions in case we need to interpolate
         # the frequency dimension, since `interpolate` expects
         # a (batch, channel, spatial) formatted tensor as input
         x = x.view(1, 1, -1)

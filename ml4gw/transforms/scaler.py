@@ -1,6 +1,8 @@
 from typing import Optional
 
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
 from ml4gw.transforms.transform import FittableTransform
 
@@ -34,7 +36,9 @@ class ChannelWiseScaler(FittableTransform):
         self.register_buffer("mean", mean)
         self.register_buffer("std", std)
 
-    def fit(self, X: torch.Tensor) -> None:
+    def fit(
+        self, X: Float[Tensor, "... time"], std_reg: Optional[float] = 0.0
+    ) -> None:
         """Fit the scaling parameters to a timeseries
 
         Computes the channel-wise mean and standard deviation
@@ -57,10 +61,12 @@ class ChannelWiseScaler(FittableTransform):
                 "Can't fit channel wise mean and standard deviation "
                 "from tensor of shape {}".format(X.shape)
             )
-
+        std += std_reg * torch.ones_like(std)
         super().build(mean=mean, std=std)
 
-    def forward(self, X: torch.Tensor, reverse: bool = False) -> torch.Tensor:
+    def forward(
+        self, X: Float[Tensor, "... time"], reverse: bool = False
+    ) -> Float[Tensor, "... time"]:
         if not reverse:
             return (X - self.mean) / self.std
         else:

@@ -1,8 +1,10 @@
 import torch
-from torchtyping import TensorType
+from jaxtyping import Float
 
-from ..constants import MPC_SEC, MTSUN_SI, PI
-from ..constants import EulerGamma as GAMMA
+from ml4gw.constants import MPC_SEC, MTSUN_SI, PI
+from ml4gw.constants import EulerGamma as GAMMA
+from ml4gw.types import BatchTensor, FrequencySeries1d
+from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
 
 
 class TaylorF2(torch.nn.Module):
@@ -11,14 +13,14 @@ class TaylorF2(torch.nn.Module):
 
     def forward(
         self,
-        f: TensorType,
-        chirp_mass: TensorType,
-        mass_ratio: TensorType,
-        chi1: TensorType,
-        chi2: TensorType,
-        distance: TensorType,
-        phic: TensorType,
-        inclination: TensorType,
+        f: FrequencySeries1d,
+        chirp_mass: BatchTensor,
+        mass_ratio: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
+        inclination: BatchTensor,
         f_ref: float,
     ):
         """
@@ -59,8 +61,11 @@ class TaylorF2(torch.nn.Module):
             or phic.shape[0] != inclination.shape[0]
         ):
             raise RuntimeError("Tensors should have same batch size")
-        mass2 = chirp_mass * (1.0 + mass_ratio) ** 0.2 / mass_ratio**0.6
-        mass1 = mass_ratio * mass2
+
+        mass1, mass2 = chirp_mass_and_mass_ratio_to_components(
+            chirp_mass, mass_ratio
+        )
+
         cfac = torch.cos(inclination)
         pfac = 0.5 * (1.0 + cfac * cfac)
 
@@ -75,15 +80,15 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_htilde(
         self,
-        f: TensorType,
-        mass1: TensorType,
-        mass2: TensorType,
-        chi1: TensorType,
-        chi2: TensorType,
-        distance: TensorType,
-        phic: TensorType,
+        f: FrequencySeries1d,
+        mass1: BatchTensor,
+        mass2: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+        distance: BatchTensor,
+        phic: BatchTensor,
         f_ref: float,
-    ):
+    ) -> Float[FrequencySeries1d, " batch"]:
         mass1_s = mass1 * MTSUN_SI
         mass2_s = mass2 * MTSUN_SI
         M_s = mass1_s + mass2_s
@@ -103,8 +108,13 @@ class TaylorF2(torch.nn.Module):
         return h0
 
     def taylorf2_amplitude(
-        self, Mf: TensorType, mass1, mass2, eta, distance
-    ) -> TensorType:
+        self,
+        Mf: BatchTensor,
+        mass1: BatchTensor,
+        mass2: BatchTensor,
+        eta: BatchTensor,
+        distance: BatchTensor,
+    ) -> Float[FrequencySeries1d, " batch"]:
         mass1_s = mass1 * MTSUN_SI
         mass2_s = mass2 * MTSUN_SI
         v = (PI * Mf) ** (1.0 / 3.0)
@@ -126,12 +136,12 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_phase(
         self,
-        Mf: TensorType,
-        mass1: TensorType,
-        mass2: TensorType,
-        chi1: TensorType,
-        chi2: TensorType,
-    ) -> TensorType:
+        Mf: BatchTensor,
+        mass1: BatchTensor,
+        mass2: BatchTensor,
+        chi1: BatchTensor,
+        chi2: BatchTensor,
+    ) -> Float[FrequencySeries1d, " batch"]:
         """
         Calculate the inspiral phase for the TaylorF2.
         """

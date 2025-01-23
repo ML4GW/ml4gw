@@ -9,6 +9,8 @@ from typing import Optional
 
 import torch
 import torch.distributions as dist
+from jaxtyping import Float
+from torch import Tensor
 
 
 class Cosine(dist.Distribution):
@@ -31,11 +33,11 @@ class Cosine(dist.Distribution):
         self.high = torch.as_tensor(high)
         self.norm = 1 / (torch.sin(self.high) - torch.sin(self.low))
 
-    def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
+    def rsample(self, sample_shape: torch.Size = torch.Size()) -> Tensor:
         u = torch.rand(sample_shape, device=self.low.device)
         return torch.arcsin(u / self.norm + torch.sin(self.low))
 
-    def log_prob(self, value):
+    def log_prob(self, value: float) -> Float[Tensor, ""]:
         value = torch.as_tensor(value)
         inside_range = (value >= self.low) & (value <= self.high)
         return value.cos().log() * inside_range
@@ -164,7 +166,7 @@ class DeltaFunction(dist.Distribution):
         super().__init__(batch_shape, validate_args=validate_args)
         self.peak = torch.as_tensor(peak)
 
-    def rsample(self, sample_shape: torch.Size = torch.Size()) -> torch.Tensor:
+    def rsample(self, sample_shape: torch.Size = torch.Size()) -> Tensor:
         return self.peak * torch.ones(
             sample_shape, device=self.peak.device, dtype=torch.float32
         )

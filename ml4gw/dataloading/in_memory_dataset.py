@@ -2,8 +2,9 @@ import itertools
 from typing import Optional, Tuple, Union
 
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
-from ml4gw import types
 from ml4gw.utils.slicing import slice_kernels
 
 
@@ -76,9 +77,9 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
     def __init__(
         self,
-        X: types.TimeSeriesTensor,
+        X: Float[Tensor, "channels time"],
         kernel_size: int,
-        y: Optional[types.ScalarTensor] = None,
+        y: Optional[Float[Tensor, " time"]] = None,
         batch_size: int = 32,
         stride: int = 1,
         batches_per_epoch: Optional[int] = None,
@@ -207,7 +208,10 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
     def __iter__(
         self,
-    ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+    ) -> Union[
+        Float[Tensor, "batch channel time"],
+        Tuple[Float[Tensor, "batch channel time"], Float[Tensor, " batch"]],
+    ]:
 
         indices = self.init_indices()
         for i in range(len(self)):

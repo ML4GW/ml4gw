@@ -2,6 +2,8 @@ from collections.abc import Iterable
 
 import torch
 
+from ml4gw.types import WaveformTensor
+
 
 class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
     """
@@ -55,10 +57,10 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
         self.coincident = coincident
         self.device = device
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.chunk_it) * self.batches_per_chunk
 
-    def __iter__(self):
+    def __iter__(self) -> WaveformTensor:
         it = iter(self.chunk_it)
         chunk = next(it)
         num_chunks, num_channels, chunk_size = chunk.shape

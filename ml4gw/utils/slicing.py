@@ -1,25 +1,30 @@
 from typing import Optional, Union
 
 import torch
+from jaxtyping import Float, Int64
+from torch import Tensor
 from torch.nn.functional import unfold
-from torchtyping import TensorType
 
-# need to define these for flake8 compatibility
-batch = time = channel = None  # noqa
+from ml4gw.types import (
+    TimeSeries1d,
+    TimeSeries1to3d,
+    TimeSeries2d,
+    TimeSeries3d,
+)
 
-TimeSeriesTensor = Union[TensorType["time"], TensorType["channel", "time"]]
-
-BatchTimeSeriesTensor = Union[
-    TensorType["batch", "time"], TensorType["batch", "channel", "time"]
-]
+BatchTimeSeriesTensor = Union[Float[Tensor, "batch time"], TimeSeries3d]
 
 
 def unfold_windows(
-    x: torch.Tensor,
+    x: TimeSeries1to3d,
     window_size: int,
     stride: int,
     drop_last: bool = True,
-):
+) -> Union[
+    Float[TimeSeries1d, " window"],
+    Float[TimeSeries2d, " window"],
+    Float[TimeSeries3d, " window"],
+]:
     """Unfold a timeseries into windows
 
     Args:
@@ -83,8 +88,8 @@ def unfold_windows(
 
 
 def slice_kernels(
-    x: Union[TimeSeriesTensor, TensorType["batch", "channel", "time"]],
-    idx: TensorType[..., torch.int64],
+    x: TimeSeries1to3d,
+    idx: Int64[Tensor, "..."],
     kernel_size: int,
 ) -> BatchTimeSeriesTensor:
     """Slice kernels from single or multichannel timeseries
@@ -96,7 +101,8 @@ def slice_kernels(
     one more dimension than `x`.
 
     Args:
-        x: The timeseries tensor to slice kernels from
+        x:
+            The timeseries tensor to slice kernels from
         idx:
             The indices in `x` of the first sample of each
             kernel. If `x` is 1D, `idx` must be 1D as well.
@@ -114,6 +120,7 @@ def slice_kernels(
             coincidentally among the channels.
         kernel_size:
             The length of the kernels to slice from the timeseries
+
     Returns:
         A tensor of shape `(batch_size, kernel_size)` if `x` is
         1D and `(batch_size, num_channels, kernel_size)` if `x`
@@ -225,7 +232,7 @@ def slice_kernels(
 
 
 def sample_kernels(
-    X: TimeSeriesTensor,
+    X: TimeSeries1to3d,
     kernel_size: int,
     N: Optional[int] = None,
     max_center_offset: Optional[int] = None,
@@ -245,8 +252,9 @@ def sample_kernels(
     either be `None` or be equal to `len(X)`.
 
     Args:
-        X: The timeseries tensor from which to sample kernels
-        kernel_size: The size of the kernels to sample
+        X:
+            The timeseries tensor from which to sample kernels
+            kernel_size: The size of the kernels to sample
         N:
             The number of kernels to sample. Can be left as
             `None` if `X` is 3D, otherwise must be specified

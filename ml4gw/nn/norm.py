@@ -1,6 +1,8 @@
 from typing import Callable, Optional
 
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
 NormLayer = Callable[[int], torch.nn.Module]
 
@@ -31,7 +33,9 @@ class GroupNorm1D(torch.nn.Module):
         self.weight = torch.nn.Parameter(torch.ones(shape))
         self.bias = torch.nn.Parameter(torch.zeros(shape))
 
-    def forward(self, x):
+    def forward(
+        self, x: Float[Tensor, "batch channel length"]
+    ) -> Float[Tensor, "batch channel length"]:
         if len(x.shape) != 3:
             raise ValueError(
                 "GroupNorm1D requires 3-dimensional input, "

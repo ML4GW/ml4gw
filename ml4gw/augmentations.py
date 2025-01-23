@@ -1,4 +1,6 @@
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
 
 class SignalInverter(torch.nn.Module):
@@ -16,7 +18,9 @@ class SignalInverter(torch.nn.Module):
         super().__init__()
         self.prob = prob
 
-    def forward(self, X):
+    def forward(
+        self, X: Float[Tensor, "*batch time"]
+    ) -> Float[Tensor, "*batch time"]:
         mask = torch.rand(size=X.shape[:-1]) < self.prob
         X[mask] *= -1
         return X
@@ -37,7 +41,9 @@ class SignalReverser(torch.nn.Module):
         super().__init__()
         self.prob = prob
 
-    def forward(self, X):
+    def forward(
+        self, X: Float[Tensor, "*batch time"]
+    ) -> Float[Tensor, "*batch time"]:
         mask = torch.rand(size=X.shape[:-1]) < self.prob
         X[mask] = X[mask].flip(-1)
         return X

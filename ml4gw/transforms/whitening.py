@@ -1,9 +1,15 @@
-from typing import Optional
+from typing import Optional, Union
 
 import torch
 
 from ml4gw import spectral
 from ml4gw.transforms.transform import FittableSpectralTransform
+from ml4gw.types import (
+    FrequencySeries1d,
+    FrequencySeries1to3d,
+    TimeSeries1d,
+    TimeSeries3d,
+)
 
 
 class Whiten(torch.nn.Module):
@@ -39,6 +45,10 @@ class Whiten(torch.nn.Module):
             Cutoff frequency to apply highpass filtering
             during whitening. If left as `None`, no highpass
             filtering will be performed.
+        lowpass:
+            Cutoff frequency to apply lowpass filtering
+            during whitening. If left as `None`, no lowpass
+            filtering will be performed.
     """
 
     def __init__(
@@ -46,11 +56,13 @@ class Whiten(torch.nn.Module):
         fduration: float,
         sample_rate: float,
         highpass: Optional[float] = None,
+        lowpass: Optional[float] = None,
     ) -> None:
         super().__init__()
         self.fduration = fduration
         self.sample_rate = sample_rate
         self.highpass = highpass
+        self.lowpass = lowpass
 
         # register a window up front to signify our
         # fduration at inference time
@@ -58,7 +70,9 @@ class Whiten(torch.nn.Module):
         window = torch.hann_window(size, dtype=torch.float64)
         self.register_buffer("window", window)
 
-    def forward(self, X: torch.Tensor, psd: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, X: TimeSeries3d, psd: FrequencySeries1to3d
+    ) -> TimeSeries3d:
         """
         Whiten a batch of multichannel timeseries by a
         background power spectral density.
@@ -96,6 +110,7 @@ class Whiten(torch.nn.Module):
             fduration=self.window,
             sample_rate=self.sample_rate,
             highpass=self.highpass,
+            lowpass=self.lowpass,
         )
 
 
@@ -142,9 +157,10 @@ class FixedWhiten(FittableSpectralTransform):
     def fit(
         self,
         fduration: float,
-        *background: torch.Tensor,
+        *background: Union[TimeSeries1d, FrequencySeries1d],
         fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
+        lowpass: Optional[float] = None,
         overlap: Optional[float] = None
     ) -> None:
         """
@@ -192,6 +208,13 @@ class FixedWhiten(FittableSpectralTransform):
                 in the frequency bins below this value to 0.
                 If left as `None`, the fit filter won't have any
                 highpass filtering properties.
+            lowpass:
+                Cutoff frequency, in Hz, used for lowpass filtering
+                with the fit whitening filter. This is achieved by
+                setting the frequency response of the fit PSDs
+                in the frequency bins above this value to 0.
+                If left as `None`, the fit filter won't have any
+                lowpass filtering properties.
             overlap:
                 Overlap between FFT frames used to convert
                 time-domain data to the frequency domain via
@@ -216,7 +239,7 @@ class FixedWhiten(FittableSpectralTransform):
             x = x.view(1, 1, -1)
 
             psd = spectral.truncate_inverse_power_spectrum(
-                x, fduration, self.sample_rate, highpass
+                x, fduration, self.sample_rate, highpass, lowpass
             )
             psds.append(psd[0, 0])
         psd = torch.stack(psds)
@@ -224,7 +247,7 @@ class FixedWhiten(FittableSpectralTransform):
         fduration = torch.Tensor([fduration])
         self.build(psd=psd, fduration=fduration)
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    def forward(self, X: TimeSeries3d) -> TimeSeries3d:
         """
         Whiten the input timeseries tensor using the
         PSD fit by the `.fit` method, which must be
