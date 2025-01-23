@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torchaudio
-from torchaudio.functional import filtfilt as torchaudio_filtfilt
+from torchaudio.functional import filtfilt
 
 from .constants import PI
 
@@ -298,5 +298,5 @@ def iirfilter(N, Wn, btype="low", analog=False, fs=None):
 
 def butter_filter_torch(data, cutoff, fs, order, btype):
     b, a = iirfilter(order, cutoff, btype=btype, analog=False, fs=fs)
-    filtered_data = torchaudio_filtfilt(data, a, b, clamp=False)
+    filtered_data = filtfilt(data, a, b, clamp=False)
     return filtered_data, b, a
