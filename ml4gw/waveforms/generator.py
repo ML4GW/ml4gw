@@ -1,4 +1,5 @@
-from typing import Callable, Dict, Optional, Tuple
+import math
+from typing import Callable, Dict, Tuple
 
 import torch
 from jaxtyping import Float
@@ -11,44 +12,6 @@ EXTRA_TIME_FRACTION = (
     0.1  # fraction of waveform duration to add as extra time for tapering
 )
 EXTRA_CYCLES = 3.0
-
-
-class ParameterSampler(torch.nn.Module):
-    def __init__(
-        self,
-        conversion_function: Optional[Callable] = None,
-        **params: Callable,
-    ):
-        """
-        A class for sampling parameters from a prior distribution
-
-        Args:
-            conversion_function:
-                A callable that takes a dictionary of sampled parameters
-                and returns a dictionary of transformed parameters
-            **params:
-                A dictionary of parameter samplers that take an integer N
-                and return a tensor of shape (N, ...) representing
-                samples from the prior distribution
-        """
-        super().__init__()
-        self.params = params
-        self.conversion_function = conversion_function or (lambda x: x)
-
-    def forward(
-        self,
-        N: int,
-        device: str = "cpu",
-    ):
-        # sample parameters from prior
-        parameters = {
-            k: v.sample((N,)).to(device) for k, v in self.params.items()
-        }
-        # perform any necessary conversions
-        # to from sampled parameters to
-        # waveform generation parameters
-        parameters = self.conversion_function(parameters)
-        return parameters
 
 
 class TimeDomainCBCWaveformGenerator(torch.nn.Module):
@@ -155,6 +118,9 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         chirplen = torch.round(
             (tchirp + tmerge + 2.0 * textra) * self.sample_rate
         )
+
+        # pad to next power of 2
+        chirplen = 2 ** torch.ceil(torch.log(chirplen) / math.log(2))
 
         # get smallest df corresponding to longest chirp length,
         # which will make sure there is no wrap around effects.
