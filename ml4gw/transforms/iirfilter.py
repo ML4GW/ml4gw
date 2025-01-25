@@ -1,13 +1,13 @@
 import torch
+from scipy.signal import iirfilter
 from torchaudio.functional import filtfilt
-
-from ..filters import _iirfilter
 
 
 class IIRFilter(torch.nn.Module):
     r"""
     IIR digital and analog filter design given order and critical points.
     Design an Nth-order digital or analog filter and apply it to a signal.
+    Uses SciPy's `iirfilter` function to create the filter coefficients.
 
     The forward call of this module accepts a batch tensor of shape
     (n_waveforms, n_samples) and returns the filtered waveforms.
@@ -23,6 +23,12 @@ class IIRFilter(torch.nn.Module):
             half-cycles / sample). For analog filters, Wn is an angular
             frequency (e.g., rad/s). When Wn is a length-2 sequence,`Wn[0]`
             must be less than `Wn[1]`.
+        rp:
+            For Chebyshev and elliptic filters, provides the maximum ripple in
+            the passband. (dB)
+        rs:
+            For Chebyshev and elliptic filters, provides the minimum
+            attenuation in the stop band. (dB)
         btype:
             The type of filter. Default is 'bandpass'.
         analog:
@@ -31,12 +37,11 @@ class IIRFilter(torch.nn.Module):
         ftype:
             The type of IIR filter to design:
 
-                - Buttersworth   : 'butter'
-        output:
-            Filter form of the output:
-
-                - numerator/denominator (default)    : 'ba'
-                - pole-zero                          : 'zpk'
+                - Butterworth   : 'butter'
+                - Chebyshev I   : 'cheby1'
+                - Chebyshev II  : 'cheby2'
+                - Cauer/elliptic: 'ellip'
+                - Bessel/Thomson: 'bessel's
         fs:
             The sampling frequency of the digital system.
 
@@ -48,22 +53,38 @@ class IIRFilter(torch.nn.Module):
         z, p, k:
             Zeros, poles, and system gain of the IIR filter transfer
             function.  Only returned if ``output='zpk'``.
+        sos:
+            Second-order sections representation of the IIR filter.
+            Only returned if ``output='sos'``.
     """
 
     def __init__(
         self,
         N: int,
-        Wn: torch.Tensor,
+        Wn: float | torch.Tensor,
         btype="band",
         analog=False,
         ftype="butter",
-        output="ba",
         fs=None,
     ) -> None:
         super().__init__()
-        b, a = _iirfilter(N, Wn, btype, analog, ftype, output, fs)
-        self.register_buffer("b", b)
-        self.register_buffer("a", a)
+
+        if isinstance(Wn, torch.Tensor):
+            _Wn = Wn.numpy()
+        else:
+            _Wn = Wn
+
+        b, a = iirfilter(
+            N,
+            _Wn,
+            btype=btype,
+            analog=analog,
+            ftype=ftype,
+            output="ba",
+            fs=fs,
+        )
+        self.register_buffer("b", torch.tensor(b))
+        self.register_buffer("a", torch.tensor(a))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         r"""

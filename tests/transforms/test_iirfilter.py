@@ -31,19 +31,17 @@ def test_butterworth(sample_rate, order):
 
     butterworth_low = IIRFilter(
         order,
-        torch.tensor(low_cutoff),
+        low_cutoff,
         btype="low",
         analog=False,
-        output="ba",
-        fs=torch.tensor(sample_rate),
+        fs=sample_rate,
     )
     butterworth_high = IIRFilter(
         order,
-        torch.tensor(high_cutoff),
+        high_cutoff,
         btype="high",
         analog=False,
-        output="ba",
-        fs=torch.tensor(sample_rate),
+        fs=sample_rate,
     )
 
     b, a = butter(
