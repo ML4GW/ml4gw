@@ -247,7 +247,7 @@ def test_butterworth_phenom_signal(
         LALpars=lal.CreateDict(),
     )
     hp_lal, _ = lalsimulation.SimInspiralChooseFDWaveform(**params)
-    hp_lal = hp_lal.data.data
+    hp_lal = hp_lal.data.data.real
 
     slice_length = int(0.1 * sample_rate)
 
@@ -290,10 +290,10 @@ def test_butterworth_phenom_signal(
     )
 
     torch_filtered_data_low = butterworth_low(
-        torch.tensor(hp_lal.real).repeat(10, 1)
+        torch.tensor(hp_lal).repeat(10, 1)
     )[:, slice_length:-slice_length].numpy()
     torch_filtered_data_high = butterworth_high(
-        torch.tensor(hp_lal.real).repeat(10, 1)
+        torch.tensor(hp_lal).repeat(10, 1)
     )[:, slice_length:-slice_length].numpy()
 
     # test batch processing
@@ -312,10 +312,10 @@ def test_butterworth_phenom_signal(
     assert np.allclose(
         1e21 * scipy_filtered_data_low,
         1e21 * torch_filtered_data_low[0],
-        atol=1,
+        atol=1e-6,
     )
     assert np.allclose(
         1e21 * scipy_filtered_data_high,
         1e21 * torch_filtered_data_high[0],
-        atol=1,
+        atol=1e-6,
     )
