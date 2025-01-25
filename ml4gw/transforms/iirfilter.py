@@ -64,25 +64,32 @@ class IIRFilter(torch.nn.Module):
         self,
         N: int,
         Wn: Union[float, torch.Tensor],
+        rs: Union[None, float, torch.Tensor] = None,
+        rp: Union[None, float, torch.Tensor] = None,
         btype="band",
         analog=False,
         ftype="butter",
+        output="ba",
         fs=None,
     ) -> None:
         super().__init__()
 
         if isinstance(Wn, torch.Tensor):
             _Wn = Wn.numpy()
-        else:
-            _Wn = Wn
+        if isinstance(rs, torch.Tensor):
+            _rs = rs.numpy()
+        if isinstance(rp, torch.Tensor):
+            _rp = rp.numpy()
 
         b, a = iirfilter(
             N,
             _Wn,
+            rs=_rs,
+            rp=_rp,
             btype=btype,
             analog=analog,
             ftype=ftype,
-            output="ba",
+            output=output,
             fs=fs,
         )
         self.register_buffer("b", torch.tensor(b))
