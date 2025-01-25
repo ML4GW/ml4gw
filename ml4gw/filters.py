@@ -2,33 +2,13 @@ import numpy as np
 import torch
 import torchaudio
 from torch import Tensor
-from torchaudio.functional import filtfilt
 
-from ..constants import PI
+from .constants import PI
 
 r"""
     Heavily based on the scipy implementation of the butterworth filter
     https://github.com/scipy/scipy/blob/main/scipy/signal/_filter_design.py
 """
-
-band_dict: dict = {
-    "band": "bandpass",
-    "bandpass": "bandpass",
-    "pass": "bandpass",
-    "bp": "bandpass",
-    "bs": "bandstop",
-    "bandstop": "bandstop",
-    "bands": "bandstop",
-    "stop": "bandstop",
-    "l": "lowpass",
-    "low": "lowpass",
-    "lowpass": "lowpass",
-    "lp": "lowpass",
-    "high": "highpass",
-    "highpass": "highpass",
-    "h": "highpass",
-    "hp": "highpass",
-}
 
 
 def _buttap(N: int) -> tuple[Tensor, Tensor, Tensor]:
@@ -450,37 +430,15 @@ def _poly(seq_of_zeros: Tensor) -> Tensor:
         return c
 
 
-def _iirfilter(N, Wn, btype="low", analog=False, fs=None):  # noqa: C901
-    r"""
-    IIR digital and analog filter design given order and critical points.
-
-    Design an Nth-order digital or analog filter and return the filter
-    coefficients.
-
-    Args:
-        N:
-            The order of the filter.
-        Wn:
-            A scalar or length-2 sequence giving the critical frequencies.
-        btype:
-            The type of filter to design:
-
-            - 'lowpass' or 'low': return a low-pass filter
-            - 'highpass' or 'high': return a high-pass filter
-            - 'bandpass' or 'band': return a band-pass filter
-            - 'bandstop' or 'stop': return a band-stop filter
-        analog:
-            When True, return an analog filter, otherwise a digital filter is
-            returned.
-        fs:
-            The sampling frequency of the digital system.
-
-    Returns:
-        b:
-            Numerator polynomial coefficients.
-        a:
-            Denominator polynomial coefficients.
-    """
+def _iirfilter(  # noqa: C901
+    N: int,
+    Wn: torch.Tensor,
+    btype="band",
+    analog=False,
+    ftype="butter",
+    output="ba",
+    fs=None,
+) -> tuple:
     if fs is not None:
         if analog:
             raise ValueError("fs cannot be specified for an analog filter")
@@ -499,7 +457,13 @@ def _iirfilter(N, Wn, btype="low", analog=False, fs=None):  # noqa: C901
             f"'{btype}' is an invalid bandtype for filter."
         ) from e
 
-    z, p, k = _buttap(N)
+    try:
+        typefunc = filter_dict[ftype]
+    except KeyError as e:
+        raise ValueError(f"'{ftype}' is not a valid basic IIR filter.") from e
+
+    if output not in ["ba", "zpk", "sos"]:
+        raise ValueError(f"'{output}' is not a valid output form.")
 
     if not analog:
         if torch.any(Wn <= 0) or torch.any(Wn >= 1):
@@ -516,6 +480,10 @@ def _iirfilter(N, Wn, btype="low", analog=False, fs=None):  # noqa: C901
     else:
         warped = Wn
 
+    # Get analog lowpass prototype
+    if typefunc == _buttap:
+        z, p, k = typefunc(N)
+
     # transform to lowpass, bandpass, highpass, or bandstop
     if btype in ("lowpass", "highpass", "low", "high", "l", "h"):
         if _size(Wn) != 1:
@@ -528,7 +496,14 @@ def _iirfilter(N, Wn, btype="low", analog=False, fs=None):  # noqa: C901
             z, p, k = _lp2lp_zpk(z, p, k, wo=warped)
         elif btype in ("highpass", "high", "h"):
             z, p, k = _lp2hp_zpk(z, p, k, wo=warped)
-    elif btype in ("bandpass", "bandstop", "band", "stop", "bp", "bs"):
+    elif btype in (
+        "bandpass",
+        "bandstop",
+        "band",
+        "stop",
+        "bp",
+        "bs",
+    ):
         try:
             bw = warped[1] - warped[0]
             wo = torch.sqrt(warped[0] * warped[1])
@@ -545,14 +520,36 @@ def _iirfilter(N, Wn, btype="low", analog=False, fs=None):  # noqa: C901
         raise NotImplementedError(f"'{btype}' not implemented in _iirfilter.")
 
     # Find discrete equivalent if necessary
-    if not analog:
+    if not analog and fs is not None:
         z, p, k = _bilinear_zpk(z, p, k, fs=fs)
 
     # Transform to proper out type (numer-denom)
-    return _zpk2tf(z, p, k)
+    if output == "zpk":
+        return z, p, k
+    else:
+        return _zpk2tf(z, p, k)
 
 
-def butterworth(data, cutoff, fs, order, btype):
-    b, a = _iirfilter(order, cutoff, btype=btype, analog=False, fs=fs)
-    filtered_data = filtfilt(data, a, b, clamp=False)
-    return filtered_data, b, a
+filter_dict = {
+    "butter": _buttap,
+    "butterworth": _buttap,
+}
+
+band_dict: dict = {
+    "band": "bandpass",
+    "bandpass": "bandpass",
+    "pass": "bandpass",
+    "bp": "bandpass",
+    "bs": "bandstop",
+    "bandstop": "bandstop",
+    "bands": "bandstop",
+    "stop": "bandstop",
+    "l": "lowpass",
+    "low": "lowpass",
+    "lowpass": "lowpass",
+    "lp": "lowpass",
+    "high": "highpass",
+    "highpass": "highpass",
+    "h": "highpass",
+    "hp": "highpass",
+}
