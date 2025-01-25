@@ -2,8 +2,8 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.types import TimeSeries1to3d
-from ml4gw.utils.slicing import unfold_windows
+from ..types import TimeSeries1to3d
+from ..utils.slicing import unfold_windows
 
 
 class ShiftedPearsonCorrelation(torch.nn.Module):

@@ -4,8 +4,8 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw import gw
-from ml4gw.types import BatchTensor
+from .. import gw
+from ..types import BatchTensor
 
 
 # TODO: should these live in ml4gw.waveforms submodule?

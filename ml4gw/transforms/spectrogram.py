@@ -7,7 +7,7 @@ from jaxtyping import Float
 from torch import Tensor
 from torchaudio.transforms import Spectrogram
 
-from ml4gw.types import TimeSeries3d
+from ..types import TimeSeries3d
 
 
 class MultiResolutionSpectrogram(torch.nn.Module):

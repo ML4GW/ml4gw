@@ -4,7 +4,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.transforms.transform import FittableTransform
+from .transform import FittableTransform
 
 
 class ChannelWiseScaler(FittableTransform):

@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ml4gw.nn.norm import GroupNorm1DGetter, NormLayer
+from ..norm import GroupNorm1DGetter, NormLayer
 
 
 def convN(

@@ -1,9 +1,8 @@
 import torch
 from jaxtyping import Float
 
-from ml4gw.constants import MTSUN_SI, PI
-from ml4gw.types import BatchTensor, FrequencySeries1d
-
+from ...constants import MTSUN_SI, PI
+from ...types import BatchTensor, FrequencySeries1d
 from .phenom_d_data import QNMData_a, QNMData_fdamp, QNMData_fring
 from .taylorf2 import TaylorF2
 

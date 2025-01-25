@@ -1,10 +1,10 @@
 import torch
 from jaxtyping import Float
 
-from ml4gw.constants import MPC_SEC, MTSUN_SI, PI
-from ml4gw.constants import EulerGamma as GAMMA
-from ml4gw.types import BatchTensor, FrequencySeries1d
-from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
+from ...constants import MPC_SEC, MTSUN_SI, PI
+from ...constants import EulerGamma as GAMMA
+from ...types import BatchTensor, FrequencySeries1d
+from ..conversion import chirp_mass_and_mass_ratio_to_components
 
 
 class TaylorF2(torch.nn.Module):

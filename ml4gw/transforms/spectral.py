@@ -4,8 +4,8 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.spectral import fast_spectral_density, spectral_density
-from ml4gw.types import FrequencySeries1to3d, TimeSeries1to3d
+from ..spectral import fast_spectral_density, spectral_density
+from ..types import FrequencySeries1to3d, TimeSeries1to3d
 
 
 class SpectralDensity(torch.nn.Module):

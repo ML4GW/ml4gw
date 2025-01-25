@@ -2,9 +2,9 @@ from typing import Optional
 
 import torch
 
-from ml4gw.gw import compute_network_snr
-from ml4gw.transforms.transform import FittableSpectralTransform
-from ml4gw.types import BatchTensor, TimeSeries2d, WaveformTensor
+from ..gw import compute_network_snr
+from ..types import BatchTensor, TimeSeries2d, WaveformTensor
+from .transform import FittableSpectralTransform
 
 
 class SnrRescaler(FittableSpectralTransform):
