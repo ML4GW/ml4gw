@@ -69,7 +69,6 @@ class IIRFilter(torch.nn.Module):
         btype="band",
         analog=False,
         ftype="butter",
-        output="ba",
         fs=None,
     ) -> None:
         super().__init__()
@@ -89,7 +88,7 @@ class IIRFilter(torch.nn.Module):
             btype=btype,
             analog=analog,
             ftype=ftype,
-            output=output,
+            output="ba",
             fs=fs,
         )
         self.register_buffer("b", torch.tensor(b))
