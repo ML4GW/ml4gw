@@ -2,7 +2,7 @@ from collections.abc import Iterable
 
 import torch
 
-from ml4gw.types import WaveformTensor
+from ..types import WaveformTensor
 
 
 class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):

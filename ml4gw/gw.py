@@ -16,8 +16,10 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.constants import C
-from ml4gw.types import (
+from ml4gw.utils.interferometer import InterferometerGeometry
+
+from .constants import C
+from .types import (
     BatchTensor,
     NetworkDetectorTensors,
     NetworkVertices,
@@ -26,7 +28,6 @@ from ml4gw.types import (
     VectorGeometry,
     WaveformTensor,
 )
-from ml4gw.utils.interferometer import InterferometerGeometry
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:

@@ -2,8 +2,8 @@ from typing import Optional
 
 import torch
 
-from ml4gw.spectral import spectral_density
-from ml4gw.types import FrequencySeries1to3d, TimeSeries1to3d
+from ..spectral import spectral_density
+from ..types import FrequencySeries1to3d, TimeSeries1to3d
 
 
 class FittableTransform(torch.nn.Module):

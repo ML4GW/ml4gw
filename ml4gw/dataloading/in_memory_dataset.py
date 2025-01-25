@@ -5,7 +5,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.utils.slicing import slice_kernels
+from ..utils.slicing import slice_kernels
 
 
 class InMemoryDataset(torch.utils.data.IterableDataset):

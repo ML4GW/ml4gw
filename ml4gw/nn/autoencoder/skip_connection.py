@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 
-from ml4gw.nn.autoencoder.utils import match_size
+from .utils import match_size
 
 
 class SkipConnection(torch.nn.Module):

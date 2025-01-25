@@ -1,7 +1,7 @@
 import torch
 
-from ml4gw.constants import MTSUN_SI, PI
-from ml4gw.types import BatchTensor
+from ..constants import MTSUN_SI, PI
+from ..types import BatchTensor
 
 
 def rotate_z(angle: BatchTensor, x, y, z):

@@ -5,7 +5,7 @@ import h5py
 import numpy as np
 import torch
 
-from ml4gw.types import WaveformTensor
+from ..types import WaveformTensor
 
 
 class ContiguousHdf5Warning(Warning):

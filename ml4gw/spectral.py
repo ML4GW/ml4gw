@@ -15,7 +15,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.types import (
+from .types import (
     FrequencySeries1to3d,
     PSDTensor,
     TimeSeries1to3d,

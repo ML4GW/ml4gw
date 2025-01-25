@@ -4,7 +4,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.utils.slicing import unfold_windows
+from ...utils.slicing import unfold_windows
 
 
 class OnlineAverager(torch.nn.Module):

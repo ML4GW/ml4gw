@@ -2,14 +2,14 @@ from typing import Optional, Union
 
 import torch
 
-from ml4gw import spectral
-from ml4gw.transforms.transform import FittableSpectralTransform
-from ml4gw.types import (
+from .. import spectral
+from ..types import (
     FrequencySeries1d,
     FrequencySeries1to3d,
     TimeSeries1d,
     TimeSeries3d,
 )
+from .transform import FittableSpectralTransform
 
 
 class Whiten(torch.nn.Module):

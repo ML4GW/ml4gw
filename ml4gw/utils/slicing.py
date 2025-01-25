@@ -5,12 +5,7 @@ from jaxtyping import Float, Int64
 from torch import Tensor
 from torch.nn.functional import unfold
 
-from ml4gw.types import (
-    TimeSeries1d,
-    TimeSeries1to3d,
-    TimeSeries2d,
-    TimeSeries3d,
-)
+from ..types import TimeSeries1d, TimeSeries1to3d, TimeSeries2d, TimeSeries3d
 
 BatchTimeSeriesTensor = Union[Float[Tensor, "batch time"], TimeSeries3d]
 

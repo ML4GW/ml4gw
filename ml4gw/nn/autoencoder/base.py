@@ -4,7 +4,7 @@ from typing import Optional, Tuple, Union
 import torch
 from torch import Tensor
 
-from ml4gw.nn.autoencoder.skip_connection import SkipConnection
+from .skip_connection import SkipConnection
 
 
 class Autoencoder(torch.nn.Module):

@@ -4,9 +4,9 @@ from typing import Optional
 import torch
 from torch import Tensor
 
-from ml4gw.nn.autoencoder.base import Autoencoder
-from ml4gw.nn.autoencoder.skip_connection import SkipConnection
-from ml4gw.nn.autoencoder.utils import match_size
+from .base import Autoencoder
+from .skip_connection import SkipConnection
+from .utils import match_size
 
 Module = Callable[[...], torch.nn.Module]
 

@@ -7,8 +7,8 @@ import torch.nn.functional as F
 from jaxtyping import Float, Int
 from torch import Tensor
 
-from ml4gw.transforms.spline_interpolation import SplineInterpolate
-from ml4gw.types import FrequencySeries1to3d, TimeSeries1to3d, TimeSeries3d
+from ..types import FrequencySeries1to3d, TimeSeries1to3d, TimeSeries3d
+from .spline_interpolation import SplineInterpolate
 
 """
 All based on https://github.com/gwpy/gwpy/blob/v3.0.8/gwpy/signal/qtransform.py
