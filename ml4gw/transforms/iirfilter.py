@@ -74,17 +74,17 @@ class IIRFilter(torch.nn.Module):
         super().__init__()
 
         if isinstance(Wn, torch.Tensor):
-            _Wn = Wn.numpy()
+            Wn = Wn.numpy()
         if isinstance(rs, torch.Tensor):
-            _rs = rs.numpy()
+            rs = rs.numpy()
         if isinstance(rp, torch.Tensor):
-            _rp = rp.numpy()
+            rp = rp.numpy()
 
         b, a = iirfilter(
             N,
-            _Wn,
-            rs=_rs,
-            rp=_rp,
+            Wn,
+            rs=rs,
+            rp=rp,
             btype=btype,
             analog=analog,
             ftype=ftype,
