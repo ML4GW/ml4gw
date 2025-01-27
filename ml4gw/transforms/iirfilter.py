@@ -10,6 +10,7 @@ class IIRFilter(torch.nn.Module):
     IIR digital and analog filter design given order and critical points.
     Design an Nth-order digital or analog filter and apply it to a signal.
     Uses SciPy's `iirfilter` function to create the filter coefficients.
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirfilter.html # noqa E501
 
     The forward call of this module accepts a batch tensor of shape
     (n_waveforms, n_samples) and returns the filtered waveforms.
