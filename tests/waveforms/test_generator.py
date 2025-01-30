@@ -79,8 +79,6 @@ def test_cbc_waveform_generator(
     # now compare each waveform with lalsimulation SimInspiralTD
     for i in range(len(chirp_mass)):
 
-        # test far (> 400 Mpc) waveforms (O(1e-3) agreement)
-
         # construct lalinference params
         params = dict(
             m1=mass_1[i].item() * lal.MSUN_SI,
@@ -103,5 +101,22 @@ def test_cbc_waveform_generator(
             approximant=lalsimulation.IMRPhenomD,
             LALparams=lal.CreateDict(),
         )
-        return params
-        # hp_lal, hc_lal = lalsimulation.SimInspiralTD(**params)
+
+        hp_lal, hc_lal = lalsimulation.SimInspiralTD(**params)
+
+        # compare the two waveforms
+        # first center the lal waveforms
+        lal_times = (
+            torch.arange(hp_lal.data.length) * hp_lal.deltaT + hp_lal.epoch
+        )
+        mask = lal_times >= -duration & lal_times <= right_pad
+
+        hp_lal = hp_lal.data.data[mask]
+        hc_lal = hc_lal.data.data[mask]
+
+        size = int(duration + right_pad) * sample_rate
+        hc_ml4gw = hc[i].detach().numpy()[-size:]
+        hp_ml4gw = hp[i].detach().numpy()[-size:]
+
+        assert torch.allclose(hc_ml4gw, hc_lal, atol=1e-22)
+        assert torch.allclose(hp_ml4gw, hp_lal, atol=1e-22)

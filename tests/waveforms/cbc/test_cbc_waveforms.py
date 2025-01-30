@@ -521,8 +521,8 @@ def test_phenom_p(
         assert np.allclose(
             1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-2
         )
-        print(hp_lal.epoch)
-        assert False
+
+    assert False
     # test batched outputs works as expected
     hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
         torch_freqs,

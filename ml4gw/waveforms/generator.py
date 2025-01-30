@@ -67,6 +67,10 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         return torch.linspace(0, self.nyquist, num_freqs)
 
     @property
+    def delta_t(self):
+        return 1 / self.sample_rate
+
+    @property
     def nyquist(self):
         return int(self.sample_rate / 2)
 
@@ -86,6 +90,10 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         """
         Heavily based on https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa
         """
+
+        for param in parameters.values():
+            param.double()
+
         # convert masses to kg, make sure
         # they are doubles so there is no
         # overflow in the calculations
@@ -93,30 +101,46 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
             parameters["mass_1"].double() * MSUN,
             parameters["mass_2"].double() * MSUN,
         )
-
+        total_mass = mass_1 + mass_2
+        s1z, s2z = parameters["s1z"], parameters["s2z"]
         device = mass_1.device
 
-        s1z, s2z = parameters["s1z"], parameters["s2z"]
-        total_mass = mass_1 + mass_2
-
+        f_isco = utils.frequency_isco(mass_1, mass_2)
         f_min = torch.minimum(
-            utils.frequency_isco(mass_1, mass_2),
+            f_isco,
             torch.tensor(self.f_min, device=device),
         )
+
+        # upper bound on chirp time
+        tchirp = utils.chirp_time_bound(f_min, mass_1, mass_2, s1z, s2z)
+
+        # upper bound on final black hole spin
         s = utils.final_black_hole_spin_bound(s1z, s2z)
+
+        # upper bound on the final plunge, merger, and ringdown time
         tmerge = utils.merge_time_bound(
             mass_1, mass_2
         ) + utils.ringdown_time_bound(total_mass, s)
 
-        tchirp = utils.chirp_time_bound(f_min, mass_1, mass_2, s1z, s2z)
+        # extra time to include for all waveforms to take care of situations
+        # where the frequency is close to merger (and is sweeping rapidly):
+        # this is a few cycles at the low frequency
         textra = EXTRA_CYCLES / f_min
+
+        # lower bound on chirpt frequency start used for
+        # conditioning the frequency domain waveform
         fstart = utils.chirp_start_frequency_bound(
             (1.0 + EXTRA_TIME_FRACTION) * tchirp, mass_1, mass_2
         )
 
-        tchirp = utils.chirp_time_bound(fstart, mass_1, mass_2, s1z, s2z)
+        # revised chirp time estimate based on fstart
+        tchirp_fstart = utils.chirp_time_bound(
+            fstart, mass_1, mass_2, s1z, s2z
+        )
+
+        # chirp length in samples
         chirplen = torch.round(
-            (tchirp + tmerge + 2.0 * textra) * self.sample_rate
+            (tchirp_fstart + tmerge + 2.0 * textra) * self.sample_rate
         )
 
         # pad to next power of 2
@@ -124,18 +148,31 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
 
         # get smallest df corresponding to longest chirp length,
         # which will make sure there is no wrap around effects.
-        df = min(1.0 / (chirplen.max() / self.sample_rate), self.delta_f)
+        df = 1.0 / (chirplen.max() / self.sample_rate)
+
+        # generate frequency array from 0 to nyquist based on df
         frequencies = self.get_frequencies(df).to(mass_1.device)
 
         # downselect to frequencies above fstart,
         # and generate the waveform at the specified frequencies
         freq_mask = frequencies >= fstart.min()
-        frequencies = frequencies[freq_mask]
+        waveform_frequencies = frequencies[freq_mask]
 
+        # generate the waveform at specifid frequencies
         cross, plus = self.approximant(
-            frequencies, **parameters, f_ref=self.f_ref
+            waveform_frequencies, **parameters, f_ref=self.f_ref
         )
         batch_size = cross.size(0)
+
+        # create tensors to hold the full spectrum
+        # of frequencies from 0 to nyquist, and then
+        # fill in the requested frequencies with the waveform values
+        shape = (batch_size, frequencies.size(0))
+        hc_spectrum = torch.zeros(shape, dtype=cross.dtype, device=device)
+        hp_spectrum = torch.zeros(shape, dtype=plus.dtype, device=device)
+
+        hc_spectrum[:, freq_mask] = cross
+        hp_spectrum[:, freq_mask] = plus
 
         # build a taper that is dependent on each
         # individual waveforms fstart;
@@ -144,61 +181,41 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         # construct the tapers based on the maximum size
         # and then set the values outside of the individual
         # waveform taper regions to 1.0
-        taper_mask = frequencies <= f_min[:, None]
-        taper_size = taper_mask.sum(axis=1)
-        max_taper_size = taper_size.max()
-        taper = torch.nan_to_num(
-            torch.arange(max_taper_size, device=device) / taper_size[:, None],
-            nan=1.0,
-            posinf=1.0,
-            neginf=1.0,
+
+        k0s = torch.round(fstart / df)
+        k1s = torch.round(f_min / df)
+
+        num_freqs = frequencies.size(0)
+        frequency_indices = torch.arange(num_freqs)
+        taper_mask = frequency_indices <= k1s[:, None]
+        taper_mask &= frequency_indices >= k0s[:, None]
+
+        indices = frequency_indices.expand(batch_size, -1)
+
+        kvals = indices[taper_mask]
+        k0s_expanded = k0s.unsqueeze(1).expand(-1, num_freqs)[taper_mask]
+        k1s_expanded = k1s.unsqueeze(1).expand(-1, num_freqs)[taper_mask]
+
+        windows = 0.5 - 0.5 * torch.cos(
+            torch.pi * (kvals - k0s_expanded) / (k1s_expanded - k0s_expanded)
         )
-        taper = 0.5 - 0.5 * torch.cos(torch.pi * taper)
 
-        mask = torch.arange(max_taper_size, device=device).expand(
-            batch_size, -1
-        )
-        mask = mask <= taper_size.unsqueeze(1)
-        taper[~mask] = 1.0
+        hc_spectrum[taper_mask] *= windows
+        hp_spectrum[taper_mask] *= windows
 
-        # finally, apply the taper to the waveforms
-        cross[..., :max_taper_size] *= taper
-        plus[..., :max_taper_size] *= taper
-
-        # now, construct full spectrum of frequencies
-        # from 0 to nyquist, and then fill in the
-        # requested frequencies with the waveform values
-
-        shape = (batch_size, int(self.nyquist / df) + 1)
-        hc_spectrum = torch.zeros(shape, dtype=cross.dtype, device=device)
-        hp_spectrum = torch.zeros(shape, dtype=plus.dtype, device=device)
-
-        hc_spectrum[:, freq_mask] = cross
-        hp_spectrum[:, freq_mask] = plus
+        zero_mask = frequencies < fstart[:, None]
+        hc_spectrum[zero_mask] = 0
+        hp_spectrum[zero_mask] = 0
 
         # set nyquist frequency to zero
         hc_spectrum[..., -1], hp_spectrum[..., -1] = 0.0, 0.0
 
-        # perfom inverse fft to get time domain waveforms
-        cross, plus = torch.fft.irfft(hc_spectrum), torch.fft.irfft(
-            hp_spectrum
-        )
-        cross, plus = cross * self.sample_rate, plus * self.sample_rate
+        tshift = round(self.right_pad * self.sample_rate) / self.sample_rate
+        kvals = torch.arange(num_freqs)
 
-        # roll the waveforms so that the coalescence
-        # is `right_pad` seconds from the end
-        cross = torch.roll(
-            cross, -int(self.right_pad * self.sample_rate), dims=-1
-        )
-        plus = torch.roll(
-            plus, -int(self.right_pad * self.sample_rate), dims=-1
-        )
+        phase_shift = torch.exp(1j * 2 * torch.pi * df * tshift * kvals)
 
-        # lastly, slice the waveforms based on the requested duration
-        cross = cross[..., -self.size :]
-        plus = plus[..., -self.size :]
+        hp_spectrum *= phase_shift
+        hc_spectrum *= phase_shift
 
-        # TODO: implement and apply butterworth
-        # highpass filter in torch
-
-        return cross, plus
+        return hc_spectrum, hp_spectrum
