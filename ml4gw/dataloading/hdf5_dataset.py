@@ -50,7 +50,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             channel. The latter setting limits the amount of
             entropy in the effective dataset, but can provide
             over 2x improvement in total throughput.
-        fnames_per_batch:
+        num_files_per_batch:
             The number of unique files from which to sample
             batch elements each epoch. If left as `None`,
             will use all available files. Useful when reading
@@ -67,7 +67,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         batch_size: int,
         batches_per_epoch: int,
         coincident: Union[bool, str],
-        fnames_per_batch: Optional[int] = None,
+        num_files_per_batch: Optional[int] = None,
     ) -> None:
         if not isinstance(coincident, bool) and coincident != "files":
             raise ValueError(
@@ -82,9 +82,14 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.batch_size = batch_size
         self.batches_per_epoch = batches_per_epoch
         self.coincident = coincident
-        self.fnames_per_batch = (
-            len(fnames) if fnames_per_batch is None else fnames_per_batch
+        self.num_files_per_batch = (
+            len(fnames) if num_files_per_batch is None else num_files_per_batch
         )
+        if self.num_files_per_batch > len(fnames):
+            raise ValueError(
+                f"Number of files per batch ({self.num_files_per_batch}) "
+                f"cannot exceed number of files ({len(fnames)}) "
+            )
 
         self.sizes = {}
         for fname in self.fnames:
@@ -111,21 +116,22 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         return self.batches_per_epoch
 
     def sample_fnames(self, size) -> np.ndarray:
-        # first, randomly select `self.fnames_per_batch`
+        # first, randomly select `self.num_files_per_batch`
         # file indices based on their probabilities
         fname_indices = np.arange(len(self.fnames))
+        print(fname_indices)
         fname_indices = np.random.choice(
             fname_indices,
             p=self.probs,
-            size=(self.fnames_per_batch),
+            size=(self.num_files_per_batch),
             replace=False,
         )
-
+        print(fname_indices)
         # now renormalize the probabilities, and sample
         # the requested size from this subset of files
         probs = self.probs[fname_indices]
         probs /= probs.sum()
-
+        print(self.fnames)
         return np.random.choice(
             self.fnames[fname_indices],
             p=probs,

@@ -108,11 +108,11 @@ class TestHdf5TimeSeriesDataset:
         assert counts["a.h5"] > counts["b.h5"]
 
         # override fnames per batch for testing
-        dataset.fnames_per_batch = 1
+        dataset.num_files_per_batch = 1
         fnames = dataset.sample_fnames(size=(10,))
         assert len(np.unique(fnames)) == 1
 
-        dataset.fnames_per_batch = 2
+        dataset.num_files_per_batch = 2
         fnames = dataset.sample_fnames(size=(10,))
         assert len(np.unique(fnames)) == 2
 
