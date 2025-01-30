@@ -218,4 +218,12 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         hp_spectrum *= phase_shift
         hc_spectrum *= phase_shift
 
+        hp_spectrum = torch.fft.irfft(hp_spectrum) * self.sample_rate
+        hc_spectrum = torch.fft.irfft(hc_spectrum) * self.sample_rate
+
+        # pad waveforms on left up to duration
+        pad = int((self.duration * self.sample_rate) - hp_spectrum.shape[-1])
+        hp_spectrum = torch.nn.functional.pad(hp_spectrum, (pad, 0))
+        hc_spectrum = torch.nn.functional.pad(hc_spectrum, (pad, 0))
+
         return hc_spectrum, hp_spectrum
