@@ -107,6 +107,15 @@ class TestHdf5TimeSeriesDataset:
                 counts[fname.name] += 1
         assert counts["a.h5"] > counts["b.h5"]
 
+        # override fnames per batch for testing
+        dataset.fnames_per_batch = 1
+        fnames = dataset.sample_fnames(size=(10,))
+        assert len(np.unique(fnames)) == 1
+
+        dataset.fnames_per_batch = 2
+        fnames = dataset.sample_fnames(size=(10,))
+        assert len(np.unique(fnames)) == 2
+
     def test_sample_batch(self, dataset, kernel_size, coincident):
         x = dataset.sample_batch()
         assert x.shape == (128, 2, kernel_size)
