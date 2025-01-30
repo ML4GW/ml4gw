@@ -1,5 +1,5 @@
 import warnings
-from typing import Sequence, Union
+from typing import Optional, Sequence, Union
 
 import h5py
 import numpy as np
@@ -50,6 +50,13 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             channel. The latter setting limits the amount of
             entropy in the effective dataset, but can provide
             over 2x improvement in total throughput.
+        files_per_batch:
+            The number of unique files from which to sample
+            batch elements each epoch. If left as `None`,
+            will use all available files. Useful when reading
+            from many files is bottlenecking dataloading.
+
+
     """
 
     def __init__(
@@ -60,6 +67,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         batch_size: int,
         batches_per_epoch: int,
         coincident: Union[bool, str],
+        files_per_batch: Optional[int] = None,
     ) -> None:
         if not isinstance(coincident, bool) and coincident != "files":
             raise ValueError(
@@ -74,6 +82,9 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.batch_size = batch_size
         self.batches_per_epoch = batches_per_epoch
         self.coincident = coincident
+        self.fnames_per_batch = (
+            len(fnames) if files_per_batch is None else files_per_batch
+        )
 
         self.sizes = {}
         for fname in self.fnames:
@@ -92,6 +103,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     )
 
                 self.sizes[fname] = len(dset)
+
         total = sum(self.sizes.values())
         self.probs = np.array([i / total for i in self.sizes.values()])
 
@@ -99,8 +111,14 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         return self.batches_per_epoch
 
     def sample_fnames(self, size) -> np.ndarray:
+        # randomly select `self.fnames_per_batch`
+        # files from which to sample elements for this batch
+        fname_indices = torch.randperm(len(self.fnames))[
+            : self.fnames_per_batch
+        ]
+        fnames = self.fnames[fname_indices]
         return np.random.choice(
-            self.fnames,
+            fnames,
             p=self.probs,
             size=size,
             replace=True,
