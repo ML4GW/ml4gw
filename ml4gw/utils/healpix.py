@@ -1,8 +1,6 @@
 import torch
 
-from .constants import PI
-
-MAX_NSIDE = 1 << 29
+from ..constants import MAX_NSIDE, PI
 
 
 def nest2uniq(nside, ipix):
