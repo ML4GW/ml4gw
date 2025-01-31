@@ -50,7 +50,6 @@ def test_chirp_time_bound(masses, spins, fstart):
             s1_val.item(),
             s2_val.item(),
         )
-        print(result[i].float().item(), torch.tensor(expected))
         assert torch.isclose(
             result[i].float(), torch.tensor(expected), rtol=1e-3
         )
@@ -105,7 +104,6 @@ def test_chirp_start_frequency_bound(fstart, spins, masses):
     m1, m2 = masses
     s1, s2 = spins
     tchirp = utils.chirp_time_bound(fstart, m1, m2, s1, s2)
-    print(tchirp)
     result = utils.chirp_start_frequency_bound(tchirp, m1, m2)
 
     for i, (tchirp_val, m1_val, m2_val) in enumerate(zip(tchirp, m1, m2)):
