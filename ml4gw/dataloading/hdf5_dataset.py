@@ -1,5 +1,5 @@
 import warnings
-from typing import Sequence, Union
+from typing import Optional, Sequence, Union
 
 import h5py
 import numpy as np
@@ -50,6 +50,13 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             channel. The latter setting limits the amount of
             entropy in the effective dataset, but can provide
             over 2x improvement in total throughput.
+        num_files_per_batch:
+            The number of unique files from which to sample
+            batch elements each epoch. If left as `None`,
+            will use all available files. Useful when reading
+            from many files is bottlenecking dataloading.
+
+
     """
 
     def __init__(
@@ -60,6 +67,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         batch_size: int,
         batches_per_epoch: int,
         coincident: Union[bool, str],
+        num_files_per_batch: Optional[int] = None,
     ) -> None:
         if not isinstance(coincident, bool) and coincident != "files":
             raise ValueError(
@@ -67,13 +75,21 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                 "got unrecognized value {}".format(coincident)
             )
 
-        self.fnames = fnames
+        self.fnames = np.array(fnames)
         self.channels = channels
         self.num_channels = len(channels)
         self.kernel_size = kernel_size
         self.batch_size = batch_size
         self.batches_per_epoch = batches_per_epoch
         self.coincident = coincident
+        self.num_files_per_batch = (
+            len(fnames) if num_files_per_batch is None else num_files_per_batch
+        )
+        if self.num_files_per_batch > len(fnames):
+            raise ValueError(
+                f"Number of files per batch ({self.num_files_per_batch}) "
+                f"cannot exceed number of files ({len(fnames)}) "
+            )
 
         self.sizes = {}
         for fname in self.fnames:
@@ -85,13 +101,14 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                         "without using chunked storage. This can have "
                         "severe performance impacts at data loading time. "
                         "If you need faster loading, try re-generating "
-                        "your datset with chunked storage turned on.".format(
+                        "your dataset with chunked storage turned on.".format(
                             fname
                         ),
                         category=ContiguousHdf5Warning,
                     )
 
                 self.sizes[fname] = len(dset)
+
         total = sum(self.sizes.values())
         self.probs = np.array([i / total for i in self.sizes.values()])
 
@@ -99,9 +116,22 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         return self.batches_per_epoch
 
     def sample_fnames(self, size) -> np.ndarray:
-        return np.random.choice(
-            self.fnames,
+        # first, randomly select `self.num_files_per_batch`
+        # file indices based on their probabilities
+        fname_indices = np.arange(len(self.fnames))
+        fname_indices = np.random.choice(
+            fname_indices,
             p=self.probs,
+            size=(self.num_files_per_batch),
+            replace=False,
+        )
+        # now renormalize the probabilities, and sample
+        # the requested size from this subset of files
+        probs = self.probs[fname_indices]
+        probs /= probs.sum()
+        return np.random.choice(
+            self.fnames[fname_indices],
+            p=probs,
             size=size,
             replace=True,
         )
