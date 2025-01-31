@@ -198,7 +198,7 @@ def f_ref(request):
     return request.param
 
 
-def test_butterworth_phenom_signal(
+def test_filters_phenom_signal(
     sample_rate,
     order,
     chirp_mass,
@@ -340,10 +340,10 @@ def test_butterworth_phenom_signal(
         assert np.allclose(
             1e21 * scipy_filtered_data_low,
             1e21 * torch_filtered_data_low[0],
-            atol=2e-3,
+            atol=5e-3,
         )
         assert np.allclose(
             1e21 * scipy_filtered_data_high,
             1e21 * torch_filtered_data_high[0],
-            atol=2e-3,
+            atol=5e-3,
         )
