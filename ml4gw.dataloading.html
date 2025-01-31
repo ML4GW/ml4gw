@@ -149,7 +149,7 @@ should be sample independently from the others.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.hdf5_dataset.</span></span><span class="sig-name descname"><span class="pre">Hdf5TimeSeriesDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fnames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.hdf5_dataset.</span></span><span class="sig-name descname"><span class="pre">Hdf5TimeSeriesDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fnames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_files_per_batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></p>
 <p>Iterable dataset that samples and loads windows of
 timeseries data uniformly from a set of HDF5 files.
@@ -182,6 +182,10 @@ windows independently within a given file for each
 channel. The latter setting limits the amount of
 entropy in the effective dataset, but can provide
 over 2x improvement in total throughput.</p></li>
+<li><p><strong>num_files_per_batch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- The number of unique files from which to sample
+batch elements each epoch. If left as <cite>None</cite>,
+will use all available files. Useful when reading
+from many files is bottlenecking dataloading.</p></li>
 </ul>
 </dd>
 </dl>
