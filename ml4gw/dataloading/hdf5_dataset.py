@@ -119,19 +119,16 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         # first, randomly select `self.num_files_per_batch`
         # file indices based on their probabilities
         fname_indices = np.arange(len(self.fnames))
-        print(fname_indices)
         fname_indices = np.random.choice(
             fname_indices,
             p=self.probs,
             size=(self.num_files_per_batch),
             replace=False,
         )
-        print(fname_indices)
         # now renormalize the probabilities, and sample
         # the requested size from this subset of files
         probs = self.probs[fname_indices]
         probs /= probs.sum()
-        print(self.fnames)
         return np.random.choice(
             self.fnames[fname_indices],
             p=probs,

@@ -24,3 +24,7 @@ repos:
   - id: poetry-check
   - id: poetry-lock
     args: [--check, --no-update]
+- repo: https://github.com/dhruvmanila/remove-print-statements
+  rev: v0.5.2  
+  hooks:
+  - id: remove-print-statements
