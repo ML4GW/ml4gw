@@ -12,7 +12,7 @@
 | ml4gw/dataloading/hdf5\_dataset.py        |       66 |        3 |     95% |   169-173 |
 | ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
 | ml4gw/distributions.py                    |       61 |       10 |     84% |41-43, 58-64, 106-107, 136 |
-| ml4gw/gw.py                               |       90 |        9 |     90% |48, 128-129, 351-361 |
+| ml4gw/gw.py                               |       90 |        9 |     90% |49, 129-130, 352-362 |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
 | ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
 | ml4gw/nn/autoencoder/base.py              |       44 |       44 |      0% |      1-94 |
@@ -40,13 +40,13 @@
 | ml4gw/transforms/whitening.py             |       48 |        1 |     98% |       258 |
 | ml4gw/types.py                            |       18 |        0 |    100% |           |
 | ml4gw/utils/interferometer.py             |       20 |        1 |     95% |        45 |
-| ml4gw/utils/slicing.py                    |      103 |        5 |     95% |62-64, 178, 296 |
+| ml4gw/utils/slicing.py                    |      103 |        5 |     95% |57-59, 173, 291 |
 | ml4gw/waveforms/\_\_init\_\_.py           |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/\_\_init\_\_.py     |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/ringdown.py         |       36 |       29 |     19% |18-25, 57-109 |
 | ml4gw/waveforms/adhoc/sine\_gaussian.py   |       37 |        0 |    100% |           |
 | ml4gw/waveforms/cbc/\_\_init\_\_.py       |        3 |        0 |    100% |           |
-| ml4gw/waveforms/cbc/phenom\_d.py          |      346 |        7 |     98% |66, 178, 229, 278, 440, 517, 672 |
+| ml4gw/waveforms/cbc/phenom\_d.py          |      346 |        7 |     98% |65, 177, 228, 277, 439, 516, 671 |
 | ml4gw/waveforms/cbc/phenom\_d\_data.py    |        4 |        0 |    100% |           |
 | ml4gw/waveforms/cbc/phenom\_p.py          |      284 |        2 |     99% |   84, 618 |
 | ml4gw/waveforms/cbc/taylorf2.py           |      105 |        1 |     99% |        63 |
