@@ -194,7 +194,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         )
         # populate background tensor asynchronously
         with concurrent.futures.ThreadPoolExecutor(
-            max_workers=min(len(unique_fnames) + 1, 32)
+            max_workers=min(len(unique_fnames) + 1, 6)
         ) as executor:
             futures = {
                 executor.submit(
