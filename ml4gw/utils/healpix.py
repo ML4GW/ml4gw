@@ -18,7 +18,7 @@ def nside2npix(nside: HealpixIndex) -> HealpixIndex:
     return 12 * nside * nside
 
 
-def nside2pixarea(nside: HealpixIndex, degrees: bool = True) -> HealpixIndex:
+def nside2pixarea(nside: HealpixIndex, degrees: bool = False) -> HealpixIndex:
     pixarea = 4 * PI / nside2npix(nside)
 
     if degrees:
@@ -30,7 +30,6 @@ def nside2pixarea(nside: HealpixIndex, degrees: bool = True) -> HealpixIndex:
 def lonlat2thetaphi(
     lon: HealpixIndex, lat: HealpixIndex
 ) -> Tuple[HealpixIndex, HealpixIndex]:
-    lon, lat = torch.asarray(lon), torch.asarray(lat)
     if isinstance(lon, torch.Tensor) and isinstance(lat, torch.Tensor):
         return PI / 2.0 - torch.deg2rad(lat), torch.deg2rad(lon)
     else:
