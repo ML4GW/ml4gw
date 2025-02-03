@@ -69,6 +69,30 @@ class TestHdf5TimeSeriesDataset:
             coincident=coincident,
         )
 
+    @pytest.fixture
+    def dataset_missing_files(
+        self,
+        fnames,
+        channels,
+        kernel_size,
+        batch_size,
+        batches_per_epoch,
+        coincident,
+    ):
+        d = Hdf5TimeSeriesDataset(
+            sorted(fnames.keys()),
+            channels,
+            kernel_size,
+            batch_size,
+            batches_per_epoch,
+            coincident=coincident,
+        )
+        # simulate file removal
+        import os
+
+        os.remove(d.fnames[-1])
+        return d
+
     def test_coincident_arg_value(
         self,
         fnames,
@@ -123,6 +147,12 @@ class TestHdf5TimeSeriesDataset:
         dataset.num_files_per_batch = 2
         fnames = dataset.sample_fnames(size=(1000,))
         assert len(np.unique(fnames)) == 2
+
+    def test_sample_batch_missing_file(
+        self, dataset_missing_files, kernel_size, coincident
+    ):
+        with pytest.raises(FileNotFoundError):
+            dataset_missing_files.sample_batch()
 
     def test_sample_batch(self, dataset, kernel_size, coincident):
         x = dataset.sample_batch()

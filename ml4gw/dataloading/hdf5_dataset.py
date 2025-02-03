@@ -1,3 +1,4 @@
+import concurrent.futures
 import warnings
 from typing import Optional, Sequence, Union
 
@@ -10,6 +11,42 @@ from ..types import WaveformTensor
 
 class ContiguousHdf5Warning(Warning):
     pass
+
+
+def _fill_background_tensor(x, i, inv, fname, count, self_obj):
+    size = self_obj.sizes[fname]
+    max_idx = size - self_obj.kernel_size
+
+    # figure out which batch indices should be
+    # sampled from the current filename
+    indices = np.where(inv == i)[0]
+
+    # when sampling coincidentally either fully
+    # or at the file level, all channels will
+    # correspond to the same file
+    if self_obj.coincident is not False:
+        batch_indices = np.repeat(indices, self_obj.num_channels)
+        channel_indices = np.arange(self_obj.num_channels)
+        channel_indices = np.concatenate([channel_indices] * count)
+    else:
+        batch_indices = indices // self_obj.num_channels
+        channel_indices = indices % self_obj.num_channels
+
+    # if we're sampling fully coincidentally, each
+    # channel will be the same in each file
+    if self_obj.coincident is True:
+        idx = np.random.randint(max_idx, size=count)
+        idx = np.repeat(idx, self_obj.num_channels)
+    else:
+        # otherwise, every channel will be different
+        # for the given file
+        idx = np.random.randint(max_idx, size=len(batch_indices))
+
+    # open the file and sample a different set of
+    # kernels for each batch element it occupies
+    with h5py.File(fname, "r") as f:
+        for b, c, i in zip(batch_indices, channel_indices, idx):
+            x[b, c] = f[self_obj.channels[c]][i : i + self_obj.kernel_size]
 
 
 class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
@@ -155,40 +192,19 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         unique_fnames, inv, counts = np.unique(
             fnames, return_inverse=True, return_counts=True
         )
-        for i, (fname, count) in enumerate(zip(unique_fnames, counts)):
-            size = self.sizes[fname]
-            max_idx = size - self.kernel_size
-
-            # figure out which batch indices should be
-            # sampled from the current filename
-            indices = np.where(inv == i)[0]
-
-            # when sampling coincidentally either fully
-            # or at the file level, all channels will
-            # correspond to the same file
-            if self.coincident is not False:
-                batch_indices = np.repeat(indices, self.num_channels)
-                channel_indices = np.arange(self.num_channels)
-                channel_indices = np.concatenate([channel_indices] * count)
-            else:
-                batch_indices = indices // self.num_channels
-                channel_indices = indices % self.num_channels
-
-            # if we're sampling fully coincidentally, each
-            # channel will be the same in each file
-            if self.coincident is True:
-                idx = np.random.randint(max_idx, size=count)
-                idx = np.repeat(idx, self.num_channels)
-            else:
-                # otherwise, every channel will be different
-                # for the given file
-                idx = np.random.randint(max_idx, size=len(batch_indices))
-
-            # open the file and sample a different set of
-            # kernels for each batch element it occupies
-            with h5py.File(fname, "r") as f:
-                for b, c, i in zip(batch_indices, channel_indices, idx):
-                    x[b, c] = f[self.channels[c]][i : i + self.kernel_size]
+        # populate background tensor asynchronously
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(unique_fnames) + 1
+        ) as executor:
+            futures = {
+                executor.submit(
+                    _fill_background_tensor, x, i, inv, fname, count, self
+                ): fname
+                for i, (fname, count) in enumerate(zip(unique_fnames, counts))
+            }
+            for future in concurrent.futures.as_completed(futures):
+                # call .result() to capture error in any thread
+                _ = future.result()
         return torch.Tensor(x)
 
     def __iter__(self) -> WaveformTensor:
