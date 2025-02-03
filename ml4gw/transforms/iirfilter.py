@@ -49,16 +49,7 @@ class IIRFilter(torch.nn.Module):
             The sampling frequency of the digital system.
 
     Returns:
-        These parameters are stored as torch buffers.
-        b, a:
-            Numerator (`b`) and denominator (`a`) polynomials of the IIR
-            filter. Only returned if ``output='ba'``.
-        z, p, k:
-            Zeros, poles, and system gain of the IIR filter transfer
-            function.  Only returned if ``output='zpk'``.
-        sos:
-            Second-order sections representation of the IIR filter.
-            Only returned if ``output='sos'``.
+        Filtered signal on the forward pass.
     """
 
     def __init__(
