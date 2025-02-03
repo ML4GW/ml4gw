@@ -1,5 +1,6 @@
 from typing import Union
 
+import numpy.typing as npt
 from jaxtyping import Float
 from torch import Tensor
 
@@ -11,7 +12,6 @@ TensorGeometry = Float[Tensor, "batch space space"]
 NetworkVertices = Float[Tensor, "num_ifos 3"]
 NetworkDetectorTensors = Float[Tensor, "num_ifos 3 3"]
 
-
 TimeSeries1d = Float[Tensor, "time"]
 TimeSeries2d = Float[TimeSeries1d, "channel"]
 TimeSeries3d = Float[TimeSeries2d, "batch"]
@@ -22,4 +22,11 @@ FrequencySeries2d = Float[FrequencySeries1d, "channel"]
 FrequencySeries3d = Float[FrequencySeries2d, "batch"]
 FrequencySeries1to3d = Union[
     FrequencySeries1d, FrequencySeries2d, FrequencySeries3d
+]
+
+HealpixIndex = Union[
+    int,
+    float,
+    Tensor,
+    npt.NDArray,
 ]
