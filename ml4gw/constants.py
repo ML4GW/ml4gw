@@ -34,3 +34,7 @@ MPC_SEC = m_per_Mpc / C
 
 # Speed of light in vacuum (:math:`c`), in gigaparsecs per second
 clightGpc = C / 3.0856778570831e22
+
+
+# Maximum allowed nside for HEALPix
+MAX_NSIDE = 1 << 29

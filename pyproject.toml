@@ -4,7 +4,10 @@ version = "0.6.3"
 description = "Tools for training torch models on gravitational wave data"
 readme = "README.md"
 authors = [
-    "Alec Gunny <alec.gunny@ligo.org>", "Ethan Marx <emarx@mit.edu>", "Will Benoit <benoi090@umn.edu>", "Deep Chatterjee <deep1018@mit.edu"
+    "Alec Gunny <alec.gunny@ligo.org>",
+    "Ethan Marx <emarx@mit.edu>",
+    "Will Benoit <benoi090@umn.edu>",
+    "Deep Chatterjee <deep1018@mit.edu",
 ]
 
 [tool.poetry.dependencies]
@@ -18,7 +21,7 @@ torchaudio = "^2.0"
 numpy = "<2.0.0"
 
 [tool.poetry.group.dev.dependencies]
-coverage = {version = "^7.6.10", extras = ["toml"]}
+coverage = { version = "^7.6.10", extras = ["toml"] }
 pre-commit = "^2.16"
 pytest = "^7.0"
 
@@ -27,6 +30,9 @@ lalsuite = "^7.0"
 bilby = "^2.1"
 jupyter = "^1.0.0"
 gwpy = "^3.0"
+
+# need healpy to test healpy functions
+healpy = "^1.14"
 
 # versions >= 1.9. fix issue with median calculation 
 # https://github.com/scipy/scipy/issues/15601
