@@ -83,7 +83,7 @@ def validate_whitened():
 
 # number of samples to draw from
 # the distributions for testing
-N_SAMPLES = 100
+N_SAMPLES = 500
 
 
 @pytest.fixture(params=[256, 1024, 2048])
@@ -147,13 +147,13 @@ def distance(request):
 
 @pytest.fixture()
 def distance_far(request):
-    dist = Uniform(400, 3000)
+    dist = Uniform(500, 3000)
     return dist.sample((N_SAMPLES,))
 
 
 @pytest.fixture()
 def distance_close(request):
-    dist = Uniform(100, 400)
+    dist = Uniform(100, 500)
     return dist.sample((N_SAMPLES,))
 
 
