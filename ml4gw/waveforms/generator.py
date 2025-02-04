@@ -6,6 +6,7 @@ from jaxtyping import Float
 from torch import Tensor
 
 from ml4gw.constants import MSUN
+from ml4gw.types import BatchTensor
 from ml4gw.waveforms.cbc import utils
 
 EXTRA_TIME_FRACTION = (
@@ -16,10 +17,37 @@ EXTRA_CYCLES = 3.0
 
 class TimeDomainCBCWaveformGenerator(torch.nn.Module):
     """
-    Waveform generator that generates time-domain waveforms. Currently,
-    only conversion from frequency domain approximants is implemented.
+    Waveform generator that generates time-domain waveforms from frequency-domain approximants.
 
-    All relevant data conditioning for injection into real data will be applied
+    Frequency domain waveforms are conditioned as done by lalsimulation.
+    Specifically, waveforms are generated with a starting frequency `fstart`
+    slightly below the requested `f_min`, so that they can be tapered from
+    `fstart` to `f_min` using a cosine window.
+
+    Please see https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969 # noqa
+    for more information
+
+    Args:
+        approximant:
+            A callable that returns hplus and hcross polarizations
+            given requested frequencies and relevant set of parameters.
+            See `ml4gw.waveforms.cbc` for implemented approximants.
+        sample_rate:
+            Rate at which returned time domain waveform will be
+            sampled in Hz. This also specifies `f_max` for generating
+            waveforms via the nyquist frequency: `f_max = sample_rate // 2`.
+        f_min:
+            Lower frequency bound for waveforms
+        duration:
+            Length of waveform in seconds.
+            Waveforms will be left padded with zeros
+            appropiately to fill the reuqested duration
+        right_pad:
+            How far from the right edge of the window i
+            in seconds the returned waveform coalescence
+            will be placed.
+        f_ref:
+            Reference frequency for the waveform
     """
 
     def __init__(
@@ -31,28 +59,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         f_ref: float,
         right_pad: float,
     ) -> None:
-        """
-        A torch module that generates waveforms from a given waveform function
-        and a parameter sampler.
 
-        Args:
-            approximant:
-                A callable that returns hplus and hcross polarizations
-                given requested frequencies and relevant set of parameters.
-            sample_rate:
-                Rate at which returned time domain waveform will be
-                sampled in Hz.This also determines `f_max` for the waveforms.
-            f_min:
-                Lower frequency bound for waveforms
-            duration:
-                Length of waveform in seconds
-            right_pad:
-                How far from the right edge of the window
-                the returned waveform coalescence
-                will be placed in seconds
-            f_ref:
-                Reference frequency for the waveform
-        """
         super().__init__()
         self.approximant = approximant
         self.f_min = f_min
@@ -83,17 +90,26 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
     def delta_f(self):
         return 1 / self.duration
 
-    def forward(
-        self,
-        **parameters,
-    ) -> Tuple[Float[Tensor, "{N} samples"], Dict[str, Float[Tensor, " {N}"]]]:
+    def generate_conditioned_fd_waveform(
+        self, **parameters: dict[str, BatchTensor]
+    ):
         """
-        Heavily based on https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa
+        Generate a conditioned frequency domain waveform from a frequency domain approximant.
+
+        Based on https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa
+
+        Args:
+            **parameters:
+                Dictionary of parameters for waveform generation
+                where key is the parameter name and value is a tensor of parameters.
+                It is required that `parameters` contains `mass_1`, `mass_2`, `s1z`, and `s2z`
+                keys, which are used for determining parameters of data conditioning.
+                If the specified approximant takes other parameters for waveform generation,
+                like `chirp_mass` and `mass_ratio`, the utility functions in `ml4gw.waveforms.conversion`
+                may be useful for populating the parameters dictionary with these additional parameters.
+                Note that, if using an approximant from `ml4gw.waveforms.cbc`, any additional keys in `parameters`
+                not ingested by the approximant will be ignored.
         """
-
-        for param in parameters.values():
-            param.double()
-
         # convert masses to kg, make sure
         # they are doubles so there is no
         # overflow in the calculations
@@ -158,7 +174,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         freq_mask = frequencies >= fstart.min()
         waveform_frequencies = frequencies[freq_mask]
 
-        # generate the waveform at specifid frequencies
+        # generate the waveform at specified frequencies
         cross, plus = self.approximant(
             waveform_frequencies, **parameters, f_ref=self.f_ref
         )
@@ -181,7 +197,6 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         # construct the tapers based on the maximum size
         # and then set the values outside of the individual
         # waveform taper regions to 1.0
-
         k0s = torch.round(fstart / df)
         k1s = torch.round(f_min / df)
 
@@ -203,6 +218,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         hc_spectrum[taper_mask] *= windows
         hp_spectrum[taper_mask] *= windows
 
+        # zero out frequencies below fstart
         zero_mask = frequencies < fstart[:, None]
         hc_spectrum[zero_mask] = 0
         hp_spectrum[zero_mask] = 0
@@ -210,20 +226,53 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         # set nyquist frequency to zero
         hc_spectrum[..., -1], hp_spectrum[..., -1] = 0.0, 0.0
 
+        # apply time translation in (i.e. phase shift in frequency domain)
+        # that will translate the coalescense time such that it is `right_pad`
+        # seconds from the right edge of the window
         tshift = round(self.right_pad * self.sample_rate) / self.sample_rate
         kvals = torch.arange(num_freqs)
-
         phase_shift = torch.exp(1j * 2 * torch.pi * df * tshift * kvals)
 
-        hp_spectrum *= phase_shift
         hc_spectrum *= phase_shift
-
-        hp_spectrum = torch.fft.irfft(hp_spectrum) * self.sample_rate
-        hc_spectrum = torch.fft.irfft(hc_spectrum) * self.sample_rate
-
-        # pad waveforms on left up to duration
-        pad = int((self.duration * self.sample_rate) - hp_spectrum.shape[-1])
-        hp_spectrum = torch.nn.functional.pad(hp_spectrum, (pad, 0))
-        hc_spectrum = torch.nn.functional.pad(hc_spectrum, (pad, 0))
+        hp_spectrum *= phase_shift
 
         return hc_spectrum, hp_spectrum
+
+    def forward(
+        self,
+        **parameters,
+    ) -> Tuple[Float[Tensor, "{N} samples"], Dict[str, Float[Tensor, " {N}"]]]:
+        """
+        Generates a time-domain waveform from a frequency domain approximant.
+        Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa
+
+        A frequency domain waveform is generated, conditioned (see `generate_conditioned_fd_waveform`)
+        and fftdd into the time-domain
+
+        **parameters:
+            Dictionary of parameters for waveform generation
+            where key is the parameter name and value is a tensor of parameters.
+            It is required that `parameters` contains `mass_1`, `mass_2`, `s1z`, and `s2z`
+            keys, which are used for determining parameters of data conditioning.
+            If the specified approximant takes other parameters for waveform generation,
+            like `chirp_mass` and `mass_ratio`, the utility functions in `ml4gw.waveforms.conversion`
+            may be useful for populating the parameters dictionary with these additional parameters.
+            Note that, if using an approximant from `ml4gw.waveforms.cbc`, any additional keys in `parameters`
+            not ingested by the approximant will be ignored.
+        """
+
+        hc, hp = self.generate_conditioned_fd_waveform(**parameters)
+
+        # fft to time domain and apply appropiate scaling
+        hc = torch.fft.irfft(hc) * self.sample_rate
+        hp = torch.fft.irfft(hp) * self.sample_rate
+
+        # TODO: some additional tapering in the time
+        # domain is performed in lalsimulation
+
+        # pad waveforms on left up to requested duration
+        pad = int((self.duration * self.sample_rate) - hp.shape[-1])
+        hc = torch.nn.functional.pad(hc, (pad, 0))
+        hp = torch.nn.functional.pad(hp, (pad, 0))
+
+        return hc, hp
