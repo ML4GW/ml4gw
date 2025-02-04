@@ -1,11 +1,13 @@
 import math
 from typing import Callable, Dict, Tuple
 
+import numpy as np
 import torch
 from jaxtyping import Float
 from torch import Tensor
 
 from ml4gw.constants import MSUN
+from ml4gw.transforms import IIRFilter
 from ml4gw.types import BatchTensor
 from ml4gw.waveforms.cbc import utils
 
@@ -68,10 +70,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         self.right_pad = right_pad
         self.f_ref = f_ref
 
-    def get_frequencies(self, df: float):
-        """Get the frequencies from 0 to nyquist for corresponding df"""
-        num_freqs = int(self.nyquist / df) + 1
-        return torch.linspace(0, self.nyquist, num_freqs)
+        self.highpass = self.build_highpass_filter()
 
     @property
     def delta_t(self):
@@ -89,6 +88,30 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
     @property
     def delta_f(self):
         return 1 / self.duration
+
+    def build_highpass_filter(self):
+        """
+        Builds highpass filter object.
+
+        See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10 # noqa
+        """
+        order = 8.0
+        w1 = np.tan(np.pi * (self.f_min) / self.sample_rate)
+        attenuation = 0.99
+        wc = w1 * (1.0 / attenuation**0.5 - 1) ** (1.0 / (2.0 * order))
+        fc = self.sample_rate * np.arctan(wc) / np.pi
+
+        return IIRFilter(
+            order,
+            fc / (self.sample_rate / 2),
+            btype="highpass",
+            ftype="butterworth",
+        )
+
+    def get_frequencies(self, df: float):
+        """Get the frequencies from 0 to nyquist for corresponding df"""
+        num_freqs = int(self.nyquist / df) + 1
+        return torch.linspace(0, self.nyquist, num_freqs)
 
     def generate_conditioned_fd_waveform(
         self, **parameters: dict[str, BatchTensor]
@@ -274,5 +297,10 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         pad = int((self.duration * self.sample_rate) - hp.shape[-1])
         hc = torch.nn.functional.pad(hc, (pad, 0))
         hp = torch.nn.functional.pad(hp, (pad, 0))
+
+        # finally, highpass the waveforms,
+        # going to double precision
+        hp = self.highpass(hp.double())
+        hc = self.highpass(hc.double())
 
         return hc, hp

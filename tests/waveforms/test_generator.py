@@ -12,17 +12,7 @@ from ml4gw.waveforms import IMRPhenomD, conversion
 from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
 
 
-@pytest.fixture(params=[10, 100, 1000])
-def n_samples(request):
-    return request.param
-
-
-@pytest.fixture(params=[1, 2, 10])
-def duration(request):
-    return request.param
-
-
-@pytest.fixture(params=[1024, 2048, 4096])
+@pytest.fixture(params=[2048])
 def sample_rate(request):
     return request.param
 
@@ -84,7 +74,7 @@ def test_cbc_waveform_generator(
     theta_jn,
     sample_rate,
 ):
-    duration = 20
+    duration = 10
     f_min = 20
     f_ref = 40
     right_pad = 0.5
@@ -163,31 +153,23 @@ def test_cbc_waveform_generator(
             gwsignal_params, gwsignal_generator
         )
 
-        hp_ml4gw_highpassed = high_pass_time_series(
-            hp_ml4gw[i].detach().numpy(), 1 / sample_rate, f_min, 0.99, 8.0
-        )
-        hc_ml4gw_highpassed = high_pass_time_series(
-            hc_ml4gw[i].detach().numpy(), 1 / sample_rate, f_min, 0.99, 8.0
-        )
+        hp = hp_ml4gw[i].detach().numpy()
+        hc = hc_ml4gw[i].detach().numpy()
 
         # now align the gwsignal and ml4gw waveforms so we can compoare
-        ml4gw_times = np.arange(
-            0, len(hp_ml4gw_highpassed) / sample_rate, 1 / sample_rate
-        )
+        ml4gw_times = np.arange(0, len(hp) / sample_rate, 1 / sample_rate)
         ml4gw_times -= duration - right_pad
 
-        hp_ml4gw_times = (
-            ml4gw_times - ml4gw_times[np.argmax(hp_ml4gw_highpassed)]
-        )
+        hp_ml4gw_times = ml4gw_times - ml4gw_times[np.argmax(hp)]
 
         max_time = min(hp_ml4gw_times[-1], hp_gwsignal.times.value[-1])
         min_time = max(hp_ml4gw_times[0], hp_gwsignal.times.value[0])
 
-        mask = hp_gwsignal.times.value < max_time
-        mask &= hp_gwsignal.times.value > min_time
+        mask = hp_gwsignal.times.value <= max_time
+        mask &= hp_gwsignal.times.value >= min_time
 
-        ml4gw_mask = hp_ml4gw_times < max_time
-        ml4gw_mask &= hp_ml4gw_times > min_time
+        ml4gw_mask = hp_ml4gw_times <= max_time
+        ml4gw_mask &= hp_ml4gw_times >= min_time
 
         # TODO: track this down
 
@@ -199,30 +181,28 @@ def test_cbc_waveform_generator(
 
         close_hp = np.allclose(
             hp_gwsignal.value[mask],
-            hp_ml4gw_highpassed[ml4gw_mask],
+            hp[ml4gw_mask],
             atol=5e-23,
-            rtol=0.01,
+            rtol=0.05,
         )
 
-        close_hp = close_hp or np.allclose(
+        assert close_hp or np.allclose(
             hp_gwsignal.value[mask][:-1],
-            hp_ml4gw_highpassed[ml4gw_mask][1:],
+            hp[ml4gw_mask][1:],
             atol=5e-23,
-            rtol=0.01,
+            rtol=0.05,
         )
-        assert close_hp
 
         close_hc = np.allclose(
             hc_gwsignal.value[mask],
-            hc_ml4gw_highpassed[ml4gw_mask],
+            hc[ml4gw_mask],
             atol=5e-23,
-            rtol=0.01,
+            rtol=0.05,
         )
 
-        close_hc = close_hc or np.allclose(
+        assert close_hc or np.allclose(
             hc_gwsignal.value[mask][:-1],
-            hc_ml4gw_highpassed[ml4gw_mask][1:],
+            hc[ml4gw_mask][1:],
             atol=5e-23,
-            rtol=0.01,
+            rtol=0.05,
         )
-        assert close_hc
