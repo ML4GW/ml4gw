@@ -74,6 +74,7 @@ def test_cbc_waveform_generator(
     theta_jn,
     sample_rate,
 ):
+    # torch.manual_seed(10)
     duration = 10
     f_min = 20
     f_ref = 40
@@ -119,11 +120,11 @@ def test_cbc_waveform_generator(
     # now compare each waveform with lalsimulation SimInspiralTD
     for i in range(len(chirp_mass)):
 
-        # construct lalinference params
+        # construct gwsignal params
         gwsignal_params = {
             "mass1": ml4gw_parameters["mass_1"][i].item() * u.solMass,
             "mass2": ml4gw_parameters["mass_2"][i].item() * u.solMass,
-            "deltaT": 1 / sample_rate * u.s,
+            "deltaT": (1 / sample_rate) * u.s,
             "f22_start": f_min * u.Hz,
             "f22_ref": f_ref * u.Hz,
             "phi_ref": ml4gw_parameters["phic"][i].item() * u.rad,
@@ -132,7 +133,6 @@ def test_cbc_waveform_generator(
             "eccentricity": 0.0 * u.dimensionless_unscaled,
             "longAscNodes": 0.0 * u.rad,
             "meanPerAno": 0.0 * u.rad,
-            "condition": 1,
             "spin1x": ml4gw_parameters["s1x"][i].item()
             * u.dimensionless_unscaled,
             "spin1y": ml4gw_parameters["s1y"][i].item()
@@ -160,49 +160,75 @@ def test_cbc_waveform_generator(
         ml4gw_times = np.arange(0, len(hp) / sample_rate, 1 / sample_rate)
         ml4gw_times -= duration - right_pad
 
-        hp_ml4gw_times = ml4gw_times - ml4gw_times[np.argmax(hp)]
-
-        max_time = min(hp_ml4gw_times[-1], hp_gwsignal.times.value[-1])
-        min_time = max(hp_ml4gw_times[0], hp_gwsignal.times.value[0])
-
-        mask = hp_gwsignal.times.value <= max_time
-        mask &= hp_gwsignal.times.value >= min_time
-
-        ml4gw_mask = hp_ml4gw_times <= max_time
-        ml4gw_mask &= hp_ml4gw_times >= min_time
-
         # TODO: track this down
 
-        # theres an off by one error that occurs
-        # occasionally when attempting to align the
-        # gwsignal and ml4gw waveforms that is causing
-        # testing comparison issues, so assert that
-        # either one of them is close enough
+        # gwsignal will adjust the "epoch"
+        # i.e. the coalescence time based on
+        # the maximum value of the array.
+        # In some cases, the ml4gw prediction
+        # for the time of maximum value is slightly different
+        # than the gwsignal/lalsimulation. Typically, either
+        # the maximum, or second maximum will align with gwsignal.
+        # Presumably this is due to accumulation of discrepancies
+        # between our implementation and gwsignal/lalsimulations.
 
-        close_hp = np.allclose(
-            hp_gwsignal.value[mask],
-            hp[ml4gw_mask],
-            atol=5e-23,
-            rtol=0.05,
-        )
+        # So, for testing we align the waveform using both
+        # the maximum and second maximum values, and assert True
+        # if any of them satisfy the tolerances
 
-        assert close_hp or np.allclose(
-            hp_gwsignal.value[mask][:-1],
-            hp[ml4gw_mask][1:],
-            atol=5e-23,
-            rtol=0.05,
-        )
+        for ml4gw_pol, gwsignal_pol in zip(
+            [hp, hc], [hp_gwsignal, hc_gwsignal]
+        ):
+            argsorted = np.argsort(ml4gw_pol)[::-1]
+            for j in range(2):
+                argmax = argsorted[j]
+                ml4gw_times = ml4gw_times - ml4gw_times[argmax]
 
-        close_hc = np.allclose(
-            hc_gwsignal.value[mask],
-            hc[ml4gw_mask],
-            atol=5e-23,
-            rtol=0.05,
-        )
+                max_time = min(ml4gw_times[-1], gwsignal_pol.times.value[-1])
+                min_time = max(ml4gw_times[0], gwsignal_pol.times.value[0])
 
-        assert close_hc or np.allclose(
-            hc_gwsignal.value[mask][:-1],
-            hc[ml4gw_mask][1:],
-            atol=5e-23,
-            rtol=0.05,
-        )
+                mask = gwsignal_pol.times.value <= max_time
+                mask &= gwsignal_pol.times.value >= min_time
+
+                ml4gw_mask = ml4gw_times <= max_time
+                ml4gw_mask &= ml4gw_times >= min_time
+
+                close = np.allclose(
+                    gwsignal_pol.value[mask],
+                    ml4gw_pol[ml4gw_mask],
+                    atol=4e-23,
+                    rtol=0.01,
+                )
+
+                if close:
+                    break
+
+                # TODO: track this down
+
+                # theres an off by one error that occurs
+                # occasionally when attempting to align the
+                # gwsignal and ml4gw waveforms that is causing
+                # testing comparison issues, so assert that
+                # either one of them is close enough
+
+                for k in range(1, 2):
+                    if close:
+                        break
+
+                    close_shifted = np.allclose(
+                        gwsignal_pol.value[mask][:-k],
+                        ml4gw_pol[ml4gw_mask][k:],
+                        atol=4e-23,
+                        rtol=0.01,
+                    )
+
+                    close_shifted = close_shifted or np.allclose(
+                        gwsignal_pol.value[mask][k:],
+                        ml4gw_pol[ml4gw_mask][:-k],
+                        atol=4e-23,
+                        rtol=0.01,
+                    )
+
+                    close = close or close_shifted
+
+            assert close

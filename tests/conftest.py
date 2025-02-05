@@ -83,7 +83,7 @@ def validate_whitened():
 
 # number of samples to draw from
 # the distributions for testing
-N_SAMPLES = 500
+N_SAMPLES = 5000
 
 
 @pytest.fixture(params=[256, 1024, 2048])
