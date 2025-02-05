@@ -6,10 +6,10 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.constants import MSUN
-from ml4gw.transforms import IIRFilter
-from ml4gw.types import BatchTensor
-from ml4gw.waveforms.cbc import utils
+from ..constants import MSUN
+from ..transforms import IIRFilter
+from ..types import BatchTensor
+from .cbc import utils
 
 EXTRA_TIME_FRACTION = (
     0.1  # fraction of waveform duration to add as extra time for tapering
@@ -43,9 +43,9 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         duration:
             Length of waveform in seconds.
             Waveforms will be left padded with zeros
-            appropiately to fill the reuqested duration
+            appropiately to fill the requested duration
         right_pad:
-            How far from the right edge of the window i
+            How far from the right edge of the window
             in seconds the returned waveform coalescence
             will be placed.
         f_ref:
