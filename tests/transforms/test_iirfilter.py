@@ -128,67 +128,67 @@ N_SAMPLES = 1
 
 
 @pytest.fixture()
-def chirp_mass(request):
+def chirp_mass(seed_everything, request):
     dist = Uniform(5, 100)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def mass_ratio():
+def mass_ratio(seed_everything):
     dist = Uniform(0.125, 0.99)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def a_1(request):
+def a_1(seed_everything, request):
     dist = Uniform(0, 0.90)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def a_2(request):
+def a_2(seed_everything, request):
     dist = Uniform(0, 0.90)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def tilt_1(request):
+def tilt_1(seed_everything, request):
     dist = Uniform(0, torch.pi)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def tilt_2(request):
+def tilt_2(seed_everything, request):
     dist = Uniform(0, torch.pi)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def phi_12(request):
+def phi_12(seed_everything, request):
     dist = Uniform(0, 2 * torch.pi)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def phi_jl(request):
+def phi_jl(seed_everything, request):
     dist = Uniform(0, 2 * torch.pi)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def distance(request):
+def distance(seed_everything, request):
     dist = Uniform(100, 3000)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def theta_jn(request):
+def theta_jn(seed_everything, request):
     dist = Uniform(0, torch.pi)
     return dist.sample(torch.Size((N_SAMPLES,)))
 
 
 @pytest.fixture()
-def phase(request):
+def phase(seed_everything, request):
     dist = Uniform(0, 2 * torch.pi)
     return dist.sample(torch.Size((N_SAMPLES,)))
 

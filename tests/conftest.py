@@ -7,6 +7,8 @@ from scipy.special import erfinv
 from torch.distributions import Uniform
 
 
+# If a fixture is doing anything random,
+# it should take this function as an argument
 @pytest.fixture(autouse=True)
 def seed_everything():
     seed = 101589
