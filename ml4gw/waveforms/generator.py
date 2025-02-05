@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Dict, Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 import torch
@@ -115,7 +115,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
 
     def generate_conditioned_fd_waveform(
         self, **parameters: dict[str, BatchTensor]
-    ):
+    ) -> Tuple[Float[Tensor, "{N} samples"], Float[Tensor, "{N} samples"]]:
         """
         Generate a conditioned frequency domain waveform from a frequency domain approximant.
 
@@ -264,7 +264,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
     def forward(
         self,
         **parameters,
-    ) -> Tuple[Float[Tensor, "{N} samples"], Dict[str, Float[Tensor, " {N}"]]]:
+    ) -> Tuple[Float[Tensor, "{N} samples"], Float[Tensor, "{N} samples"]]:
         """
         Generates a time-domain waveform from a frequency domain approximant.
         Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa
