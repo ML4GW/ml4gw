@@ -32,7 +32,6 @@ class GenerateString(torch.nn.Module):
     """
     PyTorch re-implementation of the 'XLALGenerateString' logic for cosmic-string
     waveforms: 'cusp', 'kink', or 'kinkkink'.
-
     LAL sets:
       - f_low = 1 Hz
       - length = floor(9.0 / f_low / dt / 2) * 2 + 1  => ~9 seconds total
@@ -84,28 +83,24 @@ class GenerateString(torch.nn.Module):
 
     def forward(
         self,
-        waveform: str,
+        power: float,
         amplitude: BatchTensor,
-        f_high: BatchTensor
+        f_high: float
     ) -> (Tensor, Tensor):
         """
         Generate the chosen cosmic-string waveform in plus polarization,
         with cross=0.
-
-        waveform must be: "cusp", "kink", or "kinkkink".
-
+        waveform must be: "cusp"  -4.0 / 3.0, "kink" -5.0 / 3.0, or "kinkkink" -2.0.
         Args:
             waveform: "cusp", "kink", or "kinkkink".
             amplitude: (batch,) overall amplitude scaling parameter.
             f_high: (batch,) freq above which we apply exponential taper.
-
         Returns:
             (h_cross, h_plus): shape (batch, self.length).
             The cross polarization is zero (as in LAL).
         """
         # Reshape for batch dimension
         amplitude = amplitude.view(-1, 1)
-        f_high = f_high.view(-1, 1)
         batch = amplitude.shape[0]
 
         device = self.freq.device
@@ -133,16 +128,6 @@ class GenerateString(torch.nn.Module):
 
         # Common factor => (1 + (f_low^2)/(f^2))^-4
         base_factor = (1.0 + (self.f_low**2) / (f_clamped**2))**(-4.0)
-
-        # Pick exponent
-        if waveform == "cusp":
-            power = -4.0 / 3.0
-        elif waveform == "kink":
-            power = -5.0 / 3.0
-        elif waveform == "kinkkink":
-            power = -2.0
-        else:
-            raise ValueError(f"Invalid waveform={waveform}")
 
         # Multiply by f^power
         base_factor *= f_clamped**(power)
