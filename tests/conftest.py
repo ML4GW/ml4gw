@@ -1,8 +1,18 @@
+import random
+
 import numpy as np
 import pytest
 import torch
 from scipy.special import erfinv
 from torch.distributions import Uniform
+
+
+@pytest.fixture(autouse=True)
+def seed_everything():
+    seed = 101589
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 @pytest.fixture
