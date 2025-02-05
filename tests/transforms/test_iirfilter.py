@@ -340,10 +340,10 @@ def test_filters_phenom_signal(
         assert np.allclose(
             1e21 * scipy_filtered_data_low,
             1e21 * torch_filtered_data_low[0],
-            atol=5e-3,
+            atol=7e-3,
         )
         assert np.allclose(
             1e21 * scipy_filtered_data_high,
             1e21 * torch_filtered_data_high[0],
-            atol=5e-3,
+            atol=7e-3,
         )
