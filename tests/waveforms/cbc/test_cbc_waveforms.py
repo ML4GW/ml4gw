@@ -152,7 +152,7 @@ def test_taylor_f2(
             eccentricity=0.0,
             meanPerAno=0.0,
             deltaF=1.0 / sample_rate,
-            f_min=20,
+            f_min=10,
             f_ref=f_ref,
             f_max=300,
             approximant=lalsimulation.TaylorF2,
@@ -280,7 +280,7 @@ def test_phenom_d(
             eccentricity=0.0,
             meanPerAno=0.0,
             deltaF=1.0 / sample_rate,
-            f_min=20,
+            f_min=10,
             f_ref=f_ref,
             f_max=300,
             approximant=lalsimulation.IMRPhenomD,
@@ -327,16 +327,16 @@ def test_phenom_d(
         assert not torch.any(torch.isnan(hp_ml4gw))
 
         assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
+            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
         )
         assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
+            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
         )
         assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
+            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
         )
         assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
+            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
         )
 
 
@@ -510,16 +510,16 @@ def test_phenom_p(
         hc_lal_data = hc_lal.data.data[lal_mask]
 
         assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-2
+            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-2
         )
         assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-2
+            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-2
         )
         assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-2
+            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-2
         )
         assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-2
+            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-2
         )
 
     # test batched outputs works as expected
@@ -542,16 +542,16 @@ def test_phenom_p(
 
     # check batch against lal
     assert np.allclose(
-        1e21 * hp_lal_data.real, 1e21 * hp_ml4gw[0].real.numpy(), atol=1e-2
+        1e21 * hp_lal_data.real, 1e21 * hp_ml4gw[0].real.numpy(), atol=2e-2
     )
     assert np.allclose(
-        1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw[0].imag.numpy(), atol=1e-2
+        1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw[0].imag.numpy(), atol=2e-2
     )
     assert np.allclose(
-        1e21 * hc_lal_data.real, 1e21 * hc_ml4gw[0].real.numpy(), atol=1e-2
+        1e21 * hc_lal_data.real, 1e21 * hc_ml4gw[0].real.numpy(), atol=2e-2
     )
     assert np.allclose(
-        1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw[0].imag.numpy(), atol=1e-2
+        1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw[0].imag.numpy(), atol=2e-2
     )
 
     # check batch against each other

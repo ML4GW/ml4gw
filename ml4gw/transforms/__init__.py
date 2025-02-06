@@ -1,3 +1,4 @@
+from .iirfilter import IIRFilter
 from .pearson import ShiftedPearsonCorrelation
 from .qtransform import QScan, SingleQTransform
 from .scaler import ChannelWiseScaler

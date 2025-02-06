@@ -39,6 +39,7 @@ class IMRPhenomPv2(IMRPhenomD):
         inclination: BatchTensor,
         f_ref: float,
         tc: Optional[BatchTensor] = None,
+        **kwargs,
     ):
         """
         IMRPhenomPv2 waveform

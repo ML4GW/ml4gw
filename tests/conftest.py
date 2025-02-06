@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import torch
 from scipy.special import erfinv
+from torch.distributions import Uniform
 
 
 @pytest.fixture
@@ -78,3 +79,103 @@ def validate_whitened():
             torch.testing.assert_close(passed, target, rtol=0, atol=0.07)
 
     return validate
+
+
+# number of samples to draw from
+# the distributions for testing
+N_SAMPLES = 1000
+
+
+@pytest.fixture(params=[256, 1024, 2048])
+def sample_rate(request):
+    return request.param
+
+
+@pytest.fixture()
+def chirp_mass(request):
+    dist = Uniform(5, 100)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def mass_ratio():
+    dist = Uniform(0.125, 0.99)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def a_1(request):
+    dist = Uniform(0, 0.90)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def a_2(request):
+    dist = Uniform(0, 0.90)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def tilt_1(request):
+    dist = Uniform(0, torch.pi)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def tilt_2(request):
+    dist = Uniform(0, torch.pi)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def phi_12(request):
+    dist = Uniform(0, 2 * torch.pi)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def phi_jl(request):
+    dist = Uniform(0, 2 * torch.pi)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def distance(request):
+    dist = Uniform(100, 3000)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def distance_far(request):
+    dist = Uniform(500, 3000)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def distance_close(request):
+    dist = Uniform(100, 500)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def theta_jn(request):
+    dist = Uniform(0, torch.pi)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def phase(request):
+    dist = Uniform(0, 2 * torch.pi)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def chi1(request):
+    dist = Uniform(-0.999, 0.999)
+    return dist.sample((N_SAMPLES,))
+
+
+@pytest.fixture()
+def chi2(request):
+    dist = Uniform(-0.999, 0.999)
+    return dist.sample((N_SAMPLES,))
