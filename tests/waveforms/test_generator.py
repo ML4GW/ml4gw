@@ -6,7 +6,6 @@ from lalsimulation.gwsignal.core.waveform import (
     GenerateTDWaveform,
     LALCompactBinaryCoalescenceGenerator,
 )
-from scipy.signal import butter, sosfiltfilt
 
 from ml4gw.waveforms import IMRPhenomD, conversion
 from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
@@ -15,27 +14,6 @@ from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
 @pytest.fixture(params=[2048])
 def sample_rate(request):
     return request.param
-
-
-def high_pass_time_series(time_series, dt, fmin, attenuation, N):
-    """
-    Same as
-    https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10 # noqa
-    except w/o requiring gwpy.TimeSeries objects to be passed
-    """
-    fs = 1.0 / dt  # Sampling frequency
-    a1 = attenuation  # Attenuation at the low-freq cut-off
-
-    w1 = np.tan(np.pi * fmin * dt)  # Transformed frequency variable at f_min
-    wc = w1 * (1.0 / a1**0.5 - 1) ** (
-        1.0 / (2.0 * N)
-    )  # Cut-off freq. from attenuation
-    fc = fs * np.arctan(wc) / np.pi  # For use in butterworth filter
-
-    # Construct the filter and then forward - backward filter the time-series
-    sos = butter(N, fc, btype="highpass", output="sos", fs=fs)
-    output = sosfiltfilt(sos, time_series)
-    return output
 
 
 class GWsignalGenerator(LALCompactBinaryCoalescenceGenerator):
