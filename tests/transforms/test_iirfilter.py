@@ -5,7 +5,6 @@ import pytest
 import torch
 from astropy import units as u
 from scipy.signal import filtfilt, iirfilter
-from torch.distributions import Uniform
 
 from ml4gw.constants import MSUN
 from ml4gw.transforms.iirfilter import IIRFilter
@@ -124,73 +123,9 @@ def test_filters_synthetic_signal(sample_rate, order):
         )
 
 
-N_SAMPLES = 1
-
-
 @pytest.fixture()
-def chirp_mass(seed_everything, request):
-    dist = Uniform(5, 100)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def mass_ratio(seed_everything):
-    dist = Uniform(0.125, 0.99)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def a_1(seed_everything, request):
-    dist = Uniform(0, 0.90)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def a_2(seed_everything, request):
-    dist = Uniform(0, 0.90)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def tilt_1(seed_everything, request):
-    dist = Uniform(0, torch.pi)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def tilt_2(seed_everything, request):
-    dist = Uniform(0, torch.pi)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def phi_12(seed_everything, request):
-    dist = Uniform(0, 2 * torch.pi)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def phi_jl(seed_everything, request):
-    dist = Uniform(0, 2 * torch.pi)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def distance(seed_everything, request):
-    dist = Uniform(100, 3000)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def theta_jn(seed_everything, request):
-    dist = Uniform(0, torch.pi)
-    return dist.sample(torch.Size((N_SAMPLES,)))
-
-
-@pytest.fixture()
-def phase(seed_everything, request):
-    dist = Uniform(0, 2 * torch.pi)
-    return dist.sample(torch.Size((N_SAMPLES,)))
+def num_samples():
+    return 1
 
 
 @pytest.fixture(params=[20, 40])

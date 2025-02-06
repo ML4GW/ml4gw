@@ -93,9 +93,8 @@ def validate_whitened():
     return validate
 
 
-# number of samples to draw from
-# the distributions for testing
-N_SAMPLES = 1000
+# A num_samples fixture should be defined for any
+# test that wants to use these fixtures
 
 
 @pytest.fixture(params=[256, 1024, 2048])
@@ -104,90 +103,90 @@ def sample_rate(request):
 
 
 @pytest.fixture()
-def chirp_mass(request):
+def chirp_mass(num_samples, seed_everything):
     dist = Uniform(5, 100)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def mass_ratio():
+def mass_ratio(num_samples, seed_everything):
     dist = Uniform(0.125, 0.99)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def a_1(request):
+def a_1(num_samples, seed_everything):
     dist = Uniform(0, 0.90)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def a_2(request):
+def a_2(num_samples, seed_everything):
     dist = Uniform(0, 0.90)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def tilt_1(request):
+def tilt_1(num_samples, seed_everything):
     dist = Uniform(0, torch.pi)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def tilt_2(request):
+def tilt_2(num_samples, seed_everything):
     dist = Uniform(0, torch.pi)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def phi_12(request):
+def phi_12(num_samples, seed_everything):
     dist = Uniform(0, 2 * torch.pi)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def phi_jl(request):
+def phi_jl(num_samples, seed_everything):
     dist = Uniform(0, 2 * torch.pi)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def distance(request):
+def distance(num_samples, seed_everything):
     dist = Uniform(100, 3000)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def distance_far(request):
+def distance_far(num_samples, seed_everything):
     dist = Uniform(500, 3000)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def distance_close(request):
+def distance_close(num_samples, seed_everything):
     dist = Uniform(100, 500)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def theta_jn(request):
+def theta_jn(num_samples, seed_everything):
     dist = Uniform(0, torch.pi)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def phase(request):
+def phase(num_samples, seed_everything):
     dist = Uniform(0, 2 * torch.pi)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def chi1(request):
+def chi1(num_samples, seed_everything):
     dist = Uniform(-0.999, 0.999)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))
 
 
 @pytest.fixture()
-def chi2(request):
+def chi2(num_samples, seed_everything):
     dist = Uniform(-0.999, 0.999)
-    return dist.sample((N_SAMPLES,))
+    return dist.sample((num_samples,))

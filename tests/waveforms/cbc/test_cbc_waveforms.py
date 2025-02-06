@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 import torch
 from astropy import units as u
-from torch.distributions import Uniform
 
 import ml4gw.waveforms as waveforms
 from ml4gw.waveforms.conversion import (
@@ -12,104 +11,10 @@ from ml4gw.waveforms.conversion import (
     chirp_mass_and_mass_ratio_to_components,
 )
 
-# number of samples to draw from
-# the distributions for testing
-N_SAMPLES = 100
-
-
-@pytest.fixture(params=[256, 1024, 2048])
-def sample_rate(request):
-    return request.param
-
 
 @pytest.fixture()
-def chirp_mass(seed_everything, request):
-    dist = Uniform(5, 100)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def mass_ratio(seed_everything):
-    dist = Uniform(0.125, 0.99)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def a_1(seed_everything, request):
-    dist = Uniform(0, 0.90)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def a_2(seed_everything, request):
-    dist = Uniform(0, 0.90)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def tilt_1(seed_everything, request):
-    dist = Uniform(0, torch.pi)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def tilt_2(seed_everything, request):
-    dist = Uniform(0, torch.pi)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def phi_12(seed_everything, request):
-    dist = Uniform(0, 2 * torch.pi)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def phi_jl(seed_everything, request):
-    dist = Uniform(0, 2 * torch.pi)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def distance(seed_everything, request):
-    dist = Uniform(100, 3000)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def distance_far(seed_everything, request):
-    dist = Uniform(400, 3000)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def distance_close(seed_everything, request):
-    dist = Uniform(100, 400)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def theta_jn(seed_everything, request):
-    dist = Uniform(0, torch.pi)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def phase(seed_everything, request):
-    dist = Uniform(0, 2 * torch.pi)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def chi_1(seed_everything, request):
-    dist = Uniform(-0.999, 0.999)
-    return dist.sample((N_SAMPLES,))
-
-
-@pytest.fixture()
-def chi_2(seed_everything, request):
-    dist = Uniform(-0.999, 0.999)
-    return dist.sample((N_SAMPLES,))
+def num_samples():
+    return 100
 
 
 @pytest.fixture(params=[20, 40])
@@ -120,8 +25,8 @@ def f_ref(request):
 def test_taylor_f2(
     chirp_mass,
     mass_ratio,
-    chi_1,
-    chi_2,
+    chi1,
+    chi2,
     phase,
     distance,
     f_ref,
@@ -141,10 +46,10 @@ def test_taylor_f2(
             m2=mass_2[i].item() * lal.MSUN_SI,
             S1x=0,
             S1y=0,
-            S1z=chi_1[i].item(),
+            S1z=chi1[i].item(),
             S2x=0,
             S2y=0,
-            S2z=chi_2[i].item(),
+            S2z=chi2[i].item(),
             distance=(distance[i].item() * u.Mpc).to("m").value,
             inclination=theta_jn[i].item(),
             phiRef=phase[i].item(),
@@ -181,8 +86,8 @@ def test_taylor_f2(
             torch_freqs,
             chirp_mass[i][None],
             mass_ratio[i][None],
-            chi_1[i][None],
-            chi_2[i][None],
+            chi1[i][None],
+            chi2[i][None],
             distance[i][None],
             phase[i][None],
             theta_jn[i][None],
@@ -214,14 +119,14 @@ def test_taylor_f2(
 
         # taylor f2 is symmetric w.r.t m1 --> m2 flip.
         # so test that the waveforms are the same when m1 and m2
-        # (and corresponding chi_1, chi_2 are flipped)
+        # (and corresponding chi1, chi2 are flipped)
         # are flipped this can be done by flipping mass ratio
         hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
             torch_freqs,
             chirp_mass[i][None],
             1 / mass_ratio[i][None],
-            chi_2[i][None],
-            chi_1[i][None],
+            chi2[i][None],
+            chi1[i][None],
             distance[i][None],
             phase[i][None],
             theta_jn[i][None],
@@ -248,8 +153,8 @@ def test_taylor_f2(
 def test_phenom_d(
     chirp_mass,
     mass_ratio,
-    chi_1,
-    chi_2,
+    chi1,
+    chi2,
     distance,
     phase,
     theta_jn,
@@ -269,10 +174,10 @@ def test_phenom_d(
             m2=mass_2[i].item() * lal.MSUN_SI,
             S1x=0,
             S1y=0,
-            S1z=chi_1[i].item(),
+            S1z=chi1[i].item(),
             S2x=0,
             S2y=0,
-            S2z=chi_2[i].item(),
+            S2z=chi2[i].item(),
             distance=(distance[i].item() * u.Mpc).to("m").value,
             inclination=theta_jn[i].item(),
             phiRef=phase[i].item(),
@@ -309,8 +214,8 @@ def test_phenom_d(
             torch_freqs,
             chirp_mass[i][None],
             mass_ratio[i][None],
-            chi_1[i][None],
-            chi_2[i][None],
+            chi1[i][None],
+            chi2[i][None],
             distance[i][None],
             phase[i][None],
             theta_jn[i][None],
