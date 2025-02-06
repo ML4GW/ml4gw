@@ -11,6 +11,11 @@ from ml4gw.waveforms import IMRPhenomD, conversion
 from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
 
 
+@pytest.fixture()
+def num_samples():
+    return 1000
+
+
 @pytest.fixture(params=[2048])
 def sample_rate(request):
     return request.param
