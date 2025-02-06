@@ -25,14 +25,27 @@ def high_cutoff():
 
 
 @pytest.fixture(
-    params=[(0.5, None), (None, 20), (0.5, 20), (None, None), (None, None)]
+    params=[
+        (
+            0.5,
+            None,
+            "cheby1",
+        ),
+        (None, 20, "cheby2"),
+        (
+            0.5,
+            20,
+            "ellip",
+        ),
+        (
+            None,
+            None,
+            "bessel",
+        ),
+        (None, None, "butter"),
+    ]
 )
-def rpr(request):
-    return request.param
-
-
-@pytest.fixture(params=["cheby1", "cheby2", "ellip", "bessel", "butter"])
-def filter(request):
+def rp_rs_filter(request):
     return request.param
 
 
@@ -47,7 +60,7 @@ def order(request):
 
 
 def test_filters_synthetic_signal(
-    sample_rate, order, filter, low_cutoff, high_cutoff, rprs
+    sample_rate, order, low_cutoff, high_cutoff, rp_rs_filter
 ):
     t = np.linspace(0, 1.0, sample_rate, endpoint=False)
     tone_freq = 50
@@ -59,7 +72,8 @@ def test_filters_synthetic_signal(
 
     slice_length = int(0.15 * sample_rate)
 
-    rp, rs = rprs
+    rp, rs, filter = rp_rs_filter
+
     b, a = iirfilter(
         order,
         low_cutoff,
@@ -155,10 +169,9 @@ def f_ref(request):
 def test_filters_phenom_signal(
     sample_rate,
     order,
-    filter,
+    rp_rs_filter,
     low_cutoff,
     high_cutoff,
-    rprs,
     chirp_mass,
     mass_ratio,
     distance,
@@ -224,7 +237,7 @@ def test_filters_phenom_signal(
 
     slice_length = int(0.15 * sample_rate)
 
-    rp, rs = rprs
+    rp, rs, filter = rp_rs_filter
 
     b, a = iirfilter(
         order,
