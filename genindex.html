@@ -147,6 +147,8 @@
 </li>
       <li><a href="ml4gw.transforms.html#ml4gw.transforms.transform.FittableTransform.build">build() (ml4gw.transforms.transform.FittableTransform method)</a>
 </li>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.build_highpass_filter">build_highpass_filter() (ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -207,6 +209,10 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_f">delta_f (ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator property)</a>
+</li>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_t">delta_t (ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator property)</a>
+</li>
       <li><a href="ml4gw.html#ml4gw.distributions.DeltaFunction">DeltaFunction (class in ml4gw.distributions)</a>
 </li>
   </ul></td>
@@ -304,9 +310,7 @@
 </li>
         <li><a href="ml4gw.transforms.html#ml4gw.transforms.whitening.Whiten.forward">(ml4gw.transforms.whitening.Whiten method)</a>
 </li>
-        <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.ParameterSampler.forward">(ml4gw.waveforms.generator.ParameterSampler method)</a>
-</li>
-        <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.WaveformGenerator.forward">(ml4gw.waveforms.generator.WaveformGenerator method)</a>
+        <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.forward">(ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -315,6 +319,10 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.generate_conditioned_fd_waveform">generate_conditioned_fd_waveform() (ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator method)</a>
+</li>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.get_frequencies">get_frequencies() (ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator method)</a>
+</li>
       <li><a href="ml4gw.html#ml4gw.gw.get_ifo_geometry">get_ifo_geometry() (in module ml4gw.gw)</a>
 </li>
       <li><a href="ml4gw.nn.streaming.html#ml4gw.nn.streaming.online_average.OnlineAverager.get_initial_state">get_initial_state() (ml4gw.nn.streaming.online_average.OnlineAverager method)</a>
@@ -323,14 +331,14 @@
         <li><a href="ml4gw.nn.streaming.html#ml4gw.nn.streaming.snapshotter.Snapshotter.get_initial_state">(ml4gw.nn.streaming.snapshotter.Snapshotter method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ml4gw.nn.autoencoder.html#ml4gw.nn.autoencoder.skip_connection.ConcatSkipConnect.get_out_channels">get_out_channels() (ml4gw.nn.autoencoder.skip_connection.ConcatSkipConnect method)</a>
 
       <ul>
         <li><a href="ml4gw.nn.autoencoder.html#ml4gw.nn.autoencoder.skip_connection.SkipConnection.get_out_channels">(ml4gw.nn.autoencoder.skip_connection.SkipConnection method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ml4gw.nn.html#ml4gw.nn.norm.GroupNorm1D">GroupNorm1D (class in ml4gw.nn.norm)</a>
 </li>
       <li><a href="ml4gw.nn.html#ml4gw.nn.norm.GroupNorm1DGetter">GroupNorm1DGetter (class in ml4gw.nn.norm)</a>
@@ -740,11 +748,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ml4gw.html#ml4gw.spectral.normalize_by_psd">normalize_by_psd() (in module ml4gw.spectral)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ml4gw.transforms.html#ml4gw.transforms.transform.FittableSpectralTransform.normalize_psd">normalize_psd() (ml4gw.transforms.transform.FittableSpectralTransform method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ml4gw.dataloading.html#ml4gw.dataloading.in_memory_dataset.InMemoryDataset.num_kernels">num_kernels (ml4gw.dataloading.in_memory_dataset.InMemoryDataset property)</a>
+</li>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.nyquist">nyquist (ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -764,12 +774,10 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.ParameterSampler">ParameterSampler (class in ml4gw.waveforms.generator)</a>
+      <li><a href="ml4gw.html#ml4gw.gw.plus">plus() (in module ml4gw.gw)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ml4gw.html#ml4gw.gw.plus">plus() (in module ml4gw.gw)</a>
-</li>
       <li><a href="ml4gw.html#ml4gw.distributions.PowerLaw">PowerLaw (class in ml4gw.distributions)</a>
 </li>
   </ul></td>
@@ -814,6 +822,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.size">size (ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator property)</a>
+</li>
       <li><a href="ml4gw.nn.autoencoder.html#ml4gw.nn.autoencoder.skip_connection.SkipConnection">SkipConnection (class in ml4gw.nn.autoencoder.skip_connection)</a>
 </li>
       <li><a href="ml4gw.nn.streaming.html#ml4gw.nn.streaming.snapshotter.Snapshotter">Snapshotter (class in ml4gw.nn.streaming.snapshotter)</a>
@@ -834,6 +844,10 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator">TimeDomainCBCWaveformGenerator (class in ml4gw.waveforms.generator)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ml4gw.html#ml4gw.spectral.truncate_inverse_power_spectrum">truncate_inverse_power_spectrum() (in module ml4gw.spectral)</a>
 </li>
   </ul></td>
@@ -842,14 +856,12 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ml4gw.waveforms.html#ml4gw.waveforms.generator.WaveformGenerator">WaveformGenerator (class in ml4gw.waveforms.generator)</a>
-</li>
       <li><a href="ml4gw.transforms.html#ml4gw.transforms.waveforms.WaveformProjector">WaveformProjector (class in ml4gw.transforms.waveforms)</a>
+</li>
+      <li><a href="ml4gw.transforms.html#ml4gw.transforms.waveforms.WaveformSampler">WaveformSampler (class in ml4gw.transforms.waveforms)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ml4gw.transforms.html#ml4gw.transforms.waveforms.WaveformSampler">WaveformSampler (class in ml4gw.transforms.waveforms)</a>
-</li>
       <li><a href="ml4gw.transforms.html#ml4gw.transforms.whitening.Whiten">Whiten (class in ml4gw.transforms.whitening)</a>
 </li>
       <li><a href="ml4gw.html#ml4gw.spectral.whiten">whiten() (in module ml4gw.spectral)</a>

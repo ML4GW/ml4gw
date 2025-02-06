@@ -102,43 +102,117 @@
 <section id="module-ml4gw.waveforms.generator">
 <span id="ml4gw-waveforms-generator-module"></span><h2>ml4gw.waveforms.generator module<a class="headerlink" href="#module-ml4gw.waveforms.generator" title="Link to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="ml4gw.waveforms.generator.ParameterSampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.generator.</span></span><span class="sig-name descname"><span class="pre">ParameterSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.ParameterSampler" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.generator.</span></span><span class="sig-name descname"><span class="pre">TimeDomainCBCWaveformGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">approximant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_pad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Waveform generator that generates time-domain waveforms from frequency-domain approximants.</p>
+<p>Frequency domain waveforms are conditioned as done by lalsimulation.
+Specifically, waveforms are generated with a starting frequency <cite>fstart</cite>
+slightly below the requested <cite>f_min</cite>, so that they can be tapered from
+<cite>fstart</cite> to <cite>f_min</cite> using a cosine window.</p>
+<p>Please see <a class="reference external" href="https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969">https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969</a> # noqa
+for more information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>approximant</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></span>) -- A callable that returns hplus and hcross polarizations
+given requested frequencies and relevant set of parameters.
+See <cite>ml4gw.waveforms.cbc</cite> for implemented approximants.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which returned time domain waveform will be
+sampled in Hz. This also specifies <cite>f_max</cite> for generating
+waveforms via the nyquist frequency: <cite>f_max = sample_rate // 2</cite>.</p></li>
+<li><p><strong>f_min</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Lower frequency bound for waveforms</p></li>
+<li><p><strong>duration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Length of waveform in seconds.
+Waveforms will be left padded with zeros
+appropiately to fill the requested duration</p></li>
+<li><p><strong>right_pad</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- How far from the right edge of the window
+in seconds the returned waveform coalescence
+will be placed.</p></li>
+<li><p><strong>f_ref</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Reference frequency for the waveform</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="ml4gw.waveforms.generator.ParameterSampler.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.ParameterSampler.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}']</span></code>]</span></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.build_highpass_filter">
+<span class="sig-name descname"><span class="pre">build_highpass_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.build_highpass_filter" title="Link to this definition"></a></dt>
+<dd><p>Builds highpass filter object.</p>
+<p>See <a class="reference external" href="https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10">https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10</a> # noqa</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_f">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">delta_f</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_f" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_t">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">delta_t</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_t" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.forward" title="Link to this definition"></a></dt>
+<dd><p>Generates a time-domain waveform from a frequency domain approximant.
+Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa</p>
+<p>A frequency domain waveform is generated, conditioned (see <cite>generate_conditioned_fd_waveform</cite>)
+and fftdd into the time-domain</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>]</span></p>
+</dd>
+</dl>
+<dl class="simple">
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>parameters:</dt><dd><p>Dictionary of parameters for waveform generation
+where key is the parameter name and value is a tensor of parameters.
+It is required that <cite>parameters</cite> contains <cite>mass_1</cite>, <cite>mass_2</cite>, <cite>s1z</cite>, and <cite>s2z</cite>
+keys, which are used for determining parameters of data conditioning.
+If the specified approximant takes other parameters for waveform generation,
+like <cite>chirp_mass</cite> and <cite>mass_ratio</cite>, the utility functions in <cite>ml4gw.waveforms.conversion</cite>
+may be useful for populating the parameters dictionary with these additional parameters.
+Note that, if using an approximant from <cite>ml4gw.waveforms.cbc</cite>, any additional keys in <cite>parameters</cite>
+not ingested by the approximant will be ignored.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="ml4gw.waveforms.generator.WaveformGenerator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.generator.</span></span><span class="sig-name descname"><span class="pre">WaveformGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_sampler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.WaveformGenerator" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="ml4gw.waveforms.generator.WaveformGenerator.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.WaveformGenerator.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}']</span></code>]]</span></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.generate_conditioned_fd_waveform">
+<span class="sig-name descname"><span class="pre">generate_conditioned_fd_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.generate_conditioned_fd_waveform" title="Link to this definition"></a></dt>
+<dd><p>Generate a conditioned frequency domain waveform from a frequency domain approximant.</p>
+<p>Based on <a class="reference external" href="https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248">https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248</a> # noqa</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**parameters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span>) -- Dictionary of parameters for waveform generation
+where key is the parameter name and value is a tensor of parameters.
+It is required that <cite>parameters</cite> contains <cite>mass_1</cite>, <cite>mass_2</cite>, <cite>s1z</cite>, and <cite>s2z</cite>
+keys, which are used for determining parameters of data conditioning.
+If the specified approximant takes other parameters for waveform generation,
+like <cite>chirp_mass</cite> and <cite>mass_ratio</cite>, the utility functions in <cite>ml4gw.waveforms.conversion</cite>
+may be useful for populating the parameters dictionary with these additional parameters.
+Note that, if using an approximant from <cite>ml4gw.waveforms.cbc</cite>, any additional keys in <cite>parameters</cite>
+not ingested by the approximant will be ignored.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.get_frequencies">
+<span class="sig-name descname"><span class="pre">get_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.get_frequencies" title="Link to this definition"></a></dt>
+<dd><p>Get the frequencies from 0 to nyquist for corresponding df</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.nyquist">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nyquist</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.nyquist" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.size" title="Link to this definition"></a></dt>
+<dd><p>Number of samples in the waveform</p>
 </dd></dl>
 
 </dd></dl>
