@@ -156,6 +156,8 @@ def test_filters_phenom_signal(
     sample_rate,
     order,
     filter,
+    low_cutoff,
+    high_cutoff,
     rprs,
     chirp_mass,
     mass_ratio,
