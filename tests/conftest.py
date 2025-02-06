@@ -37,7 +37,9 @@ def compare_against_numpy():
 
         # at most one point can differ by more than tolerance
         # this happens occasionally and typically for very low values
-        # eventually we should track down and address the underlying cause
+
+        # TODO: eventually we should track down
+        # and address the underlying cause
         assert isclose.sum() - np.prod(isclose.shape) <= 1
 
     return compare
