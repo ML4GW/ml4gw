@@ -27,7 +27,7 @@ def compare_against_numpy():
     of the time
     """
 
-    def compare(value, expected):
+    def compare(value, expected, num_bad: int = 0):
         sigma = 0.01
         prob = 0.99999
         N = np.prod(expected.shape)
@@ -40,7 +40,7 @@ def compare_against_numpy():
 
         # TODO: eventually we should track down
         # and address the underlying cause
-        assert isclose.sum() - np.prod(isclose.shape) <= 1
+        assert isclose.sum() - np.prod(isclose.shape) <= num_bad
 
     return compare
 
