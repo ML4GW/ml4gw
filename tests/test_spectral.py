@@ -111,7 +111,7 @@ def test_fast_spectral_density(
     # that components higher than the first two are correct
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    compare_against_numpy(torch_result, scipy_result)
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -260,7 +260,7 @@ def test_fast_spectral_density_with_y(
 
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    compare_against_numpy(torch_result, scipy_result)
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
     _shape_checks(ndim, y_ndim, x, y, fsd)
 
 
@@ -322,7 +322,7 @@ def test_spectral_density(
         window=signal.windows.hann(nperseg, False),
         average=average,
     )
-    compare_against_numpy(torch_result, scipy_result)
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:

@@ -45,25 +45,25 @@ def test_power_law():
     """Test PowerLaw distribution"""
     ref_snr = 8
     sampler = distributions.PowerLaw(ref_snr, float("inf"), index=-4)
-    samples = sampler.sample((10000,)).numpy()
+    samples = sampler.sample((100000,)).numpy()
     # check x^-4 behavior
-    counts, ebins = np.histogram(samples, bins=100)
+    counts, ebins = np.histogram(samples, bins=1000)
     bins = ebins[1:] + ebins[:-1]
     bins *= 0.5
 
     def foo(x, a, b):
         return a * x**b
 
-    popt, _ = optimize.curve_fit(foo, bins, counts, (20, 3))
+    popt, _ = optimize.curve_fit(foo, bins, counts)
     # popt[1] is the index
     assert popt[1] == pytest.approx(-4, rel=1e-1)
 
     min_dist = 10
     max_dist = 1000
     uniform_in_volume = distributions.PowerLaw(min_dist, max_dist, index=2)
-    samples = uniform_in_volume.sample((10000,)).numpy()
+    samples = uniform_in_volume.sample((100000,)).numpy()
     # check d^2 behavior
-    counts, ebins = np.histogram(samples, bins=100)
+    counts, ebins = np.histogram(samples, bins=1000)
     bins = ebins[1:] + ebins[:-1]
     bins *= 0.5
 
@@ -73,12 +73,12 @@ def test_power_law():
 
     # test 1/x distribution
     inverse_in_distance = distributions.PowerLaw(min_dist, max_dist, index=-1)
-    samples = inverse_in_distance.sample((10000,)).numpy()
-    counts, ebins = np.histogram(samples, bins=100)
+    samples = inverse_in_distance.sample((100000,)).numpy()
+    counts, ebins = np.histogram(samples, bins=1000)
     bins = ebins[1:] + ebins[:-1]
     bins *= 0.5
     popt, _ = optimize.curve_fit(foo, bins, counts)
-    # popt[1] is the index
+
     assert popt[1] == pytest.approx(-1, rel=1e-1)
 
 
