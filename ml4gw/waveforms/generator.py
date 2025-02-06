@@ -224,7 +224,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         k1s = torch.round(f_min / df)
 
         num_freqs = frequencies.size(0)
-        frequency_indices = torch.arange(num_freqs)
+        frequency_indices = torch.arange(num_freqs, device=device)
         taper_mask = frequency_indices <= k1s[:, None]
         taper_mask &= frequency_indices >= k0s[:, None]
 
@@ -253,7 +253,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         # that will translate the coalescense time such that it is `right_pad`
         # seconds from the right edge of the window
         tshift = round(self.right_pad * self.sample_rate) / self.sample_rate
-        kvals = torch.arange(num_freqs)
+        kvals = torch.arange(num_freqs, device=device)
         phase_shift = torch.exp(1j * 2 * torch.pi * df * tshift * kvals)
 
         hc_spectrum *= phase_shift
