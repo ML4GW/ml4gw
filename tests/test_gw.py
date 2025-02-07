@@ -310,6 +310,27 @@ def test_compute_ifo_snr(_get_waveforms_from_lalsimulation, highpass, lowpass):
     backgrounds = torch.from_numpy(backgrounds)
     hp_torch = torch.from_numpy(hp.data.data)
     hc_torch = torch.from_numpy(hc.data.data)
+
+    num_freqs = hp_torch.shape[-1] // 2 + 1
+    with pytest.raises(ValueError) as exc:
+        snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+            hp_torch,
+            backgrounds,
+            sample_rate=sample_rate,
+            highpass=torch.ones(num_freqs - 1),
+            lowpass=lowpass,
+        )
+    assert str(exc.value).startswith("Can't apply highpass")
+    with pytest.raises(ValueError) as exc:
+        snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+            hp_torch,
+            backgrounds,
+            sample_rate=sample_rate,
+            highpass=highpass,
+            lowpass=torch.ones(num_freqs - 1),
+        )
+    assert str(exc.value).startswith("Can't apply lowpass")
+
     snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
         hp_torch,
         backgrounds,
