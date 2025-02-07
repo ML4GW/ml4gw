@@ -56,7 +56,7 @@ def validate_whitened():
         stds = whitened.std(axis=-1)
         target = torch.ones_like(stds)
 
-        # if we're highpassingi or lowpassing, then we
+        # if we're highpassing or lowpassing, then we
         # shouldn't expect the standard deviation to be
         # one because we're subtracting some power, so
         # remove roughly the expected power contributed
