@@ -14,10 +14,10 @@ class SnrRescaler(FittableSpectralTransform):
         sample_rate: float,
         waveform_duration: float,
         highpass: Optional[float] = None,
+        lowpass: Optional[float] = None,
         dtype: torch.dtype = torch.float32,
     ) -> None:
         super().__init__()
-        self.highpass = highpass
         self.sample_rate = sample_rate
         self.num_channels = num_channels
 
@@ -29,9 +29,18 @@ class SnrRescaler(FittableSpectralTransform):
 
         if highpass is not None:
             freqs = torch.fft.rfftfreq(waveform_size, 1 / sample_rate)
-            self.register_buffer("mask", freqs >= highpass, persistent=False)
+            self.register_buffer(
+                "highpass_mask", freqs >= highpass, persistent=False
+            )
         else:
-            self.mask = None
+            self.highpass_mask = None
+        if lowpass is not None:
+            freqs = torch.fft.rfftfreq(waveform_size, 1 / sample_rate)
+            self.register_buffer(
+                "lowpass_mask", freqs < lowpass, persistent=False
+            )
+        else:
+            self.lowpass_mask = None
 
     def fit(
         self,
@@ -63,7 +72,11 @@ class SnrRescaler(FittableSpectralTransform):
         target_snrs: Optional[BatchTensor] = None,
     ):
         snrs = compute_network_snr(
-            responses, self.background, self.sample_rate, self.mask
+            responses,
+            self.background,
+            self.sample_rate,
+            self.highpass_mask,
+            self.lowpass_mask,
         )
         if target_snrs is None:
             idx = torch.randperm(len(snrs))

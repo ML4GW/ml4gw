@@ -382,7 +382,7 @@ def truncate_inverse_power_spectrum(
             as `None`, no lowpass filtering will be applied.
     Returns:
         The PSD with its time domain response truncated
-            to `fduration` and any highpassed frequencies
+            to `fduration` and any filtered frequencies
             tapered.
     """
 
