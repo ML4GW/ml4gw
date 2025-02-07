@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.6.4">coverage.py v7.6.4</a>,
-            created at 2025-02-06 21:03 +0000
+            created at 2025-02-07 14:11 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -306,7 +306,7 @@
     <p class="run"><span class="n"><a id="t224" href="#t224">224</a></span><span class="t">        <span class="nam">k1s</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">round</span><span class="op">(</span><span class="nam">f_min</span> <span class="op">/</span> <span class="nam">df</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t225" href="#t225">225</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t226" href="#t226">226</a></span><span class="t">        <span class="nam">num_freqs</span> <span class="op">=</span> <span class="nam">frequencies</span><span class="op">.</span><span class="nam">size</span><span class="op">(</span><span class="num">0</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t227" href="#t227">227</a></span><span class="t">        <span class="nam">frequency_indices</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">arange</span><span class="op">(</span><span class="nam">num_freqs</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t227" href="#t227">227</a></span><span class="t">        <span class="nam">frequency_indices</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">arange</span><span class="op">(</span><span class="nam">num_freqs</span><span class="op">,</span> <span class="nam">device</span><span class="op">=</span><span class="nam">device</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t228" href="#t228">228</a></span><span class="t">        <span class="nam">taper_mask</span> <span class="op">=</span> <span class="nam">frequency_indices</span> <span class="op">&lt;=</span> <span class="nam">k1s</span><span class="op">[</span><span class="op">:</span><span class="op">,</span> <span class="key">None</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t229" href="#t229">229</a></span><span class="t">        <span class="nam">taper_mask</span> <span class="op">&amp;=</span> <span class="nam">frequency_indices</span> <span class="op">>=</span> <span class="nam">k0s</span><span class="op">[</span><span class="op">:</span><span class="op">,</span> <span class="key">None</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t230" href="#t230">230</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -335,7 +335,7 @@
     <p class="pln"><span class="n"><a id="t253" href="#t253">253</a></span><span class="t">        <span class="com"># that will translate the coalescense time such that it is `right_pad`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t254" href="#t254">254</a></span><span class="t">        <span class="com"># seconds from the right edge of the window</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t255" href="#t255">255</a></span><span class="t">        <span class="nam">tshift</span> <span class="op">=</span> <span class="nam">round</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">right_pad</span> <span class="op">*</span> <span class="nam">self</span><span class="op">.</span><span class="nam">sample_rate</span><span class="op">)</span> <span class="op">/</span> <span class="nam">self</span><span class="op">.</span><span class="nam">sample_rate</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t256" href="#t256">256</a></span><span class="t">        <span class="nam">kvals</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">arange</span><span class="op">(</span><span class="nam">num_freqs</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t256" href="#t256">256</a></span><span class="t">        <span class="nam">kvals</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">arange</span><span class="op">(</span><span class="nam">num_freqs</span><span class="op">,</span> <span class="nam">device</span><span class="op">=</span><span class="nam">device</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t257" href="#t257">257</a></span><span class="t">        <span class="nam">phase_shift</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">exp</span><span class="op">(</span><span class="num">1j</span> <span class="op">*</span> <span class="num">2</span> <span class="op">*</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">pi</span> <span class="op">*</span> <span class="nam">df</span> <span class="op">*</span> <span class="nam">tshift</span> <span class="op">*</span> <span class="nam">kvals</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t258" href="#t258">258</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t259" href="#t259">259</a></span><span class="t">        <span class="nam">hc_spectrum</span> <span class="op">*=</span> <span class="nam">phase_shift</span>&nbsp;</span><span class="r"></span></p>
@@ -395,7 +395,7 @@
             <a class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.6.4">coverage.py v7.6.4</a>,
-            created at 2025-02-06 21:03 +0000
+            created at 2025-02-07 14:11 +0000
         </p>
     </div>
 </footer>
