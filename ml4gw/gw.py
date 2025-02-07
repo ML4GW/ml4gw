@@ -362,7 +362,7 @@ def compute_ifo_snr(
             highpass = freqs >= highpass
         elif len(highpass) != integrand.shape[-1]:
             raise ValueError(
-                "Can't apply highpass filter mask with {} frequecy bins"
+                "Can't apply highpass filter mask with {} frequency bins"
                 "to signal fft with {} frequency bins".format(
                     len(highpass), integrand.shape[-1]
                 )
@@ -374,7 +374,7 @@ def compute_ifo_snr(
             lowpass = freqs < lowpass
         elif len(lowpass) != integrand.shape[-1]:
             raise ValueError(
-                "Can't apply lowpass filter mask with {} frequecy bins"
+                "Can't apply lowpass filter mask with {} frequency bins"
                 "to signal fft with {} frequency bins".format(
                     len(lowpass), integrand.shape[-1]
                 )
