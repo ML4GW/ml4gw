@@ -87,7 +87,7 @@ def test_compute_antenna_responses(
 ):
     ra, dec, psi, phi, gps_times, plus, cross = data
     expected = bilby_get_ifo_response(
-        ra, dec, psi, gps_times, ["plus", "cross"]
+        ra, dec, psi, gps_times, ["plus", "cross", "breathing"]
     )
 
     phi = torch.tensor(phi)
@@ -96,10 +96,15 @@ def test_compute_antenna_responses(
     tensors, vertices = injection.get_ifo_geometry(*ifos)
     tensors = tensors.type(torch.float64)
 
+    with pytest.raises(ValueError) as exc:
+        injection.compute_antenna_responses(
+            np.pi / 2 - dec, psi, phi, tensors, ["dummy_mode"]
+        )
+    assert str(exc.value).startswith("No polarization mode")
     result = injection.compute_antenna_responses(
-        np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
+        np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross", "breathing"]
     )
-    assert result.shape == (batch_size, 2, len(ifos))
+    assert result.shape == (batch_size, 3, len(ifos))
     compare_against_numpy(result, expected)
 
 
@@ -278,7 +283,17 @@ def _get_O4_psd(
     return psd
 
 
-def test_compute_ifo_snr(_get_waveforms_from_lalsimulation):
+@pytest.fixture(params=[None, 32])
+def highpass(request):
+    return request.param
+
+
+@pytest.fixture(params=[None, 64])
+def lowpass(request):
+    return request.param
+
+
+def test_compute_ifo_snr(_get_waveforms_from_lalsimulation, highpass, lowpass):
     """Test SNR for stellar mass system against lalsimulation
     with a relative tolerance.
     """
@@ -286,18 +301,49 @@ def test_compute_ifo_snr(_get_waveforms_from_lalsimulation):
     sample_rate = 1024
     psd = _get_O4_psd(sample_rate, hp.data.data.shape[-1])
     # All systems in test have ISCO < 100
-    snr_hp_lal = lalsimulation.MeasureSNR(hp, psd, 1, 100)
-    snr_hc_lal = lalsimulation.MeasureSNR(hc, psd, 1, 100)
+    lal_highpass = highpass or 1
+    lal_lowpass = lowpass or 100
+    snr_hp_lal = lalsimulation.MeasureSNR(hp, psd, lal_highpass, lal_lowpass)
+    snr_hc_lal = lalsimulation.MeasureSNR(hc, psd, lal_highpass, lal_lowpass)
 
     backgrounds = psd.data.data[: len(hp.data.data) // 2 + 1]
     backgrounds = torch.from_numpy(backgrounds)
     hp_torch = torch.from_numpy(hp.data.data)
     hc_torch = torch.from_numpy(hc.data.data)
+
+    num_freqs = hp_torch.shape[-1] // 2 + 1
+    with pytest.raises(ValueError) as exc:
+        snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+            hp_torch,
+            backgrounds,
+            sample_rate=sample_rate,
+            highpass=torch.ones(num_freqs - 1),
+            lowpass=lowpass,
+        )
+    assert str(exc.value).startswith("Can't apply highpass")
+    with pytest.raises(ValueError) as exc:
+        snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+            hp_torch,
+            backgrounds,
+            sample_rate=sample_rate,
+            highpass=highpass,
+            lowpass=torch.ones(num_freqs - 1),
+        )
+    assert str(exc.value).startswith("Can't apply lowpass")
+
     snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
-        hp_torch, backgrounds, sample_rate=sample_rate
+        hp_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
     )
     snr_hc_compute_ifo_snr = injection.compute_ifo_snr(
-        hc_torch, backgrounds, sample_rate=sample_rate
+        hc_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
     )
 
     assert snr_hp_lal == pytest.approx(

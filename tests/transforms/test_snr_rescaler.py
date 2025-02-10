@@ -35,16 +35,26 @@ class TestSnrRescaler:
     def highpass(self, request):
         return request.param
 
+    @pytest.fixture(params=[None, 64])
+    def lowpass(self, request):
+        return request.param
+
     @pytest.fixture
     def transform(
-        self, num_channels, sample_rate, waveform_duration, highpass
+        self, num_channels, sample_rate, waveform_duration, highpass, lowpass
     ):
         return SnrRescaler(
-            num_channels, sample_rate, waveform_duration, highpass
+            num_channels, sample_rate, waveform_duration, highpass, lowpass
         )
 
     def test_init(
-        self, transform, num_channels, sample_rate, waveform_duration, highpass
+        self,
+        transform,
+        num_channels,
+        sample_rate,
+        waveform_duration,
+        highpass,
+        lowpass,
     ):
         assert not transform.built
 
@@ -53,11 +63,24 @@ class TestSnrRescaler:
         assert transform.background.shape == shape
         assert (transform.background == 0).all().item()
 
-        if highpass is not None:
+        if highpass is not None and lowpass is not None:
+            start = int(highpass * waveform_duration)
+            stop = int(lowpass * waveform_duration)
+            assert len(transform._buffers) == 3
+            assert not (transform.highpass_mask[:start].any().item())
+            assert not (transform.lowpass_mask[stop:].any().item())
+            assert transform.lowpass_mask[start:stop].all().item()
+        elif highpass is not None:
             idx = int(highpass * waveform_duration)
             assert len(transform._buffers) == 2
-            assert not (transform.mask[:idx]).any().item()
-            assert (transform.mask[idx:]).all().item()
+            assert not (transform.highpass_mask[:idx]).any().item()
+            assert (transform.highpass_mask[idx:]).all().item()
+        elif lowpass is not None:
+            idx = int(lowpass * waveform_duration)
+            assert len(transform._buffers) == 2
+            assert not (transform.lowpass_mask[idx:]).any().item()
+            assert (transform.lowpass_mask[:idx]).all().item()
         else:
             assert len(transform._buffers) == 1
-            assert transform.mask is None
+            assert transform.highpass_mask is None
+            assert transform.lowpass_mask is None

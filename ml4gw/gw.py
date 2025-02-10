@@ -16,8 +16,6 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from ml4gw.utils.interferometer import InterferometerGeometry
-
 from .constants import C
 from .types import (
     BatchTensor,
@@ -28,6 +26,7 @@ from .types import (
     VectorGeometry,
     WaveformTensor,
 )
+from .utils.interferometer import InterferometerGeometry
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
@@ -285,6 +284,7 @@ def compute_ifo_snr(
     psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> Float[Tensor, "batch num_ifos"]:
     r"""Compute the SNRs of a batch of interferometer responses
 
@@ -300,7 +300,8 @@ def compute_ifo_snr(
         {S_n^{(j)}(f)}df$$
 
     Where $f_{\text{min}}$ is a minimum frequency denoted
-    by `highpass`, `f_{\text{max}}` is the Nyquist frequency
+    by `highpass`, `f_{\text{max}}` is the maximum frequency
+    denoted by `lowpass`, which defaults to the Nyquist frequency
     dictated by `sample_rate`; `\tilde{h_{ij}}` and `\tilde{h_{ij}}*`
     indicate the fourier transform of the $i$th waveform at
     the $j$th inteferometer and its complex conjugate, respectively;
@@ -328,8 +329,15 @@ def compute_ifo_snr(
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out low frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies up to `sample_rate / 2`
+            left as `None`, all frequencies up to `lowpass`
             will contribute to the SNR calculation.
+        lowpass:
+            The maximum frequency below which to compute the SNR.
+            If a tensor is provided, it will be assumed to be a
+            pre-computed mask used to 0-out high frequency components.
+            If a float, it will be used to compute such a mask. If
+            left as `None`, all frequencies from `highpass` up to
+            the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Batch of SNRs computed for each interferometer
     """
@@ -346,7 +354,7 @@ def compute_ifo_snr(
     integrand = fft / (psd**0.5)
     integrand = integrand.type(torch.float32) ** 2
 
-    # mask out low frequency components if a critical
+    # mask out frequency components if a critical
     # frequency or frequency mask was provided
     if highpass is not None:
         if not isinstance(highpass, torch.Tensor):
@@ -354,12 +362,24 @@ def compute_ifo_snr(
             highpass = freqs >= highpass
         elif len(highpass) != integrand.shape[-1]:
             raise ValueError(
-                "Can't apply highpass filter mask with {} frequecy bins"
+                "Can't apply highpass filter mask with {} frequency bins"
                 "to signal fft with {} frequency bins".format(
                     len(highpass), integrand.shape[-1]
                 )
             )
         integrand *= highpass.to(integrand.device)
+    if lowpass is not None:
+        if not isinstance(lowpass, torch.Tensor):
+            freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
+            lowpass = freqs < lowpass
+        elif len(lowpass) != integrand.shape[-1]:
+            raise ValueError(
+                "Can't apply lowpass filter mask with {} frequency bins"
+                "to signal fft with {} frequency bins".format(
+                    len(lowpass), integrand.shape[-1]
+                )
+            )
+        integrand *= lowpass.to(integrand.device)
 
     # sum over the desired frequency range and multiply
     # by df to turn it into an integration (and get
@@ -386,6 +406,7 @@ def compute_network_snr(
     psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> BatchTensor:
     r"""
     Compute the total SNR from a gravitational waveform
@@ -422,10 +443,17 @@ def compute_network_snr(
             If a float, it will be used to compute such a mask. If
             left as `None`, all frequencies up to `sample_rate / 2`
             will contribute to the SNR calculation.
+        lowpass:
+            The maximum frequency below which to compute the SNR.
+            If a tensor is provided, it will be assumed to be a
+            pre-computed mask used to 0-out high frequency components.
+            If a float, it will be used to compute such a mask. If
+            left as `None`, all frequencies from `highpass` up to
+            the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Batch of SNRs for each waveform across the interferometer network
     """
-    snrs = compute_ifo_snr(responses, psd, sample_rate, highpass)
+    snrs = compute_ifo_snr(responses, psd, sample_rate, highpass, lowpass)
     snrs = snrs**2
     return snrs.sum(axis=-1) ** 0.5
 
@@ -436,6 +464,7 @@ def reweight_snrs(
     psd: PSDTensor,
     sample_rate: float,
     highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> WaveformTensor:
     """Scale interferometer responses such that they have a desired SNR
 
@@ -466,10 +495,17 @@ def reweight_snrs(
             If a float, it will be used to compute such a mask. If
             left as `None`, all frequencies up to `sample_rate / 2`
             will contribute to the SNR calculation.
+        lowpass:
+            The maximum frequency below which to compute the SNR.
+            If a tensor is provided, it will be assumed to be a
+            pre-computed mask used to 0-out high frequency components.
+            If a float, it will be used to compute such a mask. If
+            left as `None`, all frequencies from `highpass` up to
+            the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Rescaled interferometer responses
     """
 
-    snrs = compute_network_snr(responses, psd, sample_rate, highpass)
+    snrs = compute_network_snr(responses, psd, sample_rate, highpass, lowpass)
     weights = target_snrs / snrs
     return responses * weights[:, None, None]
