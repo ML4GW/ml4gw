@@ -12,7 +12,7 @@
 | ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |89, 199-203 |
 | ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
 | ml4gw/distributions.py                    |       61 |       12 |     80% |41-43, 58-64, 102-103, 106-107, 136 |
-| ml4gw/gw.py                               |       90 |        9 |     90% |49, 129-130, 352-362 |
+| ml4gw/gw.py                               |       97 |        0 |    100% |           |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
 | ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
 | ml4gw/nn/autoencoder/base.py              |       44 |       44 |      0% |      1-94 |
@@ -32,7 +32,7 @@
 | ml4gw/transforms/pearson.py               |       28 |        3 |     89% |48, 53, 60 |
 | ml4gw/transforms/qtransform.py            |      172 |       14 |     92% |149, 328, 336-338, 345-354 |
 | ml4gw/transforms/scaler.py                |       32 |        0 |    100% |           |
-| ml4gw/transforms/snr\_rescaler.py         |       37 |       16 |     57% |42-58, 65-75 |
+| ml4gw/transforms/snr\_rescaler.py         |       40 |       16 |     60% |51-67, 74-88 |
 | ml4gw/transforms/spectral.py              |       32 |        1 |     97% |        95 |
 | ml4gw/transforms/spectrogram.py           |       57 |        0 |    100% |           |
 | ml4gw/transforms/spline\_interpolation.py |      105 |        4 |     96% |261-263, 285, 364 |
@@ -55,7 +55,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        1 |     99% |        87 |
 | ml4gw/waveforms/generator.py              |      103 |        3 |     97% |77, 86, 90 |
-|                                 **TOTAL** | **2905** |  **289** | **90%** |           |
+|                                 **TOTAL** | **2915** |  **280** | **90%** |           |
 
 
 ## Setup coverage badge
