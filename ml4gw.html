@@ -402,7 +402,7 @@ the waveforms, for each interferometer.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.gw.compute_ifo_snr">
-<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_ifo_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_ifo_snr" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_ifo_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_ifo_snr" title="Link to this definition"></a></dt>
 <dd><p>Compute the SNRs of a batch of interferometer responses</p>
 <p>Compute the signal to noise ratio (SNR) of individual
 interferometer responses to gravitational waveforms with
@@ -416,7 +416,8 @@ frac{tilde{h_{ij}}(f)tilde{h_{ij}}^*(f)}
 </dd>
 </dl>
 <p>Where $f_{text{min}}$ is a minimum frequency denoted
-by <cite>highpass</cite>, <cite>f_{text{max}}</cite> is the Nyquist frequency
+by <cite>highpass</cite>, <cite>f_{text{max}}</cite> is the maximum frequency
+denoted by <cite>lowpass</cite>, which defaults to the Nyquist frequency
 dictated by <cite>sample_rate</cite>; <cite>tilde{h_{ij}}</cite> and <cite>tilde{h_{ij}}*</cite>
 indicate the fourier transform of the $i$th waveform at
 the $j$th inteferometer and its complex conjugate, respectively;
@@ -441,8 +442,14 @@ match the frequency resolution of the provided PSDs.</p></li>
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
-left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
+left as <cite>None</cite>, all frequencies up to <cite>lowpass</cite>
 will contribute to the SNR calculation.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
+If a tensor is provided, it will be assumed to be a
+pre-computed mask used to 0-out high frequency components.
+If a float, it will be used to compute such a mask. If
+left as <cite>None</cite>, all frequencies from <cite>highpass</cite> up to
+the Nyquist freqyency will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -456,7 +463,7 @@ will contribute to the SNR calculation.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.gw.compute_network_snr">
-<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_network_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_network_snr" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_network_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_network_snr" title="Link to this definition"></a></dt>
 <dd><p>Compute the total SNR from a gravitational waveform
 from a network of interferometers. The total SNR for
 the $i$th waveform is computed as</p>
@@ -486,6 +493,12 @@ pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
 left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
 will contribute to the SNR calculation.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
+If a tensor is provided, it will be assumed to be a
+pre-computed mask used to 0-out high frequency components.
+If a float, it will be used to compute such a mask. If
+left as <cite>None</cite>, all frequencies from <cite>highpass</cite> up to
+the Nyquist freqyency will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -594,7 +607,7 @@ A concatenation of the vertices of each interferometer</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.gw.reweight_snrs">
-<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">reweight_snrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_snrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.reweight_snrs" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">reweight_snrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_snrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.reweight_snrs" title="Link to this definition"></a></dt>
 <dd><p>Scale interferometer responses such that they have a desired SNR</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -620,6 +633,12 @@ pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
 left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
 will contribute to the SNR calculation.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
+If a tensor is provided, it will be assumed to be a
+pre-computed mask used to 0-out high frequency components.
+If a float, it will be used to compute such a mask. If
+left as <cite>None</cite>, all frequencies from <cite>highpass</cite> up to
+the Nyquist freqyency will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -807,7 +826,7 @@ as <cite>None</cite>, no lowpass filtering will be applied.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
-<dt>The PSD with its time domain response truncated</dt><dd><p>to <cite>fduration</cite> and any highpassed frequencies
+<dt>The PSD with its time domain response truncated</dt><dd><p>to <cite>fduration</cite> and any filtered frequencies
 tapered.</p>
 </dd>
 </dl>
