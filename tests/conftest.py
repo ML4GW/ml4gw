@@ -1,11 +1,55 @@
 import random
 
+import json
 import numpy as np
 import pytest
 import torch
 from scipy.special import erfinv
 from torch.distributions import Uniform
+import matplotlib.pyplot as plt
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--benchmark", action="store_true", default=False, help="Change to benchmark mode"
+    )
+
+def pytest_sessionfinish(session):
+    print("Session finish")
+    store = session.config.benchmark_storage
+    for key in store:
+        print(key)
+        data = store[key]
+        data = np.array(data)
+        data[np.isinf(data)] = 0
+        plt.hist(data, bins=100, density=True)
+        plt.title(key)
+        plt.savefig(f"{key}.png")
+        plt.close()
+        json_data = {
+            key: data.tolist() 
+        }
+        with open(f"{key}.json", "w") as f:
+            json.dump(json_data, f, indent=4)
+
+
+@pytest.fixture(scope="session")
+def benchmark_storage(request):
+    state = request.config.benchmark_storage
+    return state
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config):
+    """Make shared_state accessible in pytest_sessionfinish."""
+    config.benchmark_storage = {
+        "hp_real_abs_err": [],
+        "hp_real_rel_err": [],
+        "hp_imag_abs_err": [],
+        "hp_imag_rel_err": [],
+        "hc_real_abs_err": [],
+        "hc_real_rel_err": [],
+        "hc_imag_abs_err": [],
+        "hc_imag_rel_err": [],
+    }
 
 # If a fixture is doing anything random,
 # it should take this function as an argument

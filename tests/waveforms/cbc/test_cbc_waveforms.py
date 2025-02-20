@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import torch
 from astropy import units as u
+import matplotlib.pyplot as plt
 
 import ml4gw.waveforms as waveforms
 from ml4gw.waveforms.conversion import (
@@ -11,16 +12,15 @@ from ml4gw.waveforms.conversion import (
     chirp_mass_and_mass_ratio_to_components,
 )
 
-
 @pytest.fixture()
-def num_samples():
+def num_samples(request):
+    if request.config.getoption("--benchmark"):
+        return 100000
     return 100
-
 
 @pytest.fixture(params=[20, 40])
 def f_ref(request):
     return request.param
-
 
 def test_taylor_f2(
     chirp_mass,
@@ -160,6 +160,8 @@ def test_phenom_d(
     theta_jn,
     sample_rate,
     f_ref,
+    benchmark_storage,
+    request
 ):
     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
         chirp_mass, mass_ratio
@@ -231,19 +233,42 @@ def test_phenom_d(
         assert not torch.any(torch.isnan(hc_ml4gw))
         assert not torch.any(torch.isnan(hp_ml4gw))
 
-        assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
-        )
+        hp_real_abs_err = np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy())
+        hp_imag_abs_err = np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy())
+        hc_real_abs_err = np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy())
+        hc_imag_abs_err = np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy())
+        hp_real_rel_err = hp_real_abs_err / np.abs(1e21 * hp_lal_data.real)
+        hp_imag_rel_err = hp_imag_abs_err / np.abs(1e21 * hp_lal_data.imag)
+        hc_real_rel_err = hc_real_abs_err / np.abs(1e21 * hc_lal_data.real)
+        hc_imag_rel_err = hc_imag_abs_err / np.abs(1e21 * hc_lal_data.imag)
 
+        hp_real_rel_err[np.isinf(hp_real_rel_err)] = 0
+        hp_imag_rel_err[np.isinf(hp_imag_rel_err)] = 0
+        hc_real_rel_err[np.isinf(hc_real_rel_err)] = 0
+        hc_imag_rel_err[np.isinf(hc_imag_rel_err)] = 0
+
+        benchmark_storage["hp_real_abs_err"] = np.concatenate((benchmark_storage["hp_real_abs_err"], hp_real_abs_err))
+        benchmark_storage["hp_real_rel_err"] = np.concatenate((benchmark_storage["hp_real_rel_err"], hp_real_rel_err))
+        benchmark_storage["hp_imag_abs_err"] = np.concatenate((benchmark_storage["hp_imag_abs_err"], hp_imag_abs_err))
+        benchmark_storage["hp_imag_rel_err"] = np.concatenate((benchmark_storage["hp_imag_rel_err"], hp_imag_rel_err))
+        benchmark_storage["hc_real_abs_err"] = np.concatenate((benchmark_storage["hc_real_abs_err"], hc_real_abs_err))
+        benchmark_storage["hc_real_rel_err"] = np.concatenate((benchmark_storage["hc_real_rel_err"], hc_real_rel_err))
+        benchmark_storage["hc_imag_abs_err"] = np.concatenate((benchmark_storage["hc_imag_abs_err"], hc_imag_abs_err))
+        benchmark_storage["hc_imag_rel_err"] = np.concatenate((benchmark_storage["hc_imag_rel_err"], hc_imag_rel_err))
+
+        if (request.config.getoption("--benchmark") == False):
+            assert np.allclose(
+                1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
+            )
 
 def test_phenom_p(
     chirp_mass,
