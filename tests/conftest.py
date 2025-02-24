@@ -7,30 +7,12 @@ import torch
 from scipy.special import erfinv
 from torch.distributions import Uniform
 import matplotlib.pyplot as plt
+import h5py
 
 def pytest_addoption(parser):
     parser.addoption(
         "--benchmark", action="store_true", default=False, help="Change to benchmark mode"
     )
-
-def pytest_sessionfinish(session):
-    print("Session finish")
-    store = session.config.benchmark_storage
-    for key in store:
-        print(key)
-        data = store[key]
-        data = np.array(data)
-        data[np.isinf(data)] = 0
-        plt.hist(data, bins=100, density=True)
-        plt.title(key)
-        plt.savefig(f"{key}.png")
-        plt.close()
-        json_data = {
-            key: data.tolist() 
-        }
-        with open(f"{key}.json", "w") as f:
-            json.dump(json_data, f, indent=4)
-
 
 @pytest.fixture(scope="session")
 def benchmark_storage(request):
