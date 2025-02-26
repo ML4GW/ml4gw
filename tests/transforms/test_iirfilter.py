@@ -210,28 +210,28 @@ def test_filters_phenom_signal(
         phase,
     )
 
-    params = dict(
-        m1=mass_1.item() * MSUN,
-        m2=mass_2.item() * MSUN,
-        S1x=chi1x.item(),
-        S1y=chi1y.item(),
-        S1z=chi1z.item(),
-        S2x=chi2x.item(),
-        S2y=chi2y.item(),
-        S2z=chi2z.item(),
-        distance=(distance.item() * u.Mpc).to("m").value,
-        inclination=inclination.item(),
-        phiRef=phase.item(),
-        longAscNodes=0.0,
-        eccentricity=0.0,
-        meanPerAno=0.0,
-        deltaF=1.0 / sample_rate,
-        f_min=10.0,
-        f_ref=f_ref,
-        f_max=300,
-        approximant=lalsimulation.IMRPhenomPv2,
-        LALpars=lal.CreateDict(),
-    )
+    params = {
+        "m1": mass_1.item() * MSUN,
+        "m2": mass_2.item() * MSUN,
+        "S1x": chi1x.item(),
+        "S1y": chi1y.item(),
+        "S1z": chi1z.item(),
+        "S2x": chi2x.item(),
+        "S2y": chi2y.item(),
+        "S2z": chi2z.item(),
+        "distance": (distance.item() * u.Mpc).to("m").value,
+        "inclination": inclination.item(),
+        "phiRef": phase.item(),
+        "longAscNodes": 0.0,
+        "eccentricity": 0.0,
+        "meanPerAno": 0.0,
+        "deltaF": 1.0 / sample_rate,
+        "f_min": 10.0,
+        "f_ref": f_ref,
+        "f_max": 300,
+        "approximant": lalsimulation.IMRPhenomPv2,
+        "LALpars": lal.CreateDict(),
+    }
     hp_lal, _ = lalsimulation.SimInspiralChooseFDWaveform(**params)
     hp_lal = hp_lal.data.data.real
 

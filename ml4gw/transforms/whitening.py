@@ -161,7 +161,7 @@ class FixedWhiten(FittableSpectralTransform):
         fftlength: Optional[float] = None,
         highpass: Optional[float] = None,
         lowpass: Optional[float] = None,
-        overlap: Optional[float] = None
+        overlap: Optional[float] = None,
     ) -> None:
         """
         Compute the PSD of channel-wise background to

@@ -125,8 +125,8 @@ def compute_antenna_responses(
     for mode in modes:
         try:
             polarization = polarization_funcs[mode](m, n)
-        except KeyError:
-            raise ValueError(f"No polarization mode {mode}")
+        except KeyError as exc:
+            raise ValueError(f"No polarization mode {mode}") from exc
 
         # add a dummy dimension for concatenating
         polarizations.append(polarization)

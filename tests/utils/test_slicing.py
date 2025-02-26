@@ -161,7 +161,7 @@ def test_sample_kernels_1D(kernel_size, num_channels):
     # now 1D behavior without patching
     result = slicing.sample_kernels(x, kernel_size, N)
     assert result.shape == (N, kernel_size)
-    for i, y in enumerate(result.cpu().numpy()):
+    for y in result.cpu().numpy():
         assert y[0] <= (100 - kernel_size)
         assert (y == np.arange(y[0], y[0] + kernel_size)).all()
 

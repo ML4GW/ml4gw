@@ -64,7 +64,6 @@ class BasicBlock(nn.Module):
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
     ) -> None:
-
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm1d
@@ -258,8 +257,10 @@ class ResNet1D(nn.Module):
             stride_type = ["stride"] * (len(layers) - 1)
         if len(stride_type) != (len(layers) - 1):
             raise ValueError(
-                "'stride_type' should be None or a "
-                "{}-element tuple, got {}".format(len(layers) - 1, stride_type)
+                (
+                    "'stride_type' should be None or a {}-element "
+                    "tuple, got {}"
+                ).format(len(layers) - 1, stride_type)
             )
 
         self.groups = groups

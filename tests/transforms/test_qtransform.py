@@ -57,7 +57,6 @@ def test_qtile(
     mismatch,
     norm,
 ):
-
     X = torch.randn(int(duration * sample_rate))
     X = torch.fft.rfft(X, norm="forward")
     X[..., 1:] *= 2

@@ -27,34 +27,40 @@ dev = [
     "bilby~=2.1",
     "jupyter>=1.0.0,<2",
     "gwpy~=3.0",
+    "pytest-repeat>=0.9.3,<0.10",
+]
+docs = [
     "Sphinx>5.0",
     "sphinx-rtd-theme>=2.0.0,<3",
     "myst-parser>=2.0.0,<3",
     "sphinx-autodoc-typehints>=2.0.0,<3",
-    "pytest-repeat>=0.9.3,<0.10",
+]
+
+[tool.uv]
+default-groups = [
+    "dev",
+    "docs",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.black]
+[tool.ruff]
 line-length = 79
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.tox
-  | _build
-  | dist
-  | docs
-)/
-'''
+extend-exclude = ["docs", "examples"]
 
-[tool.isort]
-known_first_party = ["ml4gw"]
-multi_line_output = 3
-include_trailing_comma = true
+[tool.ruff.lint]
+extend-safe-fixes = ["C408"]
+mccabe = {"max-complexity" = 18}
+select = ["B", "C", "E", "F", "W", "B9"]
+# ignore W605 and E203 for consistency with black
+# ignore F722 for compatibility with jaxtyping
+ignore = ["W605", "E203", "F722"]  
+
+# ignore asterisk imports and unused
+# import errors in __init__ files
+per-file-ignores =  {"**/__init__.py" = ["F401", "F403"]}
 
 [tool.tox]
 legacy_tox_ini = """

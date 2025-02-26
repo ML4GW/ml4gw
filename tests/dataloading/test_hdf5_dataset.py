@@ -183,6 +183,6 @@ class TestHdf5TimeSeriesDataset:
     def test_iter(self, dataset, kernel_size):
         # test_sample_batch covered most our checks, so here
         # we'll just make sure that we respect the dataset lengths
-        for i, x in enumerate(dataset):
+        for x in dataset:
             assert x.shape == (128, 2, kernel_size)
-        assert i == 9
+        assert len(dataset) == 10

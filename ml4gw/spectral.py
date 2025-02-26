@@ -28,8 +28,8 @@ def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
     the same bias correction used by scipy's implementation.
-    see https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066 # noqa
-    """
+    see https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066
+    """  # noqa: E501
     n = x.shape[axis]
     ii_2 = 2 * torch.arange(1.0, (n - 1) // 2 + 1)
     bias = 1 + torch.sum(1.0 / (ii_2 + 1) - 1.0 / ii_2)
@@ -355,7 +355,7 @@ def truncate_inverse_power_spectrum(
     to which the whitening filter will be applied.
 
     Implementation details adapted from
-    https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8  # noqa
+    https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8
 
     Args:
         psd:
@@ -384,7 +384,7 @@ def truncate_inverse_power_spectrum(
         The PSD with its time domain response truncated
             to `fduration` and any filtered frequencies
             tapered.
-    """
+    """  # noqa: E501
 
     num_freqs = psd.size(-1)
     N = (num_freqs - 1) * 2
@@ -522,8 +522,10 @@ def whiten(
     N = X.size(-1)
     if N <= (2 * pad):
         raise ValueError(
-            "Not enough timeseries samples {} for "
-            "number of padded samples {}".format(N, 2 * pad)
+            (
+                "Not enough timeseries samples {} for number of "
+                "padded samples {}"
+            ).format(N, 2 * pad)
         )
 
     # normalize the number of expected dimensions in the PSD

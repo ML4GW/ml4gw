@@ -20,15 +20,15 @@ def XLALSimInspiralLN(
     total_mass: BatchTensor, eta: BatchTensor, v: BatchTensor
 ):
     """
-    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2173 # noqa
-    """
+    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2173
+    """  # noqa: E501
     return total_mass**2 * eta / v
 
 
 def XLALSimInspiralL_2PN(eta: BatchTensor):
     """
-    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2181 # noqa
-    """
+    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2181
+    """  # noqa: E501
     return 1.5 + eta / 6.0
 
 
@@ -65,8 +65,8 @@ def bilby_spins_to_lalsim(
     """
     Converts between bilby spin and lalsimulation spin conventions.
 
-    See https://github.com/bilby-dev/bilby/blob/cccdf891e82d46319e69dbfdf48c4970b4e9a727/bilby/gw/conversion.py#L105 # noqa
-    and https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiral.c#L3594 # noqa
+    See https://github.com/bilby-dev/bilby/blob/cccdf891e82d46319e69dbfdf48c4970b4e9a727/bilby/gw/conversion.py#L105
+    and https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiral.c#L3594
 
     Args:
         theta_jn: BatchTensor,
@@ -80,13 +80,15 @@ def bilby_spins_to_lalsim(
         mass_2: BatchTensor,
         f_ref: float,
         phi_ref: BatchTensor,
-    """
+    """  # noqa: E501
 
     # check if f_ref is valid
     if f_ref <= 0.0:
         raise ValueError(
-            "f_ref <= 0 is invalid. "
-            "Please pass in the starting GW frequency instead."
+            (
+                "f_ref <= 0 is invalid. "
+                "Please pass in the starting GW frequency instead."
+            )
         )
 
     # starting frame: LNhat is along the z-axis and the unit

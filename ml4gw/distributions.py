@@ -4,6 +4,7 @@ from specified distributions. Each callable should map from
 an integer `N` to a 1D torch `Tensor` containing `N` samples
 from the corresponding distribution.
 """
+
 import math
 from typing import Optional
 
@@ -33,7 +34,8 @@ class Cosine(dist.Distribution):
         self.high = torch.as_tensor(high)
         self.norm = 1 / (torch.sin(self.high) - torch.sin(self.low))
 
-    def rsample(self, sample_shape: torch.Size = torch.Size()) -> Tensor:
+    def rsample(self, sample_shape: torch.Size = None) -> Tensor:
+        sample_shape = sample_shape or torch.Size()
         u = torch.rand(sample_shape, device=self.low.device)
         return torch.arcsin(u / self.norm + torch.sin(self.low))
 
@@ -166,7 +168,8 @@ class DeltaFunction(dist.Distribution):
         super().__init__(batch_shape, validate_args=validate_args)
         self.peak = torch.as_tensor(peak)
 
-    def rsample(self, sample_shape: torch.Size = torch.Size()) -> Tensor:
+    def rsample(self, sample_shape: torch.Size = None) -> Tensor:
+        sample_shape = sample_shape or torch.Size()
         return self.peak * torch.ones(
             sample_shape, device=self.peak.device, dtype=torch.float32
         )

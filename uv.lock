@@ -1730,10 +1730,12 @@ dev = [
     { name = "gwpy" },
     { name = "jupyter" },
     { name = "lalsuite" },
-    { name = "myst-parser" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-repeat" },
+]
+docs = [
+    { name = "myst-parser" },
     { name = "sphinx" },
     { name = "sphinx-autodoc-typehints" },
     { name = "sphinx-rtd-theme" },
@@ -1755,10 +1757,12 @@ dev = [
     { name = "gwpy", specifier = "~=3.0" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "lalsuite", specifier = "~=7.0" },
-    { name = "myst-parser", specifier = ">=2.0.0,<3" },
     { name = "pre-commit", specifier = "~=2.16" },
     { name = "pytest", specifier = "~=7.0" },
     { name = "pytest-repeat", specifier = ">=0.9.3,<0.10" },
+]
+docs = [
+    { name = "myst-parser", specifier = ">=2.0.0,<3" },
     { name = "sphinx", specifier = ">5.0" },
     { name = "sphinx-autodoc-typehints", specifier = ">=2.0.0,<3" },
     { name = "sphinx-rtd-theme", specifier = ">=2.0.0,<3" },

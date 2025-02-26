@@ -1,6 +1,6 @@
 """
-    Based on the JAX implementation of IMRPhenomPv2 from
-    https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
+Based on the JAX implementation of IMRPhenomPv2 from
+https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
 """
 
 from typing import Dict, Optional, Tuple
