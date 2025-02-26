@@ -18,12 +18,6 @@ repos:
   rev: v2.3.0
   hooks:
   - id: end-of-file-fixer
-- repo: https://github.com/python-poetry/poetry
-  rev: 1.2.2
-  hooks:
-  - id: poetry-check
-  - id: poetry-lock
-    args: [--check, --no-update]
 - repo: https://github.com/dhruvmanila/remove-print-statements
   rev: v0.5.2  
   hooks:
