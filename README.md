@@ -9,9 +9,9 @@
 | ml4gw/constants.py                        |       12 |        0 |    100% |           |
 | ml4gw/dataloading/\_\_init\_\_.py         |        3 |        0 |    100% |           |
 | ml4gw/dataloading/chunked\_dataset.py     |       45 |        2 |     96% |    61, 96 |
-| ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |89, 199-203 |
+| ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |89, 200-204 |
 | ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
-| ml4gw/distributions.py                    |       61 |       12 |     80% |41-43, 58-64, 102-103, 106-107, 136 |
+| ml4gw/distributions.py                    |       63 |       12 |     81% |43-45, 60-66, 104-105, 108-109, 138 |
 | ml4gw/gw.py                               |       97 |        0 |    100% |           |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
 | ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
@@ -21,8 +21,8 @@
 | ml4gw/nn/autoencoder/utils.py             |       12 |       12 |      0% |      1-15 |
 | ml4gw/nn/norm.py                          |       51 |        2 |     96% |   87, 106 |
 | ml4gw/nn/resnet/\_\_init\_\_.py           |        2 |        0 |    100% |           |
-| ml4gw/nn/resnet/resnet\_1d.py             |      142 |        8 |     94% |72, 319-320, 328-332 |
-| ml4gw/nn/resnet/resnet\_2d.py             |      142 |        6 |     96% |69, 328-332 |
+| ml4gw/nn/resnet/resnet\_1d.py             |      142 |        8 |     94% |71, 320-321, 329-333 |
+| ml4gw/nn/resnet/resnet\_2d.py             |      142 |        6 |     96% |68, 329-333 |
 | ml4gw/nn/streaming/\_\_init\_\_.py        |        2 |        0 |    100% |           |
 | ml4gw/nn/streaming/online\_average.py     |       49 |        4 |     92% |82, 90-91, 115 |
 | ml4gw/nn/streaming/snapshotter.py         |       35 |        2 |     94% |   96, 110 |
@@ -34,14 +34,14 @@
 | ml4gw/transforms/scaler.py                |       32 |        0 |    100% |           |
 | ml4gw/transforms/snr\_rescaler.py         |       40 |       16 |     60% |51-67, 74-88 |
 | ml4gw/transforms/spectral.py              |       32 |        1 |     97% |        95 |
-| ml4gw/transforms/spectrogram.py           |       57 |        0 |    100% |           |
-| ml4gw/transforms/spline\_interpolation.py |      105 |        4 |     96% |261-263, 285, 364 |
+| ml4gw/transforms/spectrogram.py           |       58 |        0 |    100% |           |
+| ml4gw/transforms/spline\_interpolation.py |      107 |        4 |     96% |260-262, 284, 363 |
 | ml4gw/transforms/transform.py             |       38 |        0 |    100% |           |
 | ml4gw/transforms/waveforms.py             |       42 |        2 |     95% |     58-59 |
 | ml4gw/transforms/whitening.py             |       48 |        1 |     98% |       258 |
 | ml4gw/types.py                            |       18 |        0 |    100% |           |
 | ml4gw/utils/interferometer.py             |       20 |        1 |     95% |        45 |
-| ml4gw/utils/slicing.py                    |      103 |        5 |     95% |57-59, 173, 291 |
+| ml4gw/utils/slicing.py                    |      103 |        5 |     95% |57-59, 173, 294 |
 | ml4gw/waveforms/\_\_init\_\_.py           |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/\_\_init\_\_.py     |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/ringdown.py         |       36 |       29 |     19% |18-25, 57-109 |
@@ -55,7 +55,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        1 |     99% |        87 |
 | ml4gw/waveforms/generator.py              |      103 |        3 |     97% |77, 86, 90 |
-|                                 **TOTAL** | **2915** |  **280** | **90%** |           |
+|                                 **TOTAL** | **2920** |  **280** | **90%** |           |
 
 
 ## Setup coverage badge
