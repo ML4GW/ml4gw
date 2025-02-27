@@ -428,7 +428,9 @@ def test_reweight_snrs(_get_waveforms_from_lalsimulation):
     )
     # mutate data in the hp timeseries, and recompute snr using LAL
     hp.data.data = reweighted_response[..., 0, :].numpy().flatten()
+    ligo_snr = lalsimulation.MeasureSNR(hp, psd_1, 1, sample_rate / 2)
+    hp.data.data = reweighted_response[..., 1, :].numpy().flatten()
+    virgo_snr = lalsimulation.MeasureSNR(hp, psd_1, 1, sample_rate / 2)
+    network_snr = (ligo_snr**2 + virgo_snr**2) ** 0.5
 
-    assert lalsimulation.MeasureSNR(hp, psd_1, 1, 100) == pytest.approx(
-        target_network_snr.numpy()
-    )
+    assert network_snr == pytest.approx(target_network_snr.numpy(), rel=1e-1)

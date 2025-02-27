@@ -66,6 +66,7 @@ class TestChunkedTimeseriesDataset:
         )
 
     def test_iter(self, dataset, coincident):
+        length = 0
         for x in dataset:
             assert x.shape == (8, 2, 192)
             if coincident:
@@ -76,5 +77,6 @@ class TestChunkedTimeseriesDataset:
             diffs = torch.diff(x[:, 0], axis=-1)
             expected = torch.ones_like(diffs)
             torch.testing.assert_close(diffs, expected, rtol=0, atol=0)
+            length += 1
 
-        assert len(dataset) == 42
+        assert length == 42

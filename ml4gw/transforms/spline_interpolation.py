@@ -83,12 +83,14 @@ class SplineInterpolate(torch.nn.Module):
         y_out: Optional[Tensor] = None,
     ):
         super().__init__()
+        if y_in is None:
+            y_in = Tensor([1])
         self.kx = kx
         self.ky = ky
         self.sx = sx
         self.sy = sy
         self.register_buffer("x_in", x_in)
-        self.register_buffer("y_in", y_in or Tensor([1]))
+        self.register_buffer("y_in", y_in)
         self.register_buffer("x_out", x_out)
         self.register_buffer("y_out", y_out)
 

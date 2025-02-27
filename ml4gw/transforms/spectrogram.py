@@ -104,7 +104,8 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self.register_buffer("time_idxs", time_idxs)
 
     def _check_and_format_kwargs(self, kwargs: Dict[str, List]) -> List:
-        lengths = sorted((len(v) for v in kwargs.values()))
+        lengths = sorted(len(v) for v in kwargs.values())
+        lengths = list(set(lengths))
 
         if lengths[-1] > 3:
             warnings.warn(
