@@ -104,7 +104,8 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self.register_buffer("time_idxs", time_idxs)
 
     def _check_and_format_kwargs(self, kwargs: Dict[str, List]) -> List:
-        lengths = sorted(set([len(v) for v in kwargs.values()]))
+        lengths = sorted(len(v) for v in kwargs.values())
+        lengths = list(set(lengths))
 
         if lengths[-1] > 3:
             warnings.warn(
@@ -112,6 +113,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
                 "If performance is slower than desired, try reducing the "
                 "number of spectrograms",
                 RuntimeWarning,
+                stacklevel=2,
             )
 
         if len(lengths) > 2 or (len(lengths) == 2 and lengths[0] != 1):

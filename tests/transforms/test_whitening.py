@@ -146,8 +146,7 @@ class TestFixedWhiten(WhitenModuleTest):
         # truncation
         psds = self.get_psds(background, self.whiten_length)
         with patch(
-            "ml4gw.transforms.whitening"
-            ".spectral.truncate_inverse_power_spectrum",
+            "ml4gw.transforms.whitening.spectral.truncate_inverse_power_spectrum",
             new=lambda x, _, __, ___, ____: x,
         ):
             transform.fit(2, *psds)

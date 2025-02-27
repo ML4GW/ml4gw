@@ -19,14 +19,15 @@ EXTRA_CYCLES = 3.0
 
 class TimeDomainCBCWaveformGenerator(torch.nn.Module):
     """
-    Waveform generator that generates time-domain waveforms from frequency-domain approximants.
+    Waveform generator that generates time-domain waveforms from
+    frequency-domain approximants.
 
     Frequency domain waveforms are conditioned as done by lalsimulation.
     Specifically, waveforms are generated with a starting frequency `fstart`
     slightly below the requested `f_min`, so that they can be tapered from
     `fstart` to `f_min` using a cosine window.
 
-    Please see https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969 # noqa
+    Please see https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969
     for more information
 
     Args:
@@ -50,7 +51,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
             will be placed.
         f_ref:
             Reference frequency for the waveform
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -61,7 +62,6 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         f_ref: float,
         right_pad: float,
     ) -> None:
-
         super().__init__()
         self.approximant = approximant
         self.f_min = f_min
@@ -93,8 +93,8 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         """
         Builds highpass filter object.
 
-        See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10 # noqa
-        """
+        See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10
+        """  # noqa: E501
         order = 8.0
         w1 = np.tan(np.pi * (self.f_min) / self.sample_rate)
         attenuation = 0.99
@@ -117,22 +117,29 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         self, **parameters: dict[str, BatchTensor]
     ) -> Tuple[Float[Tensor, "{N} samples"], Float[Tensor, "{N} samples"]]:
         """
-        Generate a conditioned frequency domain waveform from a frequency domain approximant.
+        Generate a conditioned frequency domain waveform from a
+        frequency-domain approximant.
 
-        Based on https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa
+        Based on https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248
 
         Args:
             **parameters:
-                Dictionary of parameters for waveform generation
-                where key is the parameter name and value is a tensor of parameters.
-                It is required that `parameters` contains `mass_1`, `mass_2`, `s1z`, and `s2z`
-                keys, which are used for determining parameters of data conditioning.
-                If the specified approximant takes other parameters for waveform generation,
-                like `chirp_mass` and `mass_ratio`, the utility functions in `ml4gw.waveforms.conversion`
-                may be useful for populating the parameters dictionary with these additional parameters.
-                Note that, if using an approximant from `ml4gw.waveforms.cbc`, any additional keys in `parameters`
-                not ingested by the approximant will be ignored.
-        """
+                Dictionary of parameters for waveform generation where key is
+                the parameter name and value is a tensor of parameters.
+                It is required that `parameters` contains `mass_1`, `mass_2`,
+                `s1z`, and `s2z` keys, which are used for determining
+                parameters of data conditioning.
+
+                If the specified approximant takes other parameters for
+                waveform generation, like `chirp_mass` and `mass_ratio`, the
+                utility functions in `ml4gw.waveforms.conversion`may be useful
+                for populating the parameters dictionary with these
+                additional parameters.
+
+                Note that, if using an approximant from `ml4gw.waveforms.cbc`,
+                any additional keys in `parameters` not ingested by the
+                approximant will be ignored.
+        """  # noqa: E501
         # convert masses to kg, make sure
         # they are doubles so there is no
         # overflow in the calculations
@@ -266,23 +273,29 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         **parameters,
     ) -> Tuple[Float[Tensor, "{N} samples"], Float[Tensor, "{N} samples"]]:
         """
-        Generates a time-domain waveform from a frequency domain approximant.
-        Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248 # noqa
+        Generates a time-domain waveform from a frequency-domain approximant.
+        Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248
 
-        A frequency domain waveform is generated, conditioned (see `generate_conditioned_fd_waveform`)
-        and fftdd into the time-domain
+        A frequency domain waveform is generated, conditioned
+        (see `generate_conditioned_fd_waveform`) and fft'd into the time-domain
 
         **parameters:
-            Dictionary of parameters for waveform generation
-            where key is the parameter name and value is a tensor of parameters.
-            It is required that `parameters` contains `mass_1`, `mass_2`, `s1z`, and `s2z`
-            keys, which are used for determining parameters of data conditioning.
-            If the specified approximant takes other parameters for waveform generation,
-            like `chirp_mass` and `mass_ratio`, the utility functions in `ml4gw.waveforms.conversion`
-            may be useful for populating the parameters dictionary with these additional parameters.
-            Note that, if using an approximant from `ml4gw.waveforms.cbc`, any additional keys in `parameters`
-            not ingested by the approximant will be ignored.
-        """
+            Dictionary of parameters for waveform generation where each key is
+            the parameter name and each value is a tensor of parameters.
+            It is required that `parameters` contains `mass_1`, `mass_2`,
+            `s1z`, and `s2z` keys, which are used for determining parameters
+            of data conditioning.
+
+            If the specified approximant takes other parameters for waveform
+            generation, like `chirp_mass` and `mass_ratio`, the utility
+            functions in `ml4gw.waveforms.conversion` may be useful for
+            populating the parameters dictionary with these additional
+            parameters.
+
+            Note that, if using an approximant from `ml4gw.waveforms.cbc`,
+            any additional keys in `parameters` not ingested by the
+            approximant will be ignored.
+        """  # noqa: E501
 
         hc, hp = self.generate_conditioned_fd_waveform(**parameters)
 

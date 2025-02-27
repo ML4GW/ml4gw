@@ -18,7 +18,7 @@ class TestChunkedTimeseriesDataset:
     @pytest.fixture
     def chunk_it(self, chunk_length, chunks_per_epoch):
         def it():
-            for i in range(chunks_per_epoch):
+            for _ in range(chunks_per_epoch):
                 chunk = []
                 for _ in range(6):
                     start = random.randint(0, 128 * 8)
@@ -66,7 +66,8 @@ class TestChunkedTimeseriesDataset:
         )
 
     def test_iter(self, dataset, coincident):
-        for i, x in enumerate(dataset):
+        length = 0
+        for x in dataset:
             assert x.shape == (8, 2, 192)
             if coincident:
                 torch.testing.assert_close(x[:, 0], -x[:, 1], rtol=0, atol=0)
@@ -76,5 +77,6 @@ class TestChunkedTimeseriesDataset:
             diffs = torch.diff(x[:, 0], axis=-1)
             expected = torch.ones_like(diffs)
             torch.testing.assert_close(diffs, expected, rtol=0, atol=0)
+            length += 1
 
-        assert i == 41
+        assert length == 42

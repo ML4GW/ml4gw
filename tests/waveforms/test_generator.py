@@ -102,7 +102,6 @@ def test_cbc_waveform_generator(
 
     # now compare each waveform with lalsimulation SimInspiralTD
     for i in range(len(chirp_mass)):
-
         # construct gwsignal params
         gwsignal_params = {
             "mass1": ml4gw_parameters["mass_1"][i].item() * u.solMass,

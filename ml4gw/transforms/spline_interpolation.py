@@ -74,7 +74,7 @@ class SplineInterpolate(torch.nn.Module):
     def __init__(
         self,
         x_in: Tensor,
-        y_in: Tensor = Tensor([1]),
+        y_in: Tensor = None,
         kx: int = 3,
         ky: int = 3,
         sx: float = 0.001,
@@ -83,6 +83,8 @@ class SplineInterpolate(torch.nn.Module):
         y_out: Optional[Tensor] = None,
     ):
         super().__init__()
+        if y_in is None:
+            y_in = Tensor([1])
         self.kx = kx
         self.ky = ky
         self.sx = sx
@@ -141,7 +143,6 @@ class SplineInterpolate(torch.nn.Module):
         d: int,
         m: int,
     ) -> Tuple[Tensor, Tensor]:
-
         """
         Compute the L and R values for B-spline basis functions.
         L and R are respectively the first and second coefficient multiplying
@@ -184,7 +185,6 @@ class SplineInterpolate(torch.nn.Module):
         n: int,
         m: int,
     ) -> Tensor:
-
         """
         Compute the zeroth-order B-spline basis functions
         according to de Boors recursive formula.
@@ -256,7 +256,6 @@ class SplineInterpolate(torch.nn.Module):
         return b[:, :, -1]
 
     def bivariate_spline_fit_natural(self, Z):
-
         if len(Z.shape) == 3:
             Z_Bx = torch.matmul(Z, self.Bx)
             # ((BxT @ Bx)^-1 @ (Z @ Bx)T)T = Z @ BxT^-1

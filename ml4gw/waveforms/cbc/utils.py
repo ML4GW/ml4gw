@@ -1,7 +1,8 @@
 """
 Utilities for conditioning waveforms
-See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiral.c # noqa
-"""
+See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiral.c
+"""  # noqa: E501
+
 import torch
 
 from ml4gw.constants import MRSUN, MSUN, MTSUN_SI, C, G
@@ -105,7 +106,5 @@ def ringdown_time_bound(
 def frequency_isco(mass_1: BatchTensor, mass_2: BatchTensor):
     return (
         1.0
-        / (
-            (9.0**1.5) * torch.pi * (mass_1 + mass_2) * MTSUN_SI / MSUN
-        ).float()
+        / ((9.0**1.5) * torch.pi * (mass_1 + mass_2) * MTSUN_SI / MSUN).float()
     )

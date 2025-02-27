@@ -25,29 +25,6 @@ To build with a specific version of PyTorch/CUDA, please see the PyTorch install
 pip install ml4gw torch==2.5.1--extra-index-url=https://download.pytorch.org/whl/cu118
 ```
 
-### Poetry installation
-`ml4gw` is also fully compatible with use in Poetry, with your `pyproject.toml` set up like
-
-```toml
-[tool.poetry.dependencies]
-python = "^3.9"  # python versions 3.9-3.12 are supported
-ml4gw = "^0.6"
-```
-
-To build against a specific PyTorch/CUDA combination, consult the PyTorch installation documentation above and specify the `extra-index-url` via the `tool.poetry.source` table in your `pyproject.toml`. For example, to build against CUDA 11.6, you would do something like:
-
-```toml
-[tool.poetry.dependencies]
-python = "^3.9"
-ml4gw = "^0.6"
-torch = {version = "^2.0", source = "torch"}
-
-[[tool.poetry.source]]
-name = "torch"
-url = "https://download.pytorch.org/whl/cu118"
-priority = "explicit"
-```
-
 ## Contributing
 If you come across errors in the code, have difficulties using this software, or simply find that the current version doesn't cover your use case, please file an issue on our GitHub page, and we'll be happy to offer support.
 We encourage users who encounter these difficulties to file issues on GitHub, and we'll be happy to offer support to extend our coverage to new or improved functionality.

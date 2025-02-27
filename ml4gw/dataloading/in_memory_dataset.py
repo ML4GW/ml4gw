@@ -212,7 +212,6 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
         Float[Tensor, "batch channel time"],
         Tuple[Float[Tensor, "batch channel time"], Float[Tensor, " batch"]],
     ]:
-
         indices = self.init_indices()
         for i in range(len(self)):
             # slice the array of _indices_ we'll be using to

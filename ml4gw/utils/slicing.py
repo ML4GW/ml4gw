@@ -171,8 +171,10 @@ def slice_kernels(
         # to select _different_ kernels from each channel
         if len(x) != idx.shape[1]:
             raise ValueError(
-                "Can't slice array with shape {} with indices "
-                "with shape {}".format(x.shape, idx.shape)
+                (
+                    "Can't slice array with shape {} with indices "
+                    "with shape {}"
+                ).format(x.shape, idx.shape)
             )
 
         # batch_size x num_channels x kernel_size
@@ -284,8 +286,9 @@ def sample_kernels(
 
     if X.shape[-1] < kernel_size:
         raise ValueError(
-            "Can't sample kernels of size {} from "
-            "tensor with shape {}".format(kernel_size, X.shape)
+            "Can't sample kernels of size {} from tensor with shape {}".format(
+                kernel_size, X.shape
+            )
         )
     elif X.ndim > 3:
         raise ValueError(
@@ -293,13 +296,14 @@ def sample_kernels(
         )
     elif X.ndim < 3 and N is None:
         raise ValueError(
-            "Must specify number of kernels N if X "
-            "has fewer than 3 dimensions"
+            "Must specify number of kernels N if X has fewer than 3 dimensions"
         )
     elif X.ndim == 3 and N is not None and N != len(X):
         raise ValueError(
-            "Can't sample {} kernels from 3D tensor "
-            "with batch dimension {}".format(N, len(X))
+            (
+                "Can't sample {} kernels from 3D tensor with "
+                "batch dimension {}"
+            ).format(N, len(X))
         )
 
     if X.ndim == 1:
@@ -309,7 +313,6 @@ def sample_kernels(
     center = int(X.shape[-1] // 2)
 
     if max_center_offset is None:
-
         # sample uniformly from all of X's time dimension
         min_val, max_val = 0, X.shape[-1] - kernel_size
     elif max_center_offset >= 0:
@@ -341,8 +344,10 @@ def sample_kernels(
         # if kernel_size > center - max_center_offset,
         # we may end up with negative indices
         raise ValueError(
-            "Kernel size {} is too large for requested center "
-            "offset value {}".format(kernel_size, max_center_offset)
+            (
+                "Kernel size {} is too large for requested center "
+                "offset value {}"
+            ).format(kernel_size, max_center_offset)
         )
 
     if X.ndim == 3 or coincident:

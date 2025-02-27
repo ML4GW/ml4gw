@@ -105,6 +105,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                             fname
                         ),
                         category=ContiguousHdf5Warning,
+                        stacklevel=2,
                     )
 
                 self.sizes[fname] = len(dset)

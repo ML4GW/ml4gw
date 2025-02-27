@@ -22,7 +22,6 @@ def ifos(request):
 
 
 def test_waveform_sampler(num_waveforms):
-
     # test that instantiating with different numbers of waveforms
     # for each polarization raises an error
     wrong = {str(i): torch.randn(i + 2, 1024) for i in range(2)}

@@ -94,8 +94,10 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
             # flatten it to make it easier to slice
             if chunk_size < self.kernel_size:
                 raise ValueError(
-                    "Can't sample kernels of size {} from chunk "
-                    "with size {}".format(self.kernel_size, chunk_size)
+                    (
+                        "Can't sample kernels of size {} from chunk "
+                        "with size {}"
+                    ).format(self.kernel_size, chunk_size)
                 )
             chunk = chunk.reshape(-1)
 

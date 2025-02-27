@@ -2,10 +2,11 @@
 
 This repo hosts the Jupyter notebook and the environment files for the `ml4gw` tutorial.
 
-If you use `poetry`, the environment can be installed and a Jupyter kernel created with
+If you use `uv`, the environment can be installed and a Jupyter kernel created with
 ```bash
-poetry install
-poetry run python -m ipykernel install --user --name ml4gw_tutorial
+uv sync --no-install-project
+source .venv/bin/activate
+python -m ipykernel install --user --name ml4gw_tutorial
 ```
 
 If you use a different environment manager, all of the packages listed in the `pyproject.toml` file can be `pip install`ed into whatever environment you desire.

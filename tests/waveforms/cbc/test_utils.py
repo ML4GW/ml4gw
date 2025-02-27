@@ -40,11 +40,11 @@ def test_chirp_time_bound(masses, spins, fstart):
     s1, s2 = spins
 
     result = utils.chirp_time_bound(fstart, m1, m2, s1, s2)
-    for i, (fstart, m1_val, m2_val, s1_val, s2_val) in enumerate(
+    for i, (fs, m1_val, m2_val, s1_val, s2_val) in enumerate(
         zip(fstart, m1, m2, s1, s2)
     ):
         expected = lalsimulation.SimInspiralChirpTimeBound(
-            fstart.item(),
+            fs.item(),
             m1_val.item(),
             m2_val.item(),
             s1_val.item(),

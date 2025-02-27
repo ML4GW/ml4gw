@@ -33,7 +33,6 @@ def test_bilby_to_lalsim_spins():
         phi_ref,
     )
     for i in range(2):
-
         (
             lal_incl,
             lal_s1x,

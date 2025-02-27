@@ -16,7 +16,7 @@ def num_groups(request):
 
 def update_weights(norm):
     optim = torch.optim.SGD(norm.parameters(), lr=1e-1)
-    for i in range(10):
+    for _ in range(10):
         optim.zero_grad()
         x, y = [torch.randn(8, norm.num_channels, 128) for _ in range(2)]
         y = 0.2 + 0.5 * y

@@ -196,14 +196,14 @@ class SingleQTransform(torch.nn.Module):
         sample_rate: float,
         spectrogram_shape: Tuple[int, int],
         q: float = 12,
-        frange: List[float] = [0, torch.inf],
+        frange: List[float] = None,
         mismatch: float = 0.2,
         interpolation_method: str = "bicubic",
     ) -> None:
         super().__init__()
         self.q = q
         self.spectrogram_shape = spectrogram_shape
-        self.frange = frange
+        self.frange = frange or [0, torch.inf]
         self.duration = duration
         self.mismatch = mismatch
 
@@ -251,7 +251,7 @@ class SingleQTransform(torch.nn.Module):
         ntiles = [qtile.ntiles() for qtile in self.qtile_transforms]
         # For efficiency, we'll stack all qtiles of the same length before
         # interpolating, so we need to figure out which those are
-        unique_ntiles = sorted(list(set(ntiles)))
+        unique_ntiles = sorted(set(ntiles))
         idx = torch.arange(len(ntiles))
         self.stack_idx = [idx[Tensor(ntiles) == n] for n in unique_ntiles]
 
@@ -465,15 +465,15 @@ class QScan(torch.nn.Module):
         duration: float,
         sample_rate: float,
         spectrogram_shape: Tuple[int, int],
-        qrange: List[float] = [4, 64],
-        frange: List[float] = [0, torch.inf],
+        qrange: List[float] = None,
+        frange: List[float] = None,
         interpolation_method="bicubic",
         mismatch: float = 0.2,
     ) -> None:
         super().__init__()
-        self.qrange = qrange
+        self.qrange = qrange or [4, 64]
         self.mismatch = mismatch
-        self.frange = frange
+        self.frange = frange or [0, torch.inf]
         self.spectrogram_shape = spectrogram_shape
         max_q = torch.pi * duration * sample_rate / 50 - 11 ** (0.5)
         self.qs = self.get_qs()
@@ -481,7 +481,8 @@ class QScan(torch.nn.Module):
             warnings.warn(
                 "Some Q values exceed the maximum allowable Q value of "
                 f"{max_q}. The list of Q values to be tested in this "
-                "scan will be truncated to avoid those values."
+                "scan will be truncated to avoid those values.",
+                stacklevel=2,
             )
 
         # Deliberately doing something different from GWpy here.

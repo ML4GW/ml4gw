@@ -1,62 +1,66 @@
-[tool.poetry]
+[project]
 name = "ml4gw"
 version = "0.7.3"
 description = "Tools for training torch models on gravitational wave data"
-readme = "README.md"
 authors = [
-    "Alec Gunny <alec.gunny@ligo.org>", "Ethan Marx <emarx@mit.edu>", "Will Benoit <benoi090@umn.edu>", "Deep Chatterjee <deep1018@mit.edu"
+    { name = "Ethan Marx", email = "emarx@mit.edu" },
+    { name = "Will Benoit", email = "benoi090@umn.edu" },
+    { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
+    { name = "Alec Gunny", email = "alec.gunny@ligo.org" },
+]
+requires-python = ">=3.9,<3.13"
+readme = "README.md"
+dependencies = [
+    "jaxtyping>=0.2,<0.3",
+    "torch~=2.0",
+    "torchaudio~=2.0",
+    "numpy<2.0.0",
+    "scipy>=1.9.0,<1.15",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.9,<3.13"
+[dependency-groups]
+dev = [
+    "coverage[toml]>=7.6.10,<8",
+    "pre-commit~=2.16",
+    "pytest~=7.0",
+    "lalsuite~=7.0",
+    "bilby~=2.1",
+    "jupyter>=1.0.0,<2",
+    "gwpy~=3.0",
+    "pytest-repeat>=0.9.3,<0.10",
+]
+docs = [
+    "Sphinx>5.0",
+    "sphinx-rtd-theme>=2.0.0,<3",
+    "myst-parser>=2.0.0,<3",
+    "sphinx-autodoc-typehints>=2.0.0,<3",
+]
 
-jaxtyping = "^0.2"
+[tool.uv]
+default-groups = [
+    "dev",
+    "docs",
+]
 
-# torch deps
-torch = "^2.0"
-torchaudio = "^2.0"
-numpy = "<2.0.0"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-# versions >= 1.9. fix issue with median calculation 
-# https://github.com/scipy/scipy/issues/15601
-scipy = ">=1.9.0,<1.15"
-
-[tool.poetry.group.dev.dependencies]
-coverage = {version = "^7.6.10", extras = ["toml"]}
-pre-commit = "^2.16"
-pytest = "^7.0"
-
-# need lalsuite to compute gmst in injection testing
-lalsuite = "^7.0"
-bilby = "^2.1"
-jupyter = "^1.0.0"
-gwpy = "^3.0"
-
-Sphinx = ">5.0"
-sphinx-rtd-theme = "^2.0.0"
-myst-parser = "^2.0.0"
-sphinx-autodoc-typehints = "^2.0.0"
-pytest-repeat = "^0.9.3"
-
-[tool.black]
+[tool.ruff]
 line-length = 79
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.tox
-  | _build
-  | dist
-  | docs
-)/
-'''
+extend-exclude = ["docs", "examples"]
 
+[tool.ruff.lint]
+extend-safe-fixes = ["C408"]
+mccabe = {"max-complexity" = 18}
+select = ["B", "C", "E", "F", "W", "B9"]
+# ignore W605 and E203 for consistency with black
+# ignore F722 for compatibility with jaxtyping
+ignore = ["W605", "E203", "F722"]  
 
-[tool.isort]
-known_first_party = ["ml4gw"]
-multi_line_output = 3
-include_trailing_comma = true
-
+# ignore asterisk imports and unused
+# import errors in __init__ files
+per-file-ignores =  {"**/__init__.py" = ["F401", "F403"]}
 
 [tool.tox]
 legacy_tox_ini = """
@@ -87,7 +91,3 @@ commands = coverage run -m pytest tests
 [tool.coverage.run]
 source = ["ml4gw"]
 relative_files = true
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

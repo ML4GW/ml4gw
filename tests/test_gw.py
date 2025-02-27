@@ -249,27 +249,27 @@ def test_compute_observed_strain(
 @pytest.fixture(params=combinations([25, 30, 35, 40], 2), scope="session")
 def _get_waveforms_from_lalsimulation(request):
     m1, m2 = request.param
-    params = dict(
-        m1=m1 * lal.MSUN_SI,
-        m2=m2 * lal.MSUN_SI,
-        s1x=0,
-        s1y=0,
-        s1z=0,
-        s2x=0,
-        s2y=0,
-        s2z=0,
-        distance=3.0857e24,  # 100 Mpc
-        inclination=0.3,
-        phiRef=0.0,
-        longAscNodes=0.0,
-        eccentricity=0.0,
-        meanPerAno=0.0,
-        deltaT=1.0 / 1024.0,
-        f_min=1.0,
-        f_ref=20.0,
-        approximant=lalsimulation.TaylorT4,
-        params=lal.CreateDict(),
-    )
+    params = {
+        "m1": m1 * lal.MSUN_SI,
+        "m2": m2 * lal.MSUN_SI,
+        "s1x": 0,
+        "s1y": 0,
+        "s1z": 0,
+        "s2x": 0,
+        "s2y": 0,
+        "s2z": 0,
+        "distance": 3.0857e24,  # 100 Mpc
+        "inclination": 0.3,
+        "phiRef": 0.0,
+        "longAscNodes": 0.0,
+        "eccentricity": 0.0,
+        "meanPerAno": 0.0,
+        "deltaT": 1.0 / 1024.0,
+        "f_min": 1.0,
+        "f_ref": 20.0,
+        "approximant": lalsimulation.TaylorT4,
+        "params": lal.CreateDict(),
+    }
     hp, hc = lalsimulation.SimInspiralChooseTDWaveform(**params)
     return hp, hc
 
@@ -428,7 +428,9 @@ def test_reweight_snrs(_get_waveforms_from_lalsimulation):
     )
     # mutate data in the hp timeseries, and recompute snr using LAL
     hp.data.data = reweighted_response[..., 0, :].numpy().flatten()
+    ligo_snr = lalsimulation.MeasureSNR(hp, psd_1, 1, sample_rate / 2)
+    hp.data.data = reweighted_response[..., 1, :].numpy().flatten()
+    virgo_snr = lalsimulation.MeasureSNR(hp, psd_1, 1, sample_rate / 2)
+    network_snr = (ligo_snr**2 + virgo_snr**2) ** 0.5
 
-    lalsimulation.MeasureSNR(hp, psd_1, 1, 100) == pytest.approx(
-        target_network_snr.numpy()
-    ) == pytest.approx(10)
+    assert network_snr == pytest.approx(target_network_snr.numpy(), rel=1e-1)

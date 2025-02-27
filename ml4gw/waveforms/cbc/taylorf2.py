@@ -22,7 +22,7 @@ class TaylorF2(torch.nn.Module):
         phic: BatchTensor,
         inclination: BatchTensor,
         f_ref: float,
-        **kwargs
+        **kwargs,
     ):
         """
         TaylorF2 up to 3.5 PN in phase. Newtonian SPA amplitude.

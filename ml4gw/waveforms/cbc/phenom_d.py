@@ -25,7 +25,7 @@ class IMRPhenomD(TaylorF2):
         phic: BatchTensor,
         inclination: BatchTensor,
         f_ref: float,
-        **kwargs
+        **kwargs,
     ):
         """
         IMRPhenomD waveform
