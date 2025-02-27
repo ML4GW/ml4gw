@@ -48,7 +48,6 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pip">Pip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#poetry">Poetry</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">ml4gw</a></li>
@@ -91,23 +90,6 @@ to see how to specify the desired torch version and <code class="code docutils l
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>ml4gw<span class="w"> </span><span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.12.0<span class="w"> </span>--extra-index-url<span class="o">=</span>https://download.pytorch.org/whl/cu116
 </pre></div>
 </div>
-</section>
-<section id="poetry">
-<h2>Poetry<a class="headerlink" href="#poetry" title="Link to this heading"></a></h2>
-<p><code class="code docutils literal notranslate"><span class="pre">ml4gw</span></code> is also fully compatible with <a class="reference external" href="https://python-poetry.org/">Poetry</a>, with a <code class="code docutils literal notranslate"><span class="pre">pyproject.toml</span></code> set up like</p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.poetry.dependencies]</span>
-<span class="n">python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^3.8&quot;</span><span class="w">  </span><span class="c1"># python versions 3.8-3.10 are supported</span>
-<span class="n">ml4gw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^0.1.0&quot;</span>
-<span class="n">torch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;^1.12&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;torch&quot;</span><span class="p">}</span>
-
-<span class="k">[[tool.poetry.source]]</span>
-<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;torch&quot;</span>
-<span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://download.pytorch.org/whl/cu116&quot;</span>
-<span class="n">secondary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
-<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
-</pre></div>
-</div>
-<p>which will install ml4gw with PyTorch 1.12 built with CUDA 11.6.</p>
 </section>
 </section>
 
