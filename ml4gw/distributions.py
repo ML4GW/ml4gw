@@ -42,7 +42,7 @@ class Cosine(dist.Distribution):
     def log_prob(self, value: float) -> Float[Tensor, ""]:
         value = torch.as_tensor(value)
         inside_range = (value >= self.low) & (value <= self.high)
-        return value.cos().log() * inside_range
+        return (value.cos() * inside_range).log()
 
 
 class Sine(dist.TransformedDistribution):
