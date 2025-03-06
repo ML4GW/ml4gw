@@ -40,6 +40,8 @@ def test_cosine():
     assert len(samples) == 100
     assert ((-3 <= samples) & (samples <= 5)).all()
 
+    assert torch.all(sampler.log_prob(torch.tensor([-4, 6])) == float("-inf"))
+
 
 def test_power_law():
     """Test PowerLaw distribution"""
