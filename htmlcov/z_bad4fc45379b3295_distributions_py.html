@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for ml4gw/distributions.py: 81%</title>
+    <title>Coverage for ml4gw/distributions.py: 86%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>ml4gw/distributions.py</b>:
-            <span class="pc_cov">81%</span>
+            <span class="pc_cov">86%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">63 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">51<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">12<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">54<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">9<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_bad4fc45379b3295_gw_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.6.4">coverage.py v7.6.4</a>,
-            created at 2025-02-27 14:41 +0000
+            created at 2025-03-06 18:35 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -122,9 +122,9 @@
     <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">        <span class="key">return</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">arcsin</span><span class="op">(</span><span class="nam">u</span> <span class="op">/</span> <span class="nam">self</span><span class="op">.</span><span class="nam">norm</span> <span class="op">+</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">sin</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">low</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">    <span class="key">def</span> <span class="nam">log_prob</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">value</span><span class="op">:</span> <span class="nam">float</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Float</span><span class="op">[</span><span class="nam">Tensor</span><span class="op">,</span> <span class="str">""</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">        <span class="nam">value</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">as_tensor</span><span class="op">(</span><span class="nam">value</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">        <span class="nam">inside_range</span> <span class="op">=</span> <span class="op">(</span><span class="nam">value</span> <span class="op">>=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">low</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">(</span><span class="nam">value</span> <span class="op">&lt;=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">high</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">        <span class="key">return</span> <span class="nam">value</span><span class="op">.</span><span class="nam">cos</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">log</span><span class="op">(</span><span class="op">)</span> <span class="op">*</span> <span class="nam">inside_range</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">        <span class="nam">value</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">as_tensor</span><span class="op">(</span><span class="nam">value</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">        <span class="nam">inside_range</span> <span class="op">=</span> <span class="op">(</span><span class="nam">value</span> <span class="op">>=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">low</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">(</span><span class="nam">value</span> <span class="op">&lt;=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">high</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">        <span class="key">return</span> <span class="op">(</span><span class="nam">value</span><span class="op">.</span><span class="nam">cos</span><span class="op">(</span><span class="op">)</span> <span class="op">*</span> <span class="nam">inside_range</span><span class="op">)</span><span class="op">.</span><span class="nam">log</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t"><span class="key">class</span> <span class="nam">Sine</span><span class="op">(</span><span class="nam">dist</span><span class="op">.</span><span class="nam">TransformedDistribution</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -264,7 +264,7 @@
             <a class="nav" href="z_bad4fc45379b3295_gw_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.6.4">coverage.py v7.6.4</a>,
-            created at 2025-02-27 14:41 +0000
+            created at 2025-03-06 18:35 +0000
         </p>
     </div>
 </footer>
