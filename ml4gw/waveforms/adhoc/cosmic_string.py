@@ -92,7 +92,7 @@ class GenerateString(torch.nn.Module):
         with cross=0.
         waveform must be: "cusp"  -4.0 / 3.0, "kink" -5.0 / 3.0, or "kinkkink" -2.0.
         Args:
-            waveform: "cusp", "kink", or "kinkkink".
+            power: cusp = -4.0 / 3.0, kink = -5.0 / 3.0, or kinkkink = -2.0.
             amplitude: (batch,) overall amplitude scaling parameter.
             f_high: (batch,) freq above which we apply exponential taper.
         Returns:
@@ -147,7 +147,8 @@ class GenerateString(torch.nn.Module):
         A = amp_val * phase_factor  # shape (batch, freq_bins), complex128
 
         # iFFT => time domain: shape (batch, length), real
-        hplus = torch.fft.irfft(A, n=length, dim=-1)
+        hplus = torch.fft.irfft(A, n=length, dim=-1) #THIS SHOULD BE NORM='FORWARD' BUT IT DOESNT GIVE THE SAME AS LAL
+        hplus = hplus*self.sample_rate  # scale by dt THIS IS WEIRD ONLY THIS WORKS
         hcross = torch.zeros_like(hplus)
 
         # Apply Tukey(0.5) window to plus
