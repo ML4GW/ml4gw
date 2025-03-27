@@ -1,6 +1,6 @@
 [project]
 name = "ml4gw"
-version = "0.7.3"
+version = "0.7.4"
 description = "Tools for training torch models on gravitational wave data"
 authors = [
     { name = "Ethan Marx", email = "emarx@mit.edu" },
