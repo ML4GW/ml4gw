@@ -372,8 +372,7 @@ def compute_ifo_snr(
     # need the sample rate to compute the mask, but if we
     # replace this with a `mask` argument instead we're in
     # the clear
-    #df = sample_rate / responses.shape[-1]
-    df = 1 / responses.shape[-1]
+    df = sample_rate / responses.shape[-1]
     integrated = integrand.sum(axis=-1) * df
 
     # multiply by 4 for mystical reasons
