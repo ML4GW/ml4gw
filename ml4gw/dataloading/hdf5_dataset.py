@@ -105,8 +105,15 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             size=size,
             replace=True,
         )
-
+    
     def sample_batch(self) -> WaveformTensor:
+        x = self._sample_batch()
+        while torch.any(x==0):
+            del x
+            x = self._sample_batch()
+        return x
+
+    def _sample_batch(self) -> WaveformTensor:
         """
         Sample a single batch of multichannel timeseries
         """
