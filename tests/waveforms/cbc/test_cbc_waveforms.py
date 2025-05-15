@@ -6,6 +6,7 @@ import torch
 from astropy import units as u
 import matplotlib.pyplot as plt
 import h5py
+import os
 from tqdm import tqdm
 
 import ml4gw.waveforms as waveforms
@@ -16,177 +17,257 @@ from ml4gw.waveforms.conversion import (
 
 @pytest.fixture()
 def num_samples(request):
-    if request.config.getoption("--benchmark"):
-        return 100000
+    if request.config.getoption("--benchmark") != 0:
+        print("Running benchmarking mode")
+        return int(request.config.getoption("--benchmark"))
     return 100
 
 @pytest.fixture(params=[20, 40])
 def f_ref(request):
     return request.param
 
-def get_memory_usage():
-    with open('/proc/self/status', 'r') as f:
-        for line in f:
-            if line.startswith('VmRSS:'):
-                # Extract the memory usage in kB
-                mem_usage_kb = int(line.split()[1])
-                # Convert to MB
-                mem_usage_mb = mem_usage_kb / 1024
-                return mem_usage_mb
-    return 0
+@pytest.fixture()
+def batch_size():
+    return 100
 
 def write_benchmark_data(filename, dataset):
-    with h5py.File(filename, "a") as f:
-        existing_groupnames = [int(name) for name in f.keys() if name.isdigit()]
-        if existing_groupnames:
-            next_groupname = max(existing_groupnames) + 1
-        else:
-            next_groupname = 0
-        groupname = str(next_groupname)
-        group = f.require_group(groupname)
-        for key, data in dataset.items():
-            data = np.array(data)
-            if key not in f:
-                if data.ndim == 0:
-                    dset = group.create_dataset(key, data=data)
-                else:
-                    dset = group.create_dataset(key, data=data, maxshape=(None,), compression="gzip")
+    """Write benchmark data to an HDF5 file, creating a new group for each run."""
+    try:
+        with h5py.File(f"{filename}", "a") as f:
+            # Iterate using numbers as group names
+            existing_groupnames = [int(name) for name in f.keys() if name.isdigit()]
+            if existing_groupnames:
+                next_groupname = max(existing_groupnames) + 1
             else:
-                dset = f[key]
-                if data.ndim == 0:
-                    dset[...] = data
+                next_groupname = 0
+            groupname = str(next_groupname)
+            group = f.require_group(groupname)
+            # Create datasets for each key in the dataset dictionary
+            for key, data in dataset.items():
+                data = np.array(data, dtype=np.float32)
+                if key not in f:
+                    if data.ndim == 0:
+                        dset = group.create_dataset(key, data=data)
+                    else:
+                        dset = group.create_dataset(key, data=data, maxshape=(None,), compression="gzip")
                 else:
-                    current_size = dset.shape[0]
-                    new_size = current_size + data.shape[0]
-                    dset.resize(new_size, axis=0)
-                    dset[current_size:new_size] = data
+                    dset = f[key]
+                    if data.ndim == 0:
+                        dset[...] = data
+                    else:
+                        current_size = dset.shape[0]
+                        new_size = current_size + data.shape[0]
+                        dset.resize(new_size, axis=0)
+                        dset[current_size:new_size] = data
+            f.flush()
+    except Exception as e:
+        print(f"Error writing data to file: {e}")
+        raise
 
-# def test_taylor_f2(
-#     chirp_mass,
-#     mass_ratio,
-#     chi1,
-#     chi2,
-#     phase,
-#     distance,
-#     f_ref,
-#     theta_jn,
-#     sample_rate,
-# ):
-#     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
-#         chirp_mass, mass_ratio
-#     )
+def get_file_size(filename):
+    """Get the size of a file in GB."""
+    return os.path.getsize(f"{filename}") / (1024 * 1024 * 1024)
 
-#     # compare each waveform with lalsimulation
-#     for i in range(len(chirp_mass)):
+def get_next_file_name(base_name, extension="h5"):
+    """Get the next available file name with a numeric suffix."""
+    index = 0
+    while os.path.exists(f"{base_name}_{index}.{extension}") and get_file_size(f"{base_name}_{index}.{extension}") >= 0.05:
+        index += 1
+    return f"{base_name}_{index}.{extension}"
 
-#         # construct lalinference params
-#         params = dict(
-#             m1=mass_1[i].item() * lal.MSUN_SI,
-#             m2=mass_2[i].item() * lal.MSUN_SI,
-#             S1x=0,
-#             S1y=0,
-#             S1z=chi1[i].item(),
-#             S2x=0,
-#             S2y=0,
-#             S2z=chi2[i].item(),
-#             distance=(distance[i].item() * u.Mpc).to("m").value,
-#             inclination=theta_jn[i].item(),
-#             phiRef=phase[i].item(),
-#             longAscNodes=0.0,
-#             eccentricity=0.0,
-#             meanPerAno=0.0,
-#             deltaF=1.0 / sample_rate,
-#             f_min=10,
-#             f_ref=f_ref,
-#             f_max=300,
-#             approximant=lalsimulation.TaylorF2,
-#             LALpars=lal.CreateDict(),
-#         )
-#         hp_lal, hc_lal = lalsimulation.SimInspiralChooseFDWaveform(**params)
+def test_taylor_f2(
+    chirp_mass,
+    mass_ratio,
+    chi1,
+    chi2,
+    phase,
+    distance,
+    f_ref,
+    theta_jn,
+    sample_rate,
+    request,
+    batch_size,
+):
+    mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
+        chirp_mass, mass_ratio
+    )
 
-#         # reconstruct frequencies generated by
-#         # lal and filter based on fmin and fmax
-#         lal_freqs = np.array(
-#             [
-#                 hp_lal.f0 + ii * hp_lal.deltaF
-#                 for ii in range(len(hp_lal.data.data))
-#             ]
-#         )
+    # Accumulate data in memory and write in batches for benchmarking only
+    batch_data = []
+    base_filename = "benchmark_data/benchmark_data_taylor_f2"
+    filename = get_next_file_name(base_filename)
 
-#         lal_mask = (lal_freqs > params["f_min"]) & (
-#             lal_freqs < params["f_max"]
-#         )
+    # compare each waveform with lalsimulation
+    for i in range(len(chirp_mass)):
 
-#         lal_freqs = lal_freqs[lal_mask]
-#         torch_freqs = torch.tensor(lal_freqs, dtype=torch.float64)
+        # construct lalinference params
+        params = dict(
+            m1=mass_1[i].item() * lal.MSUN_SI,
+            m2=mass_2[i].item() * lal.MSUN_SI,
+            S1x=0,
+            S1y=0,
+            S1z=chi1[i].item(),
+            S2x=0,
+            S2y=0,
+            S2z=chi2[i].item(),
+            distance=(distance[i].item() * u.Mpc).to("m").value,
+            inclination=theta_jn[i].item(),
+            phiRef=phase[i].item(),
+            longAscNodes=0.0,
+            eccentricity=0.0,
+            meanPerAno=0.0,
+            deltaF=1.0 / sample_rate,
+            f_min=10,
+            f_ref=f_ref,
+            f_max=300,
+            approximant=lalsimulation.TaylorF2,
+            LALpars=lal.CreateDict(),
+        )
+        hp_lal, hc_lal = lalsimulation.SimInspiralChooseFDWaveform(**params)
 
-#         # generate waveforms using ml4gw
-#         hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
-#             torch_freqs,
-#             chirp_mass[i][None],
-#             mass_ratio[i][None],
-#             chi1[i][None],
-#             chi2[i][None],
-#             distance[i][None],
-#             phase[i][None],
-#             theta_jn[i][None],
-#             f_ref,
-#         )
+        # reconstruct frequencies generated by
+        # lal and filter based on fmin and fmax
+        lal_freqs = np.array(
+            [
+                hp_lal.f0 + ii * hp_lal.deltaF
+                for ii in range(len(hp_lal.data.data))
+            ]
+        )
 
-#         hc_ml4gw = hc_ml4gw[0]
-#         hp_ml4gw = hp_ml4gw[0]
+        lal_mask = (lal_freqs > params["f_min"]) & (
+            lal_freqs < params["f_max"]
+        )
 
-#         hp_lal_data = hp_lal.data.data[lal_mask]
-#         hc_lal_data = hc_lal.data.data[lal_mask]
+        lal_freqs = lal_freqs[lal_mask]
+        torch_freqs = torch.tensor(lal_freqs, dtype=torch.float64)
 
-#         # ensure no nans
-#         assert not torch.any(torch.isnan(hc_ml4gw))
-#         assert not torch.any(torch.isnan(hp_ml4gw))
+        # generate waveforms using ml4gw
+        hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
+            torch_freqs,
+            chirp_mass[i][None],
+            mass_ratio[i][None],
+            chi1[i][None],
+            chi2[i][None],
+            distance[i][None],
+            phase[i][None],
+            theta_jn[i][None],
+        
+            f_ref,
+        )
 
-#         assert np.allclose(
-#             1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
-#         )
+        hc_ml4gw = hc_ml4gw[0]
+        hp_ml4gw = hp_ml4gw[0]
 
-#         # taylor f2 is symmetric w.r.t m1 --> m2 flip.
-#         # so test that the waveforms are the same when m1 and m2
-#         # (and corresponding chi1, chi2 are flipped)
-#         # are flipped this can be done by flipping mass ratio
-#         hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
-#             torch_freqs,
-#             chirp_mass[i][None],
-#             1 / mass_ratio[i][None],
-#             chi2[i][None],
-#             chi1[i][None],
-#             distance[i][None],
-#             phase[i][None],
-#             theta_jn[i][None],
-#             f_ref,
-#         )
+        hp_lal_data = hp_lal.data.data[lal_mask]
+        hc_lal_data = hc_lal.data.data[lal_mask]
 
-#         hc_ml4gw = hc_ml4gw[0]
-#         hp_ml4gw = hp_ml4gw[0]
+        # ensure no nans
+        assert not torch.any(torch.isnan(hc_ml4gw))
+        assert not torch.any(torch.isnan(hp_ml4gw))
 
-#         assert np.allclose(
-#             1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
-#         )
+        if (request.config.getoption("--benchmark") == 0):
+            assert np.allclose(
+                1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
+            )
+
+        # If benchmarking calculate errors to record
+        # test_1 refers to differences between lal and ml4gw TaylorF2 methods
+        if (request.config.getoption("--benchmark") != 0):
+            test_1_hp_real_abs_err = np.max(np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy()))
+            test_1_hp_imag_abs_err = np.max(np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy()))
+            test_1_hc_real_abs_err = np.max(np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy()))
+            test_1_hc_imag_abs_err = np.max(np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy()))
+        
+
+
+        # taylor f2 is symmetric w.r.t m1 --> m2 flip.
+        # so test that the waveforms are the same when m1 and m2
+        # (and corresponding chi1, chi2 are flipped)
+        # are flipped this can be done by flipping mass ratio
+        hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
+            torch_freqs,
+            chirp_mass[i][None],
+            1 / mass_ratio[i][None],
+            chi2[i][None],
+            chi1[i][None],
+            distance[i][None],
+            phase[i][None],
+            theta_jn[i][None],
+            f_ref,
+        )
+
+        hc_ml4gw = hc_ml4gw[0]
+        hp_ml4gw = hp_ml4gw[0]
+
+        if (request.config.getoption("--benchmark") == 0):
+            assert np.allclose(
+                1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
+            )
+
+        # If benchmarking calculate errors to record
+        # test_2 refers to differences between lal and ml4gw TaylorF2 methods when mass ratio is flipped
+        if (request.config.getoption("--benchmark") != 0):
+            test_2_hp_real_abs_err = np.max(np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy()))
+            test_2_hp_imag_abs_err = np.max(np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy()))
+            test_2_hc_real_abs_err = np.max(np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy()))
+            test_2_hc_imag_abs_err = np.max(np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy()))
+
+        # If benchmark mode is on, gather all relavent data to store
+        if (request.config.getoption("--benchmark") != 0):
+            data = {
+                "test_1_hp_real_abs_err": test_1_hp_real_abs_err,
+                "test_1_hp_imag_abs_err": test_1_hp_imag_abs_err,
+                "test_1_hc_real_abs_err": test_1_hc_real_abs_err,
+                "test_1_hc_imag_abs_err": test_1_hc_imag_abs_err,
+                "test_2_hp_real_abs_err": test_2_hp_real_abs_err,
+                "test_2_hp_imag_abs_err": test_2_hp_imag_abs_err,
+                "test_2_hc_real_abs_err": test_2_hc_real_abs_err,
+                "test_2_hc_imag_abs_err": test_2_hc_imag_abs_err,
+                "chirp_mass": chirp_mass[i],
+                "mass_ratio": mass_ratio[i],
+                "chi1": chi1[i],
+                "chi2": chi2[i],
+                "distance": distance[i],
+                "phase": phase[i],
+                "theta_jn": theta_jn[i],
+                "f_ref": f_ref,
+            }
+        
+        # append data to batch and write if batch size exceeds set batch size
+        if (request.config.getoption("--benchmark") != 0):
+            batch_data.append(data)
+            if len(batch_data) >= batch_size:
+                for batch in batch_data:
+                    write_benchmark_data(filename, batch)
+                batch_data = []
+
+                if get_file_size(filename) >= 0.05:
+                    filename = get_next_file_name(base_filename)
+                    print(f"Switching to new file: {filename}")
+
+    # If there is any remaining data in the batch, write it to the file
+    if (request.config.getoption("--benchmark") != 0):
+        if batch_data:
+            for batch in batch_data:
+                write_benchmark_data(filename, batch)
 
 
 def test_phenom_d(
@@ -205,14 +286,12 @@ def test_phenom_d(
         chirp_mass, mass_ratio
     )
 
-    hp_real_abs_errs = []
-    hp_real_rel_errs = []
-    hp_imag_abs_errs = []
-    hp_imag_rel_errs = []
-    hc_real_abs_errs = []
-    hc_real_rel_errs = []
-    hc_imag_abs_errs = []
-    hc_imag_rel_errs = []
+    # Accumulate data in memory and write in batches for benchmarking only
+    batch_size = 100
+    batch_data = []
+    base_filename = "benchmark_data/benchmark_data_phenom_d"
+    filename = get_next_file_name(base_filename)
+
 
     # compare each waveform with lalsimulation
     for i in tqdm(range(len(chirp_mass))):
@@ -280,30 +359,16 @@ def test_phenom_d(
         assert not torch.any(torch.isnan(hc_ml4gw))
         assert not torch.any(torch.isnan(hp_ml4gw))
 
-        hp_real_abs_err = np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy())
-        hp_imag_abs_err = np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy())
-        hc_real_abs_err = np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy())
-        hc_imag_abs_err = np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy())
-        hp_real_rel_err = hp_real_abs_err / np.abs(1e21 * hp_lal_data.real)
-        hp_imag_rel_err = hp_imag_abs_err / np.abs(1e21 * hp_lal_data.imag)
-        hc_real_rel_err = hc_real_abs_err / np.abs(1e21 * hc_lal_data.real)
-        hc_imag_rel_err = hc_imag_abs_err / np.abs(1e21 * hc_lal_data.imag)
+        threshold = 1e-20  # Define a small threshold to avoid division by values close to zero
 
-        hp_real_rel_err[np.isinf(hp_real_rel_err)] = 0
-        hp_imag_rel_err[np.isinf(hp_imag_rel_err)] = 0
-        hc_real_rel_err[np.isinf(hc_real_rel_err)] = 0
-        hc_imag_rel_err[np.isinf(hc_imag_rel_err)] = 0
-
-        hp_real_abs_errs = np.concatenate((hp_real_abs_errs, [np.max(hp_real_abs_err)]))
-        hp_real_rel_errs = np.concatenate((hp_real_rel_errs, [np.max(hp_real_rel_err)]))
-        hp_imag_abs_errs = np.concatenate((hp_imag_abs_errs, [np.max(hp_imag_abs_err)]))
-        hp_imag_rel_errs = np.concatenate((hp_imag_rel_errs, [np.max(hp_imag_rel_err)]))
-        hc_real_abs_errs = np.concatenate((hc_real_abs_errs, [np.max(hc_real_abs_err)]))
-        hc_real_rel_errs = np.concatenate((hc_real_rel_errs, [np.max(hc_real_rel_err)]))
-        hc_imag_abs_errs = np.concatenate((hc_imag_abs_errs, [np.max(hc_imag_abs_err)]))
-        hc_imag_rel_errs = np.concatenate((hc_imag_rel_errs, [np.max(hc_imag_rel_err)]))
-
-        if (request.config.getoption("--benchmark") == False):
+        # If benchmarking calculate errors to record, these are just the differences between lal and ml4gw
+        if (request.config.getoption("--benchmark") != 0):
+            hp_real_abs_err = np.max(np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy()))
+            hp_imag_abs_err = np.max(np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy()))
+            hc_real_abs_err = np.max(np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy()))
+            hc_imag_abs_err = np.max(np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy()))
+        
+        if (request.config.getoption("--benchmark") == 0):
             assert np.allclose(
                 1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
             )
@@ -316,276 +381,349 @@ def test_phenom_d(
             assert np.allclose(
                 1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
             )
-        mem = get_memory_usage()
-        print(f"Memory usage: {mem} MB")
-        data = {
-            "hp_real_abs_err": hp_real_abs_errs,
-            "hp_real_rel_err": hp_real_rel_errs,
-            "hp_imag_abs_err": hp_imag_abs_errs,
-            "hp_imag_rel_err": hp_imag_rel_errs,
-            "hc_real_abs_err": hc_real_abs_errs,
-            "hc_real_rel_err": hc_real_rel_errs,
-            "hc_imag_abs_err": hc_imag_abs_errs,
-            "hc_imag_rel_err": hc_imag_rel_errs,
-            "torch_freqs": torch_freqs,
-            "chirp_mass": chirp_mass[i][None],
-            "mass_ratio": mass_ratio[i][None],
-            "chi1": chi1[i][None],
-            "chi2": chi2[i][None],
-            "distance": distance[i][None],
-            "phase": phase[i][None],
-            "theta_jn": theta_jn[i][None],
-            "f_ref": f_ref,
-        }
 
-        # Clear lists to free up memory
-        hp_real_abs_errs = np.array([])
-        hp_real_rel_errs = np.array([])
-        hp_imag_abs_errs = np.array([])
-        hp_imag_rel_errs = np.array([])
-        hc_real_abs_errs = np.array([])
-        hc_real_rel_errs = np.array([])
-        hc_imag_abs_errs = np.array([])
-        hc_imag_rel_errs = np.array([])
+        # If benchmark mode is on, gather all relavent data to store
+        if (request.config.getoption("--benchmark") != 0):
+            data = {
+                "hp_real_abs_err": hp_real_abs_err,
+                "hp_imag_abs_err": hp_imag_abs_err,
+                "hc_real_abs_err": hc_real_abs_err,
+                "hc_imag_abs_err": hc_imag_abs_err,
+                "chirp_mass": chirp_mass[i],
+                "mass_ratio": mass_ratio[i],
+                "chi1": chi1[i],
+                "chi2": chi2[i],
+                "distance": distance[i],
+                "phase": phase[i],
+                "theta_jn": theta_jn[i],
+                "f_ref": f_ref,
+            }
 
-        write_benchmark_data("benchmark_data_run_2.h5", data)
-        del data
+            # append data to batch and write if batch size exceeds set batch size
+            if (request.config.getoption("--benchmark") != 0):
+                batch_data.append(data)
+                if len(batch_data) >= batch_size:
+                    for batch in batch_data:
+                        write_benchmark_data(filename, batch)
+                    batch_data = []
+
+                    if get_file_size(filename) >= 0.05:
+                        filename = get_next_file_name(base_filename)
+                        print(f"Switching to new file: {filename}")
+
+    # If there is any remaining data in the batch, write it to the file
+    if (request.config.getoption("--benchmark") != 0):
+        if batch_data:
+            for batch in batch_data:
+                write_benchmark_data(filename, batch)
         
 
 
-# def test_phenom_p(
-#     chirp_mass,
-#     mass_ratio,
-#     distance_far,
-#     distance_close,
-#     phase,
-#     sample_rate,
-#     f_ref,
-#     theta_jn,
-#     phi_jl,
-#     tilt_1,
-#     tilt_2,
-#     phi_12,
-#     a_1,
-#     a_2,
-# ):
-#     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
-#         chirp_mass, mass_ratio
-#     )
-#     (
-#         inclination,
-#         chi1x,
-#         chi1y,
-#         chi1z,
-#         chi2x,
-#         chi2y,
-#         chi2z,
-#     ) = bilby_spins_to_lalsim(
-#         theta_jn,
-#         phi_jl,
-#         tilt_1,
-#         tilt_2,
-#         phi_12,
-#         a_1,
-#         a_2,
-#         mass_1,
-#         mass_2,
-#         f_ref,
-#         phase,
-#     )
+def test_phenom_p(
+    chirp_mass,
+    mass_ratio,
+    distance_far,
+    distance_close,
+    phase,
+    sample_rate,
+    f_ref,
+    theta_jn,
+    phi_jl,
+    tilt_1,
+    tilt_2,
+    phi_12,
+    a_1,
+    a_2,
+    request,
+    batch_size,
+):
+    mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
+        chirp_mass, mass_ratio
+    )
+    (
+        inclination,
+        chi1x,
+        chi1y,
+        chi1z,
+        chi2x,
+        chi2y,
+        chi2z,
+    ) = bilby_spins_to_lalsim(
+        theta_jn,
+        phi_jl,
+        tilt_1,
+        tilt_2,
+        phi_12,
+        a_1,
+        a_2,
+        mass_1,
+        mass_2,
+        f_ref,
+        phase,
+    )
 
-#     tc = 0.0
+    tc = 0.0
 
-#     # compare each waveform with lalsimulation
-#     for i in range(len(chirp_mass)):
+    # Accumulate data in memory and write in batches for benchmarking only
+    batch_data = []
+    base_filename = "benchmark_data/benchmark_data_phenom_p"
+    filename = get_next_file_name(base_filename)
 
-#         # test far (> 400 Mpc) waveforms (O(1e-3) agreement)
+    # compare each waveform with lalsimulation
+    for i in range(len(chirp_mass)):
 
-#         # construct lalinference params
-#         params = dict(
-#             m1=mass_1[i].item() * lal.MSUN_SI,
-#             m2=mass_2[i].item() * lal.MSUN_SI,
-#             S1x=chi1x[i].item(),
-#             S1y=chi1y[i].item(),
-#             S1z=chi1z[i].item(),
-#             S2x=chi2x[i].item(),
-#             S2y=chi2y[i].item(),
-#             S2z=chi2z[i].item(),
-#             distance=(distance_far[i].item() * u.Mpc).to("m").value,
-#             inclination=inclination[i].item(),
-#             phiRef=phase[i].item(),
-#             longAscNodes=0.0,
-#             eccentricity=0.0,
-#             meanPerAno=0.0,
-#             deltaF=1.0 / sample_rate,
-#             f_min=10.0,
-#             f_ref=f_ref,
-#             f_max=300,
-#             approximant=lalsimulation.IMRPhenomPv2,
-#             LALpars=lal.CreateDict(),
-#         )
-#         hp_lal, hc_lal = lalsimulation.SimInspiralChooseFDWaveform(**params)
+        # test far (> 400 Mpc) waveforms (O(1e-3) agreement)
 
-#         # reconstruct frequencies generated by
-#         # lal and filter based on fmin and fmax
-#         lal_freqs = np.array(
-#             [
-#                 hp_lal.f0 + ii * hp_lal.deltaF
-#                 for ii in range(len(hp_lal.data.data))
-#             ]
-#         )
+        # construct lalinference params
+        params = dict(
+            m1=mass_1[i].item() * lal.MSUN_SI,
+            m2=mass_2[i].item() * lal.MSUN_SI,
+            S1x=chi1x[i].item(),
+            S1y=chi1y[i].item(),
+            S1z=chi1z[i].item(),
+            S2x=chi2x[i].item(),
+            S2y=chi2y[i].item(),
+            S2z=chi2z[i].item(),
+            distance=(distance_far[i].item() * u.Mpc).to("m").value,
+            inclination=inclination[i].item(),
+            phiRef=phase[i].item(),
+            longAscNodes=0.0,
+            eccentricity=0.0,
+            meanPerAno=0.0,
+            deltaF=1.0 / sample_rate,
+            f_min=10.0,
+            f_ref=f_ref,
+            f_max=300,
+            approximant=lalsimulation.IMRPhenomPv2,
+            LALpars=lal.CreateDict(),
+        )
+        hp_lal, hc_lal = lalsimulation.SimInspiralChooseFDWaveform(**params)
 
-#         lal_mask = (lal_freqs > params["f_min"]) & (
-#             lal_freqs < params["f_max"]
-#         )
+        # reconstruct frequencies generated by
+        # lal and filter based on fmin and fmax
+        lal_freqs = np.array(
+            [
+                hp_lal.f0 + ii * hp_lal.deltaF
+                for ii in range(len(hp_lal.data.data))
+            ]
+        )
 
-#         lal_freqs = lal_freqs[lal_mask]
-#         torch_freqs = torch.tensor(lal_freqs, dtype=torch.float32)
+        lal_mask = (lal_freqs > params["f_min"]) & (
+            lal_freqs < params["f_max"]
+        )
 
-#         hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
-#             torch_freqs,
-#             chirp_mass[i][None],
-#             mass_ratio[i][None],
-#             chi1x[i][None],
-#             chi1y[i][None],
-#             chi1z[i][None],
-#             chi2x[i][None],
-#             chi2y[i][None],
-#             chi2z[i][None],
-#             distance_far[i][None],
-#             phase[i][None],
-#             inclination[i][None],
-#             f_ref,
-#             torch.tensor([tc]),
-#         )
+        lal_freqs = lal_freqs[lal_mask]
+        torch_freqs = torch.tensor(lal_freqs, dtype=torch.float32)
 
-#         hp_ml4gw = hp_ml4gw[0]
-#         hc_ml4gw = hc_ml4gw[0]
+        hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
+            torch_freqs,
+            chirp_mass[i][None],
+            mass_ratio[i][None],
+            chi1x[i][None],
+            chi1y[i][None],
+            chi1z[i][None],
+            chi2x[i][None],
+            chi2y[i][None],
+            chi2z[i][None],
+            distance_far[i][None],
+            phase[i][None],
+            inclination[i][None],
+            f_ref,
+            torch.tensor([tc]),
+        )
 
-#         hp_lal_data = hp_lal.data.data[lal_mask]
-#         hc_lal_data = hc_lal.data.data[lal_mask]
+        hp_ml4gw = hp_ml4gw[0]
+        hc_ml4gw = hc_ml4gw[0]
 
-#         # Only 4 of 50,000 samples failed this tolerance
-#         assert np.allclose(
-#             1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
-#         )
+        hp_lal_data = hp_lal.data.data[lal_mask]
+        hc_lal_data = hc_lal.data.data[lal_mask]
 
-#         # test close (< 400 Mpc) waveforms  (O(1e-2) agreement)
-#         params["distance"] = (distance_close[i].item() * u.Mpc).to("m").value
-#         hp_lal, hc_lal = lalsimulation.SimInspiralChooseFDWaveform(**params)
+        # Only 4 of 50,000 samples failed this tolerance
+        if (request.config.getoption("--benchmark") == 0):
+            assert np.allclose(
+                1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
+            )
 
-#         # reconstruct frequencies generated by
-#         # lal and filter based on fmin and fmax
-#         lal_freqs = np.array(
-#             [
-#                 hp_lal.f0 + ii * hp_lal.deltaF
-#                 for ii in range(len(hp_lal.data.data))
-#             ]
-#         )
+        # If benchmarking calculate errors to record
+        # test_1 refers to differences between lal and ml4gw PhenomPv2 methods
+        if (request.config.getoption("--benchmark") != 0):
+            test_1_hp_real_abs_err = np.max(np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy()))
+            test_1_hp_imag_abs_err = np.max(np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy()))
+            test_1_hc_real_abs_err = np.max(np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy()))
+            test_1_hc_imag_abs_err = np.max(np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy()))
 
-#         lal_mask = (lal_freqs > params["f_min"]) & (
-#             lal_freqs < params["f_max"]
-#         )
 
-#         lal_freqs = lal_freqs[lal_mask]
-#         torch_freqs = torch.tensor(lal_freqs, dtype=torch.float32)
+        # test close (< 400 Mpc) waveforms  (O(1e-2) agreement)
+        params["distance"] = (distance_close[i].item() * u.Mpc).to("m").value
+        hp_lal, hc_lal = lalsimulation.SimInspiralChooseFDWaveform(**params)
 
-#         hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
-#             torch_freqs,
-#             chirp_mass[i][None],
-#             mass_ratio[i][None],
-#             chi1x[i][None],
-#             chi1y[i][None],
-#             chi1z[i][None],
-#             chi2x[i][None],
-#             chi2y[i][None],
-#             chi2z[i][None],
-#             distance_close[i][None],
-#             phase[i][None],
-#             inclination[i][None],
-#             f_ref,
-#             torch.tensor([tc]),
-#         )
+        # reconstruct frequencies generated by
+        # lal and filter based on fmin and fmax
+        lal_freqs = np.array(
+            [
+                hp_lal.f0 + ii * hp_lal.deltaF
+                for ii in range(len(hp_lal.data.data))
+            ]
+        )
 
-#         hp_ml4gw = hp_ml4gw[0]
-#         hc_ml4gw = hc_ml4gw[0]
+        lal_mask = (lal_freqs > params["f_min"]) & (
+            lal_freqs < params["f_max"]
+        )
 
-#         hp_lal_data = hp_lal.data.data[lal_mask]
-#         hc_lal_data = hc_lal.data.data[lal_mask]
+        lal_freqs = lal_freqs[lal_mask]
+        torch_freqs = torch.tensor(lal_freqs, dtype=torch.float32)
 
-#         assert np.allclose(
-#             1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-2
-#         )
-#         assert np.allclose(
-#             1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-2
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-2
-#         )
-#         assert np.allclose(
-#             1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-2
-#         )
+        hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
+            torch_freqs,
+            chirp_mass[i][None],
+            mass_ratio[i][None],
+            chi1x[i][None],
+            chi1y[i][None],
+            chi1z[i][None],
+            chi2x[i][None],
+            chi2y[i][None],
+            chi2z[i][None],
+            distance_close[i][None],
+            phase[i][None],
+            inclination[i][None],
+            f_ref,
+            torch.tensor([tc]),
+        )
 
-#     # test batched outputs works as expected
-#     hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
-#         torch_freqs,
-#         chirp_mass[-1][None].repeat(10),
-#         mass_ratio[-1][None].repeat(10),
-#         chi1x[-1][None].repeat(10),
-#         chi1y[-1][None].repeat(10),
-#         chi1z[-1][None].repeat(10),
-#         chi2x[-1][None].repeat(10),
-#         chi2y[-1][None].repeat(10),
-#         chi2z[-1][None].repeat(10),
-#         distance_close[-1][None].repeat(10),
-#         phase[-1][None].repeat(10),
-#         inclination[-1][None].repeat(10),
-#         f_ref,
-#         torch.tensor([tc]).repeat(10),
-#     )
+        hp_ml4gw = hp_ml4gw[0]
+        hc_ml4gw = hc_ml4gw[0]
 
-#     # check batch against lal
-#     assert np.allclose(
-#         1e21 * hp_lal_data.real, 1e21 * hp_ml4gw[0].real.numpy(), atol=2e-2
-#     )
-#     assert np.allclose(
-#         1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw[0].imag.numpy(), atol=2e-2
-#     )
-#     assert np.allclose(
-#         1e21 * hc_lal_data.real, 1e21 * hc_ml4gw[0].real.numpy(), atol=2e-2
-#     )
-#     assert np.allclose(
-#         1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw[0].imag.numpy(), atol=2e-2
-#     )
+        hp_lal_data = hp_lal.data.data[lal_mask]
+        hc_lal_data = hc_lal.data.data[lal_mask]
 
-#     # check batch against each other
-#     for i in range(9):
-#         assert np.allclose(
-#             1e21 * hp_ml4gw[0].real.numpy(),
-#             1e21 * hp_ml4gw[i + 1].real.numpy(),
-#             atol=1e-2,
-#         )
-#         assert np.allclose(
-#             1e21 * hp_ml4gw[0].imag.numpy(),
-#             1e21 * hp_ml4gw[i + 1].imag.numpy(),
-#             atol=1e-2,
-#         )
-#         assert np.allclose(
-#             1e21 * hc_ml4gw[0].real.numpy(),
-#             1e21 * hc_ml4gw[i + 1].real.numpy(),
-#             atol=1e-2,
-#         )
-#         assert np.allclose(
-#             1e21 * hc_ml4gw[0].imag.numpy(),
-#             1e21 * hc_ml4gw[i + 1].imag.numpy(),
-#             atol=1e-2,
-#         )
+        if (request.config.getoption("--benchmark") == 0):
+            assert np.allclose(
+                1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-2
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-2
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-2
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-2
+            )
+        
+        # If benchmarking calculate errors to record
+        # test_2 refers to differences between lal and ml4gw PhenomPv2 methods reconstructed by using fmin and fmax
+        if (request.config.getoption("--benchmark") != 0):
+            test_2_hp_real_abs_err = np.max(np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy()))
+            test_2_hp_imag_abs_err = np.max(np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy()))
+            test_2_hc_real_abs_err = np.max(np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy()))
+            test_2_hc_imag_abs_err = np.max(np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy()))
+        
+        if (request.config.getoption("--benchmark") != 0):
+            data = {
+                "test_1_hp_real_abs_err": test_1_hp_real_abs_err,
+                "test_1_hp_imag_abs_err": test_1_hp_imag_abs_err,
+                "test_1_hc_real_abs_err": test_1_hc_real_abs_err,
+                "test_1_hc_imag_abs_err": test_1_hc_imag_abs_err,
+                "test_2_hp_real_abs_err": test_2_hp_real_abs_err,
+                "test_2_hp_imag_abs_err": test_2_hp_imag_abs_err,
+                "test_2_hc_real_abs_err": test_2_hc_real_abs_err,
+                "test_2_hc_imag_abs_err": test_2_hc_imag_abs_err,
+                "chirp_mass": chirp_mass[i],
+                "mass_ratio": mass_ratio[i],
+                "chi1x": chi1x[i],
+                "chi1y": chi1y[i],
+                "chi1z": chi1z[i],
+                "chi2x": chi2x[i],
+                "chi2y": chi2y[i],
+                "chi2z": chi2z[i],
+                "distance_close": distance_close[i],
+                "distance_far": distance_far[i],
+                "phase": phase[i],
+                "theta_jn": theta_jn[i],
+                "f_ref": f_ref,
+            }
+
+            # append data to batch and write if batch size exceeds set batch size
+            batch_data.append(data)
+            if len(batch_data) >= batch_size:
+                for batch in batch_data:
+                    write_benchmark_data(filename, batch)
+                batch_data = []
+
+                if get_file_size(filename) >= 0.05:
+                    filename = get_next_file_name(base_filename)
+                    print(f"Switching to new file: {filename}")
+
+    if (request.config.getoption("--benchmark") != 0):
+        # If there is any remaining data in the batch, write it to the file
+        if batch_data:
+            for batch in batch_data:
+                write_benchmark_data(filename, batch)
+
+
+    # test batched outputs works as expected
+    hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
+        torch_freqs,
+        chirp_mass[-1][None].repeat(10),
+        mass_ratio[-1][None].repeat(10),
+        chi1x[-1][None].repeat(10),
+        chi1y[-1][None].repeat(10),
+        chi1z[-1][None].repeat(10),
+        chi2x[-1][None].repeat(10),
+        chi2y[-1][None].repeat(10),
+        chi2z[-1][None].repeat(10),
+        distance_close[-1][None].repeat(10),
+        phase[-1][None].repeat(10),
+        inclination[-1][None].repeat(10),
+        f_ref,
+        torch.tensor([tc]).repeat(10),
+    )
+
+    # check batch against lal
+    if (request.config.getoption("--benchmark") == 0):
+        assert np.allclose(
+            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw[0].real.numpy(), atol=2e-2
+        )
+        assert np.allclose(
+            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw[0].imag.numpy(), atol=2e-2
+        )
+        assert np.allclose(
+            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw[0].real.numpy(), atol=2e-2
+        )
+        assert np.allclose(
+            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw[0].imag.numpy(), atol=2e-2
+        )
+
+    # check batch against each other
+    for i in range(9):
+        if (request.config.getoption("--benchmark") == 0):
+            assert np.allclose(
+                1e21 * hp_ml4gw[0].real.numpy(),
+                1e21 * hp_ml4gw[i + 1].real.numpy(),
+                atol=1e-2,
+            )
+            assert np.allclose(
+                1e21 * hp_ml4gw[0].imag.numpy(),
+                1e21 * hp_ml4gw[i + 1].imag.numpy(),
+                atol=1e-2,
+            )
+            assert np.allclose(
+                1e21 * hc_ml4gw[0].real.numpy(),
+                1e21 * hc_ml4gw[i + 1].real.numpy(),
+                atol=1e-2,
+            )
+            assert np.allclose(
+                1e21 * hc_ml4gw[0].imag.numpy(),
+                1e21 * hc_ml4gw[i + 1].imag.numpy(),
+                atol=1e-2,
+            )
+
