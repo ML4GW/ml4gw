@@ -184,7 +184,8 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                 starts = []
                 for tg in tglitch:
                     centre = int((tg - g0) * self.fs)
-                    s = centre - self.psd_samples
+                    mid_kernel_offset = self.psd_samples + self.fdur_samples + self.kernel_samples // 2
+                    s = centre - mid_kernel_offset
                     if 0 <= s <= self.sizes[fname] - self.kernel_size:
                         starts.append(s)
                 self.valid[fname] = np.unique(starts)
