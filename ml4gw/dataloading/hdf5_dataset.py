@@ -196,6 +196,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             np.save(cache_path, self.valid[fname])
 
         self.fnames = np.asarray([f for f in self.fnames if len(self.valid[f])])
+        self.num_files_per_batch = min(self.num_files_per_batch, len(self.fnames))
         if len(self.fnames) == 0:
             raise RuntimeError(f"No files contain {mode} windows!")
 
