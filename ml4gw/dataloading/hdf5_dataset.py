@@ -111,7 +111,8 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                  glitch_root: str = "/path/to/omicron/HL",
                  ifos: Sequence[str] = ("H1", "L1"),
                  glitch_margin: float = 2.0,
-                 num_files_per_batch: Optional[int] = None):
+                 num_files_per_batch: Optional[int] = None,
+                 remake_cache: bool = False):
 
         assert mode in ("raw", "clean", "glitch")
         if not isinstance(coincident, bool) and coincident != "files":
@@ -139,6 +140,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.ifos = ifos
         self.glitch_margin = glitch_margin
         self.num_files_per_batch = len(fnames) if num_files_per_batch is None else num_files_per_batch
+        self.remake_cache = remake_cache
 
         self.sizes, self.valid = {}, {}
         for fname in self.fnames:
@@ -151,7 +153,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     warnings.warn(f"{fname} stored contiguously – slower I/O", ContiguousHdf5Warning)
                 self.sizes[fname] = len(dset)
 
-            if os.path.exists(cache_path):
+            if os.path.exists(cache_path) and not self.remake_cache:
                 self.valid[fname] = np.load(cache_path)
                 continue
 
