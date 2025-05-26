@@ -112,7 +112,8 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                  glitch_root: str = "/path/to/omicron/HL",
                  ifos: Sequence[str] = ("H1","L1"),
                  glitch_margin: float = 2.0,
-                 num_files_per_batch: Optional[int] = None):
+                 num_files_per_batch: Optional[int] = None,
+                 cache_dir: Optional[str] = None,):
 
         assert mode in ("raw","clean","glitch")
         if not isinstance(coincident,bool) and coincident!="files":
@@ -140,10 +141,14 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             len(fnames) if num_files_per_batch is None else num_files_per_batch)
 
         self.sizes, self.valid = {}, {}
+        self.cache_dir = cache_dir
         for fname in self.fnames:
             basename = os.path.basename(fname).replace(".h5", "")
-            cache_path = os.path.join(os.path.dirname(fname), f"{basename}_{mode}_valid.npy")
-
+            if self.cache_dir is not None:
+                os.makedirs(self.cache_dir, exist_ok=True)
+                cache_path = os.path.join(self.cache_dir, f"{basename}_{mode}_valid.npy")
+            else:
+                cache_path = os.path.join(os.path.dirname(fname), f"{basename}_{mode}_valid.npy")
             if os.path.exists(cache_path):
                 with h5py.File(fname,"r") as f:
                     self.sizes[fname] = len(f[channels[0]])
