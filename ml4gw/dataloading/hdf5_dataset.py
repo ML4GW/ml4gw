@@ -142,10 +142,12 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.num_files_per_batch = len(fnames) if num_files_per_batch is None else num_files_per_batch
         self.remake_cache = remake_cache
 
-        self.sizes, self.valid = {}, {}
+        self.sizes, self.valid, self.cache_paths, self.num_valid = {}, {}, {}, {}
         for fname in self.fnames:
             basename = os.path.basename(fname).replace(".h5", "")
             cache_path = os.path.join(os.path.dirname(fname), f"{basename}_{mode}_valid.npy")
+            self.cache_paths[fname] = str(cache_path)
+            self.num_valid[fname] = 0
 
             with h5py.File(fname, "r") as f:
                 dset = f[channels[0]]
@@ -153,13 +155,15 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     warnings.warn(f"{fname} stored contiguously – slower I/O", ContiguousHdf5Warning)
                 self.sizes[fname] = len(dset)
 
-            if os.path.exists(cache_path) and not self.remake_cache:
-                self.valid[fname] = np.load(cache_path)
+            if os.path.exists(cache_path) and not self.remake_cache and mode != "raw":
+                #self.valid[fname] = np.load(cache_path)
+                valid = np.load(cache_path)
+                self.num_valid[fname] = len(valid)
+                self.valid[fname] = valid
                 continue
 
             if mode == "raw":
-                self.valid[fname] = np.arange(self.sizes[fname] - self.kernel_size)
-                np.save(cache_path, self.valid[fname])
+                self.num_valid[fname] = self.sizes[fname] - self.kernel_size
                 continue
 
             g0, dur = gps_from_fname(fname)
@@ -181,7 +185,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     if not post.any():
                         keep.append(i)
                 self.valid[fname] = np.asarray(keep, dtype=int)
-
+                #valid = np.asarray(keep, dtype=int)
             else:  # glitch mode
                 starts = []
                 for tg in tglitch:
@@ -191,19 +195,21 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     if 0 <= s <= self.sizes[fname] - self.kernel_size:
                         starts.append(s)
                 self.valid[fname] = np.unique(starts)
+                #valid = np.unique(starts)
 
             if mode == "glitch" and len(self.valid[fname]) == 0:
                 warnings.warn(f"No usable glitch windows in {fname}")
 
             np.save(cache_path, self.valid[fname])
+            self.num_valid[fname] = len(self.valid[fname])
 
-        self.fnames = np.asarray([f for f in self.fnames if len(self.valid[f])])
+        self.fnames = np.asarray([f for f in self.fnames if self.num_valid[f] > 0])
         self.num_files_per_batch = min(self.num_files_per_batch, len(self.fnames))
         if len(self.fnames) == 0:
             raise RuntimeError(f"No files contain {mode} windows!")
 
-        total = sum(len(self.valid[f]) for f in self.fnames)
-        self.probs = np.array([len(self.valid[f]) / total for f in self.fnames])
+        total = sum(self.num_valid[f] for f in self.fnames)
+        self.probs = np.array([self.num_valid[f] / total for f in self.fnames])
 
     def __len__(self):
         return self.batches_per_epoch
@@ -225,6 +231,11 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
 
         uniq, inv, count = np.unique(files, return_inverse=True, return_counts=True)
         for u, (fname, cnt) in enumerate(zip(uniq, count)):
+            if self.mode == "raw":
+                # just need to sample a number from 0 to self.sizes[fname] - self.kernel_size
+                valid_cache = self.sizes[fname] - self.kernel_size
+            else:
+                valid_cache = self.valid[fname]
             inds = np.where(inv == u)[0]
             if self.coincident:
                 b_idx = np.repeat(inds, self.num_channels)
@@ -234,10 +245,12 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                 ch_idx = inds % self.num_channels
 
             if self.coincident is True:
-                starts = np.random.choice(self.valid[fname], size=cnt)
+                #starts = np.random.choice(self.valid[fname], size=cnt)
+                starts = np.random.choice(valid_cache, size=cnt)
                 starts = np.repeat(starts, self.num_channels)
             else:
-                starts = np.random.choice(self.valid[fname], size=len(b_idx))
+                #starts = np.random.choice(self.valid[fname], size=len(b_idx))
+                starts = np.random.choice(valid_cache, size=len(b_idx))
 
             with h5py.File(fname, "r") as f:
                 for b, c, s in zip(b_idx, ch_idx, starts):
