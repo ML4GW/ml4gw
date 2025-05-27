@@ -57,6 +57,12 @@ def test_blocks(block, kernel_size, stride, sample_rate, inplanes):
             )
         return
 
+    if block == BasicBlock:
+        with pytest.raises(ValueError, match=r"BasicBlock only supports*"):
+            block(inplanes, planes, groups=2)
+        with pytest.raises(ValueError, match=r"BasicBlock only supports*"):
+            block(inplanes, planes, base_width=32)
+
     block = block(inplanes, planes, kernel_size, stride, downsample=downsample)
     x = torch.randn(8, inplanes, sample_rate)
     y = block(x)
@@ -81,6 +87,16 @@ def stride_type(request):
     return request.param
 
 
+@pytest.fixture(params=[True, False])
+def zero_init_residual(request):
+    return request.param
+
+
+@pytest.fixture(params=[None, torch.nn.GroupNorm])
+def norm_layer(request):
+    return request.param
+
+
 @pytest.fixture(params=[BottleneckResNet1D, ResNet1D])
 def architecture(request):
     return request.param
@@ -94,6 +110,8 @@ def test_resnet(
     in_channels,
     sample_rate,
     stride_type,
+    zero_init_residual,
+    norm_layer,
 ):
     if kernel_size % 2 == 0:
         with pytest.raises(ValueError):
@@ -118,9 +136,20 @@ def test_resnet(
             )
         return
 
-    nn = architecture(
-        in_channels, layers, classes, kernel_size, stride_type=stride_type
-    )
+    if architecture == ResNet1D:
+        nn = architecture(
+            in_channels,
+            layers,
+            classes,
+            kernel_size,
+            stride_type=stride_type,
+            zero_init_residual=zero_init_residual,
+            norm_layer=norm_layer,
+        )
+    else:
+        nn = architecture(
+            in_channels, layers, classes, kernel_size, stride_type=stride_type
+        )
     x = torch.randn(8, in_channels, sample_rate)
     y = nn(x)
     assert y.shape == (8, classes)
