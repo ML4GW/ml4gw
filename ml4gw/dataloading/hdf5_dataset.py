@@ -97,7 +97,6 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                         so the glitch lands in the centre of the
                         fduration+kernel_length part.
     """
-
     def __init__(self,
                  fnames: Sequence[str],
                  channels: Sequence[str],
@@ -110,16 +109,15 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                  coincident: Union[bool, str],
                  mode: str = "raw",
                  glitch_root: str = "/path/to/omicron/HL",
-                 ifos: Sequence[str] = ("H1","L1"),
+                 ifos: Sequence[str] = ("H1", "L1"),
                  glitch_margin: float = 2.0,
                  num_files_per_batch: Optional[int] = None,
                  cache_dir: Optional[str] = None,):
 
-        assert mode in ("raw","clean","glitch")
-        if not isinstance(coincident,bool) and coincident!="files":
+        assert mode in ("raw", "clean", "glitch")
+        if not isinstance(coincident, bool) and coincident != "files":
             raise ValueError("coincident must be bool or 'files'")
 
-        # save parameters
         self.fnames = np.asarray(fnames)
         self.channels = channels
         self.num_channels = len(channels)
@@ -127,9 +125,13 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.psd_len_s = psd_length
         self.fdur_s = fduration
         self.fs = sample_rate
-        self.kernel_size = int((psd_length + fduration + kernel_length)*sample_rate)
+
+        # New logic: psd_length | fdur/2 | kernel_length | fdur/2
+        self.fdur_samples = int((fduration / 2) * sample_rate)
         self.psd_samples = int(psd_length * sample_rate)
-        self.post_len = int((fduration + kernel_length) * sample_rate)
+        self.kernel_samples = int(kernel_length * sample_rate)
+        self.kernel_size = self.psd_samples + 2 * self.fdur_samples + self.kernel_samples
+
         self.batch_size = batch_size
         self.batches_per_epoch = batches_per_epoch
         self.coincident = coincident
@@ -137,8 +139,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.glitch_root = glitch_root
         self.ifos = ifos
         self.glitch_margin = glitch_margin
-        self.num_files_per_batch = (
-            len(fnames) if num_files_per_batch is None else num_files_per_batch)
+        self.num_files_per_batch = len(fnames) if num_files_per_batch is None else num_files_per_batch
 
         self.sizes, self.valid = {}, {}
         self.cache_dir = cache_dir
@@ -149,113 +150,107 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                 cache_path = os.path.join(self.cache_dir, f"{basename}_{mode}_valid.npy")
             else:
                 cache_path = os.path.join(os.path.dirname(fname), f"{basename}_{mode}_valid.npy")
+            with h5py.File(fname, "r") as f:
+                dset = f[channels[0]]
+                if dset.chunks is None:
+                    warnings.warn(f"{fname} stored contiguously – slower I/O", ContiguousHdf5Warning)
+                self.sizes[fname] = len(dset)
+
             if os.path.exists(cache_path):
-                with h5py.File(fname,"r") as f:
-                    self.sizes[fname] = len(f[channels[0]])
                 self.valid[fname] = np.load(cache_path)
                 continue
 
-            with h5py.File(fname,"r") as f:
-                dset = f[channels[0]]
-                if dset.chunks is None:
-                    warnings.warn(f"{fname} stored contiguously – slower I/O",
-                                  ContiguousHdf5Warning, stacklevel=2)
-                self.sizes[fname] = len(dset)
-
             if mode == "raw":
-                self.valid[fname] = np.arange(self.sizes[fname]-self.kernel_size)
+                self.valid[fname] = np.arange(self.sizes[fname] - self.kernel_size)
                 np.save(cache_path, self.valid[fname])
                 continue
 
             g0, dur = gps_from_fname(fname)
-            glitch_file  = os.path.join(glitch_root,
-                                        f"Segs_{g0}_{dur}",
-                                        "glitch_info.h5")
+            glitch_file = os.path.join(glitch_root, f"Segs_{g0}_{dur}", "glitch_info.h5")
             tglitch = read_glitch_times(glitch_file, ifos)
 
             mask = np.zeros(self.sizes[fname], dtype=bool)
             if len(tglitch):
                 for tg in tglitch:
-                    lo = int((tg-g0-glitch_margin)*self.fs)
-                    hi = int((tg-g0+glitch_margin)*self.fs)
-                    mask[max(lo,0):min(hi,self.sizes[fname])] = True
+                    lo = int((tg - g0 - glitch_margin) * self.fs)
+                    hi = int((tg - g0 + glitch_margin) * self.fs)
+                    mask[max(lo, 0):min(hi, self.sizes[fname])] = True
 
             if mode == "clean":
-                # keep indices i such that the *post-PSD* slice [i+psd : i+kernel]
-                # does NOT overlap a glitch → need mask on that region to be false
                 keep = []
-                max_i = self.sizes[fname]-self.kernel_size
+                max_i = self.sizes[fname] - self.kernel_size
                 for i in range(max_i):
-                    post = mask[i+self.psd_samples : i+self.kernel_size]
+                    post = mask[i + self.psd_samples : i + self.psd_samples + self.fdur_samples + self.kernel_samples + self.fdur_samples]
                     if not post.any():
                         keep.append(i)
                 self.valid[fname] = np.asarray(keep, dtype=int)
 
-            else:
-                # glitch mode: find starts such that glitch is centered
+            else:  # glitch mode
                 starts = []
                 for tg in tglitch:
-                    centre = int((tg - g0)*self.fs) # index of glitch
-                    s = centre - self.psd_samples # window start
-                    if 0 <= s <= self.sizes[fname]-self.kernel_size:
+                    centre = int((tg - g0) * self.fs)
+                    mid_kernel_offset = self.psd_samples + self.fdur_samples + self.kernel_samples // 2
+                    s = centre - mid_kernel_offset
+                    if 0 <= s <= self.sizes[fname] - self.kernel_size:
                         starts.append(s)
                 self.valid[fname] = np.unique(starts)
 
-            if mode=="glitch" and len(self.valid[fname])==0:
+            if mode == "glitch" and len(self.valid[fname]) == 0:
                 warnings.warn(f"No usable glitch windows in {fname}")
 
             np.save(cache_path, self.valid[fname])
 
-        # drop any file with zero valid indices
         self.fnames = np.asarray([f for f in self.fnames if len(self.valid[f])])
-        if len(self.fnames)==0:
-            raise RuntimeError(f"No files contain '{mode}' windows!")
+        self.num_files_per_batch = min(self.num_files_per_batch, len(self.fnames))
+        if len(self.fnames) == 0:
+            raise RuntimeError(f"No files contain {mode} windows!")
 
         total = sum(len(self.valid[f]) for f in self.fnames)
-        self.probs = np.array([len(self.valid[f])/total for f in self.fnames])
+        self.probs = np.array([len(self.valid[f]) / total for f in self.fnames])
 
-    def __len__(self): return self.batches_per_epoch
+    def __len__(self):
+        return self.batches_per_epoch
 
-    def sample_files(self,size):
+    def sample_files(self, size):
         idx = np.random.choice(np.arange(len(self.fnames)),
                                size=self.num_files_per_batch,
                                replace=False, p=self.probs)
-        subf = self.fnames[idx]; p = self.probs[idx]; p/=p.sum()
+        subf = self.fnames[idx]
+        p = self.probs[idx]
+        p /= p.sum()
         return np.random.choice(subf, size=size, replace=True, p=p)
 
-    def sample_batch(self)->WaveformTensor:
-        x = np.zeros((self.batch_size,self.num_channels,self.kernel_size),
-                     dtype=np.float32)
+    def sample_batch(self) -> WaveformTensor:
+        x = np.zeros((self.batch_size, self.num_channels, self.kernel_size), dtype=np.float32)
 
-        size = (self.batch_size,) if self.coincident else \
-               (self.batch_size, self.num_channels)
+        size = (self.batch_size,) if self.coincident else (self.batch_size, self.num_channels)
         files = self.sample_files(size)
 
-        uniq,inv,count = np.unique(files,return_inverse=True,return_counts=True)
-        for u,(fname,cnt) in enumerate(zip(uniq,count)):
-            inds = np.where(inv==u)[0]
+        uniq, inv, count = np.unique(files, return_inverse=True, return_counts=True)
+        for u, (fname, cnt) in enumerate(zip(uniq, count)):
+            inds = np.where(inv == u)[0]
             if self.coincident:
-                b_idx = np.repeat(inds,self.num_channels)
-                ch_idx = np.tile(np.arange(self.num_channels),cnt)
+                b_idx = np.repeat(inds, self.num_channels)
+                ch_idx = np.tile(np.arange(self.num_channels), cnt)
             else:
-                b_idx = inds//self.num_channels
-                ch_idx = inds%self.num_channels
+                b_idx = inds // self.num_channels
+                ch_idx = inds % self.num_channels
 
             if self.coincident is True:
                 starts = np.random.choice(self.valid[fname], size=cnt)
-                starts = np.repeat(starts,self.num_channels)
+                starts = np.repeat(starts, self.num_channels)
             else:
                 starts = np.random.choice(self.valid[fname], size=len(b_idx))
 
-            with h5py.File(fname,"r") as f:
-                for b,c,s in zip(b_idx,ch_idx,starts):
-                    x[b,c] = f[self.channels[c]][s:s+self.kernel_size]
+            with h5py.File(fname, "r") as f:
+                for b, c, s in zip(b_idx, ch_idx, starts):
+                    x[b, c] = f[self.channels[c]][s:s + self.kernel_size]
 
         return torch.tensor(x)
 
     def __iter__(self):
         wi = torch.utils.data.get_worker_info()
-        n   = self.batches_per_epoch if wi is None else \
-              self.batches_per_epoch//wi.num_workers + (wi.id < self.batches_per_epoch%wi.num_workers)
+        n = self.batches_per_epoch if wi is None else \
+            self.batches_per_epoch // wi.num_workers + (wi.id < self.batches_per_epoch % wi.num_workers)
         for _ in range(n):
             yield self.sample_batch()
