@@ -37,6 +37,22 @@ def test_taylor_f2(
         chirp_mass, mass_ratio
     )
 
+    # Test that a difference in the length of a
+    # parameter tensor raises an error
+    with pytest.raises(ValueError, match="Tensors must have same batch size"):
+        torch_freqs = torch.arange(100)
+        waveforms.TaylorF2()(
+            torch_freqs,
+            chirp_mass[1:],
+            mass_ratio,
+            chi1,
+            chi2,
+            distance,
+            phase,
+            theta_jn,
+            f_ref,
+        )
+
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
         # construct lalinference params
@@ -164,6 +180,22 @@ def test_phenom_d(
         chirp_mass, mass_ratio
     )
 
+    # Test that a difference in the length of a
+    # parameter tensor raises an error
+    with pytest.raises(ValueError, match="Tensors must have same batch size"):
+        torch_freqs = torch.arange(100)
+        waveforms.TaylorF2()(
+            torch_freqs,
+            chirp_mass[1:],
+            mass_ratio,
+            chi1,
+            chi2,
+            distance,
+            phase,
+            theta_jn,
+            f_ref,
+        )
+
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
         # construct lalinference params
@@ -282,6 +314,25 @@ def test_phenom_p(
         mass_2,
         f_ref,
         phase,
+    )
+
+    # Test `tc = None`
+    torch_freqs = torch.arange(100)
+    hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
+        torch_freqs,
+        chirp_mass,
+        mass_ratio,
+        chi1x,
+        chi1y,
+        chi1z,
+        chi2x,
+        chi2y,
+        chi2z,
+        distance_far,
+        phase,
+        inclination,
+        f_ref,
+        tc=None,
     )
 
     tc = 0.0
@@ -478,3 +529,6 @@ def test_phenom_p(
             1e21 * hc_ml4gw[i + 1].imag.numpy(),
             atol=1e-2,
         )
+
+    with pytest.raises(ValueError, match=r"Invalid mode s=-2, l=2, m=3*"):
+        waveforms.IMRPhenomPv2().SpinWeightedY(0, 0, -2, 2, 3)
