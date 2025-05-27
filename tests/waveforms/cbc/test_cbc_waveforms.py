@@ -184,7 +184,7 @@ def test_phenom_d(
     # parameter tensor raises an error
     with pytest.raises(ValueError, match="Tensors must have same batch size"):
         torch_freqs = torch.arange(100)
-        waveforms.TaylorF2()(
+        waveforms.IRMPhenomD()(
             torch_freqs,
             chirp_mass[1:],
             mass_ratio,

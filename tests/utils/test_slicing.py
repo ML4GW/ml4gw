@@ -109,6 +109,10 @@ def test_slice_kernels(kernel_size, num_channels):
     result = slicing.slice_kernels(X, idx, kernel_size)
     assert result.shape == (8, num_channels, kernel_size)
 
+    # Test that we fail when the index shape doesn't match the tensor
+    with pytest.raises(ValueError, match=r"Can't slice array with shape*"):
+        slicing.slice_kernels(X, idx[:, :-1], kernel_size)
+
     for i, Y in enumerate(result.cpu().numpy()):
         for j, y in enumerate(Y):
             start = j * 103 + (i + 2) * 7
@@ -288,6 +292,10 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
     x = torch.arange(100)
     X = torch.stack([x + i * 100 for i in range(num_channels)])
     X = torch.stack([X + i * 1000 for i in range(batch_size)])
+
+    # Ensure ndim <= 3 is enforced
+    with pytest.raises(ValueError, match=r"Can't sample kernels from tensor*"):
+        slicing.sample_kernels(X[None], kernel_size, N)
 
     # make sure that we enforce that we have enough data to sample
     with pytest.raises(ValueError) as exc:
