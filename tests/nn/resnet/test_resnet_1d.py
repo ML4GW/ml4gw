@@ -92,7 +92,7 @@ def zero_init_residual(request):
     return request.param
 
 
-@pytest.fixture(params=[None, torch.nn.GroupNorm])
+@pytest.fixture(params=[None, torch.nn.BatchNorm1d])
 def norm_layer(request):
     return request.param
 
