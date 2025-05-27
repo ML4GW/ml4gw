@@ -6,6 +6,10 @@ import torch
 from scipy.special import erfinv
 from torch.distributions import Uniform
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--benchmark", action="store", default=0, help="Change to benchmark mode"
+    )
 
 # If a fixture is doing anything random,
 # it should take this function as an argument

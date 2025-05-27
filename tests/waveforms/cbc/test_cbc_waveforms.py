@@ -1,3 +1,7 @@
+import logging
+import os
+
+import h5py
 import lal
 import lalsimulation
 import numpy as np
@@ -13,13 +17,88 @@ from ml4gw.waveforms.conversion import (
 
 
 @pytest.fixture()
-def num_samples():
+def num_samples(request):
+    if request.config.getoption("--benchmark") != 0:
+        logging.info("Running benchmarking mode")
+        return int(request.config.getoption("--benchmark"))
     return 100
 
 
 @pytest.fixture(params=[20, 40])
 def f_ref(request):
     return request.param
+
+
+@pytest.fixture()
+def batch_size():
+    return 100
+
+
+def write_benchmark_data(filename, dataset):
+    """
+    Write benchmark data to an HDF5 file,
+    reating a new group for each run.
+    args:
+        filename (str): The name of the file to write to.
+        dataset (dict): The dataset to write, where keys are dataset names
+        and values are the data to write.
+    returns:
+        None
+    """
+    try:
+        with h5py.File(f"{filename}", "a") as f:
+            # Iterate using numbers as group names
+            existing_groupnames = [
+                int(name) for name in f.keys() if name.isdigit()
+            ]
+            if existing_groupnames:
+                next_groupname = max(existing_groupnames) + 1
+            else:
+                next_groupname = 0
+            groupname = str(next_groupname)
+            group = f.require_group(groupname)
+            # Create datasets for each key in the dataset dictionary
+            for key, data in dataset.items():
+                data = np.array(data, dtype=np.float32)
+                if key not in f:
+                    if data.ndim == 0:
+                        dset = group.create_dataset(key, data=data)
+                    else:
+                        dset = group.create_dataset(
+                            key,
+                            data=data,
+                            maxshape=(None,),
+                            compression="gzip",
+                        )
+                else:
+                    dset = f[key]
+                    if data.ndim == 0:
+                        dset[...] = data
+                    else:
+                        current_size = dset.shape[0]
+                        new_size = current_size + data.shape[0]
+                        dset.resize(new_size, axis=0)
+                        dset[current_size:new_size] = data
+            f.flush()
+    except Exception as e:
+        logging.info(f"Error writing data to file: {e}")
+        raise
+
+
+def get_file_size(filename):
+    """Get the size of a file in GB."""
+    return os.path.getsize(f"{filename}") / (1024 * 1024 * 1024)
+
+
+def get_next_file_name(base_name, extension="h5"):
+    """Get the next available file name with a numeric suffix."""
+    index = 0
+    while (
+        os.path.exists(f"{base_name}_{index}.{extension}")
+        and get_file_size(f"{base_name}_{index}.{extension}") >= 0.05
+    ):
+        index += 1
+    return f"{base_name}_{index}.{extension}"
 
 
 def test_taylor_f2(
@@ -32,10 +111,17 @@ def test_taylor_f2(
     f_ref,
     theta_jn,
     sample_rate,
+    request,
+    batch_size,
 ):
     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
         chirp_mass, mass_ratio
     )
+
+    # Accumulate data in memory and write in batches for benchmarking only
+    batch_data = []
+    base_filename = "benchmark_data/benchmark_data_taylor_f2"
+    filename = get_next_file_name(base_filename)
 
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
@@ -103,18 +189,43 @@ def test_taylor_f2(
         assert not torch.any(torch.isnan(hc_ml4gw))
         assert not torch.any(torch.isnan(hp_ml4gw))
 
-        assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
-        )
-        assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
-        )
+        if request.config.getoption("--benchmark") == 0:
+            assert np.allclose(
+                1e21 * hp_lal_data.real,
+                1e21 * hp_ml4gw.real.numpy(),
+                atol=1e-3,
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag,
+                1e21 * hp_ml4gw.imag.numpy(),
+                atol=1e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real,
+                1e21 * hc_ml4gw.real.numpy(),
+                atol=1e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag,
+                1e21 * hc_ml4gw.imag.numpy(),
+                atol=1e-3,
+            )
+
+        # If benchmarking calculate errors to record
+        # test_1 refers to differences between lal and ml4gw TaylorF2 methods
+        if request.config.getoption("--benchmark") != 0:
+            test_1_hp_real_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy())
+            )
+            test_1_hp_imag_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy())
+            )
+            test_1_hc_real_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy())
+            )
+            test_1_hc_imag_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy())
+            )
 
         # taylor f2 is symmetric w.r.t m1 --> m2 flip.
         # so test that the waveforms are the same when m1 and m2
@@ -135,18 +246,83 @@ def test_taylor_f2(
         hc_ml4gw = hc_ml4gw[0]
         hp_ml4gw = hp_ml4gw[0]
 
-        assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=1e-3
-        )
-        assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=1e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=1e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=1e-3
-        )
+        if request.config.getoption("--benchmark") == 0:
+            assert np.allclose(
+                1e21 * hp_lal_data.real,
+                1e21 * hp_ml4gw.real.numpy(),
+                atol=1e-3,
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag,
+                1e21 * hp_ml4gw.imag.numpy(),
+                atol=1e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real,
+                1e21 * hc_ml4gw.real.numpy(),
+                atol=1e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag,
+                1e21 * hc_ml4gw.imag.numpy(),
+                atol=1e-3,
+            )
+
+        # If benchmarking calculate errors to record
+        # test_2 refers to differences between lal and ml4gw
+        # TaylorF2 methods when mass ratio is flipped
+        if request.config.getoption("--benchmark") != 0:
+            test_2_hp_real_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy())
+            )
+            test_2_hp_imag_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy())
+            )
+            test_2_hc_real_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy())
+            )
+            test_2_hc_imag_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy())
+            )
+
+        # If benchmark mode is on, gather all relavent data to store
+        if request.config.getoption("--benchmark") != 0:
+            data = {
+                "test_1_hp_real_abs_err": test_1_hp_real_abs_err,
+                "test_1_hp_imag_abs_err": test_1_hp_imag_abs_err,
+                "test_1_hc_real_abs_err": test_1_hc_real_abs_err,
+                "test_1_hc_imag_abs_err": test_1_hc_imag_abs_err,
+                "test_2_hp_real_abs_err": test_2_hp_real_abs_err,
+                "test_2_hp_imag_abs_err": test_2_hp_imag_abs_err,
+                "test_2_hc_real_abs_err": test_2_hc_real_abs_err,
+                "test_2_hc_imag_abs_err": test_2_hc_imag_abs_err,
+                "chirp_mass": chirp_mass[i],
+                "mass_ratio": mass_ratio[i],
+                "chi1": chi1[i],
+                "chi2": chi2[i],
+                "distance": distance[i],
+                "phase": phase[i],
+                "theta_jn": theta_jn[i],
+                "f_ref": f_ref,
+            }
+
+        # append data to batch and write if batch size exceeds set batch size
+        if request.config.getoption("--benchmark") != 0:
+            batch_data.append(data)
+            if len(batch_data) >= batch_size:
+                for batch in batch_data:
+                    write_benchmark_data(filename, batch)
+                batch_data = []
+
+                if get_file_size(filename) >= 0.05:
+                    filename = get_next_file_name(base_filename)
+                    logging.info(f"Switching to new file: {filename}")
+
+    # If there is any remaining data in the batch, write it to the file
+    if request.config.getoption("--benchmark") != 0:
+        if batch_data:
+            for batch in batch_data:
+                write_benchmark_data(filename, batch)
 
 
 def test_phenom_d(
@@ -159,10 +335,17 @@ def test_phenom_d(
     theta_jn,
     sample_rate,
     f_ref,
+    request,
 ):
     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
         chirp_mass, mass_ratio
     )
+
+    # Accumulate data in memory and write in batches for benchmarking only
+    batch_size = 100
+    batch_data = []
+    base_filename = "benchmark_data/benchmark_data_phenom_d"
+    filename = get_next_file_name(base_filename)
 
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
@@ -229,18 +412,79 @@ def test_phenom_d(
         assert not torch.any(torch.isnan(hc_ml4gw))
         assert not torch.any(torch.isnan(hp_ml4gw))
 
-        assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
-        )
+        # If benchmarking calculate errors to record,
+        #  these are just the differences between lal and ml4gw
+        if request.config.getoption("--benchmark") != 0:
+            hp_real_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy())
+            )
+            hp_imag_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy())
+            )
+            hc_real_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy())
+            )
+            hc_imag_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy())
+            )
+
+        if request.config.getoption("--benchmark") == 0:
+            assert np.allclose(
+                1e21 * hp_lal_data.real,
+                1e21 * hp_ml4gw.real.numpy(),
+                atol=2e-3,
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag,
+                1e21 * hp_ml4gw.imag.numpy(),
+                atol=2e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real,
+                1e21 * hc_ml4gw.real.numpy(),
+                atol=2e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag,
+                1e21 * hc_ml4gw.imag.numpy(),
+                atol=2e-3,
+            )
+
+        # If benchmark mode is on, gather all relavent data to store
+        if request.config.getoption("--benchmark") != 0:
+            data = {
+                "hp_real_abs_err": hp_real_abs_err,
+                "hp_imag_abs_err": hp_imag_abs_err,
+                "hc_real_abs_err": hc_real_abs_err,
+                "hc_imag_abs_err": hc_imag_abs_err,
+                "chirp_mass": chirp_mass[i],
+                "mass_ratio": mass_ratio[i],
+                "chi1": chi1[i],
+                "chi2": chi2[i],
+                "distance": distance[i],
+                "phase": phase[i],
+                "theta_jn": theta_jn[i],
+                "f_ref": f_ref,
+            }
+
+            # append data to batch and write if batch size exceeds
+            # set batch size
+            if request.config.getoption("--benchmark") != 0:
+                batch_data.append(data)
+                if len(batch_data) >= batch_size:
+                    for batch in batch_data:
+                        write_benchmark_data(filename, batch)
+                    batch_data = []
+
+                    if get_file_size(filename) >= 0.05:
+                        filename = get_next_file_name(base_filename)
+                        logging.info(f"Switching to new file: {filename}")
+
+    # If there is any remaining data in the batch, write it to the file
+    if request.config.getoption("--benchmark") != 0:
+        if batch_data:
+            for batch in batch_data:
+                write_benchmark_data(filename, batch)
 
 
 def test_phenom_p(
@@ -258,6 +502,8 @@ def test_phenom_p(
     phi_12,
     a_1,
     a_2,
+    request,
+    batch_size,
 ):
     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
         chirp_mass, mass_ratio
@@ -285,6 +531,11 @@ def test_phenom_p(
     )
 
     tc = 0.0
+
+    # Accumulate data in memory and write in batches for benchmarking only
+    batch_data = []
+    base_filename = "benchmark_data/benchmark_data_phenom_p"
+    filename = get_next_file_name(base_filename)
 
     # compare each waveform with lalsimulation
     for i in range(len(chirp_mass)):
@@ -355,18 +606,43 @@ def test_phenom_p(
         hc_lal_data = hc_lal.data.data[lal_mask]
 
         # Only 4 of 50,000 samples failed this tolerance
-        assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-3
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
-        )
+        if request.config.getoption("--benchmark") == 0:
+            assert np.allclose(
+                1e21 * hp_lal_data.real,
+                1e21 * hp_ml4gw.real.numpy(),
+                atol=2e-3,
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag,
+                1e21 * hp_ml4gw.imag.numpy(),
+                atol=2e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real,
+                1e21 * hc_ml4gw.real.numpy(),
+                atol=2e-3,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag,
+                1e21 * hc_ml4gw.imag.numpy(),
+                atol=2e-3,
+            )
+
+        # If benchmarking calculate errors to record
+        # test_1 refers to differences between lal and ml4gw PhenomPv2 methods
+        if request.config.getoption("--benchmark") != 0:
+            test_1_hp_real_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy())
+            )
+            test_1_hp_imag_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy())
+            )
+            test_1_hc_real_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy())
+            )
+            test_1_hc_imag_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy())
+            )
 
         # test close (< 400 Mpc) waveforms  (O(1e-2) agreement)
         params["distance"] = (distance_close[i].item() * u.Mpc).to("m").value
@@ -411,18 +687,87 @@ def test_phenom_p(
         hp_lal_data = hp_lal.data.data[lal_mask]
         hc_lal_data = hc_lal.data.data[lal_mask]
 
-        assert np.allclose(
-            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw.real.numpy(), atol=2e-2
-        )
-        assert np.allclose(
-            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw.imag.numpy(), atol=2e-2
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw.real.numpy(), atol=2e-2
-        )
-        assert np.allclose(
-            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-2
-        )
+        if request.config.getoption("--benchmark") == 0:
+            assert np.allclose(
+                1e21 * hp_lal_data.real,
+                1e21 * hp_ml4gw.real.numpy(),
+                atol=2e-2,
+            )
+            assert np.allclose(
+                1e21 * hp_lal_data.imag,
+                1e21 * hp_ml4gw.imag.numpy(),
+                atol=2e-2,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.real,
+                1e21 * hc_ml4gw.real.numpy(),
+                atol=2e-2,
+            )
+            assert np.allclose(
+                1e21 * hc_lal_data.imag,
+                1e21 * hc_ml4gw.imag.numpy(),
+                atol=2e-2,
+            )
+
+        # If benchmarking calculate errors to record
+        # test_2 refers to differences between lal and ml4gw
+        # PhenomPv2 methods reconstructed by using fmin and fmax
+        if request.config.getoption("--benchmark") != 0:
+            test_2_hp_real_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.real - 1e21 * hp_ml4gw.real.numpy())
+            )
+            test_2_hp_imag_abs_err = np.max(
+                np.abs(1e21 * hp_lal_data.imag - 1e21 * hp_ml4gw.imag.numpy())
+            )
+            test_2_hc_real_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.real - 1e21 * hc_ml4gw.real.numpy())
+            )
+            test_2_hc_imag_abs_err = np.max(
+                np.abs(1e21 * hc_lal_data.imag - 1e21 * hc_ml4gw.imag.numpy())
+            )
+
+        if request.config.getoption("--benchmark") != 0:
+            data = {
+                "test_1_hp_real_abs_err": test_1_hp_real_abs_err,
+                "test_1_hp_imag_abs_err": test_1_hp_imag_abs_err,
+                "test_1_hc_real_abs_err": test_1_hc_real_abs_err,
+                "test_1_hc_imag_abs_err": test_1_hc_imag_abs_err,
+                "test_2_hp_real_abs_err": test_2_hp_real_abs_err,
+                "test_2_hp_imag_abs_err": test_2_hp_imag_abs_err,
+                "test_2_hc_real_abs_err": test_2_hc_real_abs_err,
+                "test_2_hc_imag_abs_err": test_2_hc_imag_abs_err,
+                "chirp_mass": chirp_mass[i],
+                "mass_ratio": mass_ratio[i],
+                "chi1x": chi1x[i],
+                "chi1y": chi1y[i],
+                "chi1z": chi1z[i],
+                "chi2x": chi2x[i],
+                "chi2y": chi2y[i],
+                "chi2z": chi2z[i],
+                "distance_close": distance_close[i],
+                "distance_far": distance_far[i],
+                "phase": phase[i],
+                "theta_jn": theta_jn[i],
+                "f_ref": f_ref,
+            }
+
+            # append data to batch and write if batch size
+            # exceeds set batch size
+            batch_data.append(data)
+            if len(batch_data) >= batch_size:
+                for batch in batch_data:
+                    write_benchmark_data(filename, batch)
+                batch_data = []
+
+                if get_file_size(filename) >= 0.05:
+                    filename = get_next_file_name(base_filename)
+                    logging.info(f"Switching to new file: {filename}")
+
+    if request.config.getoption("--benchmark") != 0:
+        # If there is any remaining data in the batch, write it to the file
+        if batch_data:
+            for batch in batch_data:
+                write_benchmark_data(filename, batch)
 
     # test batched outputs works as expected
     hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
@@ -443,38 +788,40 @@ def test_phenom_p(
     )
 
     # check batch against lal
-    assert np.allclose(
-        1e21 * hp_lal_data.real, 1e21 * hp_ml4gw[0].real.numpy(), atol=2e-2
-    )
-    assert np.allclose(
-        1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw[0].imag.numpy(), atol=2e-2
-    )
-    assert np.allclose(
-        1e21 * hc_lal_data.real, 1e21 * hc_ml4gw[0].real.numpy(), atol=2e-2
-    )
-    assert np.allclose(
-        1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw[0].imag.numpy(), atol=2e-2
-    )
+    if request.config.getoption("--benchmark") == 0:
+        assert np.allclose(
+            1e21 * hp_lal_data.real, 1e21 * hp_ml4gw[0].real.numpy(), atol=2e-2
+        )
+        assert np.allclose(
+            1e21 * hp_lal_data.imag, 1e21 * hp_ml4gw[0].imag.numpy(), atol=2e-2
+        )
+        assert np.allclose(
+            1e21 * hc_lal_data.real, 1e21 * hc_ml4gw[0].real.numpy(), atol=2e-2
+        )
+        assert np.allclose(
+            1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw[0].imag.numpy(), atol=2e-2
+        )
 
     # check batch against each other
     for i in range(9):
-        assert np.allclose(
-            1e21 * hp_ml4gw[0].real.numpy(),
-            1e21 * hp_ml4gw[i + 1].real.numpy(),
-            atol=1e-2,
-        )
-        assert np.allclose(
-            1e21 * hp_ml4gw[0].imag.numpy(),
-            1e21 * hp_ml4gw[i + 1].imag.numpy(),
-            atol=1e-2,
-        )
-        assert np.allclose(
-            1e21 * hc_ml4gw[0].real.numpy(),
-            1e21 * hc_ml4gw[i + 1].real.numpy(),
-            atol=1e-2,
-        )
-        assert np.allclose(
-            1e21 * hc_ml4gw[0].imag.numpy(),
-            1e21 * hc_ml4gw[i + 1].imag.numpy(),
-            atol=1e-2,
-        )
+        if request.config.getoption("--benchmark") == 0:
+            assert np.allclose(
+                1e21 * hp_ml4gw[0].real.numpy(),
+                1e21 * hp_ml4gw[i + 1].real.numpy(),
+                atol=1e-2,
+            )
+            assert np.allclose(
+                1e21 * hp_ml4gw[0].imag.numpy(),
+                1e21 * hp_ml4gw[i + 1].imag.numpy(),
+                atol=1e-2,
+            )
+            assert np.allclose(
+                1e21 * hc_ml4gw[0].real.numpy(),
+                1e21 * hc_ml4gw[i + 1].real.numpy(),
+                atol=1e-2,
+            )
+            assert np.allclose(
+                1e21 * hc_ml4gw[0].imag.numpy(),
+                1e21 * hc_ml4gw[i + 1].imag.numpy(),
+                atol=1e-2,
+            )
