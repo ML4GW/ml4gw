@@ -89,6 +89,16 @@ def window(request, fftlength, sample_rate):
     return signal.get_window(request.param, int(fftlength * sample_rate))
 
 
+def test_average_error():
+    with pytest.raises(ValueError, match=r'average must be "mean" or*'):
+        SpectralDensity(
+            2048,
+            2,
+            None,
+            average="dummy average",
+        )
+
+
 def test_spectral_density(
     length, sample_rate, fftlength, overlap, fast, average, ndim, window
 ):

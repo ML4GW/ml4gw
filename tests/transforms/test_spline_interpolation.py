@@ -31,17 +31,25 @@ class TestSplineInterpolate:
         scipy_spline = UnivariateSpline(x_in, data, k=3, s=0)
         expected = scipy_spline(x_out)
 
+        data = Tensor(data)
+        x_in = Tensor(x_in)
+        x_out = Tensor(x_out)
+
         torch_spline = SplineInterpolate(
-            x_in=Tensor(x_in),
-            x_out=Tensor(x_out),
+            x_in=x_in,
+            x_out=x_out,
             kx=3,
         )
-        actual = torch_spline(Tensor(data)).squeeze().numpy()
+        actual = torch_spline(data).squeeze().numpy()
 
         # The "steady-state" ratio between the torch and scipy
         # interpolations is about 0.9990, with some minor fluctuations.
         # Would be nice to know why the torch interpolation is
         # consistently smaller
+        assert np.allclose(actual, expected, rtol=1e-2)
+
+        # Check that passing output grid behaves as expected
+        actual = torch_spline(data, x_out).squeeze().numpy()
         assert np.allclose(actual, expected, rtol=1e-2)
 
     def test_2d_interpolation(self, x_out_len, y_out_len):
@@ -58,21 +66,31 @@ class TestSplineInterpolate:
         scipy_spline = RectBivariateSpline(x_in, y_in, data.T, kx=3, ky=3, s=0)
         expected = scipy_spline(x_out, y_out).T
 
+        data = Tensor(data)
+        x_in = Tensor(x_in)
+        x_out = Tensor(x_out)
+        y_in = Tensor(y_in)
+        y_out = Tensor(y_out)
+
         torch_spline = SplineInterpolate(
-            x_in=Tensor(x_in),
-            x_out=Tensor(x_out),
-            y_in=Tensor(y_in),
-            y_out=Tensor(y_out),
+            x_in=x_in,
+            x_out=x_out,
+            y_in=y_in,
+            y_out=y_out,
             kx=3,
             ky=3,
         )
-        actual = torch_spline(Tensor(data)).squeeze().numpy()
+        actual = torch_spline(data).squeeze().numpy()
 
         # The "steady-state" ratio between the torch and scipy
         # interpolations is about 0.999, with some minor fluctuations.
         # Would be nice to know why the torch interpolation is
         # consistently smaller
         assert np.allclose(actual, expected, rtol=5e-3)
+
+        # Check that passing output grid behaves as expected
+        actual = torch_spline(data, x_out, y_out).squeeze().numpy()
+        assert np.allclose(actual, expected, rtol=1e-2)
 
     def test_errors(self):
         x_in = torch.arange(10)
