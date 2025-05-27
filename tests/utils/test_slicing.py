@@ -28,6 +28,12 @@ def test_unfold_windows():
     )
     assert rem.tolist() == [[6]]
 
+    # Check remainder when windows evenly divide the kernel
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=1, drop_last=False
+    )
+    assert rem.tolist() == [[]]
+
     # 2D
     x = torch.tensor([[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7]], dtype=float)
     result = slicing.unfold_windows(x, window_size=3, stride=2)
@@ -37,6 +43,12 @@ def test_unfold_windows():
         x, window_size=3, stride=2, drop_last=False
     )
     assert rem.tolist() == [[[6], [7]]]
+
+    # Check remainder when windows evenly divide the kernel
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=1, drop_last=False
+    )
+    assert rem.tolist() == [[[], []]]
 
     # 3D
     x = torch.tensor(
@@ -56,6 +68,12 @@ def test_unfold_windows():
         x, window_size=3, stride=2, drop_last=False
     )
     assert rem.tolist() == [[[[6], [7]], [[8], [9]]]]
+
+    # Check remainder when windows evenly divide the kernel
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=1, drop_last=False
+    )
+    assert rem.tolist() == [[[[], []], [[], []]]]
 
 
 def test_slice_kernels(kernel_size, num_channels):
