@@ -7,7 +7,6 @@ from astropy import units as u
 import matplotlib.pyplot as plt
 import h5py
 import os
-from tqdm import tqdm
 
 import ml4gw.waveforms as waveforms
 from ml4gw.waveforms.conversion import (
@@ -294,7 +293,7 @@ def test_phenom_d(
 
 
     # compare each waveform with lalsimulation
-    for i in tqdm(range(len(chirp_mass))):
+    for i in range(len(chirp_mass)):
 
         # construct lalinference params
         params = dict(
