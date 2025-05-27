@@ -126,6 +126,9 @@ class TestFixedWhiten(WhitenModuleTest):
         assert (transform.psd != 0).all().item()
         assert (transform.fduration == 2).item()
 
+        # Check that an error is raised for an unexpected input shape
+        with pytest.raises(ValueError, match=r"Whitening transform expected*"):
+            transform(X[..., :-1])
         # now whiten a dummy tensor and make sure
         # that the values come out as expected
         whitened = transform(X)

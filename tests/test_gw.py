@@ -76,6 +76,11 @@ def bilby_get_ifo_response(ifos, batch_size):
     return func
 
 
+def test_get_invalid_ifo_geometry():
+    with pytest.raises(ValueError, match=r"Z1 is not recognized as an inter*"):
+        injection.get_ifo_geometry("Z1")
+
+
 def test_compute_antenna_responses(
     ifos,
     batch_size,

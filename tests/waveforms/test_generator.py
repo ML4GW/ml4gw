@@ -72,6 +72,10 @@ def test_cbc_waveform_generator(
         right_pad=right_pad,
     )
 
+    assert generator.delta_t == 1 / sample_rate
+    assert generator.size == int(duration * sample_rate)
+    assert generator.delta_f == 1 / duration
+
     mass_1, mass_2 = conversion.chirp_mass_and_mass_ratio_to_components(
         chirp_mass, mass_ratio
     )

@@ -256,11 +256,6 @@ class SplineInterpolate(torch.nn.Module):
         return b[:, :, -1]
 
     def bivariate_spline_fit_natural(self, Z):
-        if len(Z.shape) == 3:
-            Z_Bx = torch.matmul(Z, self.Bx)
-            # ((BxT @ Bx)^-1 @ (Z @ Bx)T)T = Z @ BxT^-1
-            return torch.linalg.solve(self.BxT_Bx, Z_Bx.mT).mT
-
         # Adding batch/channel dimension handling
         # ByT @ Z @ BxW
         ByT_Z_Bx = torch.einsum("ij,bcik,kl->bcjl", self.By, Z, self.Bx)
@@ -280,8 +275,6 @@ class SplineInterpolate(torch.nn.Module):
             Z_interp: Interpolated values at the grid points.
         """
         # Perform matrix multiplication using einsum to get Z_interp
-        if len(C.shape) == 3:
-            return torch.matmul(C, self.Bx_out.mT)
         return torch.einsum("ik,bckm,mj->bcij", self.By_out, C, self.Bx_out.mT)
 
     def _validate_inputs(self, Z, x_out, y_out):
