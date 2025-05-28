@@ -112,6 +112,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                  ifos: Sequence[str] = ("H1", "L1"),
                  glitch_margin: float = 2.0,
                  num_files_per_batch: Optional[int] = None,
+                 cache_dir: Optional[str] = None,
                  remake_cache: bool = False):
 
         assert mode in ("raw", "clean", "glitch")
@@ -140,12 +141,18 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.ifos = ifos
         self.glitch_margin = glitch_margin
         self.num_files_per_batch = len(fnames) if num_files_per_batch is None else num_files_per_batch
+        self.cache_dir = cache_dir
         self.remake_cache = remake_cache
 
         self.sizes, self.valid, self.cache_paths, self.num_valid = {}, {}, {}, {}
         for fname in self.fnames:
             basename = os.path.basename(fname).replace(".h5", "")
-            cache_path = os.path.join(os.path.dirname(fname), f"{basename}_{mode}_valid.npy")
+            if self.cache_dir is not None:
+                os.makedirs(self.cache_dir, exist_ok=True)
+                cache_path = os.path.join(self.cache_dir, f"{basename}_{mode}_valid.npy")
+            else:
+                cache_path = os.path.join(os.path.dirname(fname), f"{basename}_{mode}_valid.npy")
+            
             self.cache_paths[fname] = str(cache_path)
             self.num_valid[fname] = 0
 
