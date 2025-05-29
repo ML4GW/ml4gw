@@ -25,9 +25,10 @@ class Gaussian(torch.nn.Module):
             tukey[-k:] = tukey[:k].flip(0)
         self.register_buffer("tukey", tukey)
 
-    def forward(self, hrss: Tensor, polarization: Tensor, eccentricity: Tensor):
+    def forward(self, hrss: Tensor, polarization: Tensor, eccentricity: Tensor, duration: Tensor):
         hrss       = hrss.view(-1, 1)
         psi        = polarization.view(-1, 1)
+        duration = duration.view(-1, 1)
 
         # correct LAL normalisation
         h0 = hrss / torch.sqrt(torch.sqrt(torch.tensor(torch.pi,
@@ -38,10 +39,12 @@ class Gaussian(torch.nn.Module):
         h0_cross = h0 * torch.sin(psi)
 
         t = self.times.to(hrss.device, hrss.dtype)
-        env = torch.exp(-0.5 * t.pow(2) / self.duration**2)[None, :]
+        #env = torch.exp(-0.5 * t.pow(2) / self.duration**2)[None, :]
+        env = torch.exp(-0.5 * t.pow(2).view(1,-1) / duration**2)
 
         win = self.tukey.to(hrss.device, hrss.dtype)[None, :]
 
+        #print("Gaussian \t env",env.shape, "win", win.shape, "h0_plus", h0_plus.shape, "h0_cross", h0_cross.shape)
         plus  = (h0_plus  * env) * win
         cross = (h0_cross * env) * win
         return cross, plus

@@ -46,7 +46,8 @@ class WhiteNoiseBurst(nn.Module):
         bandwidth: BatchTensor,
         eccentricity: BatchTensor,
         phase: BatchTensor,
-        int_hdot_squared: BatchTensor
+        int_hdot_squared: BatchTensor,
+        duration: BatchTensor
     ):
         """
         Generate a band- and time-limited white noise burst.
@@ -67,6 +68,7 @@ class WhiteNoiseBurst(nn.Module):
         eccentricity = eccentricity.view(-1, 1)
         phase = phase.view(-1, 1)
         int_hdot_squared = int_hdot_squared.view(-1, 1)
+        duration = duration.view(-1,1)
 
         batch = frequency.shape[0]
         dt = self.dt
@@ -80,7 +82,14 @@ class WhiteNoiseBurst(nn.Module):
             raise ValueError("Invalid input parameters.")
 
         # Compute compensated time-window variance: sigma_t² = duration²/4 - 1/(π² * bandwidth²)
-        sigma_t_sq = (self.duration**2 / 4.0) - 1.0 / (torch.pi**2 * (bandwidth.squeeze(-1)**2))
+        #sigma_t_sq = (self.duration**2 / 4.0) - 1.0 / (torch.pi**2 * (bandwidth.squeeze(-1)**2))
+        #if (sigma_t_sq < 0).any():
+        #    raise ValueError("Invalid input parameters: sigma_t² < 0 (duration*bandwidth too small).")
+        # Effective time-domain sigma in seconds per batch sample.
+        #sigma_t = sigma_t_sq.sqrt()  # shape (batch,)
+
+        # New with batched duration
+        sigma_t_sq = (duration.squeeze(-1)**2 / 4.0) - 1.0 / (torch.pi**2 * (bandwidth.squeeze(-1)**2))
         if (sigma_t_sq < 0).any():
             raise ValueError("Invalid input parameters: sigma_t² < 0 (duration*bandwidth too small).")
         # Effective time-domain sigma in seconds per batch sample.
