@@ -230,7 +230,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         p /= p.sum()
         return np.random.choice(subf, size=size, replace=True, p=p)
 
-    def sample_batch(self) -> WaveformTensor:
+    def _sample_batch(self) -> WaveformTensor:
         x = np.zeros((self.batch_size, self.num_channels, self.kernel_size), dtype=np.float32)
 
         size = (self.batch_size,) if self.coincident else (self.batch_size, self.num_channels)
@@ -264,6 +264,12 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     x[b, c] = f[self.channels[c]][s:s + self.kernel_size]
 
         return torch.tensor(x)
+    
+    def sample_batch(self) -> WaveformTensor:
+        x = self._sample_batch()
+        while torch.any(x==0) or torch.any(torch.isnan(x)):
+            x = self._sample_batch()
+        return x
 
     def __iter__(self):
         wi = torch.utils.data.get_worker_info()
