@@ -152,7 +152,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                 cache_path = os.path.join(self.cache_dir, f"{basename}_{mode}_valid.npy")
             else:
                 cache_path = os.path.join(os.path.dirname(fname), f"{basename}_{mode}_valid.npy")
-            
+
             self.cache_paths[fname] = str(cache_path)
             self.num_valid[fname] = 0
 
@@ -265,6 +265,12 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
 
         return torch.tensor(x)
     
+    def sample_batch(self) -> WaveformTensor:
+        x = self._sample_batch()
+        while torch.any(x==0) or torch.any(torch.isnan(x)):
+            x = self._sample_batch()
+        return x
+
     def sample_batch(self) -> WaveformTensor:
         x = self._sample_batch()
         while torch.any(x==0) or torch.any(torch.isnan(x)):
