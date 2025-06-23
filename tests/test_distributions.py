@@ -13,7 +13,7 @@ from ml4gw import distributions
 # distribution has the expected shape?
 
 
-def test_log_uniform():
+def test_log_uniform(seed_everything):
     sampler = distributions.LogUniform(math.e, math.e**2)
     samples = sampler.sample((10,))
     assert len(samples) == 10
@@ -31,7 +31,7 @@ def test_log_uniform():
     assert abs(mean - 1.5) < (3 * sample_std)
 
 
-def test_cosine():
+def test_cosine(seed_everything):
     sampler = distributions.Cosine()
     samples = sampler.sample((10,))
     assert len(samples) == 10
@@ -45,7 +45,7 @@ def test_cosine():
     assert torch.all(sampler.log_prob(torch.tensor([-4, 6])) == float("-inf"))
 
 
-def test_power_law():
+def test_power_law(seed_everything):
     """Test PowerLaw distribution"""
     ref_snr = 8
     sampler = distributions.PowerLaw(ref_snr, float("inf"), index=-4)
@@ -86,13 +86,13 @@ def test_power_law():
     assert popt[1] == pytest.approx(-1, rel=1e-1)
 
 
-def test_delta_function():
+def test_delta_function(seed_everything):
     sampler = distributions.DeltaFunction(peak=20)
     samples = sampler.sample((10,))
     assert (samples == 20).all()
 
 
-def test_uniform_comoving_volume():
+def test_uniform_comoving_volume(seed_everything):
     # Check that the ml4gw UCV distribution for
     # redshift matches bilby's
     minimum = 0
