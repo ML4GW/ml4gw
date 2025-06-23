@@ -246,28 +246,19 @@ class UniformComovingVolume(dist.Distribution):
         luminosity_dist_grid = comoving_dist_grid * (1 + z_grid)
 
         if distance_type == "comoving_distance":
-            self.minimum, self.maximum = Tensor([minimum, maximum])
             z_min, z_max = self._linear_interp_1d(
                 comoving_dist_grid, z_grid, Tensor([minimum, maximum])
             )
         elif distance_type == "redshift":
-            self.minimum, self.maximum = self._linear_interp_1d(
-                z_grid, comoving_dist_grid, Tensor([minimum, maximum])
-            )
             z_min, z_max = Tensor([minimum, maximum])
         else:
-            self.minimum, self.maximum = self._linear_interp_1d(
-                luminosity_dist_grid,
-                comoving_dist_grid,
-                Tensor([minimum, maximum]),
-            )
             z_min, z_max = self._linear_interp_1d(
                 luminosity_dist_grid, z_grid, Tensor([minimum, maximum])
             )
 
-        if self.maximum > comoving_dist_grid[-1]:
+        if z_max > z_grid_max:
             raise ValueError(
-                f"Maximum comoving distance {self.maximum} "
+                f"Maximum {distance_type} {maximum} "
                 f"exceeds given z_max {z_grid_max}."
             )
 
@@ -287,18 +278,18 @@ class UniformComovingVolume(dist.Distribution):
         log_pdf = torch.log(pdf_grid)
 
         # Compute change of variables factors for computing log_prob
-        dcomoving_dist_dz = torch.gradient(comoving_dist_grid, spacing=dz)[0]
-        dluminosity_dist_dz = torch.gradient(luminosity_dist_grid, spacing=dz)[
-            0
-        ]
+        dcomoving_dist_dz = torch.gradient(comoving_dist_grid, spacing=dz)
+        dluminosity_dist_dz = torch.gradient(luminosity_dist_grid, spacing=dz)
 
+        self.minimum = minimum
+        self.maximum = maximum
         self.z_grid = z_grid
         self.dz = dz
         self.comoving_dist_grid = comoving_dist_grid
         self.luminosity_dist_grid = luminosity_dist_grid
         self.log_pdf = log_pdf
-        self.dz_dcomoving_dist = 1 / dcomoving_dist_dz
-        self.dz_dluminosity_dist = 1 / dluminosity_dist_dz
+        self.dz_dcomoving_dist = 1 / dcomoving_dist_dz[0]
+        self.dz_dluminosity_dist = 1 / dluminosity_dist_dz[0]
 
     def _linear_interp_1d(self, x_grid, y_grid, x_query):
         idx = torch.bucketize(x_query, x_grid, right=True)
@@ -321,6 +312,10 @@ class UniformComovingVolume(dist.Distribution):
         cdf = torch.cumsum(pdf * self.dz, dim=0)
         z = self._linear_interp_1d(cdf, self.z_grid, u)
 
+        # Due to interpolation error, the sampled redshift
+        # can be very slightly outside the grid range.
+        z = z.clamp(min=self.z_grid[0], max=self.z_grid[-1])
+
         if self.distance_type == "redshift":
             return z
         elif self.distance_type == "comoving_distance":
@@ -334,7 +329,7 @@ class UniformComovingVolume(dist.Distribution):
 
     def log_prob(self, value: Tensor) -> Tensor:
         if self.distance_type == "redshift":
-            return self._linear_interp_1d(self.z_grid, self.log_pdf, value)
+            log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, value)
         elif self.distance_type == "comoving_distance":
             z = self._linear_interp_1d(
                 self.comoving_dist_grid, self.z_grid, value
@@ -343,7 +338,7 @@ class UniformComovingVolume(dist.Distribution):
             dz_dcomoving_dist = self._linear_interp_1d(
                 self.comoving_dist_grid, self.dz_dcomoving_dist, value
             )
-            return log_prob + torch.log(dz_dcomoving_dist)
+            log_prob += torch.log(dz_dcomoving_dist)
         else:
             z = self._linear_interp_1d(
                 self.luminosity_dist_grid, self.z_grid, value
@@ -352,4 +347,8 @@ class UniformComovingVolume(dist.Distribution):
             dz_dluminosity_dist = self._linear_interp_1d(
                 self.luminosity_dist_grid, self.dz_dluminosity_dist, value
             )
-            return log_prob + torch.log(dz_dluminosity_dist)
+            log_prob += torch.log(dz_dluminosity_dist)
+
+        inside_range = (value >= self.minimum) & (value <= self.maximum)
+        log_prob[~inside_range] = float("-inf")
+        return log_prob
