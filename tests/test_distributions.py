@@ -90,12 +90,17 @@ def test_delta_function():
     samples = sampler.sample((10,))
     assert (samples == 20).all()
 
+
 def test_uniform_comoving_volume():
     minimum = 1000
     maximum = 5000
-    ml4gw_samples = distributions.UniformComovingVolume(
-        minimum, maximum, distance_type="comoving_distance"
-    ).sample((100000,)).numpy()
+    ml4gw_samples = (
+        distributions.UniformComovingVolume(
+            minimum, maximum, distance_type="comoving_distance"
+        )
+        .sample((100000,))
+        .numpy()
+    )
 
     bilby_samples = UniformComovingVolume(
         minimum=minimum, maximum=maximum, name="comoving_distance"
@@ -106,9 +111,13 @@ def test_uniform_comoving_volume():
 
     minimum = 0
     maximum = 2
-    ml4gw_samples = distributions.UniformComovingVolume(
-        minimum, maximum, distance_type="redshift"
-    ).sample((100000,)).numpy()
+    ml4gw_samples = (
+        distributions.UniformComovingVolume(
+            minimum, maximum, distance_type="redshift"
+        )
+        .sample((100000,))
+        .numpy()
+    )
 
     bilby_samples = UniformComovingVolume(
         minimum=minimum, maximum=maximum, name="redshift"
@@ -117,12 +126,15 @@ def test_uniform_comoving_volume():
     _, p_value = stats.ks_2samp(ml4gw_samples, bilby_samples)
     assert p_value > 0.05
 
-
     minimum = 10000
     maximum = 45000
-    ml4gw_samples = distributions.UniformComovingVolume(
-        minimum, maximum, distance_type="luminosity_distance"
-    ).sample((100000,)).numpy()
+    ml4gw_samples = (
+        distributions.UniformComovingVolume(
+            minimum, maximum, distance_type="luminosity_distance"
+        )
+        .sample((100000,))
+        .numpy()
+    )
 
     bilby_samples = UniformComovingVolume(
         minimum=minimum, maximum=maximum, name="luminosity_distance"
@@ -131,7 +143,7 @@ def test_uniform_comoving_volume():
     _, p_value = stats.ks_2samp(ml4gw_samples, bilby_samples)
     assert p_value > 0.05
 
-    with pytest.raises(ValueError, match=r"Distance type must be either*"):
+    with pytest.raises(ValueError, match=r"Distance type must be*"):
         distributions.UniformComovingVolume(
             minimum=minimum, maximum=maximum, distance_type="dummy"
         )

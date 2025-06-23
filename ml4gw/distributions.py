@@ -184,6 +184,7 @@ class UniformComovingVolume(dist.Distribution):
     lambda-CDM cosmology. Default H0 and Omega_M values match
     astropy.cosmology.Planck18
     """
+
     arg_constraints = {}
     support = dist.constraints.nonnegative
 
@@ -200,9 +201,13 @@ class UniformComovingVolume(dist.Distribution):
     ):
         super().__init__(validate_args=validate_args)
 
-        if distance_type not in ["redshift", "comoving_distance", "luminosity_distance"]:
+        if distance_type not in [
+            "redshift",
+            "comoving_distance",
+            "luminosity_distance",
+        ]:
             raise ValueError(
-                "Distance type must be either 'redshift', 'comoving_distance', "
+                "Distance type must be 'redshift', 'comoving_distance', "
                 f"or 'luminosity_distance'; got {distance_type}"
             )
 
@@ -229,7 +234,9 @@ class UniformComovingVolume(dist.Distribution):
             )
         else:
             self.minimum, self.maximum = self._linear_interp_1d(
-                luminosity_dist_grid, comoving_dist_grid, Tensor([minimum, maximum])
+                luminosity_dist_grid,
+                comoving_dist_grid,
+                Tensor([minimum, maximum]),
             )
 
         if self.maximum > comoving_dist_grid[-1]:
@@ -254,20 +261,20 @@ class UniformComovingVolume(dist.Distribution):
         t = (x_query - x0) / (x1 - x0 + 1e-10)
         return y0 + t * (y1 - y0)
 
-
     def rsample(self, sample_shape: torch.Size = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         u = torch.rand(sample_shape)
 
         comoving_distance = (
-            (1 - u) * self.minimum ** 3 +
-            u * self.maximum ** 3
+            (1 - u) * self.minimum**3 + u * self.maximum**3
         ) ** (1 / 3)
 
         if self.distance_type == "comoving_distance":
             return comoving_distance
         else:
-            z = self._linear_interp_1d(self.comoving_dist_grid, self.z_grid, comoving_distance)
+            z = self._linear_interp_1d(
+                self.comoving_dist_grid, self.z_grid, comoving_distance
+            )
             if self.distance_type == "redshift":
                 return z
             else:
