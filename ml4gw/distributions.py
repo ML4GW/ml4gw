@@ -13,6 +13,8 @@ import torch.distributions as dist
 from jaxtyping import Float
 from torch import Tensor
 
+from ml4gw.constants import C
+
 
 class Cosine(dist.Distribution):
     """
@@ -173,3 +175,100 @@ class DeltaFunction(dist.Distribution):
         return self.peak * torch.ones(
             sample_shape, device=self.peak.device, dtype=torch.float32
         )
+
+
+class UniformComovingVolume(dist.Distribution):
+    """
+    Sample either redshift, comoving distance, or luminosity distance
+    such that they are uniform in comoving volume, assuming a flat
+    lambda-CDM cosmology. Default H0 and Omega_M values match
+    astropy.cosmology.Planck18
+    """
+    arg_constraints = {}
+    support = dist.constraints.nonnegative
+
+    def __init__(
+        self,
+        minimum: float,
+        maximum: float,
+        distance_type: str = "redshift",
+        h0: float = 67.66,
+        omega_m: float = 0.30966,
+        z_max: float = 5,
+        grid_size: int = 1000,
+        validate_args: bool = None,
+    ):
+        super().__init__(validate_args=validate_args)
+
+        if distance_type not in ["redshift", "comoving_distance", "luminosity_distance"]:
+            raise ValueError(
+                "Distance type must be either 'redshift', 'comoving_distance', "
+                f"or 'luminosity_distance'; got {distance_type}"
+            )
+
+        self.distance_type = distance_type
+        self.grid_size = grid_size
+
+        z_grid = torch.linspace(0, z_max, grid_size)
+
+        omega_l = 1 - omega_m
+        h = h0 * torch.sqrt(omega_m * (1 + z_grid) ** 3 + omega_l)
+
+        dz = z_grid[1] - z_grid[0]
+
+        # C is specfied in m/s, h0 in km/s/Mpc, so divide by 1000 to convert
+        comoving_dist_grid = torch.cumsum((C / h) * dz, dim=0) / 1000
+
+        luminosity_dist_grid = comoving_dist_grid * (1 + z_grid)
+
+        if distance_type == "comoving_distance":
+            self.minimum, self.maximum = Tensor([minimum, maximum])
+        elif distance_type == "redshift":
+            self.minimum, self.maximum = self._linear_interp_1d(
+                z_grid, comoving_dist_grid, Tensor([minimum, maximum])
+            )
+        else:
+            self.minimum, self.maximum = self._linear_interp_1d(
+                luminosity_dist_grid, comoving_dist_grid, Tensor([minimum, maximum])
+            )
+
+        if self.maximum > comoving_dist_grid[-1]:
+            raise ValueError(
+                f"Maximum comoving distance {self.maximum} "
+                f"exceeds given z_max {z_max}."
+            )
+
+        self.comoving_dist_grid = comoving_dist_grid
+        self.z_grid = z_grid
+
+    def _linear_interp_1d(self, x_grid, y_grid, x_query):
+        idx = torch.bucketize(x_query, x_grid, right=True)
+        idx = idx.clamp(min=1, max=self.grid_size - 1)
+
+        x0 = x_grid[idx - 1]
+        x1 = x_grid[idx]
+        y0 = y_grid[idx - 1]
+        y1 = y_grid[idx]
+
+        # Factor of epsilon for stability
+        t = (x_query - x0) / (x1 - x0 + 1e-10)
+        return y0 + t * (y1 - y0)
+
+
+    def rsample(self, sample_shape: torch.Size = None) -> Tensor:
+        sample_shape = sample_shape or torch.Size()
+        u = torch.rand(sample_shape)
+
+        comoving_distance = (
+            (1 - u) * self.minimum ** 3 +
+            u * self.maximum ** 3
+        ) ** (1 / 3)
+
+        if self.distance_type == "comoving_distance":
+            return comoving_distance
+        else:
+            z = self._linear_interp_1d(self.comoving_dist_grid, self.z_grid, comoving_distance)
+            if self.distance_type == "redshift":
+                return z
+            else:
+                return comoving_distance * (1 + z)

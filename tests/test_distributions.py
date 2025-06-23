@@ -3,7 +3,8 @@ import math
 import numpy as np
 import pytest
 import torch
-from scipy import optimize
+from bilby.gw.prior import UniformComovingVolume
+from scipy import optimize, stats
 
 from ml4gw import distributions
 
@@ -88,3 +89,54 @@ def test_delta_function():
     sampler = distributions.DeltaFunction(peak=20)
     samples = sampler.sample((10,))
     assert (samples == 20).all()
+
+def test_uniform_comoving_volume():
+    minimum = 1000
+    maximum = 5000
+    ml4gw_samples = distributions.UniformComovingVolume(
+        minimum, maximum, distance_type="comoving_distance"
+    ).sample((100000,)).numpy()
+
+    bilby_samples = UniformComovingVolume(
+        minimum=minimum, maximum=maximum, name="comoving_distance"
+    ).sample(100000)
+
+    _, p_value = stats.ks_2samp(ml4gw_samples, bilby_samples)
+    assert p_value > 0.05
+
+    minimum = 0
+    maximum = 2
+    ml4gw_samples = distributions.UniformComovingVolume(
+        minimum, maximum, distance_type="redshift"
+    ).sample((100000,)).numpy()
+
+    bilby_samples = UniformComovingVolume(
+        minimum=minimum, maximum=maximum, name="redshift"
+    ).sample(100000)
+
+    _, p_value = stats.ks_2samp(ml4gw_samples, bilby_samples)
+    assert p_value > 0.05
+
+
+    minimum = 10000
+    maximum = 45000
+    ml4gw_samples = distributions.UniformComovingVolume(
+        minimum, maximum, distance_type="luminosity_distance"
+    ).sample((100000,)).numpy()
+
+    bilby_samples = UniformComovingVolume(
+        minimum=minimum, maximum=maximum, name="luminosity_distance"
+    ).sample(100000)
+
+    _, p_value = stats.ks_2samp(ml4gw_samples, bilby_samples)
+    assert p_value > 0.05
+
+    with pytest.raises(ValueError, match=r"Distance type must be either*"):
+        distributions.UniformComovingVolume(
+            minimum=minimum, maximum=maximum, distance_type="dummy"
+        )
+
+    with pytest.raises(ValueError, match=r"Maximum comoving distance*"):
+        distributions.UniformComovingVolume(
+            minimum=minimum, maximum=6, distance_type="redshift"
+        )
