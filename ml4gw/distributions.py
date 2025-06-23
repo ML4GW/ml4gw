@@ -183,6 +183,18 @@ class UniformComovingVolume(dist.Distribution):
     such that they are uniform in comoving volume, assuming a flat
     lambda-CDM cosmology. Default H0 and Omega_M values match
     astropy.cosmology.Planck18
+
+    Args:
+        minimum: Minimum distance in the specified distance type
+        maximum: Maximum distance in the specified distance type
+        distance_type:
+            Type of distance to sample from. Can be 'redshift',
+            'comoving_distance', or 'luminosity_distance'
+        h0: Hubble constant in km/s/Mpc
+        omega_m: Matter density parameter
+        z_max: Maximum redshift for the grid
+        grid_size: Number of points in the grid for interpolation
+        validate_args: Whether to validate arguments
     """
 
     arg_constraints = {}
