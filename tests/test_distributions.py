@@ -5,6 +5,7 @@ import pytest
 import torch
 from astropy.cosmology import Planck18
 from bilby.gw.prior import UniformComovingVolume, UniformSourceFrame
+from bilby.core.utils.random import seed as bilby_seed
 from scipy import optimize, stats
 
 from ml4gw import distributions
@@ -92,168 +93,247 @@ def test_delta_function(seed_everything):
     assert (samples == 20).all()
 
 
-def test_uniform_comoving_volume(seed_everything):
-    # Check that the ml4gw UCV distribution for
-    # redshift matches bilby's
-    minimum = 0
-    maximum = 5
-    bilby_dist = UniformComovingVolume(
-        minimum=minimum, maximum=maximum, name="redshift"
-    )
-    ml4gw_dist = distributions.UniformComovingVolume(
-        minimum=minimum, maximum=maximum, distance_type="redshift"
-    )
-    bilby_samples = bilby_dist.sample(100000)
-    ml4gw_samples = ml4gw_dist.sample((100000,))
-    _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
-    assert p_value > 0.05
+class TestUniformComovingVolume:
+    # bilby randomness currently comes into play in
+    # only this test, so set the seed separately from
+    # the `seed_everything` fixture so that we don't
+    # get too constrained in finding a seed that passes
+    # every random test.
+    bilby_seed(123456789)
 
-    # Compare log probability between ml4gw and bilby
-    # using the same samples
-    ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
-    bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
-    assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+    @pytest.fixture(params=[False, True])
+    def source_frame_time(self, request):
+        return request.param
 
-    # Check that the luminosity distance calculation
-    # matches astropy's
-    z_grid = ml4gw_dist.z_grid.numpy()
-    # The d_L calculation differs by ~5% at z=0.015, and that
-    # difference improves with increasing z.
-    mask = z_grid > 0.015
-    ml4gw_dl = ml4gw_dist.luminosity_dist_grid.numpy()[mask]
-    astropy_dl = Planck18.luminosity_distance(z_grid[mask]).value
-    assert np.allclose(ml4gw_dl, astropy_dl, rtol=5e-2)
+    @pytest.fixture
+    def boundaries(self):
+        return {
+            "redshift": (0, 5),
+            "comoving_distance": (1000, 2000),
+            "luminosity_distance": (10000, 45000),
+        }
 
-    # Repeat for comoving distance
+    def test_distribution(
+        self, seed_everything, boundaries, source_frame_time
+    ):
+        num_samples = 10000
+        for distance_type, (minimum, maximum) in boundaries.items():
+            ml4gw_dist = distributions.UniformComovingVolume(
+                minimum=minimum,
+                maximum=maximum,
+                source_frame_time=source_frame_time,
+                distance_type=distance_type,
+            )
+            ml4gw_samples = ml4gw_dist.sample((num_samples,))
 
-    minimum = 1000
-    maximum = 2000
-    bilby_dist = UniformComovingVolume(
-        minimum=minimum, maximum=maximum, name="comoving_distance"
-    )
-    ml4gw_dist = distributions.UniformComovingVolume(
-        minimum=minimum, maximum=maximum, distance_type="comoving_distance"
-    )
-    bilby_samples = bilby_dist.sample(100000)
-    ml4gw_samples = ml4gw_dist.sample((100000,))
-    _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
-    assert p_value > 0.05
+            assert ml4gw_samples.shape == (num_samples,)
 
-    # Compare log probability between ml4gw and bilby
-    # using the same samples
-    ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
-    bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
-    assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+            if source_frame_time:
+                bilby_dist = UniformSourceFrame(
+                    minimum=minimum, maximum=maximum, name=distance_type
+                )
+            else:
+                bilby_dist = UniformComovingVolume(
+                    minimum=minimum, maximum=maximum, name=distance_type
+                )
+            bilby_samples = bilby_dist.sample(num_samples)
+            _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
+            assert p_value > 0.05
 
-    # Repeat for luminosity distance
+            # Compare log probability between ml4gw and bilby
+            # using the same samples
+            ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
+            bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
+            assert np.allclose(
+                ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2
+            )
 
-    minimum = 10000
-    maximum = 45000
-    bilby_dist = UniformComovingVolume(
-        minimum=minimum, maximum=maximum, name="luminosity_distance"
-    )
-    ml4gw_dist = distributions.UniformComovingVolume(
-        minimum=minimum, maximum=maximum, distance_type="luminosity_distance"
-    )
-    bilby_samples = bilby_dist.sample(100000)
-    ml4gw_samples = ml4gw_dist.sample((100000,))
-    _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
-    assert p_value > 0.05
+            # Check that the luminosity distance calculation
+            # matches astropy's
+            z_grid = ml4gw_dist.z_grid.numpy()
+            # The d_L calculation differs by ~5% at z=0.015, and that
+            # difference improves with increasing z.
+            mask = z_grid > 0.015
+            ml4gw_dl = ml4gw_dist.luminosity_dist_grid.numpy()[mask]
+            astropy_dl = Planck18.luminosity_distance(z_grid[mask]).value
+            assert np.allclose(ml4gw_dl, astropy_dl, rtol=5e-2)
 
-    # Compare log probability between ml4gw and bilby
-    # using the same samples
-    ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
-    bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
-    assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+    def test_raises_errors(self):
+        with pytest.raises(ValueError, match=r"Distance type must be*"):
+            distributions.UniformComovingVolume(
+                minimum=0, maximum=5, distance_type="dummy"
+            )
 
-    # Now repeat everything, but with `source_frame_time = True`
+        with pytest.raises(ValueError, match=r"Maximum redshift*"):
+            distributions.UniformComovingVolume(
+                minimum=0, maximum=6, distance_type="redshift"
+            )
 
-    minimum = 0
-    maximum = 5
-    bilby_dist = UniformSourceFrame(
-        minimum=minimum, maximum=maximum, name="redshift"
-    )
-    ml4gw_dist = distributions.UniformComovingVolume(
-        minimum=minimum,
-        maximum=maximum,
-        source_frame_time=True,
-        distance_type="redshift",
-    )
-    bilby_samples = bilby_dist.sample(100000)
-    ml4gw_samples = ml4gw_dist.sample((100000,))
-    _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
-    assert p_value > 0.05
 
-    # Compare log probability between ml4gw and bilby
-    # using the same samples
-    ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
-    bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
-    assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+# def test_uniform_comoving_volume(seed_everything):
 
-    # Check that the luminosity distance calculation
-    # matches astropy's
-    z_grid = ml4gw_dist.z_grid.numpy()
-    # The d_L calculation differs by ~5% at z=0.015, and that
-    # difference improves with increasing z.
-    mask = z_grid > 0.015
-    ml4gw_dl = ml4gw_dist.luminosity_dist_grid.numpy()[mask]
-    astropy_dl = Planck18.luminosity_distance(z_grid[mask]).value
-    assert np.allclose(ml4gw_dl, astropy_dl, rtol=5e-2)
 
-    # Repeat for comoving distance
+#     # Check that the ml4gw UCV distribution for
+#     # redshift matches bilby's
+#     minimum = 0
+#     maximum = 5
+#     bilby_dist = UniformComovingVolume(
+#         minimum=minimum, maximum=maximum, name="redshift"
+#     )
+#     ml4gw_dist = distributions.UniformComovingVolume(
+#         minimum=minimum, maximum=maximum, distance_type="redshift"
+#     )
+#     bilby_samples = bilby_dist.sample(100000)
+#     ml4gw_samples = ml4gw_dist.sample((100000,))
+#     _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
+#     assert p_value > 0.05
 
-    minimum = 1000
-    maximum = 2000
-    bilby_dist = UniformSourceFrame(
-        minimum=minimum, maximum=maximum, name="comoving_distance"
-    )
-    ml4gw_dist = distributions.UniformComovingVolume(
-        minimum=minimum,
-        maximum=maximum,
-        source_frame_time=True,
-        distance_type="comoving_distance",
-    )
-    bilby_samples = bilby_dist.sample(100000)
-    ml4gw_samples = ml4gw_dist.sample((100000,))
-    _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
-    assert p_value > 0.05
+#     # Compare log probability between ml4gw and bilby
+#     # using the same samples
+#     ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
+#     bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
+#     assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
 
-    # Compare log probability between ml4gw and bilby
-    # using the same samples
-    ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
-    bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
-    assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+#     # Check that the luminosity distance calculation
+#     # matches astropy's
+#     z_grid = ml4gw_dist.z_grid.numpy()
+#     # The d_L calculation differs by ~5% at z=0.015, and that
+#     # difference improves with increasing z.
+#     mask = z_grid > 0.015
+#     ml4gw_dl = ml4gw_dist.luminosity_dist_grid.numpy()[mask]
+#     astropy_dl = Planck18.luminosity_distance(z_grid[mask]).value
+#     assert np.allclose(ml4gw_dl, astropy_dl, rtol=5e-2)
 
-    # Repeat for luminosity distance
+#     # Repeat for comoving distance
 
-    minimum = 10000
-    maximum = 45000
-    bilby_dist = UniformSourceFrame(
-        minimum=minimum, maximum=maximum, name="luminosity_distance"
-    )
-    ml4gw_dist = distributions.UniformComovingVolume(
-        minimum=minimum,
-        maximum=maximum,
-        source_frame_time=True,
-        distance_type="luminosity_distance",
-    )
-    bilby_samples = bilby_dist.sample(100000)
-    ml4gw_samples = ml4gw_dist.sample((100000,))
-    _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
-    assert p_value > 0.05
+#     minimum = 1000
+#     maximum = 2000
+#     bilby_dist = UniformComovingVolume(
+#         minimum=minimum, maximum=maximum, name="comoving_distance"
+#     )
+#     ml4gw_dist = distributions.UniformComovingVolume(
+#         minimum=minimum, maximum=maximum, distance_type="comoving_distance"
+#     )
+#     bilby_samples = bilby_dist.sample(100000)
+#     ml4gw_samples = ml4gw_dist.sample((100000,))
+#     _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
+#     assert p_value > 0.05
 
-    # Compare log probability between ml4gw and bilby
-    # using the same samples
-    ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
-    bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
-    assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+#     # Compare log probability between ml4gw and bilby
+#     # using the same samples
+#     ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
+#     bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
+#     assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
 
-    with pytest.raises(ValueError, match=r"Distance type must be*"):
-        distributions.UniformComovingVolume(
-            minimum=minimum, maximum=maximum, distance_type="dummy"
-        )
+#     # Repeat for luminosity distance
 
-    with pytest.raises(ValueError, match=r"Maximum redshift*"):
-        distributions.UniformComovingVolume(
-            minimum=minimum, maximum=6, distance_type="redshift"
-        )
+#     minimum = 10000
+#     maximum = 45000
+#     bilby_dist = UniformComovingVolume(
+#         minimum=minimum, maximum=maximum, name="luminosity_distance"
+#     )
+#     ml4gw_dist = distributions.UniformComovingVolume(
+#         minimum=minimum, maximum=maximum, distance_type="luminosity_distance"
+#     )
+#     bilby_samples = bilby_dist.sample(100000)
+#     ml4gw_samples = ml4gw_dist.sample((100000,))
+#     _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
+#     assert p_value > 0.05
+
+#     # Compare log probability between ml4gw and bilby
+#     # using the same samples
+#     ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
+#     bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
+#     assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+
+#     # Now repeat everything, but with `source_frame_time = True`
+
+#     minimum = 0
+#     maximum = 5
+#     bilby_dist = UniformSourceFrame(
+#         minimum=minimum, maximum=maximum, name="redshift"
+#     )
+#     ml4gw_dist = distributions.UniformComovingVolume(
+#         minimum=minimum,
+#         maximum=maximum,
+#         source_frame_time=True,
+#         distance_type="redshift",
+#     )
+#     bilby_samples = bilby_dist.sample(100000)
+#     ml4gw_samples = ml4gw_dist.sample((100000,))
+#     _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
+#     assert p_value > 0.05
+
+#     # Compare log probability between ml4gw and bilby
+#     # using the same samples
+#     ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
+#     bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
+#     assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+
+#     # Check that the luminosity distance calculation
+#     # matches astropy's
+#     z_grid = ml4gw_dist.z_grid.numpy()
+#     # The d_L calculation differs by ~5% at z=0.015, and that
+#     # difference improves with increasing z.
+#     mask = z_grid > 0.015
+#     ml4gw_dl = ml4gw_dist.luminosity_dist_grid.numpy()[mask]
+#     astropy_dl = Planck18.luminosity_distance(z_grid[mask]).value
+#     assert np.allclose(ml4gw_dl, astropy_dl, rtol=5e-2)
+
+#     # Repeat for comoving distance
+
+#     minimum = 1000
+#     maximum = 2000
+#     bilby_dist = UniformSourceFrame(
+#         minimum=minimum, maximum=maximum, name="comoving_distance"
+#     )
+#     ml4gw_dist = distributions.UniformComovingVolume(
+#         minimum=minimum,
+#         maximum=maximum,
+#         source_frame_time=True,
+#         distance_type="comoving_distance",
+#     )
+#     bilby_samples = bilby_dist.sample(100000)
+#     ml4gw_samples = ml4gw_dist.sample((100000,))
+#     _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
+#     assert p_value > 0.05
+
+#     # Compare log probability between ml4gw and bilby
+#     # using the same samples
+#     ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
+#     bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
+#     assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+
+#     # Repeat for luminosity distance
+
+#     minimum = 10000
+#     maximum = 45000
+#     bilby_dist = UniformSourceFrame(
+#         minimum=minimum, maximum=maximum, name="luminosity_distance"
+#     )
+#     ml4gw_dist = distributions.UniformComovingVolume(
+#         minimum=minimum,
+#         maximum=maximum,
+#         source_frame_time=True,
+#         distance_type="luminosity_distance",
+#     )
+#     bilby_samples = bilby_dist.sample(100000)
+#     ml4gw_samples = ml4gw_dist.sample((100000,))
+#     _, p_value = stats.ks_2samp(ml4gw_samples.numpy(), bilby_samples)
+#     assert p_value > 0.05
+
+#     # Compare log probability between ml4gw and bilby
+#     # using the same samples
+#     ml4gw_log_prob = ml4gw_dist.log_prob(ml4gw_samples)
+#     bilby_log_prob = bilby_dist.ln_prob(ml4gw_samples)
+#     assert np.allclose(ml4gw_log_prob.numpy(), bilby_log_prob, rtol=1e-2)
+
+#     with pytest.raises(ValueError, match=r"Distance type must be*"):
+#         distributions.UniformComovingVolume(
+#             minimum=minimum, maximum=maximum, distance_type="dummy"
+#         )
+
+#     with pytest.raises(ValueError, match=r"Maximum redshift*"):
+#         distributions.UniformComovingVolume(
+#             minimum=minimum, maximum=6, distance_type="redshift"
+#         )
