@@ -6,7 +6,7 @@ from the corresponding distribution.
 """
 
 import math
-from typing import Optional
+from typing import Callable, Optional
 
 import torch
 import torch.distributions as dist
@@ -193,9 +193,6 @@ class UniformComovingVolume(dist.Distribution):
         distance_type:
             Type of distance to sample from. Can be 'redshift',
             'comoving_distance', or 'luminosity_distance'
-        source_frame_time:
-            Whether to additionally make the distribution uniform
-            in source frame time
         h0: Hubble constant in km/s/Mpc
         omega_m: Matter density parameter
         z_max: Maximum redshift for the grid
@@ -211,9 +208,8 @@ class UniformComovingVolume(dist.Distribution):
         minimum: float,
         maximum: float,
         distance_type: str = "redshift",
-        source_frame_time: bool = False,
-        h0: float = 67.66,
-        omega_m: float = 0.30966,
+        h0: float = _PLANCK18_H0,
+        omega_m: float = _PLANCK18_OMEGA_M,
         z_grid_max: float = 5,
         grid_size: int = 10000,
         validate_args: bool = None,
@@ -234,17 +230,19 @@ class UniformComovingVolume(dist.Distribution):
         self.grid_size = grid_size
 
         z_grid = torch.linspace(0, z_grid_max, grid_size)
+        dz = z_grid[1] - z_grid[0]
 
+        # Compute H(z) assuming a flat lambda-CDM cosmology
         omega_l = 1 - omega_m
         h = h0 * torch.sqrt(omega_m * (1 + z_grid) ** 3 + omega_l)
-
-        dz = z_grid[1] - z_grid[0]
 
         # C is specfied in m/s, h0 in km/s/Mpc, so divide by 1000 to convert
         comoving_dist_grid = torch.cumsum((C / h) * dz, dim=0) / 1000
         # Compute luminosity distance from comoving distance
         luminosity_dist_grid = comoving_dist_grid * (1 + z_grid)
 
+        # Compute minimum and maximum redshift values based on the
+        # specified distance type
         if distance_type == "comoving_distance":
             z_min, z_max = self._linear_interp_1d(
                 comoving_dist_grid, z_grid, Tensor([minimum, maximum])
@@ -269,12 +267,10 @@ class UniformComovingVolume(dist.Distribution):
         luminosity_dist_grid = luminosity_dist_grid[mask]
         h = h[mask]
 
-        # Compute the pdf and log_pdf from the comoving distance grid
+        # Compute the pdf, cdf, and log_pdf from the comoving distance grid
         dV_dz = comoving_dist_grid**2 / h
-        if source_frame_time:
-            dV_dz /= 1 + z_grid
         pdf_grid = dV_dz / torch.sum(dV_dz * dz)
-
+        cdf = torch.cumsum(pdf_grid * dz, dim=0)
         log_pdf = torch.log(pdf_grid)
 
         # Compute change of variables factors for computing log_prob
@@ -288,6 +284,8 @@ class UniformComovingVolume(dist.Distribution):
         self.comoving_dist_grid = comoving_dist_grid
         self.luminosity_dist_grid = luminosity_dist_grid
         self.log_pdf = log_pdf
+        self.cdf = cdf
+        self.dV_dz = dV_dz
         self.dz_dcomoving_dist = 1 / dcomoving_dist_dz[0]
         self.dz_dluminosity_dist = 1 / dluminosity_dist_dz[0]
 
@@ -307,10 +305,7 @@ class UniformComovingVolume(dist.Distribution):
     def rsample(self, sample_shape: torch.Size = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         u = torch.rand(sample_shape)
-
-        pdf = self.log_pdf.exp()
-        cdf = torch.cumsum(pdf * self.dz, dim=0)
-        z = self._linear_interp_1d(cdf, self.z_grid, u)
+        z = self._linear_interp_1d(self.cdf, self.z_grid, u)
 
         # Due to interpolation error, the sampled redshift
         # can be very slightly outside the grid range.
@@ -327,28 +322,76 @@ class UniformComovingVolume(dist.Distribution):
                 self.z_grid, self.luminosity_dist_grid, z
             )
 
+    def _log_prob_redshift(self, value: Tensor) -> Tensor:
+        return self._linear_interp_1d(self.z_grid, self.log_pdf, value)
+
+    def _log_prob_comoving_distance(self, value: Tensor) -> Tensor:
+        prob = (
+            3
+            * value**2
+            / (
+                self.comoving_dist_grid[-1] ** 3
+                - self.comoving_dist_grid[0] ** 3
+            )
+        )
+        return torch.log(prob)
+
+    def _log_prob_luminosity_distance(self, value: Tensor) -> Tensor:
+        z = self._linear_interp_1d(
+            self.luminosity_dist_grid, self.z_grid, value
+        )
+        log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, z)
+        dz_dluminosity_dist = self._linear_interp_1d(
+            self.luminosity_dist_grid, self.dz_dluminosity_dist, value
+        )
+        log_prob += torch.log(dz_dluminosity_dist)
+        return log_prob
+
     def log_prob(self, value: Tensor) -> Tensor:
         if self.distance_type == "redshift":
-            log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, value)
+            log_prob = self._log_prob_redshift(value)
         elif self.distance_type == "comoving_distance":
-            z = self._linear_interp_1d(
-                self.comoving_dist_grid, self.z_grid, value
-            )
-            log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, z)
-            dz_dcomoving_dist = self._linear_interp_1d(
-                self.comoving_dist_grid, self.dz_dcomoving_dist, value
-            )
-            log_prob += torch.log(dz_dcomoving_dist)
+            log_prob = self._log_prob_comoving_distance(value)
         else:
-            z = self._linear_interp_1d(
-                self.luminosity_dist_grid, self.z_grid, value
-            )
-            log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, z)
-            dz_dluminosity_dist = self._linear_interp_1d(
-                self.luminosity_dist_grid, self.dz_dluminosity_dist, value
-            )
-            log_prob += torch.log(dz_dluminosity_dist)
+            log_prob = self._log_prob_luminosity_distance(value)
 
         inside_range = (value >= self.minimum) & (value <= self.maximum)
         log_prob[~inside_range] = float("-inf")
+        return log_prob
+
+
+class RateEvolution(UniformComovingVolume):
+    """
+    Wrapper around `UniformComovingVolume` to allow for
+    arbitrary rate evolution functions. E.g., if
+    `rate_function = 1 / (1 + z)`, then the distribution
+    will sample values such that they occur uniform in
+    source frame time.
+
+    Args:
+        rate_function: Callable that takes redshift as input
+            and returns the rate evolution factor.
+        *args, **kwargs: Arguments passed to `UniformComovingVolume`
+            constructor.
+    """
+
+    def __init__(
+        self,
+        rate_function: Callable,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        rate = rate_function(self.z_grid)
+        pdf_grid = (self.dV_dz * rate) / torch.sum(self.dV_dz * rate * self.dz)
+        self.cdf = torch.cumsum(pdf_grid * self.dz, dim=0)
+        self.log_pdf = torch.log(pdf_grid)
+
+    def _log_prob_comoving_distance(self, value: Tensor) -> Tensor:
+        z = self._linear_interp_1d(self.comoving_dist_grid, self.z_grid, value)
+        log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, z)
+        dz_dcomoving_dist = self._linear_interp_1d(
+            self.comoving_dist_grid, self.dz_dcomoving_dist, value
+        )
+        log_prob += torch.log(dz_dcomoving_dist)
         return log_prob
