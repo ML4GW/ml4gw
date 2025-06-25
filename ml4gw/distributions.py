@@ -215,7 +215,6 @@ class UniformComovingVolume(dist.Distribution):
         validate_args: bool = None,
     ):
         super().__init__(validate_args=validate_args)
-
         if distance_type not in [
             "redshift",
             "comoving_distance",
@@ -226,68 +225,99 @@ class UniformComovingVolume(dist.Distribution):
                 f"or 'luminosity_distance'; got {distance_type}"
             )
 
+        self.minimum = minimum
+        self.maximum = maximum
         self.distance_type = distance_type
         self.grid_size = grid_size
+        self.z_grid_max = z_grid_max
+        self.h0 = h0
+        self.omega_m = omega_m
 
-        z_grid = torch.linspace(0, z_grid_max, grid_size)
-        dz = z_grid[1] - z_grid[0]
-
-        # Compute H(z) assuming a flat lambda-CDM cosmology
-        omega_l = 1 - omega_m
-        h = h0 * torch.sqrt(omega_m * (1 + z_grid) ** 3 + omega_l)
-
-        # C is specfied in m/s, h0 in km/s/Mpc, so divide by 1000 to convert
-        comoving_dist_grid = torch.cumsum((C / h) * dz, dim=0) / 1000
-        # Compute luminosity distance from comoving distance
-        luminosity_dist_grid = comoving_dist_grid * (1 + z_grid)
-
-        # Compute minimum and maximum redshift values based on the
-        # specified distance type
-        if distance_type == "comoving_distance":
-            z_min, z_max = self._linear_interp_1d(
-                comoving_dist_grid, z_grid, Tensor([minimum, maximum])
-            )
-        elif distance_type == "redshift":
-            z_min, z_max = Tensor([minimum, maximum])
-        else:
-            z_min, z_max = self._linear_interp_1d(
-                luminosity_dist_grid, z_grid, Tensor([minimum, maximum])
-            )
-
+        # Compute redshift range based on the given min and max distances
+        z_min, z_max = self._get_z_bounds()
         if z_max > z_grid_max:
             raise ValueError(
                 f"Maximum {distance_type} {maximum} "
                 f"exceeds given z_max {z_grid_max}."
             )
 
-        # Restrict grids based on the minimum and maximum values
-        mask = (z_grid >= z_min) & (z_grid <= z_max)
-        z_grid = z_grid[mask]
-        comoving_dist_grid = comoving_dist_grid[mask]
-        luminosity_dist_grid = luminosity_dist_grid[mask]
-        h = h[mask]
+        # Restrict distance grids to the specified redshift range
+        mask = (self.z_grid >= z_min) & (self.z_grid <= z_max)
+        self.distance_grid = self.distance_grid[mask]
+        self.z_grid = self.z_grid[mask]
+        self.comoving_dist_grid = self.comoving_dist_grid[mask]
+        self.luminosity_dist_grid = self.luminosity_dist_grid[mask]
+        # Compute probability arrays from those grids
+        self._generate_probability_grids()
 
-        # Compute the pdf, cdf, and log_pdf from the comoving distance grid
-        dV_dz = comoving_dist_grid**2 / h
-        pdf_grid = dV_dz / torch.sum(dV_dz * dz)
-        cdf = torch.cumsum(pdf_grid * dz, dim=0)
-        log_pdf = torch.log(pdf_grid)
+    def _hubble_function(self):
+        """
+        Compute H(z) assuming a flat lambda-CDM cosmology.
+        """
+        omega_l = 1 - self.omega_m
+        return self.h0 * torch.sqrt(
+            self.omega_m * (1 + self.z_grid) ** 3 + omega_l
+        )
 
-        # Compute change of variables factors for computing log_prob
-        dcomoving_dist_dz = torch.gradient(comoving_dist_grid, spacing=dz)
-        dluminosity_dist_dz = torch.gradient(luminosity_dist_grid, spacing=dz)
+    def _get_z_bounds(self):
+        """
+        Compute the bounds on redshift based on the given minimum and maximum
+        distances, using the specified distance type.
+        """
+        self._generate_distance_grids()
+        bounds = torch.tensor([self.minimum, self.maximum])
+        z_min, z_max = self._linear_interp_1d(
+            self.distance_grid, self.z_grid, bounds
+        )
 
-        self.minimum = minimum
-        self.maximum = maximum
-        self.z_grid = z_grid
-        self.dz = dz
-        self.comoving_dist_grid = comoving_dist_grid
-        self.luminosity_dist_grid = luminosity_dist_grid
-        self.log_pdf = log_pdf
-        self.cdf = cdf
-        self.dV_dz = dV_dz
-        self.dz_dcomoving_dist = 1 / dcomoving_dist_dz[0]
-        self.dz_dluminosity_dist = 1 / dluminosity_dist_dz[0]
+        return z_min, z_max
+
+    def _generate_distance_grids(self):
+        """
+        Generate distance grids based on the specified redshift range.
+        """
+        self.z_grid = torch.linspace(0, self.z_grid_max, self.grid_size)
+        self.dz = self.z_grid[1] - self.z_grid[0]
+        # C is specfied in m/s, h0 in km/s/Mpc, so divide by 1000 to convert
+        comoving_dist_grid = (
+            torch.cumulative_trapezoid(
+                (C / self._hubble_function()), self.z_grid
+            )
+            / 1000
+        )
+        zero_prefix = torch.zeros(1, dtype=comoving_dist_grid.dtype)
+        self.comoving_dist_grid = torch.cat([zero_prefix, comoving_dist_grid])
+        self.luminosity_dist_grid = self.comoving_dist_grid * (1 + self.z_grid)
+
+        if self.distance_type == "redshift":
+            self.distance_grid = self.z_grid
+        elif self.distance_type == "comoving_distance":
+            self.distance_grid = self.comoving_dist_grid
+        else:  # luminosity_distance
+            self.distance_grid = self.luminosity_dist_grid
+
+    def _p_of_distance(self):
+        """
+        Compute the unnormalized probability as a function of distance
+        """
+        dV_dz = self.comoving_dist_grid**2 / self._hubble_function()
+        # This is a tensor of ones if the distance type is redshift
+        jacobian = torch.gradient(self.distance_grid, spacing=self.dz)[0]
+        return dV_dz / jacobian
+
+    def _generate_probability_grids(self):
+        """
+        Compute the pdf, cdf, and log pdf based on the
+        comoving volume differential and distance grid.
+        """
+        p_of_distance = self._p_of_distance()
+        self.pdf = p_of_distance / torch.trapz(
+            p_of_distance, self.distance_grid
+        )
+        cdf = torch.cumulative_trapezoid(self.pdf, self.distance_grid)
+        zero_prefix = torch.zeros(1, dtype=cdf.dtype)
+        self.cdf = torch.cat([zero_prefix, cdf])
+        self.log_pdf = torch.log(self.pdf)
 
     def _linear_interp_1d(self, x_grid, y_grid, x_query):
         idx = torch.bucketize(x_query, x_grid, right=True)
@@ -298,63 +328,18 @@ class UniformComovingVolume(dist.Distribution):
         y0 = y_grid[idx - 1]
         y1 = y_grid[idx]
 
-        # Factor of epsilon for stability
-        t = (x_query - x0) / (x1 - x0 + 1e-20)
+        t = (x_query - x0) / (x1 - x0)
         return y0 + t * (y1 - y0)
 
     def rsample(self, sample_shape: torch.Size = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         u = torch.rand(sample_shape)
-        z = self._linear_interp_1d(self.cdf, self.z_grid, u)
-
-        # Due to interpolation error, the sampled redshift
-        # can be very slightly outside the grid range.
-        z = z.clamp(min=self.z_grid[0], max=self.z_grid[-1])
-
-        if self.distance_type == "redshift":
-            return z
-        elif self.distance_type == "comoving_distance":
-            return self._linear_interp_1d(
-                self.z_grid, self.comoving_dist_grid, z
-            )
-        else:
-            return self._linear_interp_1d(
-                self.z_grid, self.luminosity_dist_grid, z
-            )
-
-    def _log_prob_redshift(self, value: Tensor) -> Tensor:
-        return self._linear_interp_1d(self.z_grid, self.log_pdf, value)
-
-    def _log_prob_comoving_distance(self, value: Tensor) -> Tensor:
-        prob = (
-            3
-            * value**2
-            / (
-                self.comoving_dist_grid[-1] ** 3
-                - self.comoving_dist_grid[0] ** 3
-            )
-        )
-        return torch.log(prob)
-
-    def _log_prob_luminosity_distance(self, value: Tensor) -> Tensor:
-        z = self._linear_interp_1d(
-            self.luminosity_dist_grid, self.z_grid, value
-        )
-        log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, z)
-        dz_dluminosity_dist = self._linear_interp_1d(
-            self.luminosity_dist_grid, self.dz_dluminosity_dist, value
-        )
-        log_prob += torch.log(dz_dluminosity_dist)
-        return log_prob
+        return self._linear_interp_1d(self.cdf, self.distance_grid, u)
 
     def log_prob(self, value: Tensor) -> Tensor:
-        if self.distance_type == "redshift":
-            log_prob = self._log_prob_redshift(value)
-        elif self.distance_type == "comoving_distance":
-            log_prob = self._log_prob_comoving_distance(value)
-        else:
-            log_prob = self._log_prob_luminosity_distance(value)
-
+        log_prob = self._linear_interp_1d(
+            self.distance_grid, self.log_pdf, value
+        )
         inside_range = (value >= self.minimum) & (value <= self.maximum)
         log_prob[~inside_range] = float("-inf")
         return log_prob
@@ -381,17 +366,14 @@ class RateEvolution(UniformComovingVolume):
         *args,
         **kwargs,
     ):
+        self.rate_function = rate_function
         super().__init__(*args, **kwargs)
-        rate = rate_function(self.z_grid)
-        pdf_grid = (self.dV_dz * rate) / torch.sum(self.dV_dz * rate * self.dz)
-        self.cdf = torch.cumsum(pdf_grid * self.dz, dim=0)
-        self.log_pdf = torch.log(pdf_grid)
 
-    def _log_prob_comoving_distance(self, value: Tensor) -> Tensor:
-        z = self._linear_interp_1d(self.comoving_dist_grid, self.z_grid, value)
-        log_prob = self._linear_interp_1d(self.z_grid, self.log_pdf, z)
-        dz_dcomoving_dist = self._linear_interp_1d(
-            self.comoving_dist_grid, self.dz_dcomoving_dist, value
-        )
-        log_prob += torch.log(dz_dcomoving_dist)
-        return log_prob
+    def _p_of_distance(self):
+        """
+        Compute the unnormalized probability as a function of distance
+        """
+        dV_dz = self.comoving_dist_grid**2 / self._hubble_function()
+        # This is a tensor of ones if the distance type is redshift
+        jacobian = torch.gradient(self.distance_grid, spacing=self.dz)[0]
+        return dV_dz / jacobian * self.rate_function(self.z_grid)

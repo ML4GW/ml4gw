@@ -168,12 +168,9 @@ class TestCosmologyDistributions:
             # Check that the luminosity distance calculation
             # matches astropy's
             z_grid = ml4gw_dist.z_grid.numpy()
-            # The d_L calculation differs by ~5% at z=0.015, and that
-            # difference improves with increasing z.
-            mask = z_grid > 0.015
-            ml4gw_dl = ml4gw_dist.luminosity_dist_grid.numpy()[mask]
-            astropy_dl = Planck18.luminosity_distance(z_grid[mask]).value
-            assert np.allclose(ml4gw_dl, astropy_dl, rtol=5e-2)
+            ml4gw_dl = ml4gw_dist.luminosity_dist_grid.numpy()
+            astropy_dl = Planck18.luminosity_distance(z_grid).value
+            assert np.allclose(ml4gw_dl, astropy_dl, rtol=1e-2)
 
     def test_rate_evolution(
         self, seed_everything, boundaries, num_samples, num_trials, alpha
