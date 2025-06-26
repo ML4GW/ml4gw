@@ -11,7 +11,7 @@
 | ml4gw/dataloading/chunked\_dataset.py     |       45 |        2 |     96% |    61, 96 |
 | ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |89, 200-204 |
 | ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
-| ml4gw/distributions.py                    |       63 |        9 |     86% |60-66, 104-105, 108-109, 138 |
+| ml4gw/distributions.py                    |      146 |        9 |     94% |65-71, 109-110, 113-114, 143 |
 | ml4gw/gw.py                               |       97 |        0 |    100% |           |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
 | ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
@@ -55,7 +55,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        1 |     99% |        87 |
 | ml4gw/waveforms/generator.py              |      103 |        3 |     97% |77, 86, 90 |
-|                                 **TOTAL** | **2920** |  **277** | **91%** |           |
+|                                 **TOTAL** | **3003** |  **277** | **91%** |           |
 
 
 ## Setup coverage badge
