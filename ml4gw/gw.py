@@ -291,7 +291,7 @@ def compute_ifo_snr(
     Compute the signal to noise ratio (SNR) of individual
     interferometer responses to gravitational waveforms with
     respect to a background PSD for each interferometer. The
-    SNR of the $i$th waveform at the $j$th interferometer
+    SNR of the :math:`i` th waveform at the :math:`j` th interferometer
     is computed as:
 
     .. math::
