@@ -15,9 +15,9 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
         chunk_it:
             Iterator which will produce chunks of timeseries
             data to sample windows from. Should have shape
-            `(N, C, T)`, where `N` is the number of chunks
-            to sample from, `C` is the number of channels,
-            and `T` is the number of samples along the
+            ``(N, C, T)``, where ``N`` is the number of chunks
+            to sample from, ``C`` is the number of channels,
+            and ``T`` is the number of samples along the
             time dimension for each chunk.
         kernel_size:
             Size of windows to be sampled from each chunk.

@@ -1,7 +1,7 @@
 """
 Module containing callables classes for generating samples
 from specified distributions. Each callable should map from
-an integer `N` to a 1D torch `Tensor` containing `N` samples
+an integer ``N`` to a 1D torch ``Tensor`` containing ``N`` samples
 from the corresponding distribution.
 """
 
@@ -22,8 +22,9 @@ _PLANCK18_OMEGA_M = 0.30966  # Matter density parameter
 class Cosine(dist.Distribution):
     """
     Cosine distribution based on
-    ``torch.distributions.TransformedDistribution``.
-    """
+    ``torch.distributions.TransformedDistribution``
+    (see `documentation <https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution>`_).
+    """  # noqa E501
 
     arg_constraints = {}
 

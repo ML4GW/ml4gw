@@ -505,11 +505,11 @@ def whiten(
         lowpass:
             The frequency in Hz at which to lowpass filter
             the data, setting the frequency response in the
-            whitening filter to 0. If left as `None`, no
+            whitening filter to 0. If left as ``None``, no
             lowpass filtering will be applied.
     Returns:
         Batch of whitened multichannel timeseries with
-            `fduration / 2` seconds trimmed from each side.
+            ``fduration / 2`` seconds trimmed from each side.
     """
 
     # figure out how much data we'll need to slice
