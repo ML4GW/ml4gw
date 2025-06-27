@@ -8,20 +8,19 @@ from ..utils.slicing import unfold_windows
 
 class ShiftedPearsonCorrelation(torch.nn.Module):
     """
-    Compute the [Pearson correlation]
-    (https://en.wikipedia.org/wiki/Pearson_correlation_coefficient)
+    Compute the `Pearson correlation <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_
     for two equal-length timeseries over a pre-defined number of time
     shifts in each direction. Useful for when you want a
     correlation, but not over every possible shift (i.e.
     a convolution).
 
-    The number of dimensions of the second timeseries `y`
+    The number of dimensions of the second timeseries ``y``
     passed at call time should always be less than or equal
-    to the number of dimensions of the first timeseries `x`,
+    to the number of dimensions of the first timeseries ``x``,
     and each dimension should match the corresponding one of
-    `x` in  reverse order (i.e. if `x` has shape `(B, C, T)`
-    then `y` should either have shape `(T,)`, `(C, T)`, or
-    `(B, C, T)`).
+    ``x`` in  reverse order (i.e. if ``x`` has shape ``(B, C, T)``
+    then ``y`` should either have shape ``(T,)``, ``(C, T)``, or
+    ``(B, C, T)``).
 
     Note that no windowing to either timeseries is applied
     at call time. Users should do any requisite windowing
@@ -36,7 +35,7 @@ class ShiftedPearsonCorrelation(torch.nn.Module):
             The maximum number of 1-step time shifts in
             each direction over which to compute the
             Pearson coefficient. Output shape will then
-            be `(2 * max_shifts + 1, B, C)`.
+            be ``(2 * max_shifts + 1, B, C)``.
     """
 
     def __init__(self, max_shift: int) -> None:

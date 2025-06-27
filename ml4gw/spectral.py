@@ -27,8 +27,8 @@ def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     """
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
-    the same bias correction used by scipy's implementation.
-    see https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066
+    the same bias correction used by
+    `scipy's implementation <https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066>`_.
     """  # noqa: E501
     n = x.shape[axis]
     ii_2 = 2 * torch.arange(1.0, (n - 1) // 2 + 1)
@@ -111,50 +111,50 @@ def fast_spectral_density(
             The timeseries tensor whose power spectral density
             to compute, or for cross spectral density the
             timeseries whose fft will be conjugated. Can have
-            shape `(batch_size, num_channels, length * sample_rate)`,
-            `(num_channels, length * sample_rate)`, or
-            `(length * sample_rate)`.
+            shape ``(batch_size, num_channels, length * sample_rate)``,
+            ``(num_channels, length * sample_rate)``, or
+            ``(length * sample_rate)``.
         nperseg:
             Number of samples included in each FFT window
         nstride:
             Stride between FFT windows
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length `nperseg // 2 + 1`.
+            FFT computation. Should have length ``nperseg // 2 + 1``.
         scale:
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
-            `1 / (sample_rate * (window**2).sum())` will give output
-            units of density, $\\text{Hz}^-1$$.
+            ``1 / (sample_rate * (window**2).sum())`` will give output
+            units of density, :math`\\text{Hz}^-1`.
         average:
             How to aggregate the contributions of each FFT window to
-            the spectral density. Allowed options are `'mean'` and
-            `'median'`.
+            the spectral density. Allowed options are ``'mean'`` and
+            ``'median'``.
         y:
             Timeseries tensor to compute cross spectral density
-            with `x`. If left as `None`, `x`'s power spectral
-            density will be returned. Otherwise, if `x` is 1D,
-            `y` must also be 1D. If `x` is 2D, the assumption
+            with ``x``. If left as ``None``, ``x``'s power spectral
+            density will be returned. Otherwise, if ``x`` is 1D,
+            ``y`` must also be 1D. If ``x`` is 2D, the assumption
             is that this represents a single multi-channel timeseries,
-            and `y` must be either 2D or 1D. In the former case,
+            and ``y`` must be either 2D or 1D. In the former case,
             the cross-spectral densities of each channel will be
-            computed individually, so `y` must have the same shape as `x`.
-            Otherwise, this will compute the CSD of each of `x`'s channels
-            with `y`. If `x` is 3D, this will be assumed to be a batch
-            of multi-channel timeseries. In this case, `y` can either
+            computed individually, so ``y`` must have the same shape as ``x``.
+            Otherwise, this will compute the CSD of each of ``x``'s channels
+            with ``y``. If ``x`` is 3D, this will be assumed to be a batch
+            of multi-channel timeseries. In this case, ``y`` can either
             be 3D, in which case each channel of each batch element will
             have its CSD calculated or 2D, which has two different options.
-            If `y`'s 0th dimension matches `x`'s 0th dimension, it will
-            be assumed that `y` represents a batch of 1D timeseries, and
+            If ``y``'s 0th dimension matches ``x``'s 0th dimension, it will
+            be assumed that ``y`` represents a batch of 1D timeseries, and
             for each batch element this timeseries will have its CSD with
-            each channel of the corresponding batch element of `x`
-            calculated. Otherwise, it sill be assumed that `y` represents
+            each channel of the corresponding batch element of ``x``
+            calculated. Otherwise, it sill be assumed that ``y`` represents
             a single multi-channel timeseries, in which case each channel
-            of `y` will have its CSD calculated with the corresponding
-            channel in `x` across _all_ of `x`'s batch elements.
+            of ``y`` will have its CSD calculated with the corresponding
+            channel in ``x`` across _all_ of ``x``'s batch elements.
     Returns:
-        Tensor of power spectral densities of `x` or its cross spectral
-        density with the timeseries in `y`.
+        Tensor of power spectral densities of ``x`` or its cross spectral
+        density with the timeseries in ``y``.
     """
 
     _validate_shapes(x, nperseg, y)
@@ -262,25 +262,25 @@ def spectral_density(
             The timeseries tensor whose power spectral density
             to compute, or for cross spectral density the
             timeseries whose fft will be conjugated. Can have
-            shape `(batch_size, num_channels, length * sample_rate)`,
-            `(num_channels, length * sample_rate)`, or
-            `(length * sample_rate)`.
+            shape ``(batch_size, num_channels, length * sample_rate)``,
+            ``(num_channels, length * sample_rate)``, or
+            ``(length * sample_rate)``.
         nperseg:
             Number of samples included in each FFT window
         nstride:
             Stride between FFT windows
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length `nperseg // 2 + 1`.
+            FFT computation. Should have length ``nperseg // 2 + 1``.
         scale:
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
-            `1 / (sample_rate * (window**2).sum())` will give output
-            units of density, $\\text{Hz}^-1$$.
+            ``1 / (sample_rate * (window**2).sum())`` will give output
+            units of density, :math:`\\text{Hz}^-1`.
         average:
             How to aggregate the contributions of each FFT window to
-            the spectral density. Allowed options are `'mean'` and
-            `'median'`.
+            the spectral density. Allowed options are ``'mean'`` and
+            ``'median'``.
     """
 
     _validate_shapes(x, nperseg)
@@ -348,14 +348,14 @@ def truncate_inverse_power_spectrum(
     """
     Truncate the length of the time domain response
     of a whitening filter built using the specified
-    `psd` so that it has maximum length `fduration`
+    ``psd`` so that it has maximum length ``fduration``
     seconds. This is meant to mitigate the impact
     of sharp features in the background PSD causing
     time domain responses longer than the segments
     to which the whitening filter will be applied.
 
     Implementation details adapted from
-    https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8
+    `here <https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8>`_.
 
     Args:
         psd:
@@ -382,7 +382,7 @@ def truncate_inverse_power_spectrum(
             as `None`, no lowpass filtering will be applied.
     Returns:
         The PSD with its time domain response truncated
-            to `fduration` and any filtered frequencies
+            to ``fduration`` and any filtered frequencies
             tapered.
     """  # noqa: E501
 
@@ -469,7 +469,7 @@ def whiten(
     Whiten a batch of timeseries using the specified
     background one-sided power spectral densities (PSDs),
     modified to have the desired time domain response length
-    `fduration` and possibly to highpass/lowpass filter.
+    ``fduration`` and possibly to highpass/lowpass filter.
 
     Args:
         X:
@@ -480,11 +480,11 @@ def whiten(
             the inverse of the square root of this PSD, ensuring
             that data from the same distribution will have
             approximately uniform power after whitening.
-            If 2D, each batch element in `X` will be whitened
+            If 2D, each batch element in ``X`` will be whitened
             using the same PSDs. If 3D, each batch element will
             be whitened by the PSDs contained along the 0th
-            dimenion of `psd`, and so the first two dimensions
-            of `X` and `psd` should match.
+            dimenion of ``psd``, and so the first two dimensions
+            of ``X`` and ``psd`` should match.
         fduration:
             Desired length in seconds of the time domain
             response of a whitening filter built using
@@ -496,7 +496,7 @@ def whiten(
             the whitened timeseries to account for filter
             settle-in time.
         sample_rate:
-            Rate at which the data in `X` has been sampled
+            Rate at which the data in ``X`` has been sampled
         highpass:
             The frequency in Hz at which to highpass filter
             the data, setting the frequency response in the

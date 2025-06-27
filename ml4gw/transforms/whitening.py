@@ -25,17 +25,17 @@ class Whiten(torch.nn.Module):
     In order to avoid edge effects due to filter settle-in,
     the provided PSDs will have their spectrum truncated
     such that their impulse response time in the time
-    domain is `fduration` seconds, and `fduration / 2`
+    domain is ``fduration`` seconds, and ``fduration / 2``
     seconds worth of data will be removed from each
     edge of the whitened timeseries.
 
-    For more information, see the documentation to
-    `ml4gw.spectral.whiten`.
+    For more information, see the documentation for
+    :meth:`~ml4gw.spectral.whiten`.
 
     Args:
         fduration:
             The length of the whitening filter's impulse
-            response, in seconds. `fduration / 2` seconds
+            response, in seconds. ``fduration / 2`` seconds
             worth of data will be cropped from the edges
             of the whitened timeseries.
         sample_rate:
@@ -43,11 +43,11 @@ class Whiten(torch.nn.Module):
             time is expected to be sampled
         highpass:
             Cutoff frequency to apply highpass filtering
-            during whitening. If left as `None`, no highpass
+            during whitening. If left as ``None``, no highpass
             filtering will be performed.
         lowpass:
             Cutoff frequency to apply lowpass filtering
-            during whitening. If left as `None`, no lowpass
+            during whitening. If left as ``None``, no lowpass
             filtering will be performed.
     """
 
@@ -80,28 +80,28 @@ class Whiten(torch.nn.Module):
         Args:
             X:
                 Batch of multichannel timeseries to whiten.
-                Should have the shape (B, C, N), where
-                B is the batch size, C is the number of
-                channels, and N is the number of seconds
-                in the timeseries times `self.sample_rate`.
+                Should have the shape ``(B, C, N)``, where
+                ``B`` is the batch size, ``C`` is the number of
+                channels, and ``N`` is the number of seconds
+                in the timeseries times ``self.sample_rate``.
             psd:
                 Power spectral density used to whiten the
                 provided timeseries. Can be either 1D, 2D,
                 or 3D, with the last dimension representing
                 power at each frequency value. All other
                 dimensions must match their corresponding
-                value in `X`, starting from the right.
-                (e.g. if `psd.ndim == 2`, `psd.size(1)` should
-                be equal to `X.size(1)`. If `psd.ndim == 3`,
-                `psd.size(1)` and `psd.size(0)` should be equal
-                to `X.size(1)` and `X.size(0)`, respectively.)
+                value in ``X``, starting from the right.
+                (e.g. if ``psd.ndim == 2``, ``psd.size(1)`` should
+                be equal to ``X.size(1)``. If ``psd.ndim == 3``,
+                ``psd.size(1)`` and ``psd.size(0)`` should be equal
+                to ``X.size(1)`` and ``X.size(0)``, respectively.)
                 For more information about what these different
-                shapes for `psd` represent, consult the documentation
-                for `ml4gw.spectral.whiten`.
+                shapes for ``psd`` represent, consult the documentation
+                for :meth:`~ml4gw.spectral.whiten`.
         Returns:
-            Whitened timeseries, with `fduration * sample_rate / 2`
+            Whitened timeseries, with ``fduration * sample_rate / 2``
                 samples cropped from each edge. Output shape will then
-                be (B, C, N - `fduration * sample_rate`).
+                be ``(B, C, N - fduration * sample_rate)``.
         """
 
         return spectral.whiten(
@@ -167,7 +167,7 @@ class FixedWhiten(FittableSpectralTransform):
         Compute the PSD of channel-wise background to
         use to whiten timeseries at call time. PSDs will
         be resampled to have
-        `self.kernel_length * self.sample_rate // 2 + 1`
+        ``self.kernel_length * self.sample_rate // 2 + 1``
         frequency bins.
 
         Args:
@@ -176,29 +176,29 @@ class FixedWhiten(FittableSpectralTransform):
                 of the whitening filter, in seconds.
                 Fit PSDs will have their spectrum truncated
                 to approximate this response time.
-                A longer `fduration` will be able to
+                A longer ``fduration`` will be able to
                 handle narrower spikes in frequency, but
                 at the expense of longer filter settle-in
-                time. As such `fduration / 2` seconds of data
+                time. As such ``fduration / 2`` seconds of data
                 will be removed from each edge of whitened
                 timeseries.
             *background:
                 1D arrays capturing the signal to be used to
-                whiten each channel at call time. If `fftlength`
-                is left as `None`, it will be assumed that these
+                whiten each channel at call time. If ``fftlength``
+                is left as ``None``, it will be assumed that these
                 already represent frequency-domain data that will
                 be possibly resampled and truncated to whiten
                 timeseries at call time. Otherwise, it will be
                 assumed that these represent time-domain data that
                 will be converted to the frequency domain via
-                Welch's method using the specified `fftlength`
+                Welch's method using the specified ``fftlength``
                 and `overlap`, with a Hann window used to window
                 the FFT frames by default. Should have the same
                 number of args as `self.num_channels`.
             fftlength:
                 Length of frames used to convert time-domain
                 data to the frequency-domain via Welch's method.
-                If left as `None`, it will be assumed that the
+                If left as ``None``, it will be assumed that the
                 background arrays passed already represent frequency-
                 domain data and don't require any conversion.
             highpass:
@@ -206,21 +206,21 @@ class FixedWhiten(FittableSpectralTransform):
                 with the fit whitening filter. This is achieved by
                 setting the frequency response of the fit PSDs
                 in the frequency bins below this value to 0.
-                If left as `None`, the fit filter won't have any
+                If left as ``None``, the fit filter won't have any
                 highpass filtering properties.
             lowpass:
                 Cutoff frequency, in Hz, used for lowpass filtering
                 with the fit whitening filter. This is achieved by
                 setting the frequency response of the fit PSDs
                 in the frequency bins above this value to 0.
-                If left as `None`, the fit filter won't have any
+                If left as ``None``, the fit filter won't have any
                 lowpass filtering properties.
             overlap:
                 Overlap between FFT frames used to convert
                 time-domain data to the frequency domain via
-                Welch's method. If `fftlength` is `None`, this
-                is ignored. Otherwise, if left as `None`, it will
-                be set to half of `fftlength` by default.
+                Welch's method. If ``fftlength`` is ``None``, this
+                is ignored. Otherwise, if left as ``None``, it will
+                be set to half of ``fftlength`` by default.
         """
         if len(background) != self.num_channels:
             raise ValueError(
@@ -250,8 +250,8 @@ class FixedWhiten(FittableSpectralTransform):
     def forward(self, X: TimeSeries3d) -> TimeSeries3d:
         """
         Whiten the input timeseries tensor using the
-        PSD fit by the `.fit` method, which must be
-        called _before_ the first call to `.forward`.
+        PSD fit by the ``.fit`` method, which must be
+        called **before** the first call to ``.forward``.
         """
         expected_dim = int(self.kernel_length * self.sample_rate)
         if X.size(-1) != expected_dim:
