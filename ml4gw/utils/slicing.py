@@ -255,11 +255,12 @@ def sample_kernels(
     Args:
         X:
             The timeseries tensor from which to sample kernels
-            kernel_size: The size of the kernels to sample
+        kernel_size:
+            The size of the kernels to sample
         N:
             The number of kernels to sample. Can be left as
             ``None`` if ``X`` is 3D, otherwise must be specified
-        max_center_offeset:
+        max_center_offset:
             If ``X`` is 2D, this indicates the maximum distance
             from the center of the timeseries the edge of
             sampled kernels may fall. If left as ``None``, kernels
