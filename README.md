@@ -9,9 +9,9 @@
 | ml4gw/constants.py                        |       12 |        0 |    100% |           |
 | ml4gw/dataloading/\_\_init\_\_.py         |        3 |        0 |    100% |           |
 | ml4gw/dataloading/chunked\_dataset.py     |       45 |        2 |     96% |    61, 96 |
-| ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |89, 200-204 |
+| ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |86, 197-201 |
 | ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
-| ml4gw/distributions.py                    |      146 |        9 |     94% |65-71, 109-110, 113-114, 143 |
+| ml4gw/distributions.py                    |      146 |        9 |     94% |66-72, 110-111, 114-115, 143 |
 | ml4gw/gw.py                               |       97 |        0 |    100% |           |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
 | ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
@@ -29,7 +29,7 @@
 | ml4gw/spectral.py                         |      147 |        2 |     99% |  324, 524 |
 | ml4gw/transforms/\_\_init\_\_.py          |       10 |        0 |    100% |           |
 | ml4gw/transforms/iirfilter.py             |       18 |        0 |    100% |           |
-| ml4gw/transforms/pearson.py               |       28 |        3 |     89% |48, 53, 60 |
+| ml4gw/transforms/pearson.py               |       28 |        3 |     89% |47, 52, 59 |
 | ml4gw/transforms/qtransform.py            |      172 |       14 |     92% |149, 328, 336-338, 345-354 |
 | ml4gw/transforms/scaler.py                |       32 |        0 |    100% |           |
 | ml4gw/transforms/snr\_rescaler.py         |       40 |       16 |     60% |51-67, 74-88 |
