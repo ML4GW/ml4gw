@@ -20,56 +20,56 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
     Args:
         X:
             Timeseries data to be iterated through. Should have
-            shape `(num_channels, length * sample_rate)`. Windows
+            shape ``(num_channels, length * sample_rate)``. Windows
             will be sampled from the time (1st) dimension for all
             channels along the channel (0th) dimension.
         kernel_size:
-            The length of the windows to sample from `X` in units
+            The length of the windows to sample from ``X`` in units
             of samples.
         y:
             Target timeseries to be iterated through. If specified,
             should be a single channel and have shape
-            `(length * sample_rate,)`. If left as `None`, only windows
+            ``(length * sample_rate,)``. If left as ``None``, only windows
             sampled from `X` will be returned during iteration.
             Otherwise, windows sampled from both arrays will be
             returned. Note that if sampling is performed non-coincidentally,
             there's no sensible way to align windows sampled from this
-            array with the windows sampled from `X`, so this combination
+            array with the windows sampled from ``X``, so this combination
             of arguments is not permitted.
         batch_size:
             Maximum number of windows to return at each iteration. Will
             be the length of the 0th dimension of the returned array(s).
-            If `batches_per_epoch` is specified, this will be the length
-            of _every_ array returned during iteration. Otherwise, it's
+            If ``batches_per_epoch`` is specified, this will be the length
+            of **every** array returned during iteration. Otherwise, it's
             possible that the last array will be shorter due to the number
             of windows in the timeseries being a non-integer multiple of
-            `batch_size`.
+            ``batch_size``.
         stride:
             The resolution at which windows will be sampled from the
             specified timeseries, in units of samples. E.g. if
-            `stride=2`, the first sample of each window can only be
-            from an index of `X` which is a multiple of 2. Obviously,
+            ``stride=2``, the first sample of each window can only be
+            from an index of ``X`` which is a multiple of 2. Obviously,
             this reduces the number of windows which can be iterated
-            through by a factor of `stride`.
+            through by a factor of ``stride``.
         batches_per_epoch:
             Number of batches of window to produce during iteration
-            before raising a `StopIteration`. Must be specified if
+            before raising a ``StopIteration``. Must be specified if
             performing non-coincident sampling. Otherwise, if left
             as `None`, windows will be sampled until the entire
             timeseries has been exhausted. Note that
-            `batch_size * batches_per_epoch` must be be small
+            ``batch_size * batches_per_epoch`` must be be small
             enough to be able to be fulfilled by the number of
-            windows in the timeseries, otherise a `ValueError`
+            windows in the timeseries, otherise a ``ValueError``
             will be raised.
         coincident:
             Whether to sample windows from the channels of `X`
             using the same indices or independently. Can't be
-            `True` if `batches_per_epoch` is `None` or `y` is
-            _not_ `None`.
+            ``True`` if ``batches_per_epoch`` is ``None`` or ``y`` is
+            **not** ``None``.
         shuffle:
             Whether to sample windows from timeseries randomly
-            or in order along the time axis. If `coincident=False`
-            and `shuffle=False`, channels will be iterated through
+            or in order along the time axis. If ``coincident=False``
+            and ``shuffle=False``, channels will be iterated through
             with the index along the last channel moving fastest.
         device:
             Which device to host the timeseries arrays on

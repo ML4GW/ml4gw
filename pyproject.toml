@@ -1,6 +1,6 @@
 [project]
 name = "ml4gw"
-version = "0.7.4"
+version = "0.7.5"
 description = "Tools for training torch models on gravitational wave data"
 authors = [
     { name = "Ethan Marx", email = "emarx@mit.edu" },
@@ -88,10 +88,10 @@ deps =
     coverage[toml]>=7.6,<8
     pytest>=7,<8
     lalsuite>=7,<8
-    bilby>=1.1,<2
+    bilby>=2.1
     gwpy>=3.0
     numpy>=1,<2
-    scipy>=1.9,<1.15
+    scipy>=1.9,<1.14
 pass_env = COVERAGE_FILE
 commands = coverage run -m pytest tests
 """

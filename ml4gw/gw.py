@@ -2,13 +2,11 @@
 Tools for manipulating raw gravitational waveforms
 and projecting them onto interferometer responses.
 Much of the projection code is an extension of the
-implementation made available in bilby:
-
-https://arxiv.org/abs/1811.02042
-
-Specifically the code here:
-https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
-"""
+implementation made available in
+`bilby <https://arxiv.org/abs/1811.02042>`_.
+Specifically code from
+`this module <https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py>`_.
+"""  # noqa E501
 
 from typing import List, Tuple, Union
 
@@ -286,26 +284,28 @@ def compute_ifo_snr(
     highpass: Union[float, Float[Tensor, " frequency"], None] = None,
     lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> Float[Tensor, "batch num_ifos"]:
-    r"""Compute the SNRs of a batch of interferometer responses
+    """Compute the SNRs of a batch of interferometer responses
 
     Compute the signal to noise ratio (SNR) of individual
     interferometer responses to gravitational waveforms with
     respect to a background PSD for each interferometer. The
-    SNR of the $i$th waveform at the $j$th interferometer
+    SNR of the :math:`i` th waveform at the :math:`j` th interferometer
     is computed as:
 
-    $$\rho_{ij} =
-        4 \int_{f_{\text{min}}}^{f_{\text{max}}}
-        \frac{\tilde{h_{ij}}(f)\tilde{h_{ij}}^*(f)}
-        {S_n^{(j)}(f)}df$$
+    .. math::
 
-    Where $f_{\text{min}}$ is a minimum frequency denoted
-    by `highpass`, `f_{\text{max}}` is the maximum frequency
-    denoted by `lowpass`, which defaults to the Nyquist frequency
-    dictated by `sample_rate`; `\tilde{h_{ij}}` and `\tilde{h_{ij}}*`
-    indicate the fourier transform of the $i$th waveform at
-    the $j$th inteferometer and its complex conjugate, respectively;
-    and $S_n^{(j)}$ is the backround PSD at the $j$th interferometer.
+        \\rho_{ij} =
+        4 \\int_{f_{\\text{min}}}^{f_{\\text{max}}}
+        \\frac{\\tilde{h_{ij}}(f)\\tilde{h_{ij}}^*(f)}
+        {S_n^{(j)}(f)}df
+
+    Where :math:`f_{\\text{min}}` is a minimum frequency denoted
+    by ``highpass``, :math:`f_{\\text{max}}` is the maximum frequency
+    denoted by ``lowpass``, which defaults to the Nyquist frequency
+    dictated by ``sample_rate``; :math:`\\tilde{h}_{ij}` and :math:`\\tilde{h}_{ij}^*`
+    indicate the fourier transform of the :math:`i` th waveform at
+    the :math:`j` th inteferometer and its complex conjugate, respectively;
+    and :math:`S_n^{(j)}` is the backround PSD at the :math:`j` th interferometer.
 
     Args:
         responses:
@@ -340,7 +340,7 @@ def compute_ifo_snr(
             the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Batch of SNRs computed for each interferometer
-    """
+    """  # noqa E501
 
     # TODO: should we do windowing here?
     # compute frequency power, upsampling precision so that
@@ -408,15 +408,17 @@ def compute_network_snr(
     highpass: Union[float, Float[Tensor, " frequency"], None] = None,
     lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
 ) -> BatchTensor:
-    r"""
+    """
     Compute the total SNR from a gravitational waveform
     from a network of interferometers. The total SNR for
-    the $i$th waveform is computed as
+    the :math:`i` th waveform is computed as
 
-    $$\rho_i = \sqrt{\sum_{j}^{N}\rho_{ij}^2}$$
+    .. math::
 
-    where \rho_{ij} is the SNR for the $i$th waveform at
-    the $j$th interferometer in the network and $N$ is
+        \\rho_i = \\sqrt{\\sum_{j}^{N}\\rho_{ij}^2}
+
+    where :math:`\\rho_{ij}` is the SNR for the :math:`i` th waveform at
+    the :math:`j` th interferometer in the network and :math:`N` is
     the total number of interferometers.
 
     Args:
@@ -426,12 +428,12 @@ def compute_network_snr(
         backgrounds:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated. If 2D, each row of
-            `psd` will be assumed to be the background PSD for each
-            channel of _every_ batch element in `responses`. If 3D,
+            in ``responses`` has been calculated. If 2D, each row of
+            ``psd`` will be assumed to be the background PSD for each
+            channel of **every** batch element in ``responses``. If 3D,
             this should contain a background PSD for each channel
-            of each element in `responses`, and therefore the first
-            two dimensions of `psd` and `responses` should match.
+            of each element in ``responses``, and therefore the first
+            two dimensions of ``psd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -441,14 +443,14 @@ def compute_network_snr(
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out low frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies up to `sample_rate / 2`
+            left as ``None``, all frequencies up to ``sample_rate / 2``
             will contribute to the SNR calculation.
         lowpass:
             The maximum frequency below which to compute the SNR.
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out high frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies from `highpass` up to
+            left as ``None``, all frequencies from ``highpass`` up to
             the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Batch of SNRs for each waveform across the interferometer network
@@ -478,12 +480,12 @@ def reweight_snrs(
         psd:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated. If 2D, each row of
-            `psd` will be assumed to be the background PSD for each
-            channel of _every_ batch element in `responses`. If 3D,
+            in ``responses`` has been calculated. If 2D, each row of
+            ``psd`` will be assumed to be the background PSD for each
+            channel of **every** batch element in ``responses``. If 3D,
             this should contain a background PSD for each channel
-            of each element in `responses`, and therefore the first
-            two dimensions of `psd` and `responses` should match.
+            of each element in ``responses``, and therefore the first
+            two dimensions of ``psd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -493,14 +495,14 @@ def reweight_snrs(
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out low frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies up to `sample_rate / 2`
+            left as ``None``, all frequencies up to ``sample_rate / 2``
             will contribute to the SNR calculation.
         lowpass:
             The maximum frequency below which to compute the SNR.
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out high frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies from `highpass` up to
+            left as ``None``, all frequencies from ``highpass`` up to
             the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Rescaled interferometer responses

@@ -108,10 +108,10 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     """
     Bottleneck blocks implement one extra convolution
-    compared to basic blocks. In this layers, the `planes`
-    parameter is generally meant to _downsize_ the number
+    compared to basic blocks. In this layers, the ``planes``
+    parameter is generally meant to **downsize** the number
     of feature maps first, which then get expanded out to
-    `planes * Bottleneck.expansion` feature maps at the
+    ``planes * Bottleneck.expansion`` feature maps at the
     output of the layer.
     """
 
@@ -192,9 +192,9 @@ class ResNet1D(nn.Module):
             A list representing the number of residual
             blocks to include in each "layer" of the
             network. Total layers (e.g. 50 in ResNet50)
-            is `2 + sum(layers) * factor`, where factor
-            is `2` for vanilla `ResNet` and `3` for
-            `BottleneckResNet`.
+            is ``2 + sum(layers) * factor``, where factor
+            is ``2`` for vanilla ``ResNet`` and ``3`` for
+            ``BottleneckResNet``.
         kernel_size:
             The size of the convolutional kernel to
             use in all residual layers. _NOT_ the size
@@ -222,8 +222,8 @@ class ResNet1D(nn.Module):
             by strided or dilated convolutions for each layer.
             If left as `None`, strided convolutions will be
             used at each layer. Otherwise, `stride_type` should
-            be one element shorter than `layers` and indicate either
-            `stride` or `dilation` for each layer after the first.
+            be one element shorter than ``layers`` and indicate either
+            ``stride`` or `dilation` for each layer after the first.
     """
 
     block = BasicBlock
