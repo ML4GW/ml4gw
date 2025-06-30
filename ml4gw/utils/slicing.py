@@ -287,7 +287,9 @@ def sample_kernels(
         A batch of sampled kernels. If ``X`` is 1D, this will have
         shape ``(N, kernel_size)``. If ``X`` is 2D, this will have
         shape ``(N, num_channels, kernel_size)``, where
-        ``num_channels = X.shape[0]``.
+        ``num_channels = X.shape[0]``. If ``return_idx`` is ``True``,
+        the returned value will be a tuple of the sampled kernels
+        and the indices used for slicing
     """
 
     if X.shape[-1] < kernel_size:
