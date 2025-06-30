@@ -14,8 +14,8 @@ class MultiResolutionSpectrogram(torch.nn.Module):
     """
     Create a batch of multi-resolution spectrograms
     from a batch of timeseries. Input is expected to
-    have the shape `(B, C, T)`, where `B` is the number
-    of batches, `C` is the number of channels, and `T`
+    have the shape ``(B, C, T)``, where ``B`` is the number
+    of batches, ``C`` is the number of channels, and ``T``
     is the number of time samples.
 
     For each timeseries, calculate multiple normalized
@@ -24,8 +24,8 @@ class MultiResolutionSpectrogram(torch.nn.Module):
     from the nearest time-frequncy bin.
 
     If the largest number of time bins among the spectrograms
-    is `N` and the largest number of frequency bins is `M`,
-    the output will have dimensions `(B, C, M, N)`
+    is ``N`` and the largest number of frequency bins is ``M``,
+    the output will have dimensions ``(B, C, M, N)``
 
     Args:
         kernel_length:
@@ -34,10 +34,11 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             spectrogram
         sample_rate:
             The sample rate of the timeseries in Hz
-        kwargs:
+        **kwargs:
             Arguments passed in kwargs will used to create
-            `torchaudio.transforms.Spectrogram`s. Each
-            argument should be a list of values. Any list
+            ``torchaudio.transforms.Spectrogram`` (see
+            `documentation <https://docs.pytorch.org/audio/main/generated/torchaudio.transforms.Spectrogram.html>`_).
+            Each argument should be a list of values. Any list
             of length greater than 1 should be the same
             length
     """
@@ -140,9 +141,9 @@ class MultiResolutionSpectrogram(torch.nn.Module):
                 Batch of multichannel timeseries which will
                 be used to calculate the multi-resolution
                 spectrogram. Should have the shape
-                `(B, C, T)`, where `B` is the number of
-                batches, `C` is the  number of channels,
-                and `T` is the number of time samples.
+                ``(B, C, T)``, where ``B`` is the number of
+                batches, ``C`` is the  number of channels,
+                and ``T`` is the number of time samples.
         """
         if X.shape[-1] != self.kernel_size:
             raise ValueError(

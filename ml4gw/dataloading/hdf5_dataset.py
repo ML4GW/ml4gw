@@ -17,8 +17,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
     Iterable dataset that samples and loads windows of
     timeseries data uniformly from a set of HDF5 files.
     It is _strongly_ recommended that these files have been
-    written using [chunked storage]
-    (https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage).
+    written using `chunked storage <https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage>`_.
     This has shown to produce increases in read-time speeds
     of over an order of magnitude.
 
@@ -37,15 +36,15 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             Number of windows to sample at each iteration.
         batches_per_epoch:
             Number of batches to generate during each call
-            to `__iter__`.
+            to ``__iter__``.
         coincident:
             Whether windows for each channel in a given batch
             element should be sampled coincidentally, i.e.
             corresponding to the same time indices from the
             same files, or should be sampled independently.
             For the latter case, users can either specify
-            `False`, which will sample filenames independently
-            for each channel, or `"files"`, which will sample
+            ``False``, which will sample filenames independently
+            for each channel, or ``"files"``, which will sample
             windows independently within a given file for each
             channel. The latter setting limits the amount of
             entropy in the effective dataset, but can provide
@@ -55,9 +54,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             batch elements each epoch. If left as `None`,
             will use all available files. Useful when reading
             from many files is bottlenecking dataloading.
-
-
-    """
+    """  # noqa E501
 
     def __init__(
         self,

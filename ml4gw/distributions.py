@@ -1,7 +1,7 @@
 """
 Module containing callables classes for generating samples
 from specified distributions. Each callable should map from
-an integer `N` to a 1D torch `Tensor` containing `N` samples
+an integer ``N`` to a 1D torch ``Tensor`` containing ``N`` samples
 from the corresponding distribution.
 """
 
@@ -22,8 +22,9 @@ _PLANCK18_OMEGA_M = 0.30966  # Matter density parameter
 class Cosine(dist.Distribution):
     """
     Cosine distribution based on
-    ``torch.distributions.TransformedDistribution``.
-    """
+    ``torch.distributions.TransformedDistribution``
+    (see `documentation <https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution>`_).
+    """  # noqa E501
 
     arg_constraints = {}
 
@@ -117,18 +118,17 @@ class LogNormal(dist.LogNormal):
 class PowerLaw(dist.TransformedDistribution):
     """
     Sample from a power law distribution,
-    .. math::
-        p(x) \approx x^{\alpha}.
+
+    .. math:: p(x) \\approx x^{\\alpha}.
 
     Index alpha cannot be 0, since it is equivalent to a Uniform distribution.
     This could be used, for example, as a universal distribution of
     signal-to-noise ratios (SNRs) from uniformly volume distributed
     sources
-    .. math::
 
-       p(\rho) = 3*\rho_0^3 / \rho^4
+    .. math:: p(\\rho) = 3\;\\rho_0^3 / \\rho^4
 
-    where :math:`\rho_0` is a representative minimum SNR
+    where :math:`\\rho_0` is a representative minimum SNR
     considered for detection. See, for example,
     `Schutz (2011) <https://arxiv.org/abs/1102.5421>`_.
     Or, for example, ``index=2`` for uniform in Euclidean volume.
@@ -185,14 +185,14 @@ class UniformComovingVolume(dist.Distribution):
     Sample either redshift, comoving distance, or luminosity distance
     such that they are uniform in comoving volume, assuming a flat
     lambda-CDM cosmology. Default H0 and Omega_M values match
-    astropy.cosmology.Planck18
+    `Planck18 parameters in Astropy <https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html>`_.
 
     Args:
         minimum: Minimum distance in the specified distance type
         maximum: Maximum distance in the specified distance type
         distance_type:
-            Type of distance to sample from. Can be 'redshift',
-            'comoving_distance', or 'luminosity_distance'
+            Type of distance to sample from. Can be ``redshift``,
+            ``comoving_distance``, or ``luminosity_distance``
         h0: Hubble constant in km/s/Mpc
         omega_m: Matter density parameter
         z_max: Maximum redshift for the grid
@@ -347,18 +347,20 @@ class UniformComovingVolume(dist.Distribution):
 
 class RateEvolution(UniformComovingVolume):
     """
-    Wrapper around `UniformComovingVolume` to allow for
+    Wrapper around :meth:`~ml4gw.distributions.UniformComovingVolume` to allow for
     arbitrary rate evolution functions. E.g., if
-    `rate_function = 1 / (1 + z)`, then the distribution
+    ``rate_function = lambda z: 1 / (1 + z)``, then the distribution
     will sample values such that they occur uniform in
     source frame time.
 
     Args:
         rate_function: Callable that takes redshift as input
             and returns the rate evolution factor.
-        *args, **kwargs: Arguments passed to `UniformComovingVolume`
-            constructor.
-    """
+        *args: Arguments passed to
+            :meth:`~ml4gw.distributions.UniformComovingVolume` constructor.
+        **kwargs: Keyword arguments passed to
+            :meth:`~ml4gw.distributions.UniformComovingVolume` constructor.
+    """  # noqa E501
 
     def __init__(
         self,

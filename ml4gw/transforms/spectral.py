@@ -14,39 +14,39 @@ class SpectralDensity(torch.nn.Module):
     of a batch of multichannel timeseries, or the cross spectral
     density of two batches of multichannel timeseries.
 
-    On `SpectralDensity.forward` call, if only one tensor is provided,
+    On ``SpectralDensity.forward`` call, if only one tensor is provided,
     this transform will compute its power spectral density. If a second
     tensor is provided, the cross spectral density between the two
     timeseries will be computed. For information about the allowed
     relationships between these two tensors, see the documentation to
-    `ml4gw.spectral.fast_spectral_density`.
+    :meth:`~ml4gw.spectral.fast_spectral_density`.
 
     Note that the cross spectral density computation is currently
-    only available for the `fast_spectral_density` option. If
-    `fast=False` and a second tensor is passed to `SpectralDensity.forward`,
-    a `NotImplementedError` will be raised.
+    only available for :meth:`~ml4gw.spectral.fast_spectral_density`. If
+    ``fast=False`` and a second tensor is passed to ``SpectralDensity.forward``,  # noqa E501
+    a ``NotImplementedError`` will be raised.
 
     Args:
         sample_rate:
-            Rate at which tensors passed to `forward` will be sampled
+            Rate at which tensors passed to ``forward`` will be sampled
         fftlength:
             Length of the window, in seconds, to use for FFT estimates
         overlap:
             Overlap between windows used for FFT calculation. If left
-            as `None`, this will be set to `fftlength / 2`.
+            as ``None``, this will be set to ``fftlength / 2``.
         average:
             Aggregation method to use for combining windowed FFTs.
-            Allowed values are `"mean"` and `"median"`.
+            Allowed values are ``"mean"`` and ``"median"``.
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length `nperseg`.
+            FFT computation. Should have length ``nperseg``.
             Defaults to a hanning window.
         fast:
             Whether to use a faster spectral density computation that
             support cross spectral density, or a slower one which does
             not. The cost of the fast implementation is that it is not
             exact for the two lowest frequency bins.
-    """
+    """  # noqa E501
 
     def __init__(
         self,
