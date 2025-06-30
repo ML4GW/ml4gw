@@ -114,9 +114,9 @@ these chunks.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>chunk_it</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></span>) -- Iterator which will produce chunks of timeseries
 data to sample windows from. Should have shape
-<cite>(N, C, T)</cite>, where <cite>N</cite> is the number of chunks
-to sample from, <cite>C</cite> is the number of channels,
-and <cite>T</cite> is the number of samples along the
+<code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">C,</span> <span class="pre">T)</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of chunks
+to sample from, <code class="docutils literal notranslate"><span class="pre">C</span></code> is the number of channels,
+and <code class="docutils literal notranslate"><span class="pre">T</span></code> is the number of samples along the
 time dimension for each chunk.</p></li>
 <li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Size of windows to be sampled from each chunk.
 Should be less than the size of each chunk
@@ -154,8 +154,7 @@ should be sample independently from the others.</p></li>
 <p>Iterable dataset that samples and loads windows of
 timeseries data uniformly from a set of HDF5 files.
 It is _strongly_ recommended that these files have been
-written using [chunked storage]
-(<a class="reference external" href="https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage">https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage</a>).
+written using <a class="reference external" href="https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage">chunked storage</a>.
 This has shown to produce increases in read-time speeds
 of over an order of magnitude.</p>
 <dl class="field-list simple">
@@ -170,14 +169,14 @@ This will be the size of the last dimension of the
 generated batches.</p></li>
 <li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of windows to sample at each iteration.</p></li>
 <li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of batches to generate during each call
-to <cite>__iter__</cite>.</p></li>
+to <code class="docutils literal notranslate"><span class="pre">__iter__</span></code>.</p></li>
 <li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Whether windows for each channel in a given batch
 element should be sampled coincidentally, i.e.
 corresponding to the same time indices from the
 same files, or should be sampled independently.
 For the latter case, users can either specify
-<cite>False</cite>, which will sample filenames independently
-for each channel, or <cite>&quot;files&quot;</cite>, which will sample
+<code class="docutils literal notranslate"><span class="pre">False</span></code>, which will sample filenames independently
+for each channel, or <code class="docutils literal notranslate"><span class="pre">&quot;files&quot;</span></code>, which will sample
 windows independently within a given file for each
 channel. The latter setting limits the amount of
 entropy in the effective dataset, but can provide
@@ -229,49 +228,49 @@ arguments. See their descriptions for details.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channels</span> <span class="pre">time']</span></code></span>) -- Timeseries data to be iterated through. Should have
-shape <cite>(num_channels, length * sample_rate)</cite>. Windows
+shape <code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>. Windows
 will be sampled from the time (1st) dimension for all
 channels along the channel (0th) dimension.</p></li>
-<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The length of the windows to sample from <cite>X</cite> in units
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The length of the windows to sample from <code class="docutils literal notranslate"><span class="pre">X</span></code> in units
 of samples.</p></li>
 <li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>]</span>) -- Target timeseries to be iterated through. If specified,
 should be a single channel and have shape
-<cite>(length * sample_rate,)</cite>. If left as <cite>None</cite>, only windows
+<code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">*</span> <span class="pre">sample_rate,)</span></code>. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, only windows
 sampled from <cite>X</cite> will be returned during iteration.
 Otherwise, windows sampled from both arrays will be
 returned. Note that if sampling is performed non-coincidentally,
 there's no sensible way to align windows sampled from this
-array with the windows sampled from <cite>X</cite>, so this combination
+array with the windows sampled from <code class="docutils literal notranslate"><span class="pre">X</span></code>, so this combination
 of arguments is not permitted.</p></li>
 <li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Maximum number of windows to return at each iteration. Will
 be the length of the 0th dimension of the returned array(s).
-If <cite>batches_per_epoch</cite> is specified, this will be the length
-of _every_ array returned during iteration. Otherwise, it's
+If <code class="docutils literal notranslate"><span class="pre">batches_per_epoch</span></code> is specified, this will be the length
+of <strong>every</strong> array returned during iteration. Otherwise, it's
 possible that the last array will be shorter due to the number
 of windows in the timeseries being a non-integer multiple of
-<cite>batch_size</cite>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>.</p></li>
 <li><p><strong>stride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The resolution at which windows will be sampled from the
 specified timeseries, in units of samples. E.g. if
-<cite>stride=2</cite>, the first sample of each window can only be
-from an index of <cite>X</cite> which is a multiple of 2. Obviously,
+<code class="docutils literal notranslate"><span class="pre">stride=2</span></code>, the first sample of each window can only be
+from an index of <code class="docutils literal notranslate"><span class="pre">X</span></code> which is a multiple of 2. Obviously,
 this reduces the number of windows which can be iterated
-through by a factor of <cite>stride</cite>.</p></li>
+through by a factor of <code class="docutils literal notranslate"><span class="pre">stride</span></code>.</p></li>
 <li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- Number of batches of window to produce during iteration
-before raising a <cite>StopIteration</cite>. Must be specified if
+before raising a <code class="docutils literal notranslate"><span class="pre">StopIteration</span></code>. Must be specified if
 performing non-coincident sampling. Otherwise, if left
 as <cite>None</cite>, windows will be sampled until the entire
 timeseries has been exhausted. Note that
-<cite>batch_size * batches_per_epoch</cite> must be be small
+<code class="docutils literal notranslate"><span class="pre">batch_size</span> <span class="pre">*</span> <span class="pre">batches_per_epoch</span></code> must be be small
 enough to be able to be fulfilled by the number of
-windows in the timeseries, otherise a <cite>ValueError</cite>
+windows in the timeseries, otherise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
 will be raised.</p></li>
 <li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- Whether to sample windows from the channels of <cite>X</cite>
 using the same indices or independently. Can't be
-<cite>True</cite> if <cite>batches_per_epoch</cite> is <cite>None</cite> or <cite>y</cite> is
-_not_ <cite>None</cite>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">True</span></code> if <code class="docutils literal notranslate"><span class="pre">batches_per_epoch</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">y</span></code> is
+<strong>not</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 <li><p><strong>shuffle</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- Whether to sample windows from timeseries randomly
-or in order along the time axis. If <cite>coincident=False</cite>
-and <cite>shuffle=False</cite>, channels will be iterated through
+or in order along the time axis. If <code class="docutils literal notranslate"><span class="pre">coincident=False</span></code>
+and <code class="docutils literal notranslate"><span class="pre">shuffle=False</span></code>, channels will be iterated through
 with the index along the last channel moving fastest.</p></li>
 <li><p><strong>device</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Which device to host the timeseries arrays on</p></li>
 </ul>

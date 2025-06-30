@@ -18,6 +18,7 @@
         <script src="_static/documentation_options.js?v=d048f138"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -152,8 +153,8 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.augmentations.</span></span><span class="sig-name descname"><span class="pre">SignalInverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalInverter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Takes a tensor of timeseries of arbitrary dimension
-and randomly inverts (i.e. h(t) -&gt; -h(t))
-each timeseries with probability <cite>prob</cite>.</p>
+and randomly inverts i.e. <span class="math notranslate nohighlight">\(h(t) \rightarrow -h(t)\)</span>
+each timeseries with probability <code class="docutils literal notranslate"><span class="pre">prob</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>prob</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Probability that a timeseries is inverted</p>
@@ -181,8 +182,8 @@ registered hooks while the latter silently ignores them.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.augmentations.</span></span><span class="sig-name descname"><span class="pre">SignalReverser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.augmentations.SignalReverser" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Takes a tensor of timeseries of arbitrary dimension
-and randomly reverses (i.e. h(t) -&gt; h(-t))
-each timeseries with probability <cite>prob</cite>.</p>
+and randomly reverses i.e., <span class="math notranslate nohighlight">\(h(t) \rightarrow h(-t)\)</span>.
+each timeseries with probability <code class="docutils literal notranslate"><span class="pre">prob</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>prob</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Probability that a kernel is reversed</p>
@@ -210,14 +211,15 @@ registered hooks while the latter silently ignores them.</p>
 <span id="ml4gw-distributions-module"></span><h2>ml4gw.distributions module<a class="headerlink" href="#module-ml4gw.distributions" title="Link to this heading"></a></h2>
 <p>Module containing callables classes for generating samples
 from specified distributions. Each callable should map from
-an integer <cite>N</cite> to a 1D torch <cite>Tensor</cite> containing <cite>N</cite> samples
+an integer <code class="docutils literal notranslate"><span class="pre">N</span></code> to a 1D torch <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> containing <code class="docutils literal notranslate"><span class="pre">N</span></code> samples
 from the corresponding distribution.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.distributions.Cosine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">Cosine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.Cosine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Distribution</span></code></p>
 <p>Cosine distribution based on
-<code class="docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code>
+(see <a class="reference external" href="https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution">documentation</a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ml4gw.distributions.Cosine.arg_constraints">
 <span class="sig-name descname"><span class="pre">arg_constraints</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#ml4gw.distributions.Cosine.arg_constraints" title="Link to this definition"></a></dt>
@@ -300,33 +302,19 @@ are batched.</p>
 <dt class="sig sig-object py" id="ml4gw.distributions.PowerLaw">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">PowerLaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.PowerLaw" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformedDistribution</span></code></p>
-<blockquote>
-<div><p>Sample from a power law distribution,
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>p(x) pprox x^{lpha}.
-</pre></div>
-</div>
+<p>Sample from a power law distribution,</p>
+<div class="math notranslate nohighlight">
+\[p(x) \approx x^{\alpha}.\]</div>
 <p>Index alpha cannot be 0, since it is equivalent to a Uniform distribution.
 This could be used, for example, as a universal distribution of
 signal-to-noise ratios (SNRs) from uniformly volume distributed
-sources
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span><span class="p">(</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>ho) = 3*
-ho_0^3 /
-ho^4</p>
-<blockquote>
-<div><p>where :math:<a href="#id1"><span class="problematic" id="id2">`</span></a></p>
-</div></blockquote>
-<dl class="simple">
-<dt>ho_0` is a representative minimum SNR</dt><dd><p>considered for detection. See, for example,
+sources</p>
+<div class="math notranslate nohighlight">
+\[p(\rho) = 3\;\rho_0^3 / \rho^4\]</div>
+<p>where <span class="math notranslate nohighlight">\(\rho_0\)</span> is a representative minimum SNR
+considered for detection. See, for example,
 <a class="reference external" href="https://arxiv.org/abs/1102.5421">Schutz (2011)</a>.
 Or, for example, <code class="docutils literal notranslate"><span class="pre">index=2</span></code> for uniform in Euclidean volume.</p>
-</dd>
-</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ml4gw.distributions.PowerLaw.support">
 <span class="sig-name descname"><span class="pre">support</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">GreaterThanEq(lower_bound=0.0)</span></em><a class="headerlink" href="#ml4gw.distributions.PowerLaw.support" title="Link to this definition"></a></dt>
@@ -338,9 +326,9 @@ Or, for example, <code class="docutils literal notranslate"><span class="pre">in
 <dt class="sig sig-object py" id="ml4gw.distributions.RateEvolution">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">RateEvolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate_function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.RateEvolution" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformComovingVolume</span></code></a></p>
-<p>Wrapper around <cite>UniformComovingVolume</cite> to allow for
+<p>Wrapper around <a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UniformComovingVolume()</span></code></a> to allow for
 arbitrary rate evolution functions. E.g., if
-<cite>rate_function = 1 / (1 + z)</cite>, then the distribution
+<code class="docutils literal notranslate"><span class="pre">rate_function</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">z:</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">z)</span></code>, then the distribution
 will sample values such that they occur uniform in
 source frame time.</p>
 <dl class="field-list simple">
@@ -348,11 +336,10 @@ source frame time.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rate_function</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></span>) -- Callable that takes redshift as input
 and returns the rate evolution factor.</p></li>
-<li><p><strong>*args</strong> -- Arguments passed to <cite>UniformComovingVolume</cite>
-constructor.</p></li>
-<li><p><strong>**kwargs</strong> -- <p>Arguments passed to <cite>UniformComovingVolume</cite>
-constructor.</p>
-</p></li>
+<li><p><strong>*args</strong> -- Arguments passed to
+<a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UniformComovingVolume()</span></code></a> constructor.</p></li>
+<li><p><strong>**kwargs</strong> -- Keyword arguments passed to
+<a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UniformComovingVolume()</span></code></a> constructor.</p></li>
 </ul>
 </dd>
 </dl>
@@ -373,14 +360,14 @@ constructor.</p>
 <p>Sample either redshift, comoving distance, or luminosity distance
 such that they are uniform in comoving volume, assuming a flat
 lambda-CDM cosmology. Default H0 and Omega_M values match
-astropy.cosmology.Planck18</p>
+<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html">Planck18 parameters in Astropy</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>minimum</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Minimum distance in the specified distance type</p></li>
 <li><p><strong>maximum</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Maximum distance in the specified distance type</p></li>
-<li><p><strong>distance_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Type of distance to sample from. Can be 'redshift',
-'comoving_distance', or 'luminosity_distance'</p></li>
+<li><p><strong>distance_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Type of distance to sample from. Can be <code class="docutils literal notranslate"><span class="pre">redshift</span></code>,
+<code class="docutils literal notranslate"><span class="pre">comoving_distance</span></code>, or <code class="docutils literal notranslate"><span class="pre">luminosity_distance</span></code></p></li>
 <li><p><strong>h0</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Hubble constant in km/s/Mpc</p></li>
 <li><p><strong>omega_m</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Matter density parameter</p></li>
 <li><p><strong>z_max</strong> -- Maximum redshift for the grid</p></li>
@@ -435,10 +422,10 @@ are batched.</p>
 <p>Tools for manipulating raw gravitational waveforms
 and projecting them onto interferometer responses.
 Much of the projection code is an extension of the
-implementation made available in bilby:</p>
-<p><a class="reference external" href="https://arxiv.org/abs/1811.02042">https://arxiv.org/abs/1811.02042</a></p>
-<p>Specifically the code here:
-<a class="reference external" href="https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py">https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py</a></p>
+implementation made available in
+<a class="reference external" href="https://arxiv.org/abs/1811.02042">bilby</a>.
+Specifically code from
+<a class="reference external" href="https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py">this module</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.gw.breathing">
 <span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">breathing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.breathing" title="Link to this definition"></a></dt>
@@ -496,21 +483,20 @@ the waveforms, for each interferometer.</p>
 <p>Compute the signal to noise ratio (SNR) of individual
 interferometer responses to gravitational waveforms with
 respect to a background PSD for each interferometer. The
-SNR of the $i$th waveform at the $j$th interferometer
+SNR of the <span class="math notranslate nohighlight">\(i\)</span> th waveform at the <span class="math notranslate nohighlight">\(j\)</span> th interferometer
 is computed as:</p>
-<dl class="simple">
-<dt>$$rho_{ij} =</dt><dd><p>4 int_{f_{text{min}}}^{f_{text{max}}}
-frac{tilde{h_{ij}}(f)tilde{h_{ij}}^*(f)}
-{S_n^{(j)}(f)}df$$</p>
-</dd>
-</dl>
-<p>Where $f_{text{min}}$ is a minimum frequency denoted
-by <cite>highpass</cite>, <cite>f_{text{max}}</cite> is the maximum frequency
-denoted by <cite>lowpass</cite>, which defaults to the Nyquist frequency
-dictated by <cite>sample_rate</cite>; <cite>tilde{h_{ij}}</cite> and <cite>tilde{h_{ij}}*</cite>
-indicate the fourier transform of the $i$th waveform at
-the $j$th inteferometer and its complex conjugate, respectively;
-and $S_n^{(j)}$ is the backround PSD at the $j$th interferometer.</p>
+<div class="math notranslate nohighlight">
+\[\rho_{ij} =
+4 \int_{f_{\text{min}}}^{f_{\text{max}}}
+\frac{\tilde{h_{ij}}(f)\tilde{h_{ij}}^*(f)}
+{S_n^{(j)}(f)}df\]</div>
+<p>Where <span class="math notranslate nohighlight">\(f_{\text{min}}\)</span> is a minimum frequency denoted
+by <code class="docutils literal notranslate"><span class="pre">highpass</span></code>, <span class="math notranslate nohighlight">\(f_{\text{max}}\)</span> is the maximum frequency
+denoted by <code class="docutils literal notranslate"><span class="pre">lowpass</span></code>, which defaults to the Nyquist frequency
+dictated by <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>; <span class="math notranslate nohighlight">\(\tilde{h}_{ij}\)</span> and <span class="math notranslate nohighlight">\(\tilde{h}_{ij}^*\)</span>
+indicate the fourier transform of the <span class="math notranslate nohighlight">\(i\)</span> th waveform at
+the <span class="math notranslate nohighlight">\(j\)</span> th inteferometer and its complex conjugate, respectively;
+and <span class="math notranslate nohighlight">\(S_n^{(j)}\)</span> is the backround PSD at the <span class="math notranslate nohighlight">\(j\)</span> th interferometer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -555,10 +541,11 @@ the Nyquist freqyency will contribute to the SNR calculation.</p></li>
 <span class="sig-prename descclassname"><span class="pre">ml4gw.gw.</span></span><span class="sig-name descname"><span class="pre">compute_network_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.gw.compute_network_snr" title="Link to this definition"></a></dt>
 <dd><p>Compute the total SNR from a gravitational waveform
 from a network of interferometers. The total SNR for
-the $i$th waveform is computed as</p>
-<p>$$rho_i = sqrt{sum_{j}^{N}rho_{ij}^2}$$</p>
-<p>where rho_{ij} is the SNR for the $i$th waveform at
-the $j$th interferometer in the network and $N$ is
+the <span class="math notranslate nohighlight">\(i\)</span> th waveform is computed as</p>
+<div class="math notranslate nohighlight">
+\[\rho_i = \sqrt{\sum_{j}^{N}\rho_{ij}^2}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\rho_{ij}\)</span> is the SNR for the <span class="math notranslate nohighlight">\(i\)</span> th waveform at
+the <span class="math notranslate nohighlight">\(j\)</span> th interferometer in the network and <span class="math notranslate nohighlight">\(N\)</span> is
 the total number of interferometers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -567,12 +554,12 @@ the total number of interferometers.</p>
 raw gravitational waveforms</p></li>
 <li><p><strong>backgrounds</strong> -- The one-sided power spectral density of the background
 noise at each interferometer to which a response
-in <cite>responses</cite> has been calculated. If 2D, each row of
-<cite>psd</cite> will be assumed to be the background PSD for each
-channel of _every_ batch element in <cite>responses</cite>. If 3D,
+in <code class="docutils literal notranslate"><span class="pre">responses</span></code> has been calculated. If 2D, each row of
+<code class="docutils literal notranslate"><span class="pre">psd</span></code> will be assumed to be the background PSD for each
+channel of <strong>every</strong> batch element in <code class="docutils literal notranslate"><span class="pre">responses</span></code>. If 3D,
 this should contain a background PSD for each channel
-of each element in <cite>responses</cite>, and therefore the first
-two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p></li>
+of each element in <code class="docutils literal notranslate"><span class="pre">responses</span></code>, and therefore the first
+two dimensions of <code class="docutils literal notranslate"><span class="pre">psd</span></code> and <code class="docutils literal notranslate"><span class="pre">responses</span></code> should match.</p></li>
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
@@ -580,13 +567,13 @@ match the frequency resolution of the provided PSDs.</p></li>
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
-left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
+left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, all frequencies up to <code class="docutils literal notranslate"><span class="pre">sample_rate</span> <span class="pre">/</span> <span class="pre">2</span></code>
 will contribute to the SNR calculation.</p></li>
 <li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out high frequency components.
 If a float, it will be used to compute such a mask. If
-left as <cite>None</cite>, all frequencies from <cite>highpass</cite> up to
+left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, all frequencies from <code class="docutils literal notranslate"><span class="pre">highpass</span></code> up to
 the Nyquist freqyency will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
@@ -707,12 +694,12 @@ raw gravitational waveforms</p></li>
 or a single SNR to which all waveforms should be scaled.</p></li>
 <li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- The one-sided power spectral density of the background
 noise at each interferometer to which a response
-in <cite>responses</cite> has been calculated. If 2D, each row of
-<cite>psd</cite> will be assumed to be the background PSD for each
-channel of _every_ batch element in <cite>responses</cite>. If 3D,
+in <code class="docutils literal notranslate"><span class="pre">responses</span></code> has been calculated. If 2D, each row of
+<code class="docutils literal notranslate"><span class="pre">psd</span></code> will be assumed to be the background PSD for each
+channel of <strong>every</strong> batch element in <code class="docutils literal notranslate"><span class="pre">responses</span></code>. If 3D,
 this should contain a background PSD for each channel
-of each element in <cite>responses</cite>, and therefore the first
-two dimensions of <cite>psd</cite> and <cite>responses</cite> should match.</p></li>
+of each element in <code class="docutils literal notranslate"><span class="pre">responses</span></code>, and therefore the first
+two dimensions of <code class="docutils literal notranslate"><span class="pre">psd</span></code> and <code class="docutils literal notranslate"><span class="pre">responses</span></code> should match.</p></li>
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
@@ -720,13 +707,13 @@ match the frequency resolution of the provided PSDs.</p></li>
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
-left as <cite>None</cite>, all frequencies up to <cite>sample_rate / 2</cite>
+left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, all frequencies up to <code class="docutils literal notranslate"><span class="pre">sample_rate</span> <span class="pre">/</span> <span class="pre">2</span></code>
 will contribute to the SNR calculation.</p></li>
 <li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out high frequency components.
 If a float, it will be used to compute such a mask. If
-left as <cite>None</cite>, all frequencies from <cite>highpass</cite> up to
+left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, all frequencies from <code class="docutils literal notranslate"><span class="pre">highpass</span></code> up to
 the Nyquist freqyency will contribute to the SNR calculation.</p></li>
 </ul>
 </dd>
@@ -775,49 +762,49 @@ frequency components are going to be discarded anyway.</p>
 <li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor whose power spectral density
 to compute, or for cross spectral density the
 timeseries whose fft will be conjugated. Can have
-shape <cite>(batch_size, num_channels, length * sample_rate)</cite>,
-<cite>(num_channels, length * sample_rate)</cite>, or
-<cite>(length * sample_rate)</cite>.</p></li>
+shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>.</p></li>
 <li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
 <li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
 <li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{nperseg//2+1}']</span></code></span>) -- Window array to multiply by each FFT window before
-FFT computation. Should have length <cite>nperseg // 2 + 1</cite>.</p></li>
+FFT computation. Should have length <code class="docutils literal notranslate"><span class="pre">nperseg</span> <span class="pre">//</span> <span class="pre">2</span> <span class="pre">+</span> <span class="pre">1</span></code>.</p></li>
 <li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
 desired units for output tensor (e.g. letting this equal
-<cite>1 / (sample_rate * (window**2).sum())</cite> will give output
-units of density, $text{Hz}^-1$$.</p></li>
+<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">(sample_rate</span> <span class="pre">*</span> <span class="pre">(window**2).sum())</span></code> will give output
+units of density, :math`text{Hz}^-1`.</p></li>
 <li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- How to aggregate the contributions of each FFT window to
-the spectral density. Allowed options are <cite>'mean'</cite> and
-<cite>'median'</cite>.</p></li>
+the spectral density. Allowed options are <code class="docutils literal notranslate"><span class="pre">'mean'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'median'</span></code>.</p></li>
 <li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- Timeseries tensor to compute cross spectral density
-with <cite>x</cite>. If left as <cite>None</cite>, <cite>x</cite>'s power spectral
-density will be returned. Otherwise, if <cite>x</cite> is 1D,
-<cite>y</cite> must also be 1D. If <cite>x</cite> is 2D, the assumption
+with <code class="docutils literal notranslate"><span class="pre">x</span></code>. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span></code>'s power spectral
+density will be returned. Otherwise, if <code class="docutils literal notranslate"><span class="pre">x</span></code> is 1D,
+<code class="docutils literal notranslate"><span class="pre">y</span></code> must also be 1D. If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 2D, the assumption
 is that this represents a single multi-channel timeseries,
-and <cite>y</cite> must be either 2D or 1D. In the former case,
+and <code class="docutils literal notranslate"><span class="pre">y</span></code> must be either 2D or 1D. In the former case,
 the cross-spectral densities of each channel will be
-computed individually, so <cite>y</cite> must have the same shape as <cite>x</cite>.
-Otherwise, this will compute the CSD of each of <cite>x</cite>'s channels
-with <cite>y</cite>. If <cite>x</cite> is 3D, this will be assumed to be a batch
-of multi-channel timeseries. In this case, <cite>y</cite> can either
+computed individually, so <code class="docutils literal notranslate"><span class="pre">y</span></code> must have the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.
+Otherwise, this will compute the CSD of each of <code class="docutils literal notranslate"><span class="pre">x</span></code>'s channels
+with <code class="docutils literal notranslate"><span class="pre">y</span></code>. If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 3D, this will be assumed to be a batch
+of multi-channel timeseries. In this case, <code class="docutils literal notranslate"><span class="pre">y</span></code> can either
 be 3D, in which case each channel of each batch element will
 have its CSD calculated or 2D, which has two different options.
-If <cite>y</cite>'s 0th dimension matches <cite>x</cite>'s 0th dimension, it will
-be assumed that <cite>y</cite> represents a batch of 1D timeseries, and
+If <code class="docutils literal notranslate"><span class="pre">y</span></code>'s 0th dimension matches <code class="docutils literal notranslate"><span class="pre">x</span></code>'s 0th dimension, it will
+be assumed that <code class="docutils literal notranslate"><span class="pre">y</span></code> represents a batch of 1D timeseries, and
 for each batch element this timeseries will have its CSD with
-each channel of the corresponding batch element of <cite>x</cite>
-calculated. Otherwise, it sill be assumed that <cite>y</cite> represents
+each channel of the corresponding batch element of <code class="docutils literal notranslate"><span class="pre">x</span></code>
+calculated. Otherwise, it sill be assumed that <code class="docutils literal notranslate"><span class="pre">y</span></code> represents
 a single multi-channel timeseries, in which case each channel
-of <cite>y</cite> will have its CSD calculated with the corresponding
-channel in <cite>x</cite> across _all_ of <cite>x</cite>'s batch elements.</p></li>
+of <code class="docutils literal notranslate"><span class="pre">y</span></code> will have its CSD calculated with the corresponding
+channel in <code class="docutils literal notranslate"><span class="pre">x</span></code> across _all_ of <code class="docutils literal notranslate"><span class="pre">x</span></code>'s batch elements.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Tensor of power spectral densities of <cite>x</cite> or its cross spectral
-density with the timeseries in <cite>y</cite>.</p>
+<dd class="field-odd"><p>Tensor of power spectral densities of <code class="docutils literal notranslate"><span class="pre">x</span></code> or its cross spectral
+density with the timeseries in <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -827,8 +814,8 @@ density with the timeseries in <cite>y</cite>.</p>
 <span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.median" title="Link to this definition"></a></dt>
 <dd><p>Implements a median calculation that matches numpy's
 behavior for an even number of elements and includes
-the same bias correction used by scipy's implementation.
-see <a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066</a></p>
+the same bias correction used by
+<a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">scipy's implementation</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">']</span></code></span></p>
@@ -854,20 +841,20 @@ slower than the fast implementation.</p>
 <li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor whose power spectral density
 to compute, or for cross spectral density the
 timeseries whose fft will be conjugated. Can have
-shape <cite>(batch_size, num_channels, length * sample_rate)</cite>,
-<cite>(num_channels, length * sample_rate)</cite>, or
-<cite>(length * sample_rate)</cite>.</p></li>
+shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>.</p></li>
 <li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
 <li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
 <li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{nperseg//2+1}']</span></code></span>) -- Window array to multiply by each FFT window before
-FFT computation. Should have length <cite>nperseg // 2 + 1</cite>.</p></li>
+FFT computation. Should have length <code class="docutils literal notranslate"><span class="pre">nperseg</span> <span class="pre">//</span> <span class="pre">2</span> <span class="pre">+</span> <span class="pre">1</span></code>.</p></li>
 <li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
 desired units for output tensor (e.g. letting this equal
-<cite>1 / (sample_rate * (window**2).sum())</cite> will give output
-units of density, $text{Hz}^-1$$.</p></li>
+<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">(sample_rate</span> <span class="pre">*</span> <span class="pre">(window**2).sum())</span></code> will give output
+units of density, <span class="math notranslate nohighlight">\(\text{Hz}^-1\)</span>.</p></li>
 <li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- How to aggregate the contributions of each FFT window to
-the spectral density. Allowed options are <cite>'mean'</cite> and
-<cite>'median'</cite>.</p></li>
+the spectral density. Allowed options are <code class="docutils literal notranslate"><span class="pre">'mean'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'median'</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -881,13 +868,13 @@ the spectral density. Allowed options are <cite>'mean'</cite> and
 <span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">truncate_inverse_power_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.truncate_inverse_power_spectrum" title="Link to this definition"></a></dt>
 <dd><p>Truncate the length of the time domain response
 of a whitening filter built using the specified
-<cite>psd</cite> so that it has maximum length <cite>fduration</cite>
+<code class="docutils literal notranslate"><span class="pre">psd</span></code> so that it has maximum length <code class="docutils literal notranslate"><span class="pre">fduration</span></code>
 seconds. This is meant to mitigate the impact
 of sharp features in the background PSD causing
 time domain responses longer than the segments
 to which the whitening filter will be applied.</p>
 <p>Implementation details adapted from
-<a class="reference external" href="https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8">https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8</a></p>
+<a class="reference external" href="https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8">here</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -915,7 +902,7 @@ as <cite>None</cite>, no lowpass filtering will be applied.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
-<dt>The PSD with its time domain response truncated</dt><dd><p>to <cite>fduration</cite> and any filtered frequencies
+<dt>The PSD with its time domain response truncated</dt><dd><p>to <code class="docutils literal notranslate"><span class="pre">fduration</span></code> and any filtered frequencies
 tapered.</p>
 </dd>
 </dl>
@@ -930,7 +917,7 @@ tapered.</p>
 <dd><p>Whiten a batch of timeseries using the specified
 background one-sided power spectral densities (PSDs),
 modified to have the desired time domain response length
-<cite>fduration</cite> and possibly to highpass/lowpass filter.</p>
+<code class="docutils literal notranslate"><span class="pre">fduration</span></code> and possibly to highpass/lowpass filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -940,11 +927,11 @@ response of the whitening filter will be roughly
 the inverse of the square root of this PSD, ensuring
 that data from the same distribution will have
 approximately uniform power after whitening.
-If 2D, each batch element in <cite>X</cite> will be whitened
+If 2D, each batch element in <code class="docutils literal notranslate"><span class="pre">X</span></code> will be whitened
 using the same PSDs. If 3D, each batch element will
 be whitened by the PSDs contained along the 0th
-dimenion of <cite>psd</cite>, and so the first two dimensions
-of <cite>X</cite> and <cite>psd</cite> should match.</p></li>
+dimenion of <code class="docutils literal notranslate"><span class="pre">psd</span></code>, and so the first two dimensions
+of <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">psd</span></code> should match.</p></li>
 <li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
 response of a whitening filter built using
 this PSD, or a window of this length to taper
@@ -954,14 +941,14 @@ of this length will be used. Moreover, half of
 this length will be removed from each edge of
 the whitened timeseries to account for filter
 settle-in time.</p></li>
-<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which the data in <cite>X</cite> has been sampled</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which the data in <code class="docutils literal notranslate"><span class="pre">X</span></code> has been sampled</p></li>
 <li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The frequency in Hz at which to highpass filter
 the data, setting the frequency response in the
 whitening filter to 0. If left as <cite>None</cite>, no
 highpass filtering will be applied.</p></li>
 <li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The frequency in Hz at which to lowpass filter
 the data, setting the frequency response in the
-whitening filter to 0. If left as <cite>None</cite>, no
+whitening filter to 0. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no
 lowpass filtering will be applied.</p></li>
 </ul>
 </dd>
@@ -970,7 +957,7 @@ lowpass filtering will be applied.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
-<dt>Batch of whitened multichannel timeseries with</dt><dd><p><cite>fduration / 2</cite> seconds trimmed from each side.</p>
+<dt>Batch of whitened multichannel timeseries with</dt><dd><p><code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds trimmed from each side.</p>
 </dd>
 </dl>
 </p>

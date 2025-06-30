@@ -141,10 +141,10 @@ registered hooks while the latter silently ignores them.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.resnet.resnet_1d.</span></span><span class="sig-name descname"><span class="pre">Bottleneck</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplanes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">planes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downsample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dilation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.resnet.resnet_1d.Bottleneck" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Bottleneck blocks implement one extra convolution
-compared to basic blocks. In this layers, the <cite>planes</cite>
-parameter is generally meant to _downsize_ the number
+compared to basic blocks. In this layers, the <code class="docutils literal notranslate"><span class="pre">planes</span></code>
+parameter is generally meant to <strong>downsize</strong> the number
 of feature maps first, which then get expanded out to
-<cite>planes * Bottleneck.expansion</cite> feature maps at the
+<code class="docutils literal notranslate"><span class="pre">planes</span> <span class="pre">*</span> <span class="pre">Bottleneck.expansion</span></code> feature maps at the
 output of the layer.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ml4gw.nn.resnet.resnet_1d.Bottleneck.expansion">
@@ -196,9 +196,9 @@ used in BBH detection.</p>
 <li><p><strong>layers</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- A list representing the number of residual
 blocks to include in each &quot;layer&quot; of the
 network. Total layers (e.g. 50 in ResNet50)
-is <cite>2 + sum(layers) * factor</cite>, where factor
-is <cite>2</cite> for vanilla <cite>ResNet</cite> and <cite>3</cite> for
-<cite>BottleneckResNet</cite>.</p></li>
+is <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">+</span> <span class="pre">sum(layers)</span> <span class="pre">*</span> <span class="pre">factor</span></code>, where factor
+is <code class="docutils literal notranslate"><span class="pre">2</span></code> for vanilla <code class="docutils literal notranslate"><span class="pre">ResNet</span></code> and <code class="docutils literal notranslate"><span class="pre">3</span></code> for
+<code class="docutils literal notranslate"><span class="pre">BottleneckResNet</span></code>.</p></li>
 <li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The size of the convolutional kernel to
 use in all residual layers. _NOT_ the size
 of the input kernel to the network, which
@@ -221,8 +221,8 @@ for vanilla <cite>ResNet</cite>.</p></li>
 by strided or dilated convolutions for each layer.
 If left as <cite>None</cite>, strided convolutions will be
 used at each layer. Otherwise, <cite>stride_type</cite> should
-be one element shorter than <cite>layers</cite> and indicate either
-<cite>stride</cite> or <cite>dilation</cite> for each layer after the first.</p></li>
+be one element shorter than <code class="docutils literal notranslate"><span class="pre">layers</span></code> and indicate either
+<code class="docutils literal notranslate"><span class="pre">stride</span></code> or <cite>dilation</cite> for each layer after the first.</p></li>
 </ul>
 </dd>
 </dl>
