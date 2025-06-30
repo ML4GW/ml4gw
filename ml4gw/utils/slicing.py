@@ -234,6 +234,7 @@ def sample_kernels(
     N: Optional[int] = None,
     max_center_offset: Optional[int] = None,
     coincident: bool = True,
+    return_idx: bool = False,
 ) -> BatchTimeSeriesTensor:
     """Randomly sample kernels from a single or multichannel timeseries
 
@@ -251,11 +252,12 @@ def sample_kernels(
     Args:
         X:
             The timeseries tensor from which to sample kernels
-            kernel_size: The size of the kernels to sample
+        kernel_size:
+            The size of the kernels to sample
         N:
             The number of kernels to sample. Can be left as
             `None` if `X` is 3D, otherwise must be specified
-        max_center_offeset:
+        max_center_offset:
             If `X` is 2D, this indicates the maximum distance
             from the center of the timeseries the edge of
             sampled kernels may fall. If left as `None`, kernels
@@ -277,11 +279,15 @@ def sample_kernels(
             independently, i.e. whether the channels of each batch
             element in the output will contain coincident data. If
             `X` is 1D, this argument is ignored.
+        return_idx:
+            If `True`, return the indices used for slicing
     Returns:
         A batch of sampled kernels. If `X` is 1D, this will have
         shape `(N, kernel_size)`. If `X` is 2D, this will have
         shape `(N, num_channels, kernel_size)`, where
-        `num_channels = X.shape[0]`.
+        `num_channels = X.shape[0]`. If `return_idx` is `True`,
+        the returned value will be a tuple of the sampled kernels
+        and the indices used for slicing
     """
 
     if X.shape[-1] < kernel_size:
@@ -361,4 +367,6 @@ def sample_kernels(
         shape = (N, len(X))
 
     idx = torch.randint(min_val, max_val, size=shape).to(X.device)
+    if return_idx:
+        return slice_kernels(X, idx, kernel_size), idx
     return slice_kernels(X, idx, kernel_size)
