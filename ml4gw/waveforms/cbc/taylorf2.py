@@ -54,14 +54,15 @@ class TaylorF2(torch.nn.Module):
 
         # shape assumed (n_batch, params)
         if (
-            chirp_mass.shape[0] != mass_ratio.shape[0]
-            or chirp_mass.shape[0] != chi1.shape[0]
-            or chi1.shape[0] != chi2.shape[0]
-            or chi2.shape[0] != distance.shape[0]
-            or distance.shape[0] != phic.shape[0]
-            or phic.shape[0] != inclination.shape[0]
+            not chirp_mass.shape[0]
+            == mass_ratio.shape[0]
+            == chi1.shape[0]
+            == chi2.shape[0]
+            == distance.shape[0]
+            == phic.shape[0]
+            == inclination.shape[0]
         ):
-            raise RuntimeError("Tensors should have same batch size")
+            raise ValueError("Tensors must have same batch size")
 
         mass1, mass2 = chirp_mass_and_mass_ratio_to_components(
             chirp_mass, mass_ratio

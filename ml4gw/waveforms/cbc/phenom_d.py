@@ -56,14 +56,15 @@ class IMRPhenomD(TaylorF2):
         """
         # shape assumed (n_batch, params)
         if (
-            chirp_mass.shape[0] != mass_ratio.shape[0]
-            or mass_ratio.shape[0] != chi1.shape[0]
-            or chi1.shape[0] != chi2.shape[0]
-            or chi2.shape[0] != distance.shape[0]
-            or distance.shape[0] != phic.shape[0]
-            or phic.shape[0] != inclination.shape[0]
+            not chirp_mass.shape[0]
+            == mass_ratio.shape[0]
+            == chi1.shape[0]
+            == chi2.shape[0]
+            == distance.shape[0]
+            == phic.shape[0]
+            == inclination.shape[0]
         ):
-            raise RuntimeError("Tensors should have same batch size")
+            raise ValueError("Tensors must have same batch size")
         cfac = torch.cos(inclination)
         pfac = 0.5 * (1.0 + cfac * cfac)
 
@@ -104,16 +105,18 @@ class IMRPhenomD(TaylorF2):
 
         fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
         Mf_peak = self.fmaxCalc(fRD, fDM, gamma2, gamma3)
-        _, t0 = self.phenom_d_mrd_phase(Mf_peak, eta, eta2, chi1, chi2, xi)
+        _, t0 = self.phenom_d_mrd_phase(
+            Mf_peak, eta, eta2, chi1, chi2, xi, fRD, fDM
+        )
 
         Mf = torch.outer(M_s, f)
         Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
 
         Psi, _ = self.phenom_d_phase(
-            Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi
+            Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
         Psi_ref, _ = self.phenom_d_phase(
-            Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi
+            Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
 
         Psi = (Psi.mT - 2 * phic).mT
@@ -133,6 +136,8 @@ class IMRPhenomD(TaylorF2):
             chi22,
             xi,
             distance,
+            fRD,
+            fDM,
         )
 
         amp_0 = self.taylorf2_amplitude(
@@ -157,8 +162,8 @@ class IMRPhenomD(TaylorF2):
         chi22,
         xi,
         distance,
-        fRD=None,  # used for passing ringdown frequency from phenom_p
-        fDM=None,  # used for passing damping frequency from phenom_p
+        fRD,
+        fDM,
     ):
         ins_amp, ins_Damp = self.phenom_d_inspiral_amp(
             Mf, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
@@ -172,14 +177,6 @@ class IMRPhenomD(TaylorF2):
 
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
-
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
         Mf_peak = self.fmaxCalc(fRD, fDM, gamma2, gamma3)
         # Geometric peak and joining frequencies
@@ -221,17 +218,9 @@ class IMRPhenomD(TaylorF2):
         chi12,
         chi22,
         xi,
-        fRD=None,  # used for passing ringdown frequency from phenom_p
-        fDM=None,  # used for passing damping frequency from phenom_p
+        fRD,
+        fDM,
     ):
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
-
         # Geometric frequency definition from PhenomD header file
         AMP_fJoin_INS = 0.014
 
@@ -268,19 +257,7 @@ class IMRPhenomD(TaylorF2):
         )
         return amp, Damp
 
-    # fRD and fDM are to be passed for generating phenom_p waveforms
-    # and remain None for phenom_d
-    def phenom_d_mrd_amp(
-        self, Mf, eta, eta2, chi1, chi2, xi, fRD=None, fDM=None
-    ):
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
-
+    def phenom_d_mrd_amp(self, Mf, eta, eta2, chi1, chi2, xi, fRD, fDM):
         gamma1 = self.gamma1_fun(eta, eta2, xi)
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
@@ -422,10 +399,8 @@ class IMRPhenomD(TaylorF2):
 
         return amp, Damp
 
-    # fRD and fDM are to be passed for generating phenom_p waveforms
-    # and remain None for phenom_d
     def phenom_d_phase(
-        self, Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD=None, fDM=None
+        self, Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM
     ):
         ins_phase, ins_Dphase = self.phenom_d_inspiral_phase(
             Mf, mass_1, mass_2, eta, eta2, xi, chi1, chi2
@@ -435,13 +410,6 @@ class IMRPhenomD(TaylorF2):
             Mf, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
 
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
         # definitions in Eq. (35) of arXiv:1508.07253
         # PHI_fJoin_INS in header LALSimIMRPhenomD.h
         # C1 continuity at intermediate region i.e. f_1
@@ -501,24 +469,12 @@ class IMRPhenomD(TaylorF2):
 
         return phasing, Dphasing
 
-    # fRD and fDM are to be passed for generating phenom_p waveforms
-    # and remain None for phenom_d
-    def phenom_d_mrd_phase(
-        self, Mf, eta, eta2, chi1, chi2, xi, fRD=None, fDM=None
-    ):
+    def phenom_d_mrd_phase(self, Mf, eta, eta2, chi1, chi2, xi, fRD, fDM):
         alpha1 = self.alpha1Fit(eta, eta2, xi)
         alpha2 = self.alpha2Fit(eta, eta2, xi)
         alpha3 = self.alpha3Fit(eta, eta2, xi)
         alpha4 = self.alpha4Fit(eta, eta2, xi)
         alpha5 = self.alpha5Fit(eta, eta2, xi)
-
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
         f_minus_alpha5_fRD = (Mf.t() - alpha5 * fRD).t()
         # Leading 1/eta is not multiplied at this stage

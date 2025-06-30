@@ -18,18 +18,54 @@ def test_log_uniform(seed_everything):
     sampler = distributions.LogUniform(math.e, math.e**2)
     samples = sampler.sample((10,))
     assert len(samples) == 10
-    assert ((torch.e <= samples) & (torch.e**2 <= 100)).all()
+    assert ((torch.e <= samples) & (samples <= torch.e**2)).all()
 
     # check that the mean is roughly correct
     # (within three standard deviations)
-    samples = sampler.sample((100000,))
+    num_samples = 100000
+    samples = sampler.sample((num_samples,))
     log_samples = np.log(samples)
 
     mean = log_samples.mean().item()
     variance = 4 / 12
-    sample_variance = variance / 10000
+    sample_variance = variance / (num_samples - 1)
     sample_std = sample_variance**0.5
     assert abs(mean - 1.5) < (3 * sample_std)
+
+
+def test_log_normal(seed_everything):
+    mu = 0
+    sigma = 1
+    sampler = distributions.LogNormal(mu, sigma, low=0)
+    samples = sampler.sample((10,))
+    assert len(samples) == 10
+    assert (samples > 0).all()
+
+    # check that the mean is roughly correct
+    # (within three standard deviations)
+    num_samples = 100000
+    samples = sampler.sample((num_samples,))
+    mean = samples.mean().item()
+    expected_mean = np.exp(mu + (sigma**2) / 2)
+
+    variance = (np.exp(sigma**2) + 1) * np.exp(2 * mu + sigma**2)
+    sample_variance = variance / (num_samples - 1)
+    sample_std = sample_variance**0.5
+    assert abs(mean - expected_mean) < (3 * sample_std)
+
+
+def test_sine(seed_everything):
+    sampler = distributions.Sine()
+    samples = sampler.sample((10,))
+    assert len(samples) == 10
+    assert ((0 <= samples) & (samples <= math.pi)).all()
+
+    sampler = distributions.Sine(-3, 5)
+    samples = sampler.sample((100,))
+    assert len(samples) == 100
+    assert ((-3 <= samples) & (samples <= 5)).all()
+
+    assert torch.all(sampler.log_prob(torch.tensor([-4, 6])) == float("-inf"))
 
 
 def test_cosine(seed_everything):
@@ -48,6 +84,10 @@ def test_cosine(seed_everything):
 
 def test_power_law(seed_everything):
     """Test PowerLaw distribution"""
+
+    with pytest.raises(ValueError, match=r"Index of 0 is the same as Uniform"):
+        distributions.PowerLaw(0, 100, index=0)
+
     ref_snr = 8
     sampler = distributions.PowerLaw(ref_snr, float("inf"), index=-4)
     samples = sampler.sample((100000,)).numpy()

@@ -18,7 +18,9 @@ def sample_rate(request):
     return request.param
 
 
-@pytest.fixture(params=[0.5, 2, 4])
+# The 1/9 tests odd `nperseg` for the sample
+# rates above
+@pytest.fixture(params=[1 / 9, 0.5, 2, 4])
 def fftlength(request):
     return request.param
 
@@ -408,6 +410,10 @@ def test_whiten(
         scale=1 / (sample_rate * (window**2).sum()),
     )
 
+    with pytest.raises(ValueError, match=r"Not enough timeseries samples*"):
+        failure_size = int(fduration * sample_rate)
+        X = torch.randn(batch_size, num_channels, failure_size)
+        whiten(X, psd, fduration, sample_rate, highpass, lowpass)
     size = int(whiten_length * sample_rate)
     X = mean + std * torch.randn(batch_size, num_channels, size)
     whitened = whiten(X, psd, fduration, sample_rate, highpass, lowpass)
