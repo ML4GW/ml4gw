@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 import torch
 from lalsimulation import SimInspiralTransformPrecessingNewInitialConditions
 from torch.distributions import Uniform
@@ -63,3 +64,19 @@ def test_bilby_to_lalsim_spins():
         assert np.isclose(s2x[i].item(), lal_s2x, atol=1e-4)
         assert np.isclose(s2y[i].item(), lal_s2y, atol=1e-4)
         assert np.isclose(s2z[i].item(), lal_s2z, atol=1e-4)
+
+    f_ref = 0
+    with pytest.raises(ValueError, match=r"f_ref <= 0 is invalid*"):
+        incl, s1x, s1y, s1z, s2x, s2y, s2z = bilby_spins_to_lalsim(
+            theta_jn,
+            phi_jl,
+            tilt_1,
+            tilt_2,
+            phi_12,
+            a_1,
+            a_2,
+            mass_1,
+            mass_2,
+            f_ref,
+            phi_ref,
+        )

@@ -57,6 +57,12 @@ def test_blocks(block, kernel_size, stride, spectrogram_size, inplanes):
             )
         return
 
+    if block == BasicBlock:
+        with pytest.raises(ValueError, match=r"BasicBlock only supports*"):
+            block(inplanes, planes, groups=2)
+        with pytest.raises(ValueError, match=r"BasicBlock only supports*"):
+            block(inplanes, planes, base_width=32)
+
     block = block(inplanes, planes, kernel_size, stride, downsample=downsample)
     x = torch.randn(8, inplanes, spectrogram_size, spectrogram_size)
     y = block(x)
@@ -82,6 +88,11 @@ def stride_type(request):
     return request.param
 
 
+@pytest.fixture(params=[True, False])
+def zero_init_residual(request):
+    return request.param
+
+
 @pytest.fixture(params=[BottleneckResNet2D, ResNet2D])
 def architecture(request):
     return request.param
@@ -95,6 +106,7 @@ def test_resnet(
     in_channels,
     spectrogram_size,
     stride_type,
+    zero_init_residual,
 ):
     if kernel_size % 2 == 0:
         with pytest.raises(ValueError):
@@ -119,9 +131,19 @@ def test_resnet(
             )
         return
 
-    nn = architecture(
-        in_channels, layers, classes, kernel_size, stride_type=stride_type
-    )
+    if architecture == ResNet2D:
+        nn = architecture(
+            in_channels,
+            layers,
+            classes,
+            kernel_size,
+            stride_type=stride_type,
+            zero_init_residual=zero_init_residual,
+        )
+    else:
+        nn = architecture(
+            in_channels, layers, classes, kernel_size, stride_type=stride_type
+        )
     x = torch.randn(8, in_channels, spectrogram_size, spectrogram_size)
     y = nn(x)
     assert y.shape == (8, classes)

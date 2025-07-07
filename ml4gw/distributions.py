@@ -140,7 +140,7 @@ class PowerLaw(dist.TransformedDistribution):
         self, minimum: float, maximum: float, index: int, validate_args=None
     ):
         if index == 0:
-            raise RuntimeError("Index of 0 is the same as Uniform")
+            raise ValueError("Index of 0 is the same as Uniform")
         elif index == -1:
             base_min = torch.as_tensor(minimum).log()
             base_max = torch.as_tensor(maximum).log()

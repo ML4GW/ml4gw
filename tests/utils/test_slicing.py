@@ -28,6 +28,12 @@ def test_unfold_windows():
     )
     assert rem.tolist() == [[6]]
 
+    # Check remainder when windows evenly divide the kernel
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=1, drop_last=False
+    )
+    assert rem.tolist() == [[]]
+
     # 2D
     x = torch.tensor([[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7]], dtype=float)
     result = slicing.unfold_windows(x, window_size=3, stride=2)
@@ -37,6 +43,12 @@ def test_unfold_windows():
         x, window_size=3, stride=2, drop_last=False
     )
     assert rem.tolist() == [[[6], [7]]]
+
+    # Check remainder when windows evenly divide the kernel
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=1, drop_last=False
+    )
+    assert rem.tolist() == [[[], []]]
 
     # 3D
     x = torch.tensor(
@@ -56,6 +68,12 @@ def test_unfold_windows():
         x, window_size=3, stride=2, drop_last=False
     )
     assert rem.tolist() == [[[[6], [7]], [[8], [9]]]]
+
+    # Check remainder when windows evenly divide the kernel
+    result, rem = slicing.unfold_windows(
+        x, window_size=3, stride=1, drop_last=False
+    )
+    assert rem.tolist() == [[[[], []], [[], []]]]
 
 
 def test_slice_kernels(kernel_size, num_channels):
@@ -90,6 +108,10 @@ def test_slice_kernels(kernel_size, num_channels):
     idx = torch.stack([idx + i * 3 for i in range(num_channels)]).t()
     result = slicing.slice_kernels(X, idx, kernel_size)
     assert result.shape == (8, num_channels, kernel_size)
+
+    # Test that we fail when the index shape doesn't match the tensor
+    with pytest.raises(ValueError, match=r"Can't slice array with shape*"):
+        slicing.slice_kernels(X, idx[:, :-1], kernel_size)
 
     for i, Y in enumerate(result.cpu().numpy()):
         for j, y in enumerate(Y):
@@ -270,6 +292,10 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
     x = torch.arange(100)
     X = torch.stack([x + i * 100 for i in range(num_channels)])
     X = torch.stack([X + i * 1000 for i in range(batch_size)])
+
+    # Ensure ndim <= 3 is enforced
+    with pytest.raises(ValueError, match=r"Can't sample kernels from tensor*"):
+        slicing.sample_kernels(X[None], kernel_size, N)
 
     # make sure that we enforce that we have enough data to sample
     with pytest.raises(ValueError) as exc:

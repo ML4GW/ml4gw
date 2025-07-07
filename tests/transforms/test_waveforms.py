@@ -47,6 +47,10 @@ def test_waveform_sampler(num_waveforms):
     for key in ["plus", "cross"]:
         assert samples[key].shape == (num_waveforms, 1024)
 
+    samples = waveform_sampler(-1)
+    for key in ["plus", "cross"]:
+        assert torch.equal(samples[key], waveforms[key])
+
     # test that intrinsic parameters are returned if provided
     num_parameters = 5
     intrinsic_parameters = torch.column_stack(
