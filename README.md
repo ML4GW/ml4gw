@@ -11,7 +11,7 @@
 | ml4gw/dataloading/chunked\_dataset.py     |       45 |        2 |     96% |    61, 96 |
 | ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |86, 197-201 |
 | ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
-| ml4gw/distributions.py                    |      146 |        9 |     94% |66-72, 110-111, 114-115, 143 |
+| ml4gw/distributions.py                    |      146 |        2 |     99% |   114-115 |
 | ml4gw/gw.py                               |       97 |        0 |    100% |           |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
 | ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
@@ -21,41 +21,41 @@
 | ml4gw/nn/autoencoder/utils.py             |       12 |       12 |      0% |      1-15 |
 | ml4gw/nn/norm.py                          |       51 |        2 |     96% |   87, 106 |
 | ml4gw/nn/resnet/\_\_init\_\_.py           |        2 |        0 |    100% |           |
-| ml4gw/nn/resnet/resnet\_1d.py             |      142 |        8 |     94% |71, 320-321, 329-333 |
-| ml4gw/nn/resnet/resnet\_2d.py             |      142 |        6 |     96% |68, 329-333 |
+| ml4gw/nn/resnet/resnet\_1d.py             |      142 |        1 |     99% |       331 |
+| ml4gw/nn/resnet/resnet\_2d.py             |      142 |        1 |     99% |       331 |
 | ml4gw/nn/streaming/\_\_init\_\_.py        |        2 |        0 |    100% |           |
 | ml4gw/nn/streaming/online\_average.py     |       49 |        4 |     92% |82, 90-91, 115 |
 | ml4gw/nn/streaming/snapshotter.py         |       35 |        2 |     94% |   96, 110 |
-| ml4gw/spectral.py                         |      147 |        2 |     99% |  324, 524 |
+| ml4gw/spectral.py                         |      147 |        0 |    100% |           |
 | ml4gw/transforms/\_\_init\_\_.py          |       10 |        0 |    100% |           |
 | ml4gw/transforms/iirfilter.py             |       18 |        0 |    100% |           |
 | ml4gw/transforms/pearson.py               |       28 |        3 |     89% |47, 52, 59 |
 | ml4gw/transforms/qtransform.py            |      172 |       14 |     92% |149, 328, 336-338, 345-354 |
 | ml4gw/transforms/scaler.py                |       32 |        0 |    100% |           |
 | ml4gw/transforms/snr\_rescaler.py         |       40 |       16 |     60% |51-67, 74-88 |
-| ml4gw/transforms/spectral.py              |       32 |        1 |     97% |        95 |
+| ml4gw/transforms/spectral.py              |       32 |        0 |    100% |           |
 | ml4gw/transforms/spectrogram.py           |       58 |        0 |    100% |           |
-| ml4gw/transforms/spline\_interpolation.py |      107 |        4 |     96% |260-262, 284, 363 |
+| ml4gw/transforms/spline\_interpolation.py |      102 |        0 |    100% |           |
 | ml4gw/transforms/transform.py             |       38 |        0 |    100% |           |
-| ml4gw/transforms/waveforms.py             |       42 |        2 |     95% |     58-59 |
-| ml4gw/transforms/whitening.py             |       48 |        1 |     98% |       258 |
+| ml4gw/transforms/waveforms.py             |       42 |        0 |    100% |           |
+| ml4gw/transforms/whitening.py             |       48 |        0 |    100% |           |
 | ml4gw/types.py                            |       18 |        0 |    100% |           |
-| ml4gw/utils/interferometer.py             |       20 |        1 |     95% |        45 |
-| ml4gw/utils/slicing.py                    |      103 |        5 |     95% |57-59, 173, 294 |
+| ml4gw/utils/interferometer.py             |       20 |        0 |    100% |           |
+| ml4gw/utils/slicing.py                    |      103 |        0 |    100% |           |
 | ml4gw/waveforms/\_\_init\_\_.py           |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/\_\_init\_\_.py     |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/ringdown.py         |       36 |       29 |     19% |18-25, 57-109 |
 | ml4gw/waveforms/adhoc/sine\_gaussian.py   |       37 |        0 |    100% |           |
 | ml4gw/waveforms/cbc/\_\_init\_\_.py       |        3 |        0 |    100% |           |
 | ml4gw/waveforms/cbc/coefficients.py       |       13 |        0 |    100% |           |
-| ml4gw/waveforms/cbc/phenom\_d.py          |      346 |        7 |     98% |66, 178, 229, 278, 440, 517, 672 |
+| ml4gw/waveforms/cbc/phenom\_d.py          |      326 |        1 |     99% |       628 |
 | ml4gw/waveforms/cbc/phenom\_d\_data.py    |        4 |        0 |    100% |           |
-| ml4gw/waveforms/cbc/phenom\_p.py          |      284 |        2 |     99% |   85, 619 |
-| ml4gw/waveforms/cbc/taylorf2.py           |      105 |        1 |     99% |        64 |
+| ml4gw/waveforms/cbc/phenom\_p.py          |      284 |        0 |    100% |           |
+| ml4gw/waveforms/cbc/taylorf2.py           |      105 |        0 |    100% |           |
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
-| ml4gw/waveforms/conversion.py             |       81 |        1 |     99% |        87 |
-| ml4gw/waveforms/generator.py              |      103 |        3 |     97% |77, 86, 90 |
-|                                 **TOTAL** | **3003** |  **277** | **91%** |           |
+| ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
+| ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
+|                                 **TOTAL** | **2978** |  **229** | **92%** |           |
 
 
 ## Setup coverage badge

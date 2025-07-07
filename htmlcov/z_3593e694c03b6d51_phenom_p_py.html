@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for ml4gw/waveforms/cbc/phenom_p.py: 99%</title>
+    <title>Coverage for ml4gw/waveforms/cbc/phenom_p.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_81f8c14c.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>ml4gw/waveforms/cbc/phenom_p.py</b>:
-            <span class="pc_cov">99%</span>
+            <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">284 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">282<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">284<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_3593e694c03b6d51_taylorf2_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.1">coverage.py v7.9.1</a>,
-            created at 2025-06-30 03:02 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
+            created at 2025-07-07 14:32 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -164,7 +164,7 @@
     <p class="pln"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">        <span class="key">if</span> <span class="nam">tc</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">            <span class="nam">tc</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">zeros_like</span><span class="op">(</span><span class="nam">chirp_mass</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">            <span class="nam">tc</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">zeros_like</span><span class="op">(</span><span class="nam">chirp_mass</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">        <span class="nam">m1</span><span class="op">,</span> <span class="nam">m2</span> <span class="op">=</span> <span class="nam">chirp_mass_and_mass_ratio_to_components</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">            <span class="nam">chirp_mass</span><span class="op">,</span> <span class="nam">mass_ratio</span>&nbsp;</span><span class="r"></span></p>
@@ -698,7 +698,7 @@
     <p class="pln"><span class="n"><a id="t616" href="#t616">616</a></span><span class="t">                        <span class="op">*</span> <span class="op">(</span><span class="num">1.0</span> <span class="op">+</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">cos</span><span class="op">(</span><span class="nam">theta</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t617" href="#t617">617</a></span><span class="t">                    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t618" href="#t618">618</a></span><span class="t">                <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t619" href="#t619">619</a></span><span class="t">                    <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t619" href="#t619">619</a></span><span class="t">                    <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t620" href="#t620">620</a></span><span class="t">                        <span class="fst">f"</span><span class="fst">Invalid mode s=</span><span class="op">{</span><span class="nam">s</span><span class="op">}</span><span class="fst">, l=</span><span class="op">{</span><span class="nam">l</span><span class="op">}</span><span class="fst">, m=</span><span class="op">{</span><span class="nam">m</span><span class="op">}</span><span class="fst"> - require |m| &lt;= l</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t621" href="#t621">621</a></span><span class="t">                    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t622" href="#t622">622</a></span><span class="t">                <span class="key">return</span> <span class="nam">fac</span> <span class="op">*</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">complex</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -908,8 +908,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_3593e694c03b6d51_taylorf2_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.1">coverage.py v7.9.1</a>,
-            created at 2025-06-30 03:02 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
+            created at 2025-07-07 14:32 +0000
         </p>
     </div>
 </footer>

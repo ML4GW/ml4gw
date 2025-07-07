@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for ml4gw/utils/slicing.py: 95%</title>
+    <title>Coverage for ml4gw/utils/slicing.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_81f8c14c.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>ml4gw/utils/slicing.py</b>:
-            <span class="pc_cov">95%</span>
+            <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">103 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">98<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">5<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">103<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_964be60073bc9a53___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.1">coverage.py v7.9.1</a>,
-            created at 2025-06-30 03:02 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
+            created at 2025-07-07 14:32 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -136,9 +136,9 @@
     <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">    <span class="key">if</span> <span class="nam">remainder</span> <span class="op">==</span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">drop_last</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">            <span class="com"># create an empty tensor for consistency</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">            <span class="nam">shape</span> <span class="op">=</span> <span class="nam">list</span><span class="op">(</span><span class="nam">x</span><span class="op">.</span><span class="nam">shape</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">            <span class="nam">shape</span><span class="op">[</span><span class="op">-</span><span class="num">1</span><span class="op">]</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">            <span class="nam">remainder</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">zeros</span><span class="op">(</span><span class="nam">shape</span><span class="op">,</span> <span class="nam">dtype</span><span class="op">=</span><span class="nam">x</span><span class="op">.</span><span class="nam">dtype</span><span class="op">,</span> <span class="nam">device</span><span class="op">=</span><span class="nam">x</span><span class="op">.</span><span class="nam">device</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">            <span class="nam">shape</span> <span class="op">=</span> <span class="nam">list</span><span class="op">(</span><span class="nam">x</span><span class="op">.</span><span class="nam">shape</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">            <span class="nam">shape</span><span class="op">[</span><span class="op">-</span><span class="num">1</span><span class="op">]</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">            <span class="nam">remainder</span> <span class="op">=</span> <span class="nam">torch</span><span class="op">.</span><span class="nam">zeros</span><span class="op">(</span><span class="nam">shape</span><span class="op">,</span> <span class="nam">dtype</span><span class="op">=</span><span class="nam">x</span><span class="op">.</span><span class="nam">dtype</span><span class="op">,</span> <span class="nam">device</span><span class="op">=</span><span class="nam">x</span><span class="op">.</span><span class="nam">device</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">        <span class="com"># separate x from its remainder _regardless_ of whether</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">        <span class="com"># we end up returning it or not</span>&nbsp;</span><span class="r"></span></p>
@@ -252,7 +252,7 @@
     <p class="pln"><span class="n"><a id="t170" href="#t170">170</a></span><span class="t">        <span class="com"># this is a multi-channel timeseries and we want</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t171" href="#t171">171</a></span><span class="t">        <span class="com"># to select _different_ kernels from each channel</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t172" href="#t172">172</a></span><span class="t">        <span class="key">if</span> <span class="nam">len</span><span class="op">(</span><span class="nam">x</span><span class="op">)</span> <span class="op">!=</span> <span class="nam">idx</span><span class="op">.</span><span class="nam">shape</span><span class="op">[</span><span class="num">1</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t173" href="#t173">173</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t173" href="#t173">173</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t174" href="#t174">174</a></span><span class="t">                <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t175" href="#t175">175</a></span><span class="t">                    <span class="str">"Can't slice array with shape {} with indices "</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t176" href="#t176">176</a></span><span class="t">                    <span class="str">"with shape {}"</span>&nbsp;</span><span class="r"></span></p>
@@ -373,7 +373,7 @@
     <p class="pln"><span class="n"><a id="t291" href="#t291">291</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t292" href="#t292">292</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t293" href="#t293">293</a></span><span class="t">    <span class="key">elif</span> <span class="nam">X</span><span class="op">.</span><span class="nam">ndim</span> <span class="op">></span> <span class="num">3</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t294" href="#t294">294</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t294" href="#t294">294</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t295" href="#t295">295</a></span><span class="t">            <span class="fst">f"</span><span class="fst">Can't sample kernels from tensor with </span><span class="op">{</span><span class="nam">X</span><span class="op">.</span><span class="nam">ndim</span><span class="op">}</span><span class="fst"> dimensions</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t296" href="#t296">296</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t297" href="#t297">297</a></span><span class="t">    <span class="key">elif</span> <span class="nam">X</span><span class="op">.</span><span class="nam">ndim</span> <span class="op">&lt;</span> <span class="num">3</span> <span class="key">and</span> <span class="nam">N</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -452,8 +452,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_964be60073bc9a53___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.1">coverage.py v7.9.1</a>,
-            created at 2025-06-30 03:02 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
+            created at 2025-07-07 14:32 +0000
         </p>
     </div>
 </footer>
