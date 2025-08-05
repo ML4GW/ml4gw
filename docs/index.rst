@@ -30,7 +30,7 @@ Projects
 Currently, the following projects are using ml4gw to support their research:
 
 * `Aframe <https://github.com/ml4gw/aframev2>`_ - Gravitational wave detection of binary black hole mergers
-* `PE <https://github.com/ml4gw/aframev2>`_ - Parameter estimation of gravitational wave signals
+* `AMPLFI <https://github.com/ml4gw/amplfi>`_ - Parameter estimation of gravitational wave signals
 
 
 Development

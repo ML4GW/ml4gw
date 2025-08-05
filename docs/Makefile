@@ -6,7 +6,7 @@
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = .
-BUILDDIR      = _build
+BUILDDIR      = /home/william.benoit/public_html/ml4gw
 
 # Put it first so that "make" without argument is like "make help".
 help:

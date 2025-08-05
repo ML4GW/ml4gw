@@ -192,7 +192,7 @@ def compute_observed_strain(
     **polarizations: Float[Tensor, "batch time"],
 ) -> WaveformTensor:
     """
-    Compute the strain timeseries $h(t)$ observed by a network
+    Compute the strain timeseries :math:`h(t)` observed by a network
     of interferometers from the given polarization timeseries
     corresponding to gravitational waveforms from sources with
     the indicated sky parameters.

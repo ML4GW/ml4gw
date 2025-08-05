@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = "ml4gw"
-copyright = "2024, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
+copyright = "2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
 author = "Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
 
 
@@ -35,6 +35,10 @@ extensions = [
     "sphinx.ext.githubpages",
 ]
 
+autodoc_typehints = "description"
+autodoc_inherit_docstrings = False
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
