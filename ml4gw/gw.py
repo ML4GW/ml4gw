@@ -241,6 +241,8 @@ def compute_observed_strain(
     )
 
     polarizations = torch.stack(list(polarizations.values()), axis=1)
+    # Ensure dtype consistency before einsum
+    antenna_responses = antenna_responses.to(polarizations.dtype)
     waveforms = torch.einsum(
         "...pi,...pt->...it", antenna_responses, polarizations
     )

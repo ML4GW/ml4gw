@@ -2060,12 +2060,12 @@ dev = [
     { name = "h5py", specifier = "~=3.12" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "lalsuite", specifier = "~=7.0" },
-    { name = "lightning", specifier = "==2.4.0" },
+    { name = "lightning", specifier = "~=2.4.0" },
     { name = "pre-commit", specifier = "~=2.16" },
     { name = "pytest", specifier = "~=7.0" },
     { name = "pytest-repeat", specifier = ">=0.9.3,<0.10" },
     { name = "rich", specifier = ">=10.2.2" },
-    { name = "torchmetrics", specifier = "==1.6.0" },
+    { name = "torchmetrics", specifier = "~=1.6.0" },
 ]
 docs = [
     { name = "myst-nb", specifier = ">=1.3.0" },

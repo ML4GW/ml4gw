@@ -37,8 +37,8 @@ dev = [
     "gwpy~=3.0",
     "pytest-repeat>=0.9.3,<0.10",
     "h5py~=3.12",
-    "torchmetrics==1.6.0",
-    "lightning==2.4.0",
+    "torchmetrics~=1.6.0",
+    "lightning~=2.4.0",
     "rich>=10.2.2",
 ]
 docs = [
