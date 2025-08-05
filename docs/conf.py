@@ -30,15 +30,21 @@ author = "Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     "sphinx.ext.githubpages",
+    "myst_nb",
 ]
+autosummary_generate = True
 
 autodoc_typehints = "description"
 autodoc_inherit_docstrings = False
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
+
+nb_execution_mode = "off"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
