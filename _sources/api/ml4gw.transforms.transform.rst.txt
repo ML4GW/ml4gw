@@ -1,0 +1,13 @@
+ml4gw.transforms.transform
+==========================
+
+.. automodule:: ml4gw.transforms.transform
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      FittableSpectralTransform
+      FittableTransform
+   

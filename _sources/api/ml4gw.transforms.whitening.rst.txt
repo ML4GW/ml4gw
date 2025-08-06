@@ -1,0 +1,13 @@
+ml4gw.transforms.whitening
+==========================
+
+.. automodule:: ml4gw.transforms.whitening
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      FixedWhiten
+      Whiten
+   

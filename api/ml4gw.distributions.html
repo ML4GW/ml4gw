@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.distributions &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.gw" href="ml4gw.gw.html" />
+    <link rel="prev" title="ml4gw.dataloading.in_memory_dataset" href="ml4gw.dataloading.in_memory_dataset.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ml4gw.distributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.Cosine"><code class="docutils literal notranslate"><span class="pre">Cosine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.Cosine.arg_constraints"><code class="docutils literal notranslate"><span class="pre">Cosine.arg_constraints</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.Cosine.log_prob"><code class="docutils literal notranslate"><span class="pre">Cosine.log_prob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.Cosine.rsample"><code class="docutils literal notranslate"><span class="pre">Cosine.rsample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.DeltaFunction"><code class="docutils literal notranslate"><span class="pre">DeltaFunction</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.DeltaFunction.arg_constraints"><code class="docutils literal notranslate"><span class="pre">DeltaFunction.arg_constraints</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.DeltaFunction.rsample"><code class="docutils literal notranslate"><span class="pre">DeltaFunction.rsample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.LogNormal"><code class="docutils literal notranslate"><span class="pre">LogNormal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.LogNormal.support"><code class="docutils literal notranslate"><span class="pre">LogNormal.support()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.LogUniform"><code class="docutils literal notranslate"><span class="pre">LogUniform</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.PowerLaw"><code class="docutils literal notranslate"><span class="pre">PowerLaw</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.PowerLaw.support"><code class="docutils literal notranslate"><span class="pre">PowerLaw.support</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.RateEvolution"><code class="docutils literal notranslate"><span class="pre">RateEvolution</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.Sine"><code class="docutils literal notranslate"><span class="pre">Sine</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume.arg_constraints"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume.arg_constraints</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume.log_prob"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume.log_prob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume.rsample"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume.rsample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume.support"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume.support</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+      <li class="breadcrumb-item active">ml4gw.distributions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.distributions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.distributions">
+<span id="ml4gw-distributions"></span><h1>ml4gw.distributions<a class="headerlink" href="#module-ml4gw.distributions" title="Link to this heading"></a></h1>
+<p>Module containing callables classes for generating samples
+from specified distributions. Each callable should map from
+an integer <code class="docutils literal notranslate"><span class="pre">N</span></code> to a 1D torch <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> containing <code class="docutils literal notranslate"><span class="pre">N</span></code> samples
+from the corresponding distribution.</p>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.distributions.Cosine" title="ml4gw.distributions.Cosine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cosine</span></code></a>([low, high, validate_args])</p></td>
+<td><p>Cosine distribution based on <code class="docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code> (see <a class="reference external" href="https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution">documentation</a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.distributions.DeltaFunction" title="ml4gw.distributions.DeltaFunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DeltaFunction</span></code></a>([peak, validate_args])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.distributions.LogNormal" title="ml4gw.distributions.LogNormal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogNormal</span></code></a>(mean, std[, low, validate_args])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.distributions.LogUniform" title="ml4gw.distributions.LogUniform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogUniform</span></code></a>(low, high[, validate_args])</p></td>
+<td><p>Sample from a log uniform distribution</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.distributions.PowerLaw" title="ml4gw.distributions.PowerLaw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerLaw</span></code></a>(minimum, maximum, index[, ...])</p></td>
+<td><p>Sample from a power law distribution,</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.distributions.RateEvolution" title="ml4gw.distributions.RateEvolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RateEvolution</span></code></a>(rate_function, *args, **kwargs)</p></td>
+<td><p>Wrapper around <a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UniformComovingVolume()</span></code></a> to allow for arbitrary rate evolution functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.distributions.Sine" title="ml4gw.distributions.Sine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sine</span></code></a>([low, high, validate_args])</p></td>
+<td><p>Sine distribution based on <code class="docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UniformComovingVolume</span></code></a>(minimum, maximum[, ...])</p></td>
+<td><p>Sample either redshift, comoving distance, or luminosity distance such that they are uniform in comoving volume, assuming a flat lambda-CDM cosmology.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.Cosine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">Cosine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.Cosine" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Distribution</span></code></p>
+<p>Cosine distribution based on
+<code class="docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code>
+(see <a class="reference external" href="https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution">documentation</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>low</strong> (<em>float</em>)</p></li>
+<li><p><strong>high</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ml4gw.distributions.Cosine.arg_constraints">
+<span class="sig-name descname"><span class="pre">arg_constraints</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#ml4gw.distributions.Cosine.arg_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.Cosine.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.Cosine.log_prob" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'']</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>value</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.Cosine.rsample">
+<span class="sig-name descname"><span class="pre">rsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.Cosine.rsample" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sample_shape</strong> (<em>Size</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.DeltaFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">DeltaFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peak</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.DeltaFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Distribution</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>peak</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ml4gw.distributions.DeltaFunction.arg_constraints">
+<span class="sig-name descname"><span class="pre">arg_constraints</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#ml4gw.distributions.DeltaFunction.arg_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.DeltaFunction.rsample">
+<span class="sig-name descname"><span class="pre">rsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.DeltaFunction.rsample" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sample_shape</strong> (<em>Size</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.LogNormal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">LogNormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.LogNormal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LogNormal</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> (<em>float</em>)</p></li>
+<li><p><strong>std</strong> (<em>float</em>)</p></li>
+<li><p><strong>low</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.LogNormal.support">
+<span class="sig-name descname"><span class="pre">support</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.LogNormal.support" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.LogUniform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">LogUniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.LogUniform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformedDistribution</span></code></p>
+<p>Sample from a log uniform distribution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>low</strong> (<em>float</em>)</p></li>
+<li><p><strong>high</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.PowerLaw">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">PowerLaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.PowerLaw" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformedDistribution</span></code></p>
+<p>Sample from a power law distribution,</p>
+<div class="math notranslate nohighlight">
+\[p(x) \approx x^{\alpha}.\]</div>
+<p>Index alpha cannot be 0, since it is equivalent to a Uniform distribution.
+This could be used, for example, as a universal distribution of
+signal-to-noise ratios (SNRs) from uniformly volume distributed
+sources</p>
+<div class="math notranslate nohighlight">
+\[p(\rho) = 3\;\rho_0^3 / \rho^4\]</div>
+<p>where <span class="math notranslate nohighlight">\(\rho_0\)</span> is a representative minimum SNR
+considered for detection. See, for example,
+<a class="reference external" href="https://arxiv.org/abs/1102.5421">Schutz (2011)</a>.
+Or, for example, <code class="docutils literal notranslate"><span class="pre">index=2</span></code> for uniform in Euclidean volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minimum</strong> (<em>float</em>)</p></li>
+<li><p><strong>maximum</strong> (<em>float</em>)</p></li>
+<li><p><strong>index</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ml4gw.distributions.PowerLaw.support">
+<span class="sig-name descname"><span class="pre">support</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">GreaterThanEq(lower_bound=0.0)</span></em><a class="headerlink" href="#ml4gw.distributions.PowerLaw.support" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.RateEvolution">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">RateEvolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate_function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.RateEvolution" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformComovingVolume</span></code></a></p>
+<p>Wrapper around <a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UniformComovingVolume()</span></code></a> to allow for
+arbitrary rate evolution functions. E.g., if
+<code class="docutils literal notranslate"><span class="pre">rate_function</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">z:</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">z)</span></code>, then the distribution
+will sample values such that they occur uniform in
+source frame time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rate_function</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></span>) -- Callable that takes redshift as input
+and returns the rate evolution factor.</p></li>
+<li><p><strong>*args</strong> -- Arguments passed to
+<a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UniformComovingVolume()</span></code></a> constructor.</p></li>
+<li><p><strong>**kwargs</strong> -- Keyword arguments passed to
+<a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UniformComovingVolume()</span></code></a> constructor.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.Sine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">Sine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.Sine" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformedDistribution</span></code></p>
+<p>Sine distribution based on
+<code class="docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>low</strong> (<em>float</em>)</p></li>
+<li><p><strong>high</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformComovingVolume">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">UniformComovingVolume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'redshift'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">67.66</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.30966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_grid_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.UniformComovingVolume" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Distribution</span></code></p>
+<p>Sample either redshift, comoving distance, or luminosity distance
+such that they are uniform in comoving volume, assuming a flat
+lambda-CDM cosmology. Default H0 and Omega_M values match
+<a class="reference external" href="https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html">Planck18 parameters in Astropy</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minimum</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Minimum distance in the specified distance type</p></li>
+<li><p><strong>maximum</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Maximum distance in the specified distance type</p></li>
+<li><p><strong>distance_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Type of distance to sample from. Can be <code class="docutils literal notranslate"><span class="pre">redshift</span></code>,
+<code class="docutils literal notranslate"><span class="pre">comoving_distance</span></code>, or <code class="docutils literal notranslate"><span class="pre">luminosity_distance</span></code></p></li>
+<li><p><strong>h0</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Hubble constant in km/s/Mpc</p></li>
+<li><p><strong>omega_m</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Matter density parameter</p></li>
+<li><p><strong>z_max</strong> -- Maximum redshift for the grid</p></li>
+<li><p><strong>grid_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of points in the grid for interpolation</p></li>
+<li><p><strong>validate_args</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) -- Whether to validate arguments</p></li>
+<li><p><strong>z_grid_max</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformComovingVolume.arg_constraints">
+<span class="sig-name descname"><span class="pre">arg_constraints</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#ml4gw.distributions.UniformComovingVolume.arg_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformComovingVolume.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.UniformComovingVolume.log_prob" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>value</strong> (<em>Tensor</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformComovingVolume.rsample">
+<span class="sig-name descname"><span class="pre">rsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.UniformComovingVolume.rsample" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sample_shape</strong> (<em>Size</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformComovingVolume.support">
+<span class="sig-name descname"><span class="pre">support</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">GreaterThanEq(lower_bound=0.0)</span></em><a class="headerlink" href="#ml4gw.distributions.UniformComovingVolume.support" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.dataloading.in_memory_dataset.html" class="btn btn-neutral float-left" title="ml4gw.dataloading.in_memory_dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.gw.html" class="btn btn-neutral float-right" title="ml4gw.gw" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+ml4gw.transforms.pearson
+========================
+
+.. automodule:: ml4gw.transforms.pearson
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ShiftedPearsonCorrelation
+   

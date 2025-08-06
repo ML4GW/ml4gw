@@ -1,0 +1,17 @@
+ml4gw.spectral
+==============
+
+.. automodule:: ml4gw.spectral
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      fast_spectral_density
+      median
+      normalize_by_psd
+      spectral_density
+      truncate_inverse_power_spectrum
+      whiten
+   

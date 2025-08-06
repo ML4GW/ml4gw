@@ -1,0 +1,12 @@
+ml4gw.transforms.spectral
+=========================
+
+.. automodule:: ml4gw.transforms.spectral
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SpectralDensity
+   

@@ -1,0 +1,13 @@
+ml4gw.nn.autoencoder.convolutional
+==================================
+
+.. automodule:: ml4gw.nn.autoencoder.convolutional
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ConvBlock
+      ConvolutionalAutoencoder
+   

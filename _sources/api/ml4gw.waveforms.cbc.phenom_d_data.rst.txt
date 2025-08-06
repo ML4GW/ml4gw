@@ -1,0 +1,6 @@
+ml4gw.waveforms.cbc.phenom\_d\_data
+===================================
+
+.. automodule:: ml4gw.waveforms.cbc.phenom_d_data
+
+   

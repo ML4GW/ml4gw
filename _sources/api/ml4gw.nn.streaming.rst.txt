@@ -1,0 +1,14 @@
+ml4gw.nn.streaming
+==================
+
+.. automodule:: ml4gw.nn.streaming
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   online_average
+   snapshotter

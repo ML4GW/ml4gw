@@ -1,0 +1,14 @@
+ml4gw.waveforms.adhoc
+=====================
+
+.. automodule:: ml4gw.waveforms.adhoc
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   ringdown
+   sine_gaussian

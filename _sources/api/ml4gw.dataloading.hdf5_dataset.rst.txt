@@ -1,0 +1,18 @@
+ml4gw.dataloading.hdf5\_dataset
+===============================
+
+.. automodule:: ml4gw.dataloading.hdf5_dataset
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Hdf5TimeSeriesDataset
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      ContiguousHdf5Warning
+   

@@ -1,0 +1,12 @@
+ml4gw.utils.interferometer
+==========================
+
+.. automodule:: ml4gw.utils.interferometer
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      InterferometerGeometry
+   

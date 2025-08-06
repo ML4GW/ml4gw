@@ -1,0 +1,12 @@
+ml4gw.waveforms.generator
+=========================
+
+.. automodule:: ml4gw.waveforms.generator
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      TimeDomainCBCWaveformGenerator
+   

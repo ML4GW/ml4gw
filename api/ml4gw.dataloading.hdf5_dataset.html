@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.dataloading.hdf5_dataset &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.dataloading.in_memory_dataset" href="ml4gw.dataloading.in_memory_dataset.html" />
+    <link rel="prev" title="ml4gw.dataloading.chunked_dataset" href="ml4gw.dataloading.chunked_dataset.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.dataloading.chunked_dataset.html">ml4gw.dataloading.chunked_dataset</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.dataloading.hdf5_dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.dataloading.hdf5_dataset.ContiguousHdf5Warning"><code class="docutils literal notranslate"><span class="pre">ContiguousHdf5Warning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset"><code class="docutils literal notranslate"><span class="pre">Hdf5TimeSeriesDataset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.dataloading.in_memory_dataset.html">ml4gw.dataloading.in_memory_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+      <li class="breadcrumb-item active">ml4gw.dataloading.hdf5_dataset</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.dataloading.hdf5_dataset.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.dataloading.hdf5_dataset">
+<span id="ml4gw-dataloading-hdf5-dataset"></span><h1>ml4gw.dataloading.hdf5_dataset<a class="headerlink" href="#module-ml4gw.dataloading.hdf5_dataset" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset" title="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hdf5TimeSeriesDataset</span></code></a>(fnames, channels, ...)</p></td>
+<td><p>Iterable dataset that samples and loads windows of timeseries data uniformly from a set of HDF5 files.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Exceptions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.dataloading.hdf5_dataset.ContiguousHdf5Warning" title="ml4gw.dataloading.hdf5_dataset.ContiguousHdf5Warning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ContiguousHdf5Warning</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py exception">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.ContiguousHdf5Warning">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.hdf5_dataset.</span></span><span class="sig-name descname"><span class="pre">ContiguousHdf5Warning</span></span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.ContiguousHdf5Warning" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.dataloading.hdf5_dataset.</span></span><span class="sig-name descname"><span class="pre">Hdf5TimeSeriesDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fnames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches_per_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_files_per_batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></p>
+<p>Iterable dataset that samples and loads windows of
+timeseries data uniformly from a set of HDF5 files.
+It is _strongly_ recommended that these files have been
+written using <a class="reference external" href="https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage">chunked storage</a>.
+This has shown to produce increases in read-time speeds
+of over an order of magnitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fnames</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Paths to HDF5 files from which to sample data.</p></li>
+<li><p><strong>channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Datasets to read from the indicated files, which
+will be stacked along dim 1 of the generated batches
+during iteration.</p></li>
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Size of the windows to read, in number of samples.
+This will be the size of the last dimension of the
+generated batches.</p></li>
+<li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of windows to sample at each iteration.</p></li>
+<li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of batches to generate during each call
+to <code class="docutils literal notranslate"><span class="pre">__iter__</span></code>.</p></li>
+<li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Whether windows for each channel in a given batch
+element should be sampled coincidentally, i.e.
+corresponding to the same time indices from the
+same files, or should be sampled independently.
+For the latter case, users can either specify
+<code class="docutils literal notranslate"><span class="pre">False</span></code>, which will sample filenames independently
+for each channel, or <code class="docutils literal notranslate"><span class="pre">&quot;files&quot;</span></code>, which will sample
+windows independently within a given file for each
+channel. The latter setting limits the amount of
+entropy in the effective dataset, but can provide
+over 2x improvement in total throughput.</p></li>
+<li><p><strong>num_files_per_batch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- The number of unique files from which to sample
+batch elements each epoch. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+will use all available files. Useful when reading
+from many files is bottlenecking dataloading.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_batch">
+<span class="sig-name descname"><span class="pre">sample_batch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_batch" title="Link to this definition"></a></dt>
+<dd><p>Sample a single batch of multichannel timeseries</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_fnames">
+<span class="sig-name descname"><span class="pre">sample_fnames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.dataloading.hdf5_dataset.Hdf5TimeSeriesDataset.sample_fnames" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.dataloading.chunked_dataset.html" class="btn btn-neutral float-left" title="ml4gw.dataloading.chunked_dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.dataloading.in_memory_dataset.html" class="btn btn-neutral float-right" title="ml4gw.dataloading.in_memory_dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

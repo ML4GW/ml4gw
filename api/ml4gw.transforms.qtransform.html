@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.transforms.qtransform &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.transforms.scaler" href="ml4gw.transforms.scaler.html" />
+    <link rel="prev" title="ml4gw.transforms.pearson" href="ml4gw.transforms.pearson.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.iirfilter.html">ml4gw.transforms.iirfilter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.pearson.html">ml4gw.transforms.pearson</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.transforms.qtransform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.qtransform.QScan"><code class="docutils literal notranslate"><span class="pre">QScan</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.qtransform.QTile"><code class="docutils literal notranslate"><span class="pre">QTile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.qtransform.SingleQTransform"><code class="docutils literal notranslate"><span class="pre">SingleQTransform</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.scaler.html">ml4gw.transforms.scaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.snr_rescaler.html">ml4gw.transforms.snr_rescaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectral.html">ml4gw.transforms.spectral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectrogram.html">ml4gw.transforms.spectrogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spline_interpolation.html">ml4gw.transforms.spline_interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.transform.html">ml4gw.transforms.transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.waveforms.html">ml4gw.transforms.waveforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.whitening.html">ml4gw.transforms.whitening</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+      <li class="breadcrumb-item active">ml4gw.transforms.qtransform</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.transforms.qtransform.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.transforms.qtransform">
+<span id="ml4gw-transforms-qtransform"></span><h1>ml4gw.transforms.qtransform<a class="headerlink" href="#module-ml4gw.transforms.qtransform" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.qtransform.QScan" title="ml4gw.transforms.qtransform.QScan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QScan</span></code></a>(duration, sample_rate, spectrogram_shape)</p></td>
+<td><p>Calculate the Q-transform of a batch of multi-channel time series data for a range of Q values and return the interpolated Q-transform with the highest energy.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.transforms.qtransform.QTile" title="ml4gw.transforms.qtransform.QTile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QTile</span></code></a>(q, frequency, duration, sample_rate, ...)</p></td>
+<td><p>Compute the row of Q-tiles for a single Q value and a single frequency for a batch of multi-channel frequency series data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.qtransform.SingleQTransform" title="ml4gw.transforms.qtransform.SingleQTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SingleQTransform</span></code></a>(duration, sample_rate, ...)</p></td>
+<td><p>Compute the Q-transform for a single Q value for a batch of multi-channel time series data.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QScan">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.qtransform.</span></span><span class="sig-name descname"><span class="pre">QScan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectrogram_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bicubic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QScan" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Calculate the Q-transform of a batch of multi-channel
+time series data for a range of Q values and return
+the interpolated Q-transform with the highest energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Length of the time series data in seconds</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Sample rate of the data in Hz</p></li>
+<li><p><strong>spectrogram_shape</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- The shape of the interpolated spectrogram, specified as
+<code class="docutils literal notranslate"><span class="pre">(num_f_bins,</span> <span class="pre">num_t_bins)</span></code>. Because the
+frequency spacing of the Q-tiles is in log-space, the frequency
+interpolation is log-spaced as well.</p></li>
+<li><p><strong>qrange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper values of Q to consider. The
+actual values of Q used for the transforms are
+determined by the <code class="docutils literal notranslate"><span class="pre">get_qs</span></code> method</p></li>
+<li><p><strong>frange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper frequency limit to consider for
+the transform. If unspecified, default values will
+be chosen based on q, sample_rate, and duration</p></li>
+<li><p><strong>mismatch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The maximum fractional mismatch between neighboring tiles</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QScan.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fsearch_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QScan.forward" title="Link to this definition"></a></dt>
+<dd><p>Compute the set of QTiles for each Q transform and determine which
+has the highest energy value. Interpolate and return the
+corresponding set of tiles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- Time series of data. Should have the duration and sample rate
+used to initialize this object. Expected input shape is
+<code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T)</span></code>, where T is the number of samples, C is the
+number of channels, and B is the number of batches. If less
+than three-dimensional, axes will be added during Q-tile
+computation.</p></li>
+<li><p><strong>fsearch_range</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper frequency values within which to search
+for the maximum energy</p></li>
+<li><p><strong>norm</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- The method of interpolation used by each QTile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An interpolated Q-transform for the batch of data. Output will
+have one more dimension than the input</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QScan.get_qs">
+<span class="sig-name descname"><span class="pre">get_qs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QScan.get_qs" title="Link to this definition"></a></dt>
+<dd><p>Determine the values of Q to try for the set of Q-transforms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QTile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.qtransform.</span></span><span class="sig-name descname"><span class="pre">QTile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QTile" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Compute the row of Q-tiles for a single Q value and a single
+frequency for a batch of multi-channel frequency series data.
+Should really be called <code class="docutils literal notranslate"><span class="pre">QRow</span></code>, but I want to match GWpy.
+Input data should have three dimensions or fewer.
+If fewer, dimensions will be added until the input is
+three-dimensional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The Q value to use in computing the Q tile</p></li>
+<li><p><strong>frequency</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency for which to compute the Q tile in Hz</p></li>
+<li><p><strong>duration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The length of time in seconds that the input frequency
+series represents</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The sample rate of the original time series in Hz</p></li>
+<li><p><strong>mismatch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The maximum fractional mismatch between neighboring tiles</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QTile.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QTile.forward" title="Link to this definition"></a></dt>
+<dd><p>Compute the transform for this row</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fseries</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span>) -- Frequency series of data. Should correspond to data with
+the duration and sample rate used to initialize this object.
+Expected input shape is <code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">F)</span></code>, where F is the number
+of samples, C is the number of channels, and B is the number
+of batches. If less than three-dimensional, axes will be
+added.</p></li>
+<li><p><strong>norm</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- The method of normalization. Options are &quot;median&quot;, &quot;mean&quot;, or
+<code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The row of Q-tiles for the given Q and frequency. Output is
+three-dimensional: <code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T)</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QTile.get_data_indices">
+<span class="sig-name descname"><span class="pre">get_data_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QTile.get_data_indices" title="Link to this definition"></a></dt>
+<dd><p>Get the index array of relevant frequencies for this row</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Int[Tensor,</span> <span class="pre">'windowsize']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QTile.get_window">
+<span class="sig-name descname"><span class="pre">get_window</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QTile.get_window" title="Link to this definition"></a></dt>
+<dd><p>Generate the bi-square window for this row</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'windowsize']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.QTile.ntiles">
+<span class="sig-name descname"><span class="pre">ntiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.QTile.ntiles" title="Link to this definition"></a></dt>
+<dd><p>Number of tiles in this frequency row</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.SingleQTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.qtransform.</span></span><span class="sig-name descname"><span class="pre">SingleQTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectrogram_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bicubic'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.SingleQTransform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Compute the Q-transform for a single Q value for a batch of
+multi-channel time series data. Input data should have
+three dimensions or fewer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Length of the time series data in seconds</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Sample rate of the data in Hz</p></li>
+<li><p><strong>spectrogram_shape</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- The shape of the interpolated spectrogram, specified as
+<code class="docutils literal notranslate"><span class="pre">(num_f_bins,</span> <span class="pre">num_t_bins)</span></code>. Because the
+frequency spacing of the Q-tiles is in log-space, the frequency
+interpolation is log-spaced as well.</p></li>
+<li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The Q value to use for the Q transform</p></li>
+<li><p><strong>frange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper frequency limit to consider for
+the transform. If unspecified, default values will
+be chosen based on q, sample_rate, and duration</p></li>
+<li><p><strong>mismatch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The maximum fractional mismatch between neighboring tiles</p></li>
+<li><p><strong>interpolation_method</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- The method by which to interpolate each <code class="docutils literal notranslate"><span class="pre">QTile</span></code> to the specified
+number of time and frequency bins. The acceptable values are
+&quot;bilinear&quot;, &quot;bicubic&quot;, and &quot;spline&quot;. The &quot;bilinear&quot; and &quot;bicubic&quot;
+options will use PyTorch's built-in interpolation modes, while
+&quot;spline&quot; will use the custom Torch-based implementation in
+<code class="docutils literal notranslate"><span class="pre">ml4gw</span></code>, as PyTorch does not have spline-based intertpolation.
+The &quot;spline&quot; mode is most similar to the results of GWpy's
+Q-transform, which uses <code class="docutils literal notranslate"><span class="pre">scipy</span></code> to do spline interpolation.
+However, it is also the slowest and most memory intensive due to
+the matrix equation solving steps. Therefore, the default method
+is &quot;bicubic&quot; as it produces the most similar results while
+optimizing for computing performance.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.SingleQTransform.compute_qtiles">
+<span class="sig-name descname"><span class="pre">compute_qtiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.SingleQTransform.compute_qtiles" title="Link to this definition"></a></dt>
+<dd><p>Take the FFT of the input timeseries and calculate the transform
+for each <code class="docutils literal notranslate"><span class="pre">QTile</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'time'</em><em>] </em><em>| </em><em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'channel time'</em><em>] </em><em>| </em><em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch channel time'</em><em>]</em>)</p></li>
+<li><p><strong>norm</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.SingleQTransform.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.SingleQTransform.forward" title="Link to this definition"></a></dt>
+<dd><p>Compute the Q-tiles and interpolate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- Time series of data. Should have the duration and sample rate
+used to initialize this object. Expected input shape is
+<code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T)</span></code>, where T is the number of samples, C is the
+number of channels, and B is the number of batches. If less
+than three-dimensional, axes will be added during Q-tile
+computation.</p></li>
+<li><p><strong>norm</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- The method of normalization used by each QTile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The interpolated Q-transform for the batch of data. Output will
+have one more dimension than the input</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.SingleQTransform.get_freqs">
+<span class="sig-name descname"><span class="pre">get_freqs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.SingleQTransform.get_freqs" title="Link to this definition"></a></dt>
+<dd><p>Calculate the frequencies that will be used in this transform.
+For each frequency, a <code class="docutils literal notranslate"><span class="pre">QTile</span></code> is created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'nfreq']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.SingleQTransform.get_max_energy">
+<span class="sig-name descname"><span class="pre">get_max_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fsearch_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.SingleQTransform.get_max_energy" title="Link to this definition"></a></dt>
+<dd><p>Gets the maximum energy value among the QTiles. The maximum can
+be computed across all batches and channels, across all channels,
+across all batches, or individually for each channel/batch
+combination. This could be useful for allowing the use of different
+Q values for different channels and batches, but the slicing would
+be slow, so this isn't used yet.</p>
+<p>Optionally, a pair of frequency values can be specified for
+<code class="docutils literal notranslate"><span class="pre">fsearch_range</span></code> to restrict the frequencies in which the maximum
+energy value is sought.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fsearch_range</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>dimension</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.qtransform.SingleQTransform.interpolate">
+<span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.qtransform.SingleQTransform.interpolate" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.transforms.pearson.html" class="btn btn-neutral float-left" title="ml4gw.transforms.pearson" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.transforms.scaler.html" class="btn btn-neutral float-right" title="ml4gw.transforms.scaler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

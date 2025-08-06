@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.waveforms.cbc.phenom_p &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.waveforms.cbc.taylorf2" href="ml4gw.waveforms.cbc.taylorf2.html" />
+    <link rel="prev" title="ml4gw.waveforms.cbc.phenom_d_data" href="ml4gw.waveforms.cbc.phenom_d_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.waveforms.adhoc.html">ml4gw.waveforms.adhoc</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="ml4gw.waveforms.cbc.html">ml4gw.waveforms.cbc</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="ml4gw.waveforms.cbc.coefficients.html">ml4gw.waveforms.cbc.coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ml4gw.waveforms.cbc.phenom_d.html">ml4gw.waveforms.cbc.phenom_d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ml4gw.waveforms.cbc.phenom_d_data.html">ml4gw.waveforms.cbc.phenom_d_data</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ml4gw.waveforms.cbc.phenom_p</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ml4gw.waveforms.cbc.taylorf2.html">ml4gw.waveforms.cbc.taylorf2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ml4gw.waveforms.cbc.utils.html">ml4gw.waveforms.cbc.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.waveforms.conversion.html">ml4gw.waveforms.conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.waveforms.generator.html">ml4gw.waveforms.generator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.waveforms.cbc.html">ml4gw.waveforms.cbc</a></li>
+      <li class="breadcrumb-item active">ml4gw.waveforms.cbc.phenom_p</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.waveforms.cbc.phenom_p.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.waveforms.cbc.phenom_p">
+<span id="ml4gw-waveforms-cbc-phenom-p"></span><h1>ml4gw.waveforms.cbc.phenom_p<a class="headerlink" href="#module-ml4gw.waveforms.cbc.phenom_p" title="Link to this heading"></a></h1>
+<p>Based on the JAX implementation of IMRPhenomPv2 from
+<a class="reference external" href="https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py">https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py</a></p>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2" title="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IMRPhenomPv2</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.cbc.phenom_p.</span></span><span class="sig-name descname"><span class="pre">IMRPhenomPv2</span></span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ml4gw.waveforms.cbc.phenom_d.html#ml4gw.waveforms.cbc.phenom_d.IMRPhenomD" title="ml4gw.waveforms.cbc.phenom_d.IMRPhenomD"><code class="xref py py-class docutils literal notranslate"><span class="pre">IMRPhenomD</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.ComputeNNLOanglecoeffs">
+<span class="sig-name descname"><span class="pre">ComputeNNLOanglecoeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chil</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.ComputeNNLOanglecoeffs" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>q</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chil</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chip</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.FinalSpin_inplane">
+<span class="sig-name descname"><span class="pre">FinalSpin_inplane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.FinalSpin_inplane" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>m1</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>m2</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chi1_l</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chi2_l</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chip</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.L2PNR">
+<span class="sig-name descname"><span class="pre">L2PNR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.L2PNR" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>v</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>eta</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.PhenomPCoreTwistUp">
+<span class="sig-name descname"><span class="pre">PhenomPCoreTwistUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fHz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hPhenom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angcoeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y2m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphaoffset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilonoffset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.PhenomPCoreTwistUp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fHz</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'frequency'</em><em>]</em>)</p></li>
+<li><p><strong>hPhenom</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>eta</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chi1_l</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chi2_l</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>chip</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>M</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>angcoeffs</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>Y2m</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>alphaoffset</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>epsilonoffset</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.PhenomPOneFrequency">
+<span class="sig-name descname"><span class="pre">PhenomPOneFrequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Seta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi22</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.PhenomPOneFrequency" title="Link to this definition"></a></dt>
+<dd><p>m1, m2: in solar masses
+phic: Orbital phase at peak of the underlying non precessing model
+M: Total mass (Solar masses)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.SpinWeightedY">
+<span class="sig-name descname"><span class="pre">SpinWeightedY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.SpinWeightedY" title="Link to this definition"></a></dt>
+<dd><p>copied from SphericalHarmonics.c in LAL</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.WignerdCoefficients">
+<span class="sig-name descname"><span class="pre">WignerdCoefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Sp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.WignerdCoefficients" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>v</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>SL</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>eta</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>Sp</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.convert_spins">
+<span class="sig-name descname"><span class="pre">convert_spins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.convert_spins" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>m1</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>m2</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>f_ref</strong> (<em>float</em>)</p></li>
+<li><p><strong>phic</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>inclination</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>s1x</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>s1y</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>s1z</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>s2x</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>s2y</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>s2z</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chirp_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.forward" title="Link to this definition"></a></dt>
+<dd><p>IMRPhenomPv2 waveform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code></span>) -- Frequency series in Hz.</p></li>
+<li><p><strong>chirp_mass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Chirp mass in solar masses.</p></li>
+<li><p><strong>mass_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Mass ratio m1/m2.</p></li>
+<li><p><strong>s1x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin component x of the first BH.</p></li>
+<li><p><strong>s1y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin component y of the first BH.</p></li>
+<li><p><strong>s1z</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin component z of the first BH.</p></li>
+<li><p><strong>s2x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin component x of the second BH.</p></li>
+<li><p><strong>s2y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin component y of the second BH.</p></li>
+<li><p><strong>s2z</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Spin component z of the second BH.</p></li>
+<li><p><strong>distance</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Luminosity distance in Mpc.</p></li>
+<li><p><strong>tc</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span>) -- Coalescence time.</p></li>
+<li><p><strong>phic</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Reference phase.</p></li>
+<li><p><strong>inclination</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Inclination angle.</p></li>
+<li><p><strong>f_ref</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Reference frequency in Hz.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Tuple[torch.Tensor, torch.Tensor]</dt><dd><p>Cross and plus polarizations</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>hc, hp</p>
+</dd>
+</dl>
+<p>Note: m1 must be larger than m2.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.get_Amp0">
+<span class="sig-name descname"><span class="pre">get_Amp0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fM_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.get_Amp0" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fM_s</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+<li><p><strong>eta</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.interpolate">
+<span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.interpolate" title="Link to this definition"></a></dt>
+<dd><p>One-dimensional linear interpolation for monotonically
+increasing sample points.</p>
+<p>Returns the one-dimensional piecewise linear interpolant to a function
+with given data points <span class="math notranslate nohighlight">\((xp, fp)\)</span>, evaluated at <span class="math notranslate nohighlight">\(x\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'new_series']</span></code></span>) -- the <span class="math notranslate nohighlight">\(x\)</span>-coordinates at which to evaluate the
+interpolated values.</p></li>
+<li><p><strong>xp</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'series']</span></code></span>) -- the <span class="math notranslate nohighlight">\(x\)</span>-coordinates of data points, must be increasing.</p></li>
+<li><p><strong>fp</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'series']</span></code></span>) -- the <span class="math notranslate nohighlight">\(y\)</span>-coordinates of data points, same length as
+<code class="docutils literal notranslate"><span class="pre">xp</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'new_series']</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the interpolated values, same size as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.phP_get_fRD_fdamp">
+<span class="sig-name descname"><span class="pre">phP_get_fRD_fdamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi1_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.cbc.phenom_p.IMRPhenomPv2.phP_get_fRD_fdamp" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.waveforms.cbc.phenom_d_data.html" class="btn btn-neutral float-left" title="ml4gw.waveforms.cbc.phenom_d_data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.waveforms.cbc.taylorf2.html" class="btn btn-neutral float-right" title="ml4gw.waveforms.cbc.taylorf2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

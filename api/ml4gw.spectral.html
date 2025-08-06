@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.spectral &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.transforms" href="ml4gw.transforms.html" />
+    <link rel="prev" title="ml4gw.nn.streaming.snapshotter" href="ml4gw.nn.streaming.snapshotter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ml4gw.spectral</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.fast_spectral_density"><code class="docutils literal notranslate"><span class="pre">fast_spectral_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.median"><code class="docutils literal notranslate"><span class="pre">median()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd"><code class="docutils literal notranslate"><span class="pre">normalize_by_psd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.spectral_density"><code class="docutils literal notranslate"><span class="pre">spectral_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.truncate_inverse_power_spectrum"><code class="docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.whiten"><code class="docutils literal notranslate"><span class="pre">whiten()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+      <li class="breadcrumb-item active">ml4gw.spectral</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.spectral.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.spectral">
+<span id="ml4gw-spectral"></span><h1>ml4gw.spectral<a class="headerlink" href="#module-ml4gw.spectral" title="Link to this heading"></a></h1>
+<p>Several implementation details are derived from the scipy csd and welch
+implementations. For more info, see</p>
+<p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html</a></p>
+<p>and</p>
+<p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html</a></p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.fast_spectral_density" title="ml4gw.spectral.fast_spectral_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fast_spectral_density</span></code></a>(x, nperseg, nstride, ...)</p></td>
+<td><p>Compute the power spectral density of a multichannel timeseries or a batch of multichannel timeseries, or the cross power spectral density of two such timeseries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.median" title="ml4gw.spectral.median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">median</span></code></a>(x, axis)</p></td>
+<td><p>Implements a median calculation that matches numpy's behavior for an even number of elements and includes the same bias correction used by <a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">scipy's implementation</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd" title="ml4gw.spectral.normalize_by_psd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_by_psd</span></code></a>(X, psd, sample_rate, pad)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.spectral_density" title="ml4gw.spectral.spectral_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spectral_density</span></code></a>(x, nperseg, nstride, ...[, ...])</p></td>
+<td><p>Compute the power spectral density of a multichannel timeseries or a batch of multichannel timeseries.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.truncate_inverse_power_spectrum" title="ml4gw.spectral.truncate_inverse_power_spectrum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum</span></code></a>(psd, ...[, ...])</p></td>
+<td><p>Truncate the length of the time domain response of a whitening filter built using the specified <code class="docutils literal notranslate"><span class="pre">psd</span></code> so that it has maximum length <code class="docutils literal notranslate"><span class="pre">fduration</span></code> seconds.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.whiten" title="ml4gw.spectral.whiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whiten</span></code></a>(X, psd, fduration, sample_rate[, ...])</p></td>
+<td><p>Whiten a batch of timeseries using the specified background one-sided power spectral densities (PSDs), modified to have the desired time domain response length <code class="docutils literal notranslate"><span class="pre">fduration</span></code> and possibly to highpass/lowpass filter.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.fast_spectral_density">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">fast_spectral_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nperseg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.fast_spectral_density" title="Link to this definition"></a></dt>
+<dd><p>Compute the power spectral density of a multichannel
+timeseries or a batch of multichannel timeseries, or
+the cross power spectral density of two such timeseries.
+This implementation is non-exact for the two lowest
+frequency bins, since it implements centering using the
+mean for the entire timeseries rather than on a per-
+window basis. The benefit of this is a faster implementation,
+which might be beneficial for cases where the lowest
+frequency components are going to be discarded anyway.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor whose power spectral density
+to compute, or for cross spectral density the
+timeseries whose fft will be conjugated. Can have
+shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>.</p></li>
+<li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
+<li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{nperseg//2+1}']</span></code></span>) -- Window array to multiply by each FFT window before
+FFT computation. Should have length <code class="docutils literal notranslate"><span class="pre">nperseg</span> <span class="pre">//</span> <span class="pre">2</span> <span class="pre">+</span> <span class="pre">1</span></code>.</p></li>
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
+desired units for output tensor (e.g. letting this equal
+<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">(sample_rate</span> <span class="pre">*</span> <span class="pre">(window**2).sum())</span></code> will give output
+units of density, :math``text{Hz}^-1``.</p></li>
+<li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- How to aggregate the contributions of each FFT window to
+the spectral density. Allowed options are <code class="docutils literal notranslate"><span class="pre">'mean'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'median'</span></code>.</p></li>
+<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- Timeseries tensor to compute cross spectral density
+with <code class="docutils literal notranslate"><span class="pre">x</span></code>. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span></code>'s power spectral
+density will be returned. Otherwise, if <code class="docutils literal notranslate"><span class="pre">x</span></code> is 1D,
+<code class="docutils literal notranslate"><span class="pre">y</span></code> must also be 1D. If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 2D, the assumption
+is that this represents a single multi-channel timeseries,
+and <code class="docutils literal notranslate"><span class="pre">y</span></code> must be either 2D or 1D. In the former case,
+the cross-spectral densities of each channel will be
+computed individually, so <code class="docutils literal notranslate"><span class="pre">y</span></code> must have the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.
+Otherwise, this will compute the CSD of each of <code class="docutils literal notranslate"><span class="pre">x</span></code>'s channels
+with <code class="docutils literal notranslate"><span class="pre">y</span></code>. If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 3D, this will be assumed to be a batch
+of multi-channel timeseries. In this case, <code class="docutils literal notranslate"><span class="pre">y</span></code> can either
+be 3D, in which case each channel of each batch element will
+have its CSD calculated or 2D, which has two different options.
+If <code class="docutils literal notranslate"><span class="pre">y</span></code>'s 0th dimension matches <code class="docutils literal notranslate"><span class="pre">x</span></code>'s 0th dimension, it will
+be assumed that <code class="docutils literal notranslate"><span class="pre">y</span></code> represents a batch of 1D timeseries, and
+for each batch element this timeseries will have its CSD with
+each channel of the corresponding batch element of <code class="docutils literal notranslate"><span class="pre">x</span></code>
+calculated. Otherwise, it sill be assumed that <code class="docutils literal notranslate"><span class="pre">y</span></code> represents
+a single multi-channel timeseries, in which case each channel
+of <code class="docutils literal notranslate"><span class="pre">y</span></code> will have its CSD calculated with the corresponding
+channel in <code class="docutils literal notranslate"><span class="pre">x</span></code> across _all_ of <code class="docutils literal notranslate"><span class="pre">x</span></code>'s batch elements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor of power spectral densities of <code class="docutils literal notranslate"><span class="pre">x</span></code> or its cross spectral
+density with the timeseries in <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.median">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.median" title="Link to this definition"></a></dt>
+<dd><p>Implements a median calculation that matches numpy's
+behavior for an even number of elements and includes
+the same bias correction used by
+<a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">scipy's implementation</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">']</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>x</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'</em><em>...</em><em> size'</em><em>]</em>)</p></li>
+<li><p><strong>axis</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.normalize_by_psd">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">normalize_by_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.normalize_by_psd" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch num_ifos time'</em><em>]</em>)</p></li>
+<li><p><strong>psd</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'num_ifos frequency'</em><em>]</em>)</p></li>
+<li><p><strong>sample_rate</strong> (<em>float</em>)</p></li>
+<li><p><strong>pad</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.spectral_density">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">spectral_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nperseg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.spectral_density" title="Link to this definition"></a></dt>
+<dd><p>Compute the power spectral density of a multichannel
+timeseries or a batch of multichannel timeseries.
+This implementation is exact for all frequency bins, but
+slower than the fast implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor whose power spectral density
+to compute, or for cross spectral density the
+timeseries whose fft will be conjugated. Can have
+shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>.</p></li>
+<li><p><strong>nperseg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of samples included in each FFT window</p></li>
+<li><p><strong>nstride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride between FFT windows</p></li>
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{nperseg//2+1}']</span></code></span>) -- Window array to multiply by each FFT window before
+FFT computation. Should have length <code class="docutils literal notranslate"><span class="pre">nperseg</span> <span class="pre">//</span> <span class="pre">2</span> <span class="pre">+</span> <span class="pre">1</span></code>.</p></li>
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Scale factor to multiply the FFT'd data by, related to
+desired units for output tensor (e.g. letting this equal
+<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">(sample_rate</span> <span class="pre">*</span> <span class="pre">(window**2).sum())</span></code> will give output
+units of density, <span class="math notranslate nohighlight">\(\text{Hz}^-1\)</span>.</p></li>
+<li><p><strong>average</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- How to aggregate the contributions of each FFT window to
+the spectral density. Allowed options are <code class="docutils literal notranslate"><span class="pre">'mean'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'median'</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.truncate_inverse_power_spectrum">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">truncate_inverse_power_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.truncate_inverse_power_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Truncate the length of the time domain response
+of a whitening filter built using the specified
+<code class="docutils literal notranslate"><span class="pre">psd</span></code> so that it has maximum length <code class="docutils literal notranslate"><span class="pre">fduration</span></code>
+seconds. This is meant to mitigate the impact
+of sharp features in the background PSD causing
+time domain responses longer than the segments
+to which the whitening filter will be applied.</p>
+<p>Implementation details adapted from
+<a class="reference external" href="https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8">here</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- The one-sided power spectral density used
+to construct a whitening filter.</p></li>
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
+response of a whitening filter built using
+this PSD, or a window of this length to taper
+the edges of the time domain response of the
+filter. If passed as a float, a Hann window
+of this length will be used.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which the time domain data to which
+the whitening filter will be applied has been
+sampled.</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- If specified, will zero out the frequency response
+of all frequencies below this value in Hz. If left
+as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no highpass filtering will be applied.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- If specified, will zero out the frequency response
+of all frequencies above this value in Hz. If left
+as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no lowpass filtering will be applied.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>The PSD with its time domain response truncated</dt><dd><p>to <code class="docutils literal notranslate"><span class="pre">fduration</span></code> and any filtered frequencies
+tapered.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.whiten">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.whiten" title="Link to this definition"></a></dt>
+<dd><p>Whiten a batch of timeseries using the specified
+background one-sided power spectral densities (PSDs),
+modified to have the desired time domain response length
+<code class="docutils literal notranslate"><span class="pre">fduration</span></code> and possibly to highpass/lowpass filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span>) -- batch of multichannel timeseries to whiten</p></li>
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- PSDs use to whiten the data. The frequency
+response of the whitening filter will be roughly
+the inverse of the square root of this PSD, ensuring
+that data from the same distribution will have
+approximately uniform power after whitening.
+If 2D, each batch element in <code class="docutils literal notranslate"><span class="pre">X</span></code> will be whitened
+using the same PSDs. If 3D, each batch element will
+be whitened by the PSDs contained along the 0th
+dimenion of <code class="docutils literal notranslate"><span class="pre">psd</span></code>, and so the first two dimensions
+of <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">psd</span></code> should match.</p></li>
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Desired length in seconds of the time domain
+response of a whitening filter built using
+this PSD, or a window of this length to taper
+the edges of the time domain response of the
+filter. If passed as a float, a Hann window
+of this length will be used. Moreover, half of
+this length will be removed from each edge of
+the whitened timeseries to account for filter
+settle-in time.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which the data in <code class="docutils literal notranslate"><span class="pre">X</span></code> has been sampled</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The frequency in Hz at which to highpass filter
+the data, setting the frequency response in the
+whitening filter to 0. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no
+highpass filtering will be applied.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The frequency in Hz at which to lowpass filter
+the data, setting the frequency response in the
+whitening filter to 0. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no
+lowpass filtering will be applied.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Batch of whitened multichannel timeseries with</dt><dd><p><code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds trimmed from each side.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.nn.streaming.snapshotter.html" class="btn btn-neutral float-left" title="ml4gw.nn.streaming.snapshotter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.transforms.html" class="btn btn-neutral float-right" title="ml4gw.transforms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

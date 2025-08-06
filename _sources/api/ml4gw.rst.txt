@@ -1,0 +1,22 @@
+﻿ml4gw
+=====
+
+.. automodule:: ml4gw
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   augmentations
+   constants
+   dataloading
+   distributions
+   gw
+   nn
+   spectral
+   transforms
+   types
+   waveforms

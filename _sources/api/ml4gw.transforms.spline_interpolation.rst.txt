@@ -1,0 +1,12 @@
+ml4gw.transforms.spline\_interpolation
+======================================
+
+.. automodule:: ml4gw.transforms.spline_interpolation
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SplineInterpolate
+   

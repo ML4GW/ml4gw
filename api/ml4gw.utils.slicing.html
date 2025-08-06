@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.utils.slicing &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="ml4gw.utils.interferometer" href="ml4gw.utils.interferometer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.html">ml4gw</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.utils.interferometer.html">ml4gw.utils.interferometer</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ml4gw.utils.slicing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.utils.slicing.sample_kernels"><code class="docutils literal notranslate"><span class="pre">sample_kernels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.utils.slicing.slice_kernels"><code class="docutils literal notranslate"><span class="pre">slice_kernels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.utils.slicing.unfold_windows"><code class="docutils literal notranslate"><span class="pre">unfold_windows()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.utils.html">ml4gw.utils</a></li>
+      <li class="breadcrumb-item active">ml4gw.utils.slicing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.utils.slicing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.utils.slicing">
+<span id="ml4gw-utils-slicing"></span><h1>ml4gw.utils.slicing<a class="headerlink" href="#module-ml4gw.utils.slicing" title="Link to this heading"></a></h1>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.utils.slicing.sample_kernels" title="ml4gw.utils.slicing.sample_kernels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_kernels</span></code></a>(X, kernel_size[, N, ...])</p></td>
+<td><p>Randomly sample kernels from a single or multichannel timeseries</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.utils.slicing.slice_kernels" title="ml4gw.utils.slicing.slice_kernels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice_kernels</span></code></a>(x, idx, kernel_size)</p></td>
+<td><p>Slice kernels from single or multichannel timeseries</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.utils.slicing.unfold_windows" title="ml4gw.utils.slicing.unfold_windows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unfold_windows</span></code></a>(x, window_size, stride[, ...])</p></td>
+<td><p>Unfold a timeseries into windows</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.utils.slicing.sample_kernels">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.utils.slicing.</span></span><span class="sig-name descname"><span class="pre">sample_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_center_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.utils.slicing.sample_kernels" title="Link to this definition"></a></dt>
+<dd><p>Randomly sample kernels from a single or multichannel timeseries</p>
+<p>For a tensor representing one or multiple channels of
+timeseries data, randomly slice kernels of a fixed
+length from the timeseries. If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 1D, kernels will
+be sampled uniformly from <code class="docutils literal notranslate"><span class="pre">X</span></code>. If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 2D, kernels
+will be sampled from the first dimension of <code class="docutils literal notranslate"><span class="pre">X</span></code> (assumed
+to be the time dimension) in a manner that depends on the
+values of the <code class="docutils literal notranslate"><span class="pre">max_center_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">coincident</span></code> kwargs.
+If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 3D, one kernel will be sampled coincidentally from
+each element along the 0th axis of <code class="docutils literal notranslate"><span class="pre">X</span></code>. In this case, <code class="docutils literal notranslate"><span class="pre">N</span></code> must
+either be <code class="docutils literal notranslate"><span class="pre">None</span></code> or be equal to <code class="docutils literal notranslate"><span class="pre">len(X)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor from which to sample kernels
+kernel_size: The size of the kernels to sample</p></li>
+<li><p><strong>N</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- The number of kernels to sample. Can be left as
+<code class="docutils literal notranslate"><span class="pre">None</span></code> if <code class="docutils literal notranslate"><span class="pre">X</span></code> is 3D, otherwise must be specified</p></li>
+<li><p><strong>max_center_offeset</strong> -- If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 2D, this indicates the maximum distance
+from the center of the timeseries the edge of
+sampled kernels may fall. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, kernels
+will be sampled uniformly across all of <code class="docutils literal notranslate"><span class="pre">X</span></code>'s time
+dimension. If greater than 0, defines the maximum
+distance that the rightmost edge of the kernel may
+fall from the center of the timeseries (the leftmost
+edge will always be sampled such that the center of
+the timeseries falls within or afer the kernel). If
+equal to 0, every kernel sampled will contain the center
+of the timeseries, which may fall anywhere within the
+kernel with uniform probability. If less than 0, defines
+the minimum distance that the center of the timeseries
+must fall from either edge of the kernel. If <code class="docutils literal notranslate"><span class="pre">X</span></code> is
+1D, this argument is ignored.</p></li>
+<li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 2D, determines whether the individual channels
+of <code class="docutils literal notranslate"><span class="pre">X</span></code> sample the same kernels or different kernels
+independently, i.e. whether the channels of each batch
+element in the output will contain coincident data. If
+<code class="docutils literal notranslate"><span class="pre">X</span></code> is 1D, this argument is ignored.</p></li>
+<li><p><strong>kernel_size</strong> (<em>int</em>)</p></li>
+<li><p><strong>max_center_offset</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A batch of sampled kernels. If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 1D, this will have
+shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">kernel_size)</span></code>. If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 2D, this will have
+shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">num_channels,</span> <span class="pre">kernel_size)</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">num_channels</span> <span class="pre">=</span> <span class="pre">X.shape[0]</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.utils.slicing.slice_kernels">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.utils.slicing.</span></span><span class="sig-name descname"><span class="pre">slice_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.utils.slicing.slice_kernels" title="Link to this definition"></a></dt>
+<dd><p>Slice kernels from single or multichannel timeseries</p>
+<p>Given a 1D timeseries or a 2D tensor representing a
+multichannel timeseries, slice kernels of a given size
+from the timeseries starting at the indicated indices.
+Returns a batch of 1D or 2D kernels, and so will have
+one more dimension than <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries tensor to slice kernels from</p></li>
+<li><p><strong>idx</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">']</span></code></span>) -- The indices in <code class="docutils literal notranslate"><span class="pre">x</span></code> of the first sample of each
+kernel. If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 1D, <code class="docutils literal notranslate"><span class="pre">idx</span></code> must be 1D as well.
+If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 2D and <code class="docutils literal notranslate"><span class="pre">idx</span></code> is 1D, <code class="docutils literal notranslate"><span class="pre">idx</span></code> is assumed
+to represent the first index of the kernels sliced
+from _all_ channels (i.e. the channels are sliced
+coincidentally). If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 2D and <code class="docutils literal notranslate"><span class="pre">idx</span></code> is also 2D,
+<code class="docutils literal notranslate"><span class="pre">idx</span></code> should have shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">num_channels)</span></code>,
+and its values are assumed to represent the first index
+of the kernel sliced from each channel _independently_.
+If <code class="docutils literal notranslate"><span class="pre">x</span></code> is 3D, <code class="docutils literal notranslate"><span class="pre">idx</span></code> _must_ be 1D, and have the same length
+as <code class="docutils literal notranslate"><span class="pre">x</span></code>. In this case, it is assumed that the elements of
+<code class="docutils literal notranslate"><span class="pre">idx</span></code> represent the starting index in the last dimension
+of <code class="docutils literal notranslate"><span class="pre">x</span></code> from which to sample a batch of kernels
+coincidentally among the channels.</p></li>
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The length of the kernels to slice from the timeseries</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tensor of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">kernel_size)</span></code> if <code class="docutils literal notranslate"><span class="pre">x</span></code> is
+1D and <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">num_channels,</span> <span class="pre">kernel_size)</span></code> if <code class="docutils literal notranslate"><span class="pre">x</span></code>
+is 2D, where <code class="docutils literal notranslate"><span class="pre">batch_size</span> <span class="pre">=</span> <span class="pre">idx.shape[0]</span></code> and
+<code class="docutils literal notranslate"><span class="pre">num_channels</span> <span class="pre">=</span> <span class="pre">x.shape[0]</span></code> if <code class="docutils literal notranslate"><span class="pre">x</span></code> is 2D.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.utils.slicing.unfold_windows">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.utils.slicing.</span></span><span class="sig-name descname"><span class="pre">unfold_windows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_last</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.utils.slicing.unfold_windows" title="Link to this definition"></a></dt>
+<dd><p>Unfold a timeseries into windows</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span>) -- The timeseries to unfold. Can have shape
+<code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code></p></li>
+<li><p><strong>window_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The size of the windows to unfold from x</p></li>
+<li><p><strong>stride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The stride between windows</p></li>
+<li><p><strong>drop_last</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If true, does not return the remainder that exists
+when the timeseries cannot be evenly broken up into
+windows</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'window</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'window</span> <span class="pre">channel</span> <span class="pre">time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'window</span> <span class="pre">batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>A tensor of shape
+<code class="docutils literal notranslate"><span class="pre">(num_windows,</span> <span class="pre">batch_size,</span> <span class="pre">num_channels,</span> <span class="pre">kernel_size)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_windows,</span> <span class="pre">num_channels,</span> <span class="pre">kernel_size)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(num_windows,</span> <span class="pre">kernel_size)</span></code> depending on whether the
+input tensor is 3D, 2D, or 1D</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">drop_last</span></code> is false, returns the remainder of the
+timeseries, shaped to be compatible with the returned
+unfolded tensor</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.utils.interferometer.html" class="btn btn-neutral float-left" title="ml4gw.utils.interferometer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

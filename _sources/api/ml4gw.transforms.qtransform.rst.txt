@@ -1,0 +1,14 @@
+ml4gw.transforms.qtransform
+===========================
+
+.. automodule:: ml4gw.transforms.qtransform
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      QScan
+      QTile
+      SingleQTransform
+   

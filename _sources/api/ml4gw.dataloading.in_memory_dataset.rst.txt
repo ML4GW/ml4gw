@@ -1,0 +1,12 @@
+ml4gw.dataloading.in\_memory\_dataset
+=====================================
+
+.. automodule:: ml4gw.dataloading.in_memory_dataset
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      InMemoryDataset
+   

@@ -1,0 +1,23 @@
+ml4gw.transforms
+================
+
+.. automodule:: ml4gw.transforms
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   iirfilter
+   pearson
+   qtransform
+   scaler
+   snr_rescaler
+   spectral
+   spectrogram
+   spline_interpolation
+   transform
+   waveforms
+   whitening

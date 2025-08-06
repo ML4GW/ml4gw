@@ -1,0 +1,13 @@
+ml4gw.augmentations
+===================
+
+.. automodule:: ml4gw.augmentations
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SignalInverter
+      SignalReverser
+   

@@ -7,6 +7,7 @@
   <title>Installation &mdash; ml4gw  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
 
   
   <!--[if lt IE 9]>
@@ -21,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ml4gw" href="modules.html" />
+    <link rel="next" title="Example Usage" href="usage.html" />
     <link rel="prev" title="Welcome to ml4gw&#39;s documentation!" href="index.html" /> 
 </head>
 
@@ -50,7 +51,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#pip">Pip</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">ml4gw</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/ml4gw.html">ml4gw</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/ml4gw.utils.html">ml4gw.utils</a></li>
 </ul>
 
         </div>
@@ -86,8 +93,8 @@
 </pre></div>
 </div>
 <p>To build with a specific version of PyTorch/CUDA, please see the PyTorch installation <a class="reference external" href="https://pytorch.org/get-started/previous-versions/">instructions</a>
-to see how to specify the desired torch version and <code class="code docutils literal notranslate"><span class="pre">--extra-index-url</span></code> flag. For example, to install with PyTorch 1.12 and CUDA 11.6, use the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>ml4gw<span class="w"> </span><span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.12.0<span class="w"> </span>--extra-index-url<span class="o">=</span>https://download.pytorch.org/whl/cu116
+to see how to specify the desired torch version and <code class="code docutils literal notranslate"><span class="pre">--extra-index-url</span></code> flag. For example, to install with PyTorch 2.5.0 and CUDA 12.1, use the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>ml4gw<span class="w"> </span><span class="nv">torch</span><span class="o">==</span><span class="m">2</span>.5.0<span class="w"> </span>--extra-index-url<span class="o">=</span>https://download.pytorch.org/whl/cu121
 </pre></div>
 </div>
 </section>
@@ -98,13 +105,13 @@ to see how to specify the desired torch version and <code class="code docutils l
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to ml4gw&#39;s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modules.html" class="btn btn-neutral float-right" title="ml4gw" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="usage.html" class="btn btn-neutral float-right" title="Example Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

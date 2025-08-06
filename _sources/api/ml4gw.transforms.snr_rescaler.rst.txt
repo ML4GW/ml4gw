@@ -1,0 +1,12 @@
+ml4gw.transforms.snr\_rescaler
+==============================
+
+.. automodule:: ml4gw.transforms.snr_rescaler
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SnrRescaler
+   

@@ -1,0 +1,14 @@
+ml4gw.nn.resnet
+===============
+
+.. automodule:: ml4gw.nn.resnet
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   resnet_1d
+   resnet_2d

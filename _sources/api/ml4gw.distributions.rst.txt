@@ -1,0 +1,19 @@
+ml4gw.distributions
+===================
+
+.. automodule:: ml4gw.distributions
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Cosine
+      DeltaFunction
+      LogNormal
+      LogUniform
+      PowerLaw
+      RateEvolution
+      Sine
+      UniformComovingVolume
+   

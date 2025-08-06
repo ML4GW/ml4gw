@@ -1,0 +1,14 @@
+ml4gw.nn.norm
+=============
+
+.. automodule:: ml4gw.nn.norm
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      GroupNorm1D
+      GroupNorm1DGetter
+      GroupNorm2DGetter
+   

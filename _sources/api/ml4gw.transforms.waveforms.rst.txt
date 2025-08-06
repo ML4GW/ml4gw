@@ -1,0 +1,13 @@
+ml4gw.transforms.waveforms
+==========================
+
+.. automodule:: ml4gw.transforms.waveforms
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      WaveformProjector
+      WaveformSampler
+   

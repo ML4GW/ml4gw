@@ -1,0 +1,12 @@
+ml4gw.transforms.iirfilter
+==========================
+
+.. automodule:: ml4gw.transforms.iirfilter
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      IIRFilter
+   

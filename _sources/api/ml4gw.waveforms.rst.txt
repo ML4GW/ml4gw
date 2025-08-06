@@ -1,0 +1,16 @@
+ml4gw.waveforms
+===============
+
+.. automodule:: ml4gw.waveforms
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   adhoc
+   cbc
+   conversion
+   generator

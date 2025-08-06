@@ -1,0 +1,12 @@
+ml4gw.transforms.spectrogram
+============================
+
+.. automodule:: ml4gw.transforms.spectrogram
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      MultiResolutionSpectrogram
+   

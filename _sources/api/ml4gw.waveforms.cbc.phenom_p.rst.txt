@@ -1,0 +1,12 @@
+ml4gw.waveforms.cbc.phenom\_p
+=============================
+
+.. automodule:: ml4gw.waveforms.cbc.phenom_p
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      IMRPhenomPv2
+   

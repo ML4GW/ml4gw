@@ -1,0 +1,12 @@
+ml4gw.waveforms.adhoc.ringdown
+==============================
+
+.. automodule:: ml4gw.waveforms.adhoc.ringdown
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Ringdown
+   

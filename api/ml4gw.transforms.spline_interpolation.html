@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.transforms.spline_interpolation &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.transforms.transform" href="ml4gw.transforms.transform.html" />
+    <link rel="prev" title="ml4gw.transforms.spectrogram" href="ml4gw.transforms.spectrogram.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.iirfilter.html">ml4gw.transforms.iirfilter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.pearson.html">ml4gw.transforms.pearson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.qtransform.html">ml4gw.transforms.qtransform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.scaler.html">ml4gw.transforms.scaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.snr_rescaler.html">ml4gw.transforms.snr_rescaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectral.html">ml4gw.transforms.spectral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectrogram.html">ml4gw.transforms.spectrogram</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.transforms.spline_interpolation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate"><code class="docutils literal notranslate"><span class="pre">SplineInterpolate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.transform.html">ml4gw.transforms.transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.waveforms.html">ml4gw.transforms.waveforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.whitening.html">ml4gw.transforms.whitening</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+      <li class="breadcrumb-item active">ml4gw.transforms.spline_interpolation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.transforms.spline_interpolation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.transforms.spline_interpolation">
+<span id="ml4gw-transforms-spline-interpolation"></span><h1>ml4gw.transforms.spline_interpolation<a class="headerlink" href="#module-ml4gw.transforms.spline_interpolation" title="Link to this heading"></a></h1>
+<p>Adaptation of code from <a class="reference external" href="https://github.com/dottormale/Qtransform">https://github.com/dottormale/Qtransform</a></p>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate" title="ml4gw.transforms.spline_interpolation.SplineInterpolate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SplineInterpolate</span></code></a>(x_in[, y_in, kx, ky, sx, ...])</p></td>
+<td><p>Perform 1D or 2D spline interpolation based on De Boor's method.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.spline_interpolation.</span></span><span class="sig-name descname"><span class="pre">SplineInterpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ky</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Perform 1D or 2D spline interpolation based on De Boor's method.
+Supports batched, multi-channel inputs, so acceptable data
+shapes are <code class="docutils literal notranslate"><span class="pre">(width)</span></code>, <code class="docutils literal notranslate"><span class="pre">(height,</span> <span class="pre">width)</span></code>, <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">width)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>, <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">channel,</span> <span class="pre">width)</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">channel,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>.</p>
+<p>During initialization of this Module, both the desired input
+and output coordinate Tensors can be specified to allow
+pre-computation of the B-spline basis matrices, though the only
+mandatory argument is the coordinates of the data along the
+<code class="docutils literal notranslate"><span class="pre">width</span></code> dimension. If no argument is given for coordinates along
+the <code class="docutils literal notranslate"><span class="pre">height</span></code> dimension, it is assumed that 1D interpolation is
+desired.</p>
+<p>Unlike scipy's implementation of spline interpolation, the data
+to be interpolated is not passed until actually calling the
+object. This is useful for cases where the input and output
+coordinates are known in advance, but the data is not, so that
+the interpolator can be set up ahead of time.</p>
+<p>WARNING: compared to scipy's spline interpolation, this method
+produces edge artifacts when the output coordinates are near
+the boundaries of the input coordinates. Therefore, it is
+recommended to interpolate only to coordinates that are well
+within the input coordinate range. Unfortunately, the specific
+definition of &quot;well within&quot; changes based on the size of the
+data, so some testing may be required to get good results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_in</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Coordinates of the width dimension of the data</p></li>
+<li><p><strong>y_in</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates of the height dimension of the data. If not
+specified, it is assumed the 1D interpolation is desired,
+and so the default value is a Tensor of length 1</p></li>
+<li><p><strong>kx</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Degree of spline interpolation along the width dimension.
+Default is cubic.</p></li>
+<li><p><strong>ky</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Degree of spline interpolation along the height dimension.
+Default is cubic.</p></li>
+<li><p><strong>sx</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Regularization factor to avoid singularities during matrix
+inversion for interpolation along the width dimension. Not
+to be confused with the <code class="docutils literal notranslate"><span class="pre">s</span></code> parameter in scipy's spline
+methods, which controls the number of knots.</p></li>
+<li><p><strong>sy</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Regularization factor to avoid singularities during matrix
+inversion for interpolation along the height dimension.</p></li>
+<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates for the data to be interpolated to along the
+width dimension. If not specified during initialization,
+this must be specified during the object call.</p></li>
+<li><p><strong>y_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates for the data to be interpolated to along the
+height dimension. If not specified during initialization,
+this must be specified during the object call.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate.bivariate_spline_fit_natural">
+<span class="sig-name descname"><span class="pre">bivariate_spline_fit_natural</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate.bivariate_spline_fit_natural" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate.bspline_basis_natural">
+<span class="sig-name descname"><span class="pre">bspline_basis_natural</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate.bspline_basis_natural" title="Link to this definition"></a></dt>
+<dd><p>Compute bspline basis function using de Boor's recursive formula
+(See <a class="reference external" href="https://en.wikipedia.org/wiki/De_Boor%27s_algorithm">https://en.wikipedia.org/wiki/De_Boor%27s_algorithm</a> for reference)
+:type x: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>
+:param x: Tensor of data point positions.
+:type k: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>
+:param k: Degree of the spline.
+:type t: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>
+:param t: Tensor of knot positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tensor containing the kth-order B-spline basis functions</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>k</strong> (<em>int</em>)</p></li>
+<li><p><strong>t</strong> (<em>Tensor</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate.compute_L_R">
+<span class="sig-name descname"><span class="pre">compute_L_R</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate.compute_L_R" title="Link to this definition"></a></dt>
+<dd><p>Compute the L and R values for B-spline basis functions.
+L and R are respectively the first and second coefficient multiplying
+B_{i,p-1}(x) and B_{i+1,p-1}(x) in De Boor's recursive formula for
+Bspline basis funciton computation
+See <a class="reference external" href="https://en.wikipedia.org/wiki/De_Boor%27s_algorithm">https://en.wikipedia.org/wiki/De_Boor%27s_algorithm</a> for details</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of data point positions.</p></li>
+<li><p><strong>t</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of knot positions.</p></li>
+<li><p><strong>d</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Current degree of the basis function.</p></li>
+<li><p><strong>m</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of intervals (n - k - 1, where n is the number of knots
+and k is the degree).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tensor containing left values for the B-spline basis functions.
+R: Tensor containing right values for the B-spline basis functions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>L</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate.evaluate_bivariate_spline">
+<span class="sig-name descname"><span class="pre">evaluate_bivariate_spline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate.evaluate_bivariate_spline" title="Link to this definition"></a></dt>
+<dd><p>Evaluate a bivariate spline on a grid of x and y points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>C</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Coefficient tensor of shape (batch_size, mx, my).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Interpolated values at the grid points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Z_interp</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate.forward" title="Link to this definition"></a></dt>
+<dd><p>Compute the interpolated data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Z</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of data to be interpolated. Must be between 1 and 4
+dimensions. The shape of the tensor must agree with the
+input coordinates given on initialization. If <code class="docutils literal notranslate"><span class="pre">y_in</span></code> was
+not specified during initialization, it is assumed that
+Z does not have a height dimension.</p></li>
+<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates to interpolate the data to along the width
+dimension. Overrides any value that was set during
+initialization.</p></li>
+<li><p><strong>y_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates to interpolate the data to along the height
+dimension. Overrides any value that was set during
+initialization.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A 4D tensor with shape <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">channel,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>.
+Depending on the input data shape, many of these dimensions
+may have length 1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate.generate_natural_knots">
+<span class="sig-name descname"><span class="pre">generate_natural_knots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate.generate_natural_knots" title="Link to this definition"></a></dt>
+<dd><p>Generates a natural knot sequence for B-spline interpolation.
+Natural knot sequence means that 2*k knots are added to the beginning
+and end of datapoints as replicas of first and last datapoint
+respectively in order to enforce natural boundary conditions,
+i.e. second derivative = 0.
+The other n nodes are placed in correspondece of the data points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of data point positions.</p></li>
+<li><p><strong>k</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Degree of the spline.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor of knot positions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.spline_interpolation.SplineInterpolate.zeroth_order">
+<span class="sig-name descname"><span class="pre">zeroth_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.spline_interpolation.SplineInterpolate.zeroth_order" title="Link to this definition"></a></dt>
+<dd><p>Compute the zeroth-order B-spline basis functions
+according to de Boors recursive formula.
+See <a class="reference external" href="https://en.wikipedia.org/wiki/De_Boor%27s_algorithm">https://en.wikipedia.org/wiki/De_Boor%27s_algorithm</a> for reference</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of data point positions.</p></li>
+<li><p><strong>k</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Degree of the spline.</p></li>
+<li><p><strong>t</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of knot positions.</p></li>
+<li><p><strong>n</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of data points.</p></li>
+<li><p><strong>m</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of intervals (n - k - 1, where n is the number of knots
+and k is the degree).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tensor containing the zeroth-order B-spline basis functions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>b</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.transforms.spectrogram.html" class="btn btn-neutral float-left" title="ml4gw.transforms.spectrogram" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.transforms.transform.html" class="btn btn-neutral float-right" title="ml4gw.transforms.transform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

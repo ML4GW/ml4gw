@@ -1,0 +1,22 @@
+ml4gw.nn.resnet.resnet\_2d
+==========================
+
+.. automodule:: ml4gw.nn.resnet.resnet_2d
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      conv1
+      convN
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BasicBlock
+      Bottleneck
+      BottleneckResNet2D
+      ResNet2D
+   

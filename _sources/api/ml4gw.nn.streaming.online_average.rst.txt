@@ -1,0 +1,12 @@
+ml4gw.nn.streaming.online\_average
+==================================
+
+.. automodule:: ml4gw.nn.streaming.online_average
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      OnlineAverager
+   

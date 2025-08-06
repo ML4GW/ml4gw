@@ -1,0 +1,12 @@
+ml4gw.transforms.scaler
+=======================
+
+.. automodule:: ml4gw.transforms.scaler
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ChannelWiseScaler
+   

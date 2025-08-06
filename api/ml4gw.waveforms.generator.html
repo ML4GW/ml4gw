@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.waveforms.generator &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.utils" href="ml4gw.utils.html" />
+    <link rel="prev" title="ml4gw.waveforms.conversion" href="ml4gw.waveforms.conversion.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.waveforms.adhoc.html">ml4gw.waveforms.adhoc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.waveforms.cbc.html">ml4gw.waveforms.cbc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.waveforms.conversion.html">ml4gw.waveforms.conversion</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.waveforms.generator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator"><code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+      <li class="breadcrumb-item active">ml4gw.waveforms.generator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.waveforms.generator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.waveforms.generator">
+<span id="ml4gw-waveforms-generator"></span><h1>ml4gw.waveforms.generator<a class="headerlink" href="#module-ml4gw.waveforms.generator" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator" title="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code></a>(approximant, ...)</p></td>
+<td><p>Waveform generator that generates time-domain waveforms from frequency-domain approximants.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.waveforms.generator.</span></span><span class="sig-name descname"><span class="pre">TimeDomainCBCWaveformGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">approximant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_pad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Waveform generator that generates time-domain waveforms from
+frequency-domain approximants.</p>
+<p>Frequency domain waveforms are conditioned as done by lalsimulation.
+Specifically, waveforms are generated with a starting frequency <code class="docutils literal notranslate"><span class="pre">fstart</span></code>
+slightly below the requested <code class="docutils literal notranslate"><span class="pre">f_min</span></code>, so that they can be tapered from
+<code class="docutils literal notranslate"><span class="pre">fstart</span></code> to <code class="docutils literal notranslate"><span class="pre">f_min</span></code> using a cosine window.</p>
+<p>Please see <a class="reference external" href="https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969">https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969</a>
+for more information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>approximant</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></span>) -- A callable that returns hplus and hcross polarizations
+given requested frequencies and relevant set of parameters.
+See <code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.cbc</span></code> for implemented approximants.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which returned time domain waveform will be
+sampled in Hz. This also specifies <code class="docutils literal notranslate"><span class="pre">f_max</span></code> for generating
+waveforms via the nyquist frequency: <code class="docutils literal notranslate"><span class="pre">f_max</span> <span class="pre">=</span> <span class="pre">sample_rate</span> <span class="pre">//</span> <span class="pre">2</span></code>.</p></li>
+<li><p><strong>f_min</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Lower frequency bound for waveforms</p></li>
+<li><p><strong>duration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Length of waveform in seconds.
+Waveforms will be left padded with zeros
+appropiately to fill the requested duration</p></li>
+<li><p><strong>right_pad</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- How far from the right edge of the window
+in seconds the returned waveform coalescence
+will be placed.</p></li>
+<li><p><strong>f_ref</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Reference frequency for the waveform</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.build_highpass_filter">
+<span class="sig-name descname"><span class="pre">build_highpass_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.build_highpass_filter" title="Link to this definition"></a></dt>
+<dd><p>Builds highpass filter object.</p>
+<p>See <a class="reference external" href="https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10">https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10</a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_f">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">delta_f</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_f" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_t">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">delta_t</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.delta_t" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.forward" title="Link to this definition"></a></dt>
+<dd><p>Generates a time-domain waveform from a frequency-domain approximant.
+Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248</p>
+<p>A frequency domain waveform is generated, conditioned
+(see <code class="docutils literal notranslate"><span class="pre">generate_conditioned_fd_waveform</span></code>) and fft'd into the time-domain</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**parameters</strong> -- <p>Dictionary of parameters for waveform generation where each key is
+the parameter name and each value is a tensor of parameters.
+It is required that <code class="docutils literal notranslate"><span class="pre">parameters</span></code> contains <code class="docutils literal notranslate"><span class="pre">mass_1</span></code>, <code class="docutils literal notranslate"><span class="pre">mass_2</span></code>,
+<code class="docutils literal notranslate"><span class="pre">s1z</span></code>, and <code class="docutils literal notranslate"><span class="pre">s2z</span></code> keys, which are used for determining parameters
+of data conditioning.</p>
+<p>If the specified approximant takes other parameters for waveform
+generation, like <code class="docutils literal notranslate"><span class="pre">chirp_mass</span></code> and <code class="docutils literal notranslate"><span class="pre">mass_ratio</span></code>, the utility
+functions in <code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.conversion</span></code> may be useful for
+populating the parameters dictionary with these additional
+parameters.</p>
+<p>Note that, if using an approximant from <code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.cbc</span></code>,
+any additional keys in <code class="docutils literal notranslate"><span class="pre">parameters</span></code> not ingested by the
+approximant will be ignored.</p>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.generate_conditioned_fd_waveform">
+<span class="sig-name descname"><span class="pre">generate_conditioned_fd_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.generate_conditioned_fd_waveform" title="Link to this definition"></a></dt>
+<dd><p>Generate a conditioned frequency domain waveform from a
+frequency-domain approximant.</p>
+<p>Based on <a class="reference external" href="https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248">https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**parameters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span>) -- <p>Dictionary of parameters for waveform generation where key is
+the parameter name and value is a tensor of parameters.
+It is required that <code class="docutils literal notranslate"><span class="pre">parameters</span></code> contains <code class="docutils literal notranslate"><span class="pre">mass_1</span></code>, <code class="docutils literal notranslate"><span class="pre">mass_2</span></code>,
+<code class="docutils literal notranslate"><span class="pre">s1z</span></code>, and <code class="docutils literal notranslate"><span class="pre">s2z</span></code> keys, which are used for determining
+parameters of data conditioning.</p>
+<p>If the specified approximant takes other parameters for
+waveform generation, like <code class="docutils literal notranslate"><span class="pre">chirp_mass</span></code> and <code class="docutils literal notranslate"><span class="pre">mass_ratio</span></code>, the
+utility functions in <code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.conversion</span></code> may be useful
+for populating the parameters dictionary with these
+additional parameters.</p>
+<p>Note that, if using an approximant from <code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.cbc</span></code>,
+any additional keys in <code class="docutils literal notranslate"><span class="pre">parameters</span></code> not ingested by the
+approximant will be ignored.</p>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'{N}</span> <span class="pre">samples']</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.get_frequencies">
+<span class="sig-name descname"><span class="pre">get_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.get_frequencies" title="Link to this definition"></a></dt>
+<dd><p>Get the frequencies from 0 to nyquist for corresponding df</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.nyquist">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nyquist</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.nyquist" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#ml4gw.waveforms.generator.TimeDomainCBCWaveformGenerator.size" title="Link to this definition"></a></dt>
+<dd><p>Number of samples in the waveform</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.waveforms.conversion.html" class="btn btn-neutral float-left" title="ml4gw.waveforms.conversion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.utils.html" class="btn btn-neutral float-right" title="ml4gw.utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+ml4gw.utils.slicing
+===================
+
+.. automodule:: ml4gw.utils.slicing
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      sample_kernels
+      slice_kernels
+      unfold_windows
+   

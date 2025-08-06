@@ -1,0 +1,15 @@
+ml4gw.waveforms.cbc.coefficients
+================================
+
+.. automodule:: ml4gw.waveforms.cbc.coefficients
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      taylor_t2_timing_0pn_coeff
+      taylor_t2_timing_2pn_coeff
+      taylor_t2_timing_4pn_coeff
+      taylor_t3_frequency_0pn_coeff
+   

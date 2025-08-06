@@ -1,0 +1,12 @@
+ml4gw.dataloading.chunked\_dataset
+==================================
+
+.. automodule:: ml4gw.dataloading.chunked_dataset
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ChunkedTimeSeriesDataset
+   

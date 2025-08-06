@@ -1,0 +1,12 @@
+ml4gw.waveforms.cbc.taylorf2
+============================
+
+.. automodule:: ml4gw.waveforms.cbc.taylorf2
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      TaylorF2
+   

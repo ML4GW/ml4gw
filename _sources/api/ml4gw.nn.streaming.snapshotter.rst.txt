@@ -1,0 +1,12 @@
+ml4gw.nn.streaming.snapshotter
+==============================
+
+.. automodule:: ml4gw.nn.streaming.snapshotter
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Snapshotter
+   

@@ -1,0 +1,22 @@
+ml4gw.gw
+========
+
+.. automodule:: ml4gw.gw
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      breathing
+      compute_antenna_responses
+      compute_ifo_snr
+      compute_network_snr
+      compute_observed_strain
+      cross
+      get_ifo_geometry
+      outer
+      plus
+      reweight_snrs
+      shift_responses
+   

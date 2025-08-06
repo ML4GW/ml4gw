@@ -1,0 +1,18 @@
+ml4gw.waveforms.adhoc.sine\_gaussian
+====================================
+
+.. automodule:: ml4gw.waveforms.adhoc.sine_gaussian
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      semi_major_minor_from_e
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SineGaussian
+   

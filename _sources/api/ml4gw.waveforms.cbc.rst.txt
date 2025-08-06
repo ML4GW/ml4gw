@@ -1,0 +1,18 @@
+ml4gw.waveforms.cbc
+===================
+
+.. automodule:: ml4gw.waveforms.cbc
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   coefficients
+   phenom_d
+   phenom_d_data
+   phenom_p
+   taylorf2
+   utils

@@ -1,0 +1,17 @@
+ml4gw.waveforms.conversion
+==========================
+
+.. automodule:: ml4gw.waveforms.conversion
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      XLALSimInspiralLN
+      XLALSimInspiralL_2PN
+      bilby_spins_to_lalsim
+      chirp_mass_and_mass_ratio_to_components
+      rotate_y
+      rotate_z
+   

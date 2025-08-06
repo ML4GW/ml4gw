@@ -1,0 +1,17 @@
+ml4gw.waveforms.cbc.utils
+=========================
+
+.. automodule:: ml4gw.waveforms.cbc.utils
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      chirp_start_frequency_bound
+      chirp_time_bound
+      final_black_hole_spin_bound
+      frequency_isco
+      merge_time_bound
+      ringdown_time_bound
+   

@@ -1,0 +1,14 @@
+﻿ml4gw.utils
+===========
+
+.. automodule:: ml4gw.utils
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   interferometer
+   slicing
