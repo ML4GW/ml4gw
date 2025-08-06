@@ -17,7 +17,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
     Iterable dataset that samples and loads windows of
     timeseries data uniformly from a set of HDF5 files.
     It is _strongly_ recommended that these files have been
-    written using ``chunked storage <https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage>``_.
+    written using `chunked storage <https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage>`_.
     This has shown to produce increases in read-time speeds
     of over an order of magnitude.
 

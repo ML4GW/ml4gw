@@ -28,7 +28,7 @@ def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
     the same bias correction used by
-    ``scipy's implementation <https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066>``_.
+    `scipy's implementation <https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066>`_.
     """  # noqa: E501
     n = x.shape[axis]
     ii_2 = 2 * torch.arange(1.0, (n - 1) // 2 + 1)
@@ -355,11 +355,11 @@ def truncate_inverse_power_spectrum(
     to which the whitening filter will be applied.
 
     Implementation details adapted from
-    ``here <https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8>``_.
+    `here <https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8>`_.
 
     Args:
         psd:
-            The one-sided power spectraul density used
+            The one-sided power spectral density used
             to construct a whitening filter.
         fduration:
             Desired length in seconds of the time domain

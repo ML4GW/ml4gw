@@ -3,9 +3,9 @@ Tools for manipulating raw gravitational waveforms
 and projecting them onto interferometer responses.
 Much of the projection code is an extension of the
 implementation made available in
-``bilby <https://arxiv.org/abs/1811.02042>``_.
+`bilby <https://arxiv.org/abs/1811.02042>`_.
 Specifically code from
-``this module <https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py>``_.
+`this module <https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py>`_.
 """  # noqa E501
 
 from typing import List, Tuple, Union

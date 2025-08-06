@@ -23,7 +23,7 @@ class Cosine(dist.Distribution):
     """
     Cosine distribution based on
     ``torch.distributions.TransformedDistribution``
-    (see ``documentation <https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution>``_).
+    (see `documentation <https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution>`_).
     """  # noqa E501
 
     arg_constraints = {}
@@ -130,7 +130,7 @@ class PowerLaw(dist.TransformedDistribution):
 
     where :math:``\\rho_0`` is a representative minimum SNR
     considered for detection. See, for example,
-    ``Schutz (2011) <https://arxiv.org/abs/1102.5421>``_.
+    `Schutz (2011) <https://arxiv.org/abs/1102.5421>`_.
     Or, for example, ``index=2`` for uniform in Euclidean volume.
     """
 
@@ -185,7 +185,7 @@ class UniformComovingVolume(dist.Distribution):
     Sample either redshift, comoving distance, or luminosity distance
     such that they are uniform in comoving volume, assuming a flat
     lambda-CDM cosmology. Default H0 and Omega_M values match
-    ``Planck18 parameters in Astropy <https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html>``_.
+    `Planck18 parameters in Astropy <https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html>`_.
 
     Args:
         minimum: Minimum distance in the specified distance type
