@@ -132,6 +132,9 @@ def compute_antenna_responses(
     # shape: batch x num_polarizations x 3 x 3
     polarization = torch.stack(polarizations, axis=1)
 
+    # Ensure dtype consistency before einsum
+    detector_tensors = detector_tensors.to(polarization.dtype)
+
     # compute the weight of each interferometer's response
     # to each polarization: batch x polarizations x ifos
     return torch.einsum("...jk,ijk->...i", polarization, detector_tensors)

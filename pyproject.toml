@@ -1,6 +1,6 @@
 [project]
 name = "ml4gw"
-version = "0.7.5"
+version = "0.7.6"
 description = "Tools for training torch models on gravitational wave data"
 authors = [
     { name = "Ethan Marx", email = "emarx@mit.edu" },
@@ -39,7 +39,7 @@ dev = [
     "h5py~=3.12",
     "torchmetrics~=1.6.0",
     "lightning~=2.4.0",
-    "rich>=10.2.2",
+    "rich>=10.2.2,<14.0",
 ]
 docs = [
     "Sphinx>5.0",
