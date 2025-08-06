@@ -30,7 +30,7 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             Target timeseries to be iterated through. If specified,
             should be a single channel and have shape
             ``(length * sample_rate,)``. If left as ``None``, only windows
-            sampled from `X` will be returned during iteration.
+            sampled from ``X`` will be returned during iteration.
             Otherwise, windows sampled from both arrays will be
             returned. Note that if sampling is performed non-coincidentally,
             there's no sensible way to align windows sampled from this
@@ -55,14 +55,14 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             Number of batches of window to produce during iteration
             before raising a ``StopIteration``. Must be specified if
             performing non-coincident sampling. Otherwise, if left
-            as `None`, windows will be sampled until the entire
+            as ``None``, windows will be sampled until the entire
             timeseries has been exhausted. Note that
             ``batch_size * batches_per_epoch`` must be be small
             enough to be able to be fulfilled by the number of
             windows in the timeseries, otherise a ``ValueError``
             will be raised.
         coincident:
-            Whether to sample windows from the channels of `X`
+            Whether to sample windows from the channels of ``X``
             using the same indices or independently. Can't be
             ``True`` if ``batches_per_epoch`` is ``None`` or ``y`` is
             **not** ``None``.
@@ -91,7 +91,7 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
         # make sure if we specified a target array that all other
         # other necessary conditions are met (it has the same
-        # length as `X` and we're sampling coincidentally)
+        # length as ``X`` and we're sampling coincidentally)
         if y is not None and y.shape[-1] != X.shape[-1]:
             raise ValueError(
                 "Target timeseries must have same length as input"

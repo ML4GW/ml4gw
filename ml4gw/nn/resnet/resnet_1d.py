@@ -211,19 +211,19 @@ class ResNet1D(nn.Module):
             connections between feature maps at subsequent
             layers rather than global. Generally won't
             need this to be >1, and wil raise an error if
-            >1 when using vanilla `ResNet`.
+            >1 when using vanilla ``ResNet``.
         width_per_group:
             Base width of each of the feature map groups,
             which is scaled up by the typical expansion
             factor at each layer of the network. Meaningless
-            for vanilla `ResNet`.
+            for vanilla ``ResNet``.
         stride_type:
             Whether to achieve downsampling on the time axis
             by strided or dilated convolutions for each layer.
-            If left as `None`, strided convolutions will be
-            used at each layer. Otherwise, `stride_type` should
+            If left as ``None``, strided convolutions will be
+            used at each layer. Otherwise, ``stride_type`` should
             be one element shorter than ``layers`` and indicate either
-            ``stride`` or `dilation` for each layer after the first.
+            ``stride`` or ``dilation`` for each layer after the first.
     """
 
     block = BasicBlock

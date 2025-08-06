@@ -9,7 +9,7 @@ class IIRFilter(torch.nn.Module):
     r"""
     IIR digital and analog filter design given order and critical points.
     Design an Nth-order digital or analog filter and apply it to a signal.
-    Uses SciPy's `iirfilter` function to create the filter coefficients.
+    Uses SciPy's ``iirfilter`` function to create the filter coefficients.
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirfilter.html
 
     The forward call of this module accepts a batch tensor of shape
@@ -24,8 +24,8 @@ class IIRFilter(torch.nn.Module):
             default, fs is 2 half-cycles/sample, so these are normalized
             from 0 to 1, where 1 is the Nyquist frequency. (Wn is thus in
             half-cycles / sample). For analog filters, Wn is an angular
-            frequency (e.g., rad/s). When Wn is a length-2 sequence,`Wn[0]`
-            must be less than `Wn[1]`.
+            frequency (e.g., rad/s). When Wn is a length-2 sequence,``Wn[0]``
+            must be less than ``Wn[1]``.
         rp:
             For Chebyshev and elliptic filters, provides the maximum ripple in
             the passband. (dB)

@@ -28,7 +28,7 @@ def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
     the same bias correction used by
-    `scipy's implementation <https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066>`_.
+    ``scipy's implementation <https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066>``_.
     """  # noqa: E501
     n = x.shape[axis]
     ii_2 = 2 * torch.arange(1.0, (n - 1) // 2 + 1)
@@ -125,7 +125,7 @@ def fast_spectral_density(
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
             ``1 / (sample_rate * (window**2).sum())`` will give output
-            units of density, :math`\\text{Hz}^-1`.
+            units of density, :math``\\text{Hz}^-1``.
         average:
             How to aggregate the contributions of each FFT window to
             the spectral density. Allowed options are ``'mean'`` and
@@ -276,7 +276,7 @@ def spectral_density(
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
             ``1 / (sample_rate * (window**2).sum())`` will give output
-            units of density, :math:`\\text{Hz}^-1`.
+            units of density, :math:``\\text{Hz}^-1``.
         average:
             How to aggregate the contributions of each FFT window to
             the spectral density. Allowed options are ``'mean'`` and
@@ -355,7 +355,7 @@ def truncate_inverse_power_spectrum(
     to which the whitening filter will be applied.
 
     Implementation details adapted from
-    `here <https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8>`_.
+    ``here <https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8>``_.
 
     Args:
         psd:
@@ -375,11 +375,11 @@ def truncate_inverse_power_spectrum(
         highpass:
             If specified, will zero out the frequency response
             of all frequencies below this value in Hz. If left
-            as `None`, no highpass filtering will be applied.
+            as ``None``, no highpass filtering will be applied.
         lowpass:
             If specified, will zero out the frequency response
             of all frequencies above this value in Hz. If left
-            as `None`, no lowpass filtering will be applied.
+            as ``None``, no lowpass filtering will be applied.
     Returns:
         The PSD with its time domain response truncated
             to ``fduration`` and any filtered frequencies
@@ -500,7 +500,7 @@ def whiten(
         highpass:
             The frequency in Hz at which to highpass filter
             the data, setting the frequency response in the
-            whitening filter to 0. If left as `None`, no
+            whitening filter to 0. If left as ``None``, no
             highpass filtering will be applied.
         lowpass:
             The frequency in Hz at which to lowpass filter

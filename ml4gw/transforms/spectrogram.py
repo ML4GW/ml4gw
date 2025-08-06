@@ -19,7 +19,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
     is the number of time samples.
 
     For each timeseries, calculate multiple normalized
-    spectrograms based on the `Spectrogram` `kwargs` given.
+    spectrograms based on the ``Spectrogram`` ``kwargs`` given.
     Combine the spectrograms by taking the maximum value
     from the nearest time-frequncy bin.
 
@@ -37,7 +37,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         **kwargs:
             Arguments passed in kwargs will used to create
             ``torchaudio.transforms.Spectrogram`` (see
-            `documentation <https://docs.pytorch.org/audio/main/generated/torchaudio.transforms.Spectrogram.html>`_).
+            ``documentation <https://docs.pytorch.org/audio/main/generated/torchaudio.transforms.Spectrogram.html>``_).
             Each argument should be a list of values. Any list
             of length greater than 1 should be the same
             length

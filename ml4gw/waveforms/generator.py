@@ -137,7 +137,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
                 additional parameters.
 
                 Note that, if using an approximant from ``ml4gw.waveforms.cbc``,
-                any additional keys in `parameters` not ingested by the
+                any additional keys in ``parameters`` not ingested by the
                 approximant will be ignored.
         """  # noqa: E501
         # convert masses to kg, make sure
@@ -257,8 +257,8 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         hc_spectrum[..., -1], hp_spectrum[..., -1] = 0.0, 0.0
 
         # apply time translation in (i.e. phase shift in frequency domain)
-        # that will translate the coalescense time such that it is `right_pad`
-        # seconds from the right edge of the window
+        # that will translate the coalescense time such that it is
+        # ``right_pad`` seconds from the right edge of the window
         tshift = round(self.right_pad * self.sample_rate) / self.sample_rate
         kvals = torch.arange(num_freqs, device=device)
         phase_shift = torch.exp(1j * 2 * torch.pi * df * tshift * kvals)
@@ -277,7 +277,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248
 
         A frequency domain waveform is generated, conditioned
-        (see `generate_conditioned_fd_waveform`) and fft'd into the time-domain
+        (see ``generate_conditioned_fd_waveform``) and fft'd into the time-domain
 
         Args:
             **parameters:
@@ -294,7 +294,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
                 parameters.
 
                 Note that, if using an approximant from ``ml4gw.waveforms.cbc``,
-                any additional keys in `parameters` not ingested by the
+                any additional keys in ``parameters`` not ingested by the
                 approximant will be ignored.
         """  # noqa: E501
 

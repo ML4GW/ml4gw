@@ -70,7 +70,7 @@ class FittableSpectralTransform(FittableTransform):
             )
 
         # add two dummy dimensions in case we need to interpolate
-        # the frequency dimension, since `interpolate` expects
+        # the frequency dimension, since ``interpolate`` expects
         # a (batch, channel, spatial) formatted tensor as input
         x = x.view(1, 1, -1)
         if x.size(-1) != num_freqs:

@@ -8,7 +8,7 @@ from ..utils.slicing import unfold_windows
 
 class ShiftedPearsonCorrelation(torch.nn.Module):
     """
-    Compute the `Pearson correlation <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_
+    Compute the ``Pearson correlation <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>``_
     for two equal-length timeseries over a pre-defined number of time
     shifts in each direction. Useful for when you want a
     correlation, but not over every possible shift (i.e.

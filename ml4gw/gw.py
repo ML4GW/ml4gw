@@ -3,9 +3,9 @@ Tools for manipulating raw gravitational waveforms
 and projecting them onto interferometer responses.
 Much of the projection code is an extension of the
 implementation made available in
-`bilby <https://arxiv.org/abs/1811.02042>`_.
+``bilby <https://arxiv.org/abs/1811.02042>``_.
 Specifically code from
-`this module <https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py>`_.
+``this module <https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py>``_.
 """  # noqa E501
 
 from typing import List, Tuple, Union
@@ -195,7 +195,7 @@ def compute_observed_strain(
     **polarizations: Float[Tensor, "batch time"],
 ) -> WaveformTensor:
     """
-    Compute the strain timeseries :math:`h(t)` observed by a network
+    Compute the strain timeseries :math:``h(t)`` observed by a network
     of interferometers from the given polarization timeseries
     corresponding to gravitational waveforms from sources with
     the indicated sky parameters.
@@ -223,13 +223,13 @@ def compute_observed_strain(
             between the waveform observed at the geocenter and
             the one observed at the detector site. To avoid
             adding any delay between the two, reset your coordinates
-            such that the desired interferometer is at `(0., 0., 0.)`.
+            such that the desired interferometer is at ``(0., 0., 0.)``.
         sample_rate:
             Rate at which the polarization timeseries have been sampled
         polarziations:
             Timeseries for each waveform polarization which
             contributes to the interferometer response. Allowed
-            polarizations are `cross`, `plus`, and `breathing`.
+            polarizations are ``cross``, ``plus``, and ``breathing``.
     Returns:
         Tensor representing the observed strain at each
         interferometer for each waveform.
@@ -237,7 +237,7 @@ def compute_observed_strain(
 
     # TODO: just use theta as the input parameter?
     # note that ** syntax is ordered, so we're safe
-    # to be lazy and use `list` for the keys and values
+    # to be lazy and use ``list`` for the keys and values
     theta = torch.pi / 2 - dec
     antenna_responses = compute_antenna_responses(
         theta, psi, phi, detector_tensors, list(polarizations)
@@ -294,7 +294,7 @@ def compute_ifo_snr(
     Compute the signal to noise ratio (SNR) of individual
     interferometer responses to gravitational waveforms with
     respect to a background PSD for each interferometer. The
-    SNR of the :math:`i` th waveform at the :math:`j` th interferometer
+    SNR of the :math:``i`` th waveform at the :math:``j`` th interferometer
     is computed as:
 
     .. math::
@@ -304,13 +304,13 @@ def compute_ifo_snr(
         \\frac{\\tilde{h_{ij}}(f)\\tilde{h_{ij}}^*(f)}
         {S_n^{(j)}(f)}df
 
-    Where :math:`f_{\\text{min}}` is a minimum frequency denoted
-    by ``highpass``, :math:`f_{\\text{max}}` is the maximum frequency
+    Where :math:``f_{\\text{min}}`` is a minimum frequency denoted
+    by ``highpass``, :math:``f_{\\text{max}}`` is the maximum frequency
     denoted by ``lowpass``, which defaults to the Nyquist frequency
-    dictated by ``sample_rate``; :math:`\\tilde{h}_{ij}` and :math:`\\tilde{h}_{ij}^*`
-    indicate the fourier transform of the :math:`i` th waveform at
-    the :math:`j` th inteferometer and its complex conjugate, respectively;
-    and :math:`S_n^{(j)}` is the backround PSD at the :math:`j` th interferometer.
+    dictated by ``sample_rate``; :math:``\\tilde{h}_{ij}`` and :math:``\\tilde{h}_{ij}^*``
+    indicate the fourier transform of the :math:``i`` th waveform at
+    the :math:``j`` th inteferometer and its complex conjugate, respectively;
+    and :math:``S_n^{(j)}`` is the backround PSD at the :math:``j`` th interferometer.
 
     Args:
         responses:
@@ -319,12 +319,12 @@ def compute_ifo_snr(
         psd:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated. If 2D, each row of
-            `psd` will be assumed to be the background PSD for each
-            channel of _every_ batch element in `responses`. If 3D,
+            in ``responses`` has been calculated. If 2D, each row of
+            ``psd`` will be assumed to be the background PSD for each
+            channel of _every_ batch element in ``responses``. If 3D,
             this should contain a background PSD for each channel
-            of each element in `responses`, and therefore the first
-            two dimensions of `psd` and `responses` should match.
+            of each element in ``responses``, and therefore the first
+            two dimensions of ``psd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -334,14 +334,14 @@ def compute_ifo_snr(
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out low frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies up to `lowpass`
+            left as ``None``, all frequencies up to ``lowpass``
             will contribute to the SNR calculation.
         lowpass:
             The maximum frequency below which to compute the SNR.
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out high frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies from `highpass` up to
+            left as ``None``, all frequencies from ``highpass`` up to
             the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Batch of SNRs computed for each interferometer
@@ -393,10 +393,10 @@ def compute_ifo_snr(
     # that the user specify the sample rate by taking the
     # fft as-is (without dividing by sample rate) and then
     # taking the mean here (or taking the sum and dividing
-    # by the sum of `highpass` if it's a mask). If we want
+    # by the sum of ``highpass`` if it's a mask). If we want
     # to allow the user to pass a float for highpass, we'll
     # need the sample rate to compute the mask, but if we
-    # replace this with a `mask` argument instead we're in
+    # replace this with a ``mask`` argument instead we're in
     # the clear
     df = sample_rate / responses.shape[-1]
     integrated = integrand.sum(axis=-1) * df
@@ -416,14 +416,14 @@ def compute_network_snr(
     """
     Compute the total SNR from a gravitational waveform
     from a network of interferometers. The total SNR for
-    the :math:`i` th waveform is computed as
+    the :math:``i`` th waveform is computed as
 
     .. math::
 
         \\rho_i = \\sqrt{\\sum_{j}^{N}\\rho_{ij}^2}
 
-    where :math:`\\rho_{ij}` is the SNR for the :math:`i` th waveform at
-    the :math:`j` th interferometer in the network and :math:`N` is
+    where :math:``\\rho_{ij}`` is the SNR for the :math:``i`` th waveform at
+    the :math:``j`` th interferometer in the network and :math:``N`` is
     the total number of interferometers.
 
     Args:

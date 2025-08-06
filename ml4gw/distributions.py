@@ -23,7 +23,7 @@ class Cosine(dist.Distribution):
     """
     Cosine distribution based on
     ``torch.distributions.TransformedDistribution``
-    (see `documentation <https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution>`_).
+    (see ``documentation <https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution>``_).
     """  # noqa E501
 
     arg_constraints = {}
@@ -128,9 +128,9 @@ class PowerLaw(dist.TransformedDistribution):
 
     .. math:: p(\\rho) = 3\;\\rho_0^3 / \\rho^4
 
-    where :math:`\\rho_0` is a representative minimum SNR
+    where :math:``\\rho_0`` is a representative minimum SNR
     considered for detection. See, for example,
-    `Schutz (2011) <https://arxiv.org/abs/1102.5421>`_.
+    ``Schutz (2011) <https://arxiv.org/abs/1102.5421>``_.
     Or, for example, ``index=2`` for uniform in Euclidean volume.
     """
 
@@ -185,7 +185,7 @@ class UniformComovingVolume(dist.Distribution):
     Sample either redshift, comoving distance, or luminosity distance
     such that they are uniform in comoving volume, assuming a flat
     lambda-CDM cosmology. Default H0 and Omega_M values match
-    `Planck18 parameters in Astropy <https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html>`_.
+    ``Planck18 parameters in Astropy <https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html>``_.
 
     Args:
         minimum: Minimum distance in the specified distance type
@@ -347,7 +347,7 @@ class UniformComovingVolume(dist.Distribution):
 
 class RateEvolution(UniformComovingVolume):
     """
-    Wrapper around :meth:`~ml4gw.distributions.UniformComovingVolume` to allow for
+    Wrapper around :meth:``~ml4gw.distributions.UniformComovingVolume`` to allow for
     arbitrary rate evolution functions. E.g., if
     ``rate_function = lambda z: 1 / (1 + z)``, then the distribution
     will sample values such that they occur uniform in
@@ -357,9 +357,9 @@ class RateEvolution(UniformComovingVolume):
         rate_function: Callable that takes redshift as input
             and returns the rate evolution factor.
         *args: Arguments passed to
-            :meth:`~ml4gw.distributions.UniformComovingVolume` constructor.
+            :meth:``~ml4gw.distributions.UniformComovingVolume`` constructor.
         **kwargs: Keyword arguments passed to
-            :meth:`~ml4gw.distributions.UniformComovingVolume` constructor.
+            :meth:``~ml4gw.distributions.UniformComovingVolume`` constructor.
     """  # noqa E501
 
     def __init__(

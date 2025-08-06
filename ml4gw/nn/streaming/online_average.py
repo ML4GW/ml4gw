@@ -11,7 +11,7 @@ class OnlineAverager(torch.nn.Module):
     """
     Module for performing stateful online averaging of
     batches of overlapping timeseries. At present, the
-    first `num_updates` predictions produced by this
+    first ``num_updates`` predictions produced by this
     model will underestimate the true average.
 
     Args:

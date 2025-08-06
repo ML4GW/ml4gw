@@ -13,16 +13,16 @@ class SplineInterpolate(torch.nn.Module):
     """
     Perform 1D or 2D spline interpolation based on De Boor's method.
     Supports batched, multi-channel inputs, so acceptable data
-    shapes are `(width)`, `(height, width)`, `(batch, width)`,
-    `(batch, height, width)`, `(batch, channel, width)`, and
-    `(batch, channel, height, width)`.
+    shapes are ``(width)``, ``(height, width)``, ``(batch, width)``,
+    ``(batch, height, width)``, ``(batch, channel, width)``, and
+    ``(batch, channel, height, width)``.
 
     During initialization of this Module, both the desired input
     and output coordinate Tensors can be specified to allow
     pre-computation of the B-spline basis matrices, though the only
     mandatory argument is the coordinates of the data along the
-    `width` dimension. If no argument is given for coordinates along
-    the `height` dimension, it is assumed that 1D interpolation is
+    ``width`` dimension. If no argument is given for coordinates along
+    the ``height`` dimension, it is assumed that 1D interpolation is
     desired.
 
     Unlike scipy's implementation of spline interpolation, the data
@@ -55,7 +55,7 @@ class SplineInterpolate(torch.nn.Module):
         sx:
             Regularization factor to avoid singularities during matrix
             inversion for interpolation along the width dimension. Not
-            to be confused with the `s` parameter in scipy's spline
+            to be confused with the ``s`` parameter in scipy's spline
             methods, which controls the number of knots.
         sy:
             Regularization factor to avoid singularities during matrix
@@ -332,7 +332,7 @@ class SplineInterpolate(torch.nn.Module):
             Z:
                 Tensor of data to be interpolated. Must be between 1 and 4
                 dimensions. The shape of the tensor must agree with the
-                input coordinates given on initialization. If `y_in` was
+                input coordinates given on initialization. If ``y_in`` was
                 not specified during initialization, it is assumed that
                 Z does not have a height dimension.
             x_out:
@@ -345,7 +345,7 @@ class SplineInterpolate(torch.nn.Module):
                 initialization.
 
         Returns:
-            A 4D tensor with shape `(batch, channel, height, width)`.
+            A 4D tensor with shape ``(batch, channel, height, width)``.
             Depending on the input data shape, many of these dimensions
             may have length 1.
         """
