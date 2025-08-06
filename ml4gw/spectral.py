@@ -276,7 +276,7 @@ def spectral_density(
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
             ``1 / (sample_rate * (window**2).sum())`` will give output
-            units of density, :math:``\\text{Hz}^-1``.
+            units of density, :math:`\\text{Hz}^-1`.
         average:
             How to aggregate the contributions of each FFT window to
             the spectral density. Allowed options are ``'mean'`` and

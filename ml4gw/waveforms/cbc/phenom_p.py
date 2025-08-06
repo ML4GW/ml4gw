@@ -400,16 +400,16 @@ class IMRPhenomPv2(IMRPhenomD):
         increasing sample points.
 
         Returns the one-dimensional piecewise linear interpolant to a function
-        with given data points :math:``(xp, fp)``, evaluated at :math:``x``
+        with given data points :math:`(xp, fp)`, evaluated at :math:`x`
 
         Args:
             x:
-                the :math:``x``-coordinates at which to evaluate the
+                the :math:`x`-coordinates at which to evaluate the
                 interpolated values.
             xp:
-                the :math:``x``-coordinates of data points, must be increasing.
+                the :math:`x`-coordinates of data points, must be increasing.
             fp:
-                the :math:``y``-coordinates of data points, same length as
+                the :math:`y`-coordinates of data points, same length as
                 ``xp``.
 
         Returns:

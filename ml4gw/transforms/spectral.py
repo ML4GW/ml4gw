@@ -19,10 +19,10 @@ class SpectralDensity(torch.nn.Module):
     tensor is provided, the cross spectral density between the two
     timeseries will be computed. For information about the allowed
     relationships between these two tensors, see the documentation to
-    :meth:``~ml4gw.spectral.fast_spectral_density``.
+    :meth:`~ml4gw.spectral.fast_spectral_density`.
 
     Note that the cross spectral density computation is currently
-    only available for :meth:``~ml4gw.spectral.fast_spectral_density``. If
+    only available for :meth:`~ml4gw.spectral.fast_spectral_density`. If
     ``fast=False`` and a second tensor is passed to ``SpectralDensity.forward``,  # noqa E501
     a ``NotImplementedError`` will be raised.
 

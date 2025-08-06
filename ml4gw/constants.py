@@ -32,5 +32,5 @@ m_per_Mpc = 3.085677581491367278913937957796471611e22
 # 1 Mpc in seconds.
 MPC_SEC = m_per_Mpc / C
 
-# Speed of light in vacuum (:math:``c``), in gigaparsecs per second
+# Speed of light in vacuum (:math:`c`), in gigaparsecs per second
 clightGpc = C / 3.0856778570831e22

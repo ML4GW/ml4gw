@@ -195,7 +195,7 @@ def compute_observed_strain(
     **polarizations: Float[Tensor, "batch time"],
 ) -> WaveformTensor:
     """
-    Compute the strain timeseries :math:``h(t)`` observed by a network
+    Compute the strain timeseries :math:`h(t)` observed by a network
     of interferometers from the given polarization timeseries
     corresponding to gravitational waveforms from sources with
     the indicated sky parameters.
@@ -294,7 +294,7 @@ def compute_ifo_snr(
     Compute the signal to noise ratio (SNR) of individual
     interferometer responses to gravitational waveforms with
     respect to a background PSD for each interferometer. The
-    SNR of the :math:``i`` th waveform at the :math:``j`` th interferometer
+    SNR of the :math:`i` th waveform at the :math:`j` th interferometer
     is computed as:
 
     .. math::
@@ -304,13 +304,13 @@ def compute_ifo_snr(
         \\frac{\\tilde{h_{ij}}(f)\\tilde{h_{ij}}^*(f)}
         {S_n^{(j)}(f)}df
 
-    Where :math:``f_{\\text{min}}`` is a minimum frequency denoted
-    by ``highpass``, :math:``f_{\\text{max}}`` is the maximum frequency
+    Where :math:`f_{\\text{min}}` is a minimum frequency denoted
+    by ``highpass``, :math:`f_{\\text{max}}` is the maximum frequency
     denoted by ``lowpass``, which defaults to the Nyquist frequency
-    dictated by ``sample_rate``; :math:``\\tilde{h}_{ij}`` and :math:``\\tilde{h}_{ij}^*``
-    indicate the fourier transform of the :math:``i`` th waveform at
-    the :math:``j`` th inteferometer and its complex conjugate, respectively;
-    and :math:``S_n^{(j)}`` is the backround PSD at the :math:``j`` th interferometer.
+    dictated by ``sample_rate``; :math:`\\tilde{h}_{ij}` and :math:`\\tilde{h}_{ij}^*`
+    indicate the fourier transform of the :math:`i` th waveform at
+    the :math:`j` th inteferometer and its complex conjugate, respectively;
+    and :math:`S_n^{(j)}` is the backround PSD at the :math:`j` th interferometer.
 
     Args:
         responses:
@@ -416,14 +416,14 @@ def compute_network_snr(
     """
     Compute the total SNR from a gravitational waveform
     from a network of interferometers. The total SNR for
-    the :math:``i`` th waveform is computed as
+    the :math:`i` th waveform is computed as
 
     .. math::
 
         \\rho_i = \\sqrt{\\sum_{j}^{N}\\rho_{ij}^2}
 
-    where :math:``\\rho_{ij}`` is the SNR for the :math:``i`` th waveform at
-    the :math:``j`` th interferometer in the network and :math:``N`` is
+    where :math:`\\rho_{ij}` is the SNR for the :math:`i` th waveform at
+    the :math:`j` th interferometer in the network and :math:`N` is
     the total number of interferometers.
 
     Args:

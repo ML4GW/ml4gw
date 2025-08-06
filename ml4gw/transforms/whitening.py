@@ -30,7 +30,7 @@ class Whiten(torch.nn.Module):
     edge of the whitened timeseries.
 
     For more information, see the documentation for
-    :meth:``~ml4gw.spectral.whiten``.
+    :meth:`~ml4gw.spectral.whiten`.
 
     Args:
         fduration:
@@ -97,7 +97,7 @@ class Whiten(torch.nn.Module):
                 to ``X.size(1)`` and ``X.size(0)``, respectively.)
                 For more information about what these different
                 shapes for ``psd`` represent, consult the documentation
-                for :meth:``~ml4gw.spectral.whiten``.
+                for :meth:`~ml4gw.spectral.whiten`.
         Returns:
             Whitened timeseries, with ``fduration * sample_rate / 2``
                 samples cropped from each edge. Output shape will then
