@@ -12,24 +12,24 @@ class Snapshotter(torch.nn.Module):
     Model for converting streaming state updates into
     a batch of overlapping snaphots of a multichannel
     timeseries. Can support multiple timeseries in a
-    single state update via the `channels_per_snapshot`
+    single state update via the ``channels_per_snapshot``
     kwarg.
 
     Specifically, maps tensors of shape
-    `(num_channels, batch_size * stride_size)` to a tensor
-    of shape `(batch_size, num_channels, snapshot_size)`.
-    If `channels_per_snapshot` is specified, it will return
-    `len(channels_per_snapshot)` tensors of this shape,
+    ``(num_channels, batch_size * stride_size)`` to a tensor
+    of shape ``(batch_size, num_channels, snapshot_size)``.
+    If ``channels_per_snapshot`` is specified, it will return
+    ``len(channels_per_snapshot)`` tensors of this shape,
     with the channel dimension replaced by the corresponding
-    value of `channels_per_snapshot`. The last tensor returned
+    value of ``channels_per_snapshot``. The last tensor returned
     at call time will be the current state that can be passed
-    to the next `forward` call.
+    to the next ``forward`` call.
 
     Args:
         num_channels:
             Number of channels in the timeseries. If
-            `channels_per_snapshot` is not `None`,
-            this should be equal to `sum(channels_per_snapshot)`.
+            ``channels_per_snapshot`` is not ``None``,
+            this should be equal to ``sum(channels_per_snapshot)``.
         snapshot_size:
             The size of the output snapshot windows in
             number of samples
@@ -39,17 +39,17 @@ class Snapshotter(torch.nn.Module):
         batch_size:
             The number of snapshots to produce at each
             update. The last dimension of the input
-            tensor should have size `batch_size * stride_size`.
+            tensor should have size ``batch_size * stride_size``.
         channels_per_snapshot:
             How to split up the channels in the timeseries
-            for different tensors. If left as `None`, all
+            for different tensors. If left as ``None``, all
             the channels will be returned in a single tensor.
             Otherwise, the channels will be split up into
-            `len(channels_per_snapshot)` tensors, with each
+            ``len(channels_per_snapshot)`` tensors, with each
             tensor's channel dimension being equal to the
-            corresponding value in `channels_per_snapshot`.
+            corresponding value in ``channels_per_snapshot``.
             Therefore, if specified, these values should
-            add up to `num_channels`.
+            add up to ``num_channels``.
     """
 
     def __init__(

@@ -118,7 +118,7 @@ class FixedWhiten(FittableSpectralTransform):
     """
     Transform that whitens timeseries by a fixed
     power spectral density that's determined by
-    calling the `.fit` method.
+    calling the ``.fit`` method.
 
     Args:
         num_channels:
@@ -192,9 +192,9 @@ class FixedWhiten(FittableSpectralTransform):
                 assumed that these represent time-domain data that
                 will be converted to the frequency domain via
                 Welch's method using the specified ``fftlength``
-                and `overlap`, with a Hann window used to window
+                and ``overlap``, with a Hann window used to window
                 the FFT frames by default. Should have the same
-                number of args as `self.num_channels`.
+                number of args as ``self.num_channels``.
             fftlength:
                 Length of frames used to convert time-domain
                 data to the frequency-domain via Welch's method.

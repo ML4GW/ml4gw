@@ -83,11 +83,11 @@ class ConvolutionalAutoencoder(Autoencoder):
     match the shape of the input to its corresponding
     encoder layer, except for the last decoder which
     can have an arbitrary number of channels specified
-    by `decode_channels`.
+    by ``decode_channels``.
 
-    All layers also share the same `activation` except
+    All layers also share the same ``activation`` except
     for the last decoder layer, which can have an
-    arbitrary `output_activation`.
+    arbitrary ``output_activation``.
     """
 
     def __init__(
@@ -115,7 +115,7 @@ class ConvolutionalAutoencoder(Autoencoder):
             # All intermediate layers should decode to
             # the same number of channels. The last decoder
             # should decode to whatever number of channels
-            # was specified, even if it's `None` (in which
+            # was specified, even if it's ``None`` (in which
             # case it will just be in_channels anyway)
             decode = in_channels if i else decode_channels
 

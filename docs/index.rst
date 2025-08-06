@@ -15,7 +15,7 @@ ml4gw
 ml4gw is a library of `pytorch  <https://pytorch.org/docs/stable/index.html>`_ utilities 
 for training neural networks in service of gravitational wave physics applications.
 
-The code can be found on github at `<https://github.com/ml4gw/ml4gw>`_
+The code can be found on github at `<https://github.com/ML4GW/ml4gw>`_
 
 
 .. toctree::
@@ -23,14 +23,26 @@ The code can be found on github at `<https://github.com/ml4gw/ml4gw>`_
    :caption: Contents:
 
    installation
-   modules
+   usage
+   tutorials/ml4gw_tutorial
+
+API:
+----
+
+.. autosummary::
+   :toctree: api
+   :caption: API
+   :recursive:
+
+   ml4gw
+   ml4gw.utils
 
 Projects
 ========
 Currently, the following projects are using ml4gw to support their research:
 
 * `Aframe <https://github.com/ml4gw/aframev2>`_ - Gravitational wave detection of binary black hole mergers
-* `PE <https://github.com/ml4gw/aframev2>`_ - Parameter estimation of gravitational wave signals
+* `AMPLFI <https://github.com/ml4gw/amplfi>`_ - Parameter estimation of gravitational wave signals
 
 
 Development

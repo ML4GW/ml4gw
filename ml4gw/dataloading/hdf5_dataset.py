@@ -51,7 +51,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             over 2x improvement in total throughput.
         num_files_per_batch:
             The number of unique files from which to sample
-            batch elements each epoch. If left as `None`,
+            batch elements each epoch. If left as ``None``,
             will use all available files. Useful when reading
             from many files is bottlenecking dataloading.
     """  # noqa E501
@@ -114,7 +114,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         return self.batches_per_epoch
 
     def sample_fnames(self, size) -> np.ndarray:
-        # first, randomly select `self.num_files_per_batch`
+        # first, randomly select ``self.num_files_per_batch``
         # file indices based on their probabilities
         fname_indices = np.arange(len(self.fnames))
         fname_indices = np.random.choice(

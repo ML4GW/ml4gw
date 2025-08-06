@@ -22,7 +22,7 @@ class QTile(torch.nn.Module):
     """
     Compute the row of Q-tiles for a single Q value and a single
     frequency for a batch of multi-channel frequency series data.
-    Should really be called `QRow`, but I want to match GWpy.
+    Should really be called ``QRow``, but I want to match GWpy.
     Input data should have three dimensions or fewer.
     If fewer, dimensions will be added until the input is
     three-dimensional.
@@ -112,17 +112,17 @@ class QTile(torch.nn.Module):
             fseries:
                 Frequency series of data. Should correspond to data with
                 the duration and sample rate used to initialize this object.
-                Expected input shape is `(B, C, F)`, where F is the number
+                Expected input shape is ``(B, C, F)``, where F is the number
                 of samples, C is the number of channels, and B is the number
                 of batches. If less than three-dimensional, axes will be
                 added.
             norm:
                 The method of normalization. Options are "median", "mean", or
-                `None`.
+                ``None``.
 
         Returns:
             The row of Q-tiles for the given Q and frequency. Output is
-            three-dimensional: `(B, C, T)`
+            three-dimensional: ``(B, C, T)``
         """
         if len(fseries.shape) > 3:
             raise ValueError("Input data has more than 3 dimensions")
@@ -164,7 +164,7 @@ class SingleQTransform(torch.nn.Module):
             Sample rate of the data in Hz
         spectrogram_shape:
             The shape of the interpolated spectrogram, specified as
-            `(num_f_bins, num_t_bins)`. Because the
+            ``(num_f_bins, num_t_bins)``. Because the
             frequency spacing of the Q-tiles is in log-space, the frequency
             interpolation is log-spaced as well.
         q:
@@ -176,14 +176,14 @@ class SingleQTransform(torch.nn.Module):
         mismatch:
             The maximum fractional mismatch between neighboring tiles
         interpolation_method:
-            The method by which to interpolate each `QTile` to the specified
+            The method by which to interpolate each ``QTile`` to the specified
             number of time and frequency bins. The acceptable values are
             "bilinear", "bicubic", and "spline". The "bilinear" and "bicubic"
             options will use PyTorch's built-in interpolation modes, while
             "spline" will use the custom Torch-based implementation in
-            `ml4gw`, as PyTorch does not have spline-based intertpolation.
+            ``ml4gw``, as PyTorch does not have spline-based intertpolation.
             The "spline" mode is most similar to the results of GWpy's
-            Q-transform, which uses `scipy` to do spline interpolation.
+            Q-transform, which uses ``scipy`` to do spline interpolation.
             However, it is also the slowest and most memory intensive due to
             the matrix equation solving steps. Therefore, the default method
             is "bicubic" as it produces the most similar results while
@@ -291,7 +291,7 @@ class SingleQTransform(torch.nn.Module):
     def get_freqs(self) -> Float[Tensor, " nfreq"]:
         """
         Calculate the frequencies that will be used in this transform.
-        For each frequency, a `QTile` is created.
+        For each frequency, a ``QTile`` is created.
         """
         minf, maxf = self.frange
         fcum_mismatch = (
@@ -320,7 +320,7 @@ class SingleQTransform(torch.nn.Module):
         be slow, so this isn't used yet.
 
         Optionally, a pair of frequency values can be specified for
-        `fsearch_range` to restrict the frequencies in which the maximum
+        ``fsearch_range`` to restrict the frequencies in which the maximum
         energy value is sought.
         """
         allowed_dimensions = ["both", "neither", "channel", "batch"]
@@ -360,7 +360,7 @@ class SingleQTransform(torch.nn.Module):
     ) -> None:
         """
         Take the FFT of the input timeseries and calculate the transform
-        for each `QTile`
+        for each ``QTile``
         """
         # Computing the FFT with the same normalization and scaling as GWpy
         X = torch.fft.rfft(X, norm="forward")
@@ -416,9 +416,9 @@ class SingleQTransform(torch.nn.Module):
             X:
                 Time series of data. Should have the duration and sample rate
                 used to initialize this object. Expected input shape is
-                `(B, C, T)`, where T is the number of samples, C is the number
-                of channels, and B is the number of batches. If less than
-                three-dimensional, axes will be added during Q-tile
+                ``(B, C, T)``, where T is the number of samples, C is the
+                number of channels, and B is the number of batches. If less
+                than three-dimensional, axes will be added during Q-tile
                 computation.
             norm:
                 The method of normalization used by each QTile
@@ -445,13 +445,13 @@ class QScan(torch.nn.Module):
             Sample rate of the data in Hz
         spectrogram_shape:
             The shape of the interpolated spectrogram, specified as
-            `(num_f_bins, num_t_bins)`. Because the
+            ``(num_f_bins, num_t_bins)``. Because the
             frequency spacing of the Q-tiles is in log-space, the frequency
             interpolation is log-spaced as well.
         qrange:
             The lower and upper values of Q to consider. The
             actual values of Q used for the transforms are
-            determined by the `get_qs` method
+            determined by the ``get_qs`` method
         frange:
             The lower and upper frequency limit to consider for
             the transform. If unspecified, default values will
@@ -535,9 +535,9 @@ class QScan(torch.nn.Module):
             X:
                 Time series of data. Should have the duration and sample rate
                 used to initialize this object. Expected input shape is
-                `(B, C, T)`, where T is the number of samples, C is the number
-                of channels, and B is the number of batches. If less than
-                three-dimensional, axes will be added during Q-tile
+                ``(B, C, T)``, where T is the number of samples, C is the
+                number of channels, and B is the number of batches. If less
+                than three-dimensional, axes will be added during Q-tile
                 computation.
             fsearch_range:
                 The lower and upper frequency values within which to search

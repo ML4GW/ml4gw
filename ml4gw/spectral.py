@@ -125,7 +125,7 @@ def fast_spectral_density(
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
             ``1 / (sample_rate * (window**2).sum())`` will give output
-            units of density, :math`\\text{Hz}^-1`.
+            units of density, :math``\\text{Hz}^-1``.
         average:
             How to aggregate the contributions of each FFT window to
             the spectral density. Allowed options are ``'mean'`` and
@@ -359,7 +359,7 @@ def truncate_inverse_power_spectrum(
 
     Args:
         psd:
-            The one-sided power spectraul density used
+            The one-sided power spectral density used
             to construct a whitening filter.
         fduration:
             Desired length in seconds of the time domain
@@ -375,11 +375,11 @@ def truncate_inverse_power_spectrum(
         highpass:
             If specified, will zero out the frequency response
             of all frequencies below this value in Hz. If left
-            as `None`, no highpass filtering will be applied.
+            as ``None``, no highpass filtering will be applied.
         lowpass:
             If specified, will zero out the frequency response
             of all frequencies above this value in Hz. If left
-            as `None`, no lowpass filtering will be applied.
+            as ``None``, no lowpass filtering will be applied.
     Returns:
         The PSD with its time domain response truncated
             to ``fduration`` and any filtered frequencies
@@ -500,7 +500,7 @@ def whiten(
         highpass:
             The frequency in Hz at which to highpass filter
             the data, setting the frequency response in the
-            whitening filter to 0. If left as `None`, no
+            whitening filter to 0. If left as ``None``, no
             highpass filtering will be applied.
         lowpass:
             The frequency in Hz at which to lowpass filter

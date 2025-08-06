@@ -25,9 +25,9 @@ def unfold_windows(
     Args:
         x:
             The timeseries to unfold. Can have shape
-            `(batch_size, num_channels, length * sample_rate)`,
-            `(num_channels, length * sample_rate)`, or
-            `(length * sample_rate)`
+            ``(batch_size, num_channels, length * sample_rate)``,
+            ``(num_channels, length * sample_rate)``, or
+            ``(length * sample_rate)``
         window_size:
             The size of the windows to unfold from x
         stride:
@@ -39,12 +39,12 @@ def unfold_windows(
 
     Returns:
        A tensor of shape
-       `(num_windows, batch_size, num_channels, kernel_size)`,
-       `(num_windows, num_channels, kernel_size)`, or
-       `(num_windows, kernel_size)` depending on whether the
+       ``(num_windows, batch_size, num_channels, kernel_size)``,
+       ``(num_windows, num_channels, kernel_size)``, or
+       ``(num_windows, kernel_size)`` depending on whether the
        input tensor is 3D, 2D, or 1D
 
-       If `drop_last` is false, returns the remainder of the
+       If ``drop_last`` is false, returns the remainder of the
        timeseries, shaped to be compatible with the returned
        unfolded tensor
     """
@@ -93,34 +93,34 @@ def slice_kernels(
     multichannel timeseries, slice kernels of a given size
     from the timeseries starting at the indicated indices.
     Returns a batch of 1D or 2D kernels, and so will have
-    one more dimension than `x`.
+    one more dimension than ``x``.
 
     Args:
         x:
             The timeseries tensor to slice kernels from
         idx:
-            The indices in `x` of the first sample of each
-            kernel. If `x` is 1D, `idx` must be 1D as well.
-            If `x` is 2D and `idx` is 1D, `idx` is assumed
+            The indices in ``x`` of the first sample of each
+            kernel. If ``x`` is 1D, ``idx`` must be 1D as well.
+            If ``x`` is 2D and ``idx`` is 1D, ``idx`` is assumed
             to represent the first index of the kernels sliced
             from _all_ channels (i.e. the channels are sliced
-            coincidentally). If `x` is 2D and `idx` is also 2D,
-            `idx` should have shape `(batch_size, num_channels)`,
+            coincidentally). If ``x`` is 2D and ``idx`` is also 2D,
+            ``idx`` should have shape ``(batch_size, num_channels)``,
             and its values are assumed to represent the first index
             of the kernel sliced from each channel _independently_.
-            If `x` is 3D, `idx` _must_ be 1D, and have the same length
-            as `x`. In this case, it is assumed that the elements of
-            `idx` represent the starting index in the last dimension
-            of `x` from which to sample a batch of kernels
+            If ``x`` is 3D, ``idx`` _must_ be 1D, and have the same length
+            as ``x``. In this case, it is assumed that the elements of
+            ``idx`` represent the starting index in the last dimension
+            of ``x`` from which to sample a batch of kernels
             coincidentally among the channels.
         kernel_size:
             The length of the kernels to slice from the timeseries
 
     Returns:
-        A tensor of shape `(batch_size, kernel_size)` if `x` is
-        1D and `(batch_size, num_channels, kernel_size)` if `x`
-        is 2D, where `batch_size = idx.shape[0]` and
-        `num_channels = x.shape[0]` if `x` is 2D.
+        A tensor of shape ``(batch_size, kernel_size)`` if ``x`` is
+        1D and ``(batch_size, num_channels, kernel_size)`` if ``x``
+        is 2D, where ``batch_size = idx.shape[0]`` and
+        ``num_channels = x.shape[0]`` if ``x`` is 2D.
     """
 
     # create the indices all the slices will be built around,
@@ -239,14 +239,14 @@ def sample_kernels(
 
     For a tensor representing one or multiple channels of
     timeseries data, randomly slice kernels of a fixed
-    length from the timeseries. If `X` is 1D, kernels will
-    be sampled uniformly from `X`. If `X` is 2D, kernels
-    will be sampled from the first dimension of `X` (assumed
+    length from the timeseries. If ``X`` is 1D, kernels will
+    be sampled uniformly from ``X``. If ``X`` is 2D, kernels
+    will be sampled from the first dimension of ``X`` (assumed
     to be the time dimension) in a manner that depends on the
-    values of the `max_center_offset` and `coincident` kwargs.
-    If `X` is 3D, one kernel will be sampled coincidentally from
-    each element along the 0th axis of `X`. In this case, `N` must
-    either be `None` or be equal to `len(X)`.
+    values of the ``max_center_offset`` and ``coincident`` kwargs.
+    If ``X`` is 3D, one kernel will be sampled coincidentally from
+    each element along the 0th axis of ``X``. In this case, ``N`` must
+    either be ``None`` or be equal to ``len(X)``.
 
     Args:
         X:
@@ -254,12 +254,12 @@ def sample_kernels(
             kernel_size: The size of the kernels to sample
         N:
             The number of kernels to sample. Can be left as
-            `None` if `X` is 3D, otherwise must be specified
+            ``None`` if ``X`` is 3D, otherwise must be specified
         max_center_offeset:
-            If `X` is 2D, this indicates the maximum distance
+            If ``X`` is 2D, this indicates the maximum distance
             from the center of the timeseries the edge of
-            sampled kernels may fall. If left as `None`, kernels
-            will be sampled uniformly across all of `X`'s time
+            sampled kernels may fall. If left as ``None``, kernels
+            will be sampled uniformly across all of ``X``'s time
             dimension. If greater than 0, defines the maximum
             distance that the rightmost edge of the kernel may
             fall from the center of the timeseries (the leftmost
@@ -269,19 +269,19 @@ def sample_kernels(
             of the timeseries, which may fall anywhere within the
             kernel with uniform probability. If less than 0, defines
             the minimum distance that the center of the timeseries
-            must fall from either edge of the kernel. If `X` is
+            must fall from either edge of the kernel. If ``X`` is
             1D, this argument is ignored.
         coincident:
-            If `X` is 2D, determines whether the individual channels
-            of `X` sample the same kernels or different kernels
+            If ``X`` is 2D, determines whether the individual channels
+            of ``X`` sample the same kernels or different kernels
             independently, i.e. whether the channels of each batch
             element in the output will contain coincident data. If
-            `X` is 1D, this argument is ignored.
+            ``X`` is 1D, this argument is ignored.
     Returns:
-        A batch of sampled kernels. If `X` is 1D, this will have
-        shape `(N, kernel_size)`. If `X` is 2D, this will have
-        shape `(N, num_channels, kernel_size)`, where
-        `num_channels = X.shape[0]`.
+        A batch of sampled kernels. If ``X`` is 1D, this will have
+        shape ``(N, kernel_size)``. If ``X`` is 2D, this will have
+        shape ``(N, num_channels, kernel_size)``, where
+        ``num_channels = X.shape[0]``.
     """
 
     if X.shape[-1] < kernel_size:

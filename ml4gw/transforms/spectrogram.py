@@ -19,7 +19,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
     is the number of time samples.
 
     For each timeseries, calculate multiple normalized
-    spectrograms based on the `Spectrogram` `kwargs` given.
+    spectrograms based on the ``Spectrogram`` ``kwargs`` given.
     Combine the spectrograms by taking the maximum value
     from the nearest time-frequncy bin.
 

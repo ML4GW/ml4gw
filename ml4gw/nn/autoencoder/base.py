@@ -23,7 +23,7 @@ class Autoencoder(torch.nn.Module):
 
     Accepts a ``skip_connection`` argument that defines how to
     combine information from the input of one block's ``encode``
-    layer with the output to its ``decode`` layer. See `skip_connections.py`
+    layer with the output to its ``decode`` layer. See ``skip_connections.py``
     for more info about what these classes are expected to contain
     and how they operate.
     """

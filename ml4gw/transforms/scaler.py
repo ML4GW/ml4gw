@@ -13,14 +13,14 @@ class ChannelWiseScaler(FittableTransform):
     Scales timeseries channels by the mean and standard
     deviation of the channels of the timeseries used to
     fit the module. To reverse the scaling, provide the
-    `reverse=True` keyword argument at call time.
+    ``reverse=True`` keyword argument at call time.
     By default, the scaling parameters are set to zero mean
     and unit variance, amounting to an identity transform.
 
     Args:
         num_channels:
             The number of channels of the target timeseries.
-            If left as `None`, the timeseries will be assumed
+            If left as ``None``, the timeseries will be assumed
             to be 1D (single channel).
     """
 
@@ -42,8 +42,8 @@ class ChannelWiseScaler(FittableTransform):
         """Fit the scaling parameters to a timeseries
 
         Computes the channel-wise mean and standard deviation
-        of the timeseries `X` and sets these values to the
-        `mean` and `std` parameters of the scaler.
+        of the timeseries ``X`` and sets these values to the
+        ``mean`` and ``std`` parameters of the scaler.
         """
 
         if X.ndim == 1:
