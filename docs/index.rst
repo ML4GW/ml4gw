@@ -24,7 +24,7 @@ The code can be found on github at `<https://github.com/ML4GW/ml4gw>`_
 
    installation
    usage
-   examples/ml4gw_tutorial
+   tutorials/ml4gw_tutorial
 
 API:
 ----

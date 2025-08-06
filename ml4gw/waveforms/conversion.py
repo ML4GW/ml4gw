@@ -37,10 +37,11 @@ def chirp_mass_and_mass_ratio_to_components(
 ):
     """
     Compute component masses from chirp mass and mass ratio.
+
     Args:
         chirp_mass: Tensor of chirp mass values
         mass_ratio:
-            Tensor of mass ratio values, `m2 / m1`,
+            Tensor of mass ratio values, ``m2 / m1``,
             where m1 >= m2, so that mass_ratio <= 1
     """
     total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6

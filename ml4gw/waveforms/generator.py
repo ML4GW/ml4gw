@@ -23,9 +23,9 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
     frequency-domain approximants.
 
     Frequency domain waveforms are conditioned as done by lalsimulation.
-    Specifically, waveforms are generated with a starting frequency `fstart`
-    slightly below the requested `f_min`, so that they can be tapered from
-    `fstart` to `f_min` using a cosine window.
+    Specifically, waveforms are generated with a starting frequency ``fstart``
+    slightly below the requested ``f_min``, so that they can be tapered from
+    ``fstart`` to ``f_min`` using a cosine window.
 
     Please see https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_inspiral__c.html#gac9f16dab2cbca5a431738ee7d2505969
     for more information
@@ -34,11 +34,11 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         approximant:
             A callable that returns hplus and hcross polarizations
             given requested frequencies and relevant set of parameters.
-            See `ml4gw.waveforms.cbc` for implemented approximants.
+            See ``ml4gw.waveforms.cbc`` for implemented approximants.
         sample_rate:
             Rate at which returned time domain waveform will be
-            sampled in Hz. This also specifies `f_max` for generating
-            waveforms via the nyquist frequency: `f_max = sample_rate // 2`.
+            sampled in Hz. This also specifies ``f_max`` for generating
+            waveforms via the nyquist frequency: ``f_max = sample_rate // 2``.
         f_min:
             Lower frequency bound for waveforms
         duration:
@@ -126,17 +126,17 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
             **parameters:
                 Dictionary of parameters for waveform generation where key is
                 the parameter name and value is a tensor of parameters.
-                It is required that `parameters` contains `mass_1`, `mass_2`,
-                `s1z`, and `s2z` keys, which are used for determining
+                It is required that ``parameters`` contains ``mass_1``, ``mass_2``,
+                ``s1z``, and ``s2z`` keys, which are used for determining
                 parameters of data conditioning.
 
                 If the specified approximant takes other parameters for
-                waveform generation, like `chirp_mass` and `mass_ratio`, the
-                utility functions in `ml4gw.waveforms.conversion`may be useful
+                waveform generation, like ``chirp_mass`` and ``mass_ratio``, the
+                utility functions in ``ml4gw.waveforms.conversion`` may be useful
                 for populating the parameters dictionary with these
                 additional parameters.
 
-                Note that, if using an approximant from `ml4gw.waveforms.cbc`,
+                Note that, if using an approximant from ``ml4gw.waveforms.cbc``,
                 any additional keys in `parameters` not ingested by the
                 approximant will be ignored.
         """  # noqa: E501
@@ -279,22 +279,23 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
         A frequency domain waveform is generated, conditioned
         (see `generate_conditioned_fd_waveform`) and fft'd into the time-domain
 
-        **parameters:
-            Dictionary of parameters for waveform generation where each key is
-            the parameter name and each value is a tensor of parameters.
-            It is required that `parameters` contains `mass_1`, `mass_2`,
-            `s1z`, and `s2z` keys, which are used for determining parameters
-            of data conditioning.
+        Args:
+            **parameters:
+                Dictionary of parameters for waveform generation where each key is
+                the parameter name and each value is a tensor of parameters.
+                It is required that ``parameters`` contains ``mass_1``, ``mass_2``,
+                ``s1z``, and ``s2z`` keys, which are used for determining parameters
+                of data conditioning.
 
-            If the specified approximant takes other parameters for waveform
-            generation, like `chirp_mass` and `mass_ratio`, the utility
-            functions in `ml4gw.waveforms.conversion` may be useful for
-            populating the parameters dictionary with these additional
-            parameters.
+                If the specified approximant takes other parameters for waveform
+                generation, like ``chirp_mass`` and ``mass_ratio``, the utility
+                functions in ``ml4gw.waveforms.conversion`` may be useful for
+                populating the parameters dictionary with these additional
+                parameters.
 
-            Note that, if using an approximant from `ml4gw.waveforms.cbc`,
-            any additional keys in `parameters` not ingested by the
-            approximant will be ignored.
+                Note that, if using an approximant from ``ml4gw.waveforms.cbc``,
+                any additional keys in `parameters` not ingested by the
+                approximant will be ignored.
         """  # noqa: E501
 
         hc, hp = self.generate_conditioned_fd_waveform(**parameters)

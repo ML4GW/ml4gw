@@ -39,11 +39,14 @@ extensions = [
 ]
 autosummary_generate = True
 
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
+
 autodoc_typehints = "description"
 autodoc_inherit_docstrings = False
-napoleon_google_docstring = True
-napoleon_numpy_docstring = True
-
 nb_execution_mode = "off"
 
 # Add any paths that contain templates here, relative to this directory.
@@ -68,9 +71,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
-
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
