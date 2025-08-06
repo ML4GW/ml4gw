@@ -12,7 +12,7 @@
 | ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |86, 197-201 |
 | ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
 | ml4gw/distributions.py                    |      146 |        2 |     99% |   114-115 |
-| ml4gw/gw.py                               |       97 |        0 |    100% |           |
+| ml4gw/gw.py                               |       99 |        0 |    100% |           |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
 | ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
 | ml4gw/nn/autoencoder/base.py              |       44 |       44 |      0% |      1-94 |
@@ -55,7 +55,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
 | ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
-|                                 **TOTAL** | **2978** |  **229** | **92%** |           |
+|                                 **TOTAL** | **2980** |  **229** | **92%** |           |
 
 
 ## Setup coverage badge
