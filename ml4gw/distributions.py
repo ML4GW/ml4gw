@@ -137,7 +137,7 @@ class PowerLaw(dist.TransformedDistribution):
     support = dist.constraints.nonnegative
 
     def __init__(
-        self, minimum: float, maximum: float, index: int, validate_args=None
+        self, minimum: float, maximum: float, index: float, validate_args=None
     ):
         if index == 0:
             raise ValueError("Index of 0 is the same as Uniform")
