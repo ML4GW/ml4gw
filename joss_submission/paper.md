@@ -72,7 +72,7 @@ These features make it possible to train models on large quantities realistic de
 `ml4gw` is used to support the development of multiple GW analyses. 
 It has been integrated into `DeepClean` [@deepclean], a noise-subtraction pipeline; `Aframe` [@aframe], a search pipeline for gravitational waves from compact binary mergers; GWAK [@gwak], a gravitational-wave anomaly detection pipeline; and AMPLFI [@amplfi], a gravitational-wave parameter estimation pipelines.
 `ml4gw` has enabled these algorithms to efficiently train ML models at scale and deploy models on real-time streaming data, while the use of a standardized tool set has allowed for easier communication between developers.
-The library is actively developed and maintained, with thorough unit testing, and the authors welcome contributions and collaborations.
+The library is actively developed and maintained, with thorough unit testing, and the authors welcome contributions and collaborations for other possible use-cases.
 
 # Acknowledgements
 
