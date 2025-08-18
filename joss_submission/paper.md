@@ -19,6 +19,8 @@ authors:
     affiliation: 3
   - name: Ravi Kumar
     affiliation: 4
+  - name: Alec Gunny
+    affiliation: "2, 3"
 affiliations:
  - name: University of Minnesota, USA
    index: 1
@@ -45,6 +47,8 @@ Machine-learning algorithms are well-suited for applications in GW astrophysics 
 The existence of multiple independent GW detectors allows for effectively unlimited combinations of noise samples via time-shifts, and, for the most common signal morphologies, the high-fidelity simulations provided by General Relativity allow as many signal samples as desired.
 However, the standard GW libraries are not designed for the scale or speed desired for ML development; conversely, standard ML libraries lack the domain-specific preprocessing functions and waveform handling tools required to train models for GW applications.
 
+## Key Features
+
 `ml4gw` addresses this gap by re-writing common GW processing steps as PyTorch [@pytorch] modules, taking advantage of the natural parallelization that comes with PyTorch's batch processing, and adding the option to accelerate these steps using GPUs and other coprocessors supported by the PyTorch framework.
 From libraries such as GWpy [@gwpy], `ml4gw` re-implements power spectral density estimation, signal-to-noise ratio calculation, whitening filters, and Q-transforms.
 Like bilby [@bilby], `ml4gw` provides the functionality to sample from astrophysical parameter distributions, which can then be used to simulate waveforms, mimicking the simulation features of lalsuite [@lalsuite].
@@ -62,6 +66,8 @@ Additionally, `ml4gw` contains a number of general utility features.
 
 All implementations are fully differentiable, allowing algorithms to employ physically-motivated loss functions.
 These features make it possible to train models on large quantities realistic detector data, perform data augmentation consistent with physical priors, and evaluate results in a way that is directly comparable with existing pipelines.
+
+## Downstream Applications
 
 `ml4gw` is used to support the development of multiple GW analyses. 
 It has been integrated into `DeepClean` [@deepclean], a noise-subtraction pipeline; `Aframe` [@aframe], a search pipeline for gravitational waves from compact binary mergers; GWAK [@gwak], a gravitational-wave anomaly detection pipeline; and AMPLFI [@amplfi], a gravitational-wave parameter estimation pipelines.
