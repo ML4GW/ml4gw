@@ -1,12 +1,12 @@
 """
-Adaptation of code from https://github.com/dottormale/Qtransform
+Adaptation of code from https://github.com/dottormale/Qtransform_torch/
 """
 
 from typing import Optional, Tuple
 
 import torch
-import torch.nn.functional as F
 from torch import Tensor
+from jaxtyping import Float
 
 
 class SplineInterpolate(torch.nn.Module):
@@ -73,14 +73,14 @@ class SplineInterpolate(torch.nn.Module):
 
     def __init__(
         self,
-        x_in: Tensor,
-        y_in: Tensor = None,
+        x_in: Float[Tensor, " width"],
+        y_in: Float[Tensor, " height"] = None,
         kx: int = 3,
         ky: int = 3,
-        sx: float = 0.001,
-        sy: float = 0.001,
-        x_out: Optional[Tensor] = None,
-        y_out: Optional[Tensor] = None,
+        sx: float = 0.0,
+        sy: float = 0.0,
+        x_out: Optional[Float[Tensor, " width"]] = None,
+        y_out: Optional[Float[Tensor, " height"]] = None,
     ):
         super().__init__()
         if y_in is None:
@@ -112,20 +112,16 @@ class SplineInterpolate(torch.nn.Module):
             self.register_buffer("By_out", By_out)
 
     def _compute_knots_and_basis_matrices(self, x, k, s):
-        knots = self.generate_natural_knots(x, k)
+        knots = self.generate_fitpack_knots(x, k)
         basis_matrix = self.bspline_basis_natural(x, k, knots)
         identity = torch.eye(basis_matrix.shape[-1])
         B_T_B = basis_matrix.T @ basis_matrix + s * identity
         return knots, basis_matrix, B_T_B
 
-    def generate_natural_knots(self, x: Tensor, k: int) -> Tensor:
+    def generate_fitpack_knots(self, x: Tensor, k: int) -> Tensor:
         """
-        Generates a natural knot sequence for B-spline interpolation.
-        Natural knot sequence means that 2*k knots are added to the beginning
-        and end of datapoints as replicas of first and last datapoint
-        respectively in order to enforce natural boundary conditions,
-        i.e. second derivative = 0.
-        The other n nodes are placed in correspondece of the data points.
+        Generates a knot sequence for B-spline interpolation
+        in the same way as the FITPACK algorithm used by SciPy.
 
         Args:
             x: Tensor of data point positions.
@@ -134,7 +130,18 @@ class SplineInterpolate(torch.nn.Module):
         Returns:
             Tensor of knot positions.
         """
-        return F.pad(x[None], (k, k), mode="replicate")[0]
+        if x.shape[-1] == 1:
+            return None
+        num_knots = x.shape[-1] + k + 1
+        knots = torch.zeros(num_knots, dtype=x.dtype)
+        knots[: k + 1] = x[0]
+        knots[-(k + 1) :] = x[-1]
+        # Interior knots are the rolling average of the data points
+        # excluding the first and last points
+        windows = x[1:-1].unfold(dimension=-1, size=k, step=1)
+        knots[k + 1 : -k - 1] = windows.mean(dim=-1)
+
+        return knots
 
     def compute_L_R(
         self,
@@ -234,7 +241,7 @@ class SplineInterpolate(torch.nn.Module):
             Tensor containing the kth-order B-spline basis functions
         """
 
-        if len(x) == 1:
+        if x.shape[-1] == 1:
             return torch.eye(1)
         n = x.shape[0]
         m = t.shape[0] - k - 1

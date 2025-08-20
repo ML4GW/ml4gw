@@ -17,7 +17,10 @@ class TestSplineInterpolate:
         return request.param
 
     def test_1d_interpolation(self, x_out_len):
-        x_in = np.linspace(0, 10, 100)
+        x_min = 0
+        x_max = 10
+
+        x_in = np.linspace(x_min, x_max, 100)
         data = np.sin(x_in)
         # There are edge effects in the torch transform that
         # aren't present in scipy. Would be great to solve that,
@@ -25,8 +28,7 @@ class TestSplineInterpolate:
         # boundaries of the input coordinates. Unfortunately,
         # what specifically that means depends on the size of
         # the input array.
-        pad = len(x_in) // 10
-        x_out = np.linspace(x_in[pad], x_in[-pad], x_out_len)
+        x_out = np.linspace(x_min, x_max, x_out_len)
 
         scipy_spline = UnivariateSpline(x_in, data, k=3, s=0)
         expected = scipy_spline(x_out)
@@ -46,22 +48,25 @@ class TestSplineInterpolate:
         # interpolations is about 0.9990, with some minor fluctuations.
         # Would be nice to know why the torch interpolation is
         # consistently smaller
-        assert np.allclose(actual, expected, rtol=1e-2)
+        assert np.allclose(actual, expected, rtol=1e-4)
 
         # Check that passing output grid behaves as expected
         actual = torch_spline(data, x_out).squeeze().numpy()
-        assert np.allclose(actual, expected, rtol=1e-2)
+        assert np.allclose(actual, expected, rtol=1e-4)
 
     def test_2d_interpolation(self, x_out_len, y_out_len):
-        x_in = np.linspace(0, 10, 100)
-        y_in = np.linspace(0, 5, 200)
+        x_min = 0
+        x_max = 10
+        y_min = 0
+        y_max = 5
+
+        x_in = np.linspace(x_min, x_max, 100)
+        y_in = np.linspace(y_min, y_max, 200)
         x_grid, y_grid = np.meshgrid(x_in, y_in)
         data = np.sin(x_grid) * np.cos(y_grid)
 
-        pad = len(x_in) // 10
-        x_out = np.linspace(x_in[pad], x_in[-pad], x_out_len)
-        pad = len(y_in) // 10
-        y_out = np.linspace(y_in[pad], y_in[-pad], y_out_len)
+        x_out = np.linspace(x_min, x_max, x_out_len)
+        y_out = np.linspace(y_min, y_max, y_out_len)
 
         scipy_spline = RectBivariateSpline(x_in, y_in, data.T, kx=3, ky=3, s=0)
         expected = scipy_spline(x_out, y_out).T
@@ -86,14 +91,14 @@ class TestSplineInterpolate:
         # interpolations is about 0.999, with some minor fluctuations.
         # Would be nice to know why the torch interpolation is
         # consistently smaller
-        assert np.allclose(actual, expected, rtol=5e-3)
+        assert np.allclose(actual, expected, rtol=1e-4)
 
         # Check that passing output grid behaves as expected
         actual = torch_spline(data, x_out, y_out).squeeze().numpy()
-        assert np.allclose(actual, expected, rtol=1e-2)
+        assert np.allclose(actual, expected, rtol=1e-4)
 
     def test_errors(self):
-        x_in = torch.arange(10)
+        x_in = torch.arange(10, dtype=torch.float32)
         x_out = x_in
         torch_spline = SplineInterpolate(x_in)
         data = torch.randn(len(x_in))
@@ -106,7 +111,7 @@ class TestSplineInterpolate:
             torch_spline(data, x_out=x_out)
         assert str(exc.value).startswith("Input data has more than 4")
 
-        y_in = torch.arange(10)
+        y_in = torch.arange(10, dtype=torch.float32)
         torch_spline = SplineInterpolate(x_in=x_in, y_in=y_in)
         data = torch.randn(len(x_in))
         with pytest.raises(ValueError) as exc:
