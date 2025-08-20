@@ -22,12 +22,6 @@ class TestSplineInterpolate:
 
         x_in = np.linspace(x_min, x_max, 100)
         data = np.sin(x_in)
-        # There are edge effects in the torch transform that
-        # aren't present in scipy. Would be great to solve that,
-        # but a workaround is to interpolate well within the
-        # boundaries of the input coordinates. Unfortunately,
-        # what specifically that means depends on the size of
-        # the input array.
         x_out = np.linspace(x_min, x_max, x_out_len)
 
         scipy_spline = UnivariateSpline(x_in, data, k=3, s=0)
@@ -44,10 +38,6 @@ class TestSplineInterpolate:
         )
         actual = torch_spline(data).squeeze().numpy()
 
-        # The "steady-state" ratio between the torch and scipy
-        # interpolations is about 0.9990, with some minor fluctuations.
-        # Would be nice to know why the torch interpolation is
-        # consistently smaller
         assert np.allclose(actual, expected, rtol=1e-4)
 
         # Check that passing output grid behaves as expected
@@ -87,10 +77,6 @@ class TestSplineInterpolate:
         )
         actual = torch_spline(data).squeeze().numpy()
 
-        # The "steady-state" ratio between the torch and scipy
-        # interpolations is about 0.999, with some minor fluctuations.
-        # Would be nice to know why the torch interpolation is
-        # consistently smaller
         assert np.allclose(actual, expected, rtol=1e-4)
 
         # Check that passing output grid behaves as expected
