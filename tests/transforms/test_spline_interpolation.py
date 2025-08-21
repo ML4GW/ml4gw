@@ -48,6 +48,11 @@ class TestSplineInterpolate1D:
             assert np.allclose(actual[i], expected, rtol=1e-4)
 
     def test_errors(self):
+        x_in = torch.arange(2)
+        with pytest.raises(ValueError) as exc:
+            SplineInterpolate1D(x_in=x_in)
+        assert str(exc.value).startswith("Input x-coordinates must have")
+
         x_in = torch.arange(10)
         x_out = x_in
         torch_spline = SplineInterpolate1D(x_in)
@@ -116,6 +121,16 @@ class TestSplineInterpolate2D:
         assert np.allclose(actual, expected, rtol=1e-4)
 
     def test_errors(self):
+        x_in = torch.arange(2)
+        y_in = torch.arange(2)
+        with pytest.raises(ValueError) as exc:
+            SplineInterpolate2D(x_in=x_in, y_in=y_in)
+        assert str(exc.value).startswith("Input x-coordinates must have")
+
+        with pytest.raises(ValueError) as exc:
+            SplineInterpolate2D(x_in=torch.arange(10), y_in=y_in)
+        assert str(exc.value).startswith("Input y-coordinates must have")
+
         x_in = torch.arange(10)
         x_out = x_in
         y_in = torch.arange(10)

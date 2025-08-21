@@ -5,7 +5,6 @@ Adaptation of code from https://github.com/dottormale/Qtransform_torch/
 from typing import Optional, Tuple
 
 import torch
-import torch.nn.functional as F
 from torch import Tensor
 
 
@@ -33,11 +32,6 @@ class SplineInterpolateBase(torch.nn.Module):
         Returns:
             Tensor of knot positions.
         """
-        # If the input array is smaller than the degree of the spline,
-        # place knots where the data is and pad the boundaries
-        if x.shape[-1] < k + 1:
-            return F.pad(x[None], (k, k), mode="replicate")[0]
-
         num_knots = x.shape[-1] + k + 1
         knots = torch.zeros(num_knots, dtype=x.dtype)
         knots[: k + 1] = x[0]
@@ -147,9 +141,6 @@ class SplineInterpolateBase(torch.nn.Module):
         Returns:
             Tensor containing the kth-order B-spline basis functions
         """
-
-        if x.shape[-1] == 1:
-            return torch.eye(1)
         n = x.shape[0]
         m = t.shape[0] - k - 1
 
@@ -220,6 +211,11 @@ class SplineInterpolate1D(SplineInterpolateBase):
         x_out: Optional[Tensor] = None,
     ):
         super().__init__()
+
+        if len(x_in) < kx + 2:
+            raise ValueError(
+                "Input x-coordinates must have at least kx + 2 points."
+            )
 
         # Ensure that coordinates are floats
         x_in = x_in.float()
@@ -385,6 +381,15 @@ class SplineInterpolate2D(SplineInterpolateBase):
         y_out: Optional[Tensor] = None,
     ):
         super().__init__()
+
+        if len(x_in) < kx + 2:
+            raise ValueError(
+                "Input x-coordinates must have at least kx + 2 points."
+            )
+        if len(y_in) < ky + 2:
+            raise ValueError(
+                "Input y-coordinates must have at least ky + 2 points."
+            )
 
         # Ensure that coordinates are floats
         x_in = x_in.float()
