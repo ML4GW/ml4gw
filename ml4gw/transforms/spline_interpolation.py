@@ -451,7 +451,7 @@ class SplineInterpolate2D(SplineInterpolateBase):
         if dims > 4:
             raise ValueError("Input data has more than 4 dimensions")
         if dims < 2:
-            raise ValueError("Input data has less than 2 dimensions")
+            raise ValueError("Input data has fewer than 2 dimensions")
 
         if Z.shape[-2:] != torch.Size([len(self.y_in), len(self.x_in)]):
             raise ValueError(

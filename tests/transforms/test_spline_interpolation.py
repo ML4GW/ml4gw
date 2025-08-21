@@ -7,16 +7,12 @@ from torch import Tensor
 from ml4gw.transforms import SplineInterpolate1D, SplineInterpolate2D
 
 
-class TestSplineInterpolate:
+class TestSplineInterpolate1D:
     @pytest.fixture(params=[50, 100, 200])
     def x_out_len(self, request):
         return request.param
 
-    @pytest.fixture(params=[25, 200, 1000])
-    def y_out_len(self, request):
-        return request.param
-
-    def test_1d_interpolation(self, x_out_len):
+    def test_interpolation(self, x_out_len):
         x_min = 0
         x_max = 10
 
@@ -51,7 +47,36 @@ class TestSplineInterpolate:
         for i in range(height):
             assert np.allclose(actual[i], expected, rtol=1e-4)
 
-    def test_2d_interpolation(self, x_out_len, y_out_len):
+    def test_errors(self):
+        x_in = torch.arange(10)
+        x_out = x_in
+        torch_spline = SplineInterpolate1D(x_in)
+        data = torch.randn(len(x_in))
+        with pytest.raises(ValueError) as exc:
+            torch_spline(data)
+        assert str(exc.value).startswith("Output x-coordinates were not")
+
+        data = torch.randn((1, 2, 3, 4, 5))
+        with pytest.raises(ValueError) as exc:
+            torch_spline(data, x_out=x_out)
+        assert str(exc.value).startswith("Input data has more than 4")
+
+        data = torch.randn(len(x_in) - 1)
+        with pytest.raises(ValueError) as exc:
+            torch_spline(data, x_out=x_out)
+        assert str(exc.value).startswith("The spatial dimensions of the data")
+
+
+class TestSplineInterpolate2D:
+    @pytest.fixture(params=[50, 100, 200])
+    def x_out_len(self, request):
+        return request.param
+
+    @pytest.fixture(params=[25, 200, 1000])
+    def y_out_len(self, request):
+        return request.param
+
+    def test_interpolation(self, x_out_len, y_out_len):
         x_min = 0
         x_max = 10
         y_min = 0
@@ -93,25 +118,29 @@ class TestSplineInterpolate:
     def test_errors(self):
         x_in = torch.arange(10)
         x_out = x_in
-        torch_spline = SplineInterpolate1D(x_in)
+        y_in = torch.arange(10)
+        y_out = y_in
+        torch_spline = SplineInterpolate2D(x_in=x_in, y_in=y_in)
         data = torch.randn(len(x_in))
         with pytest.raises(ValueError) as exc:
             torch_spline(data)
         assert str(exc.value).startswith("Output x-coordinates were not")
 
+        with pytest.raises(ValueError) as exc:
+            torch_spline(data, x_out=x_out)
+        assert str(exc.value).startswith("Output y-coordinates were not")
+
         data = torch.randn((1, 2, 3, 4, 5))
         with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out)
+            torch_spline(data, x_out=x_out, y_out=y_out)
         assert str(exc.value).startswith("Input data has more than 4")
 
-        y_in = torch.arange(10)
-        torch_spline = SplineInterpolate2D(x_in=x_in, y_in=y_in)
-        data = torch.randn(len(x_in))
+        data = torch.randn(10)
         with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out)
-        assert str(exc.value).startswith("An input y-coordinate array")
+            torch_spline(data, x_out=x_out, y_out=y_out)
+        assert str(exc.value).startswith("Input data has fewer than 2")
 
         data = torch.randn((len(y_in) - 1, len(x_in) - 1))
         with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out)
+            torch_spline(data, x_out=x_out, y_out=y_out)
         assert str(exc.value).startswith("The spatial dimensions of the data")
