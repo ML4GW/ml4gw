@@ -141,9 +141,7 @@ def test_singleqtransform(
         mismatch=mismatch,
     )
 
-    assert (
-        qtransform.get_freqs().numpy() == list(qplane._iter_frequencies())
-    ).all()
+    assert (qtransform.freqs.numpy() == qplane.frequencies).all()
 
     qtransform.compute_qtiles(X, norm)
     torch_qtiles = qtransform.qtiles

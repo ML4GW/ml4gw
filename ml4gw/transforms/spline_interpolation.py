@@ -236,7 +236,8 @@ class SplineInterpolate1D(SplineInterpolateBase):
         self.register_buffer("BxT_Bx", BxT_Bx)
 
         if self.x_out is not None:
-            Bx_out = self.bspline_basis_natural(x_out, kx, self.tx)
+            x_clamped = torch.clamp(x_out, tx[kx], tx[-kx - 1])
+            Bx_out = self.bspline_basis_natural(x_clamped, kx, self.tx)
             self.register_buffer("Bx_out", Bx_out)
 
     def spline_fit_natural(self, Z):
@@ -312,7 +313,12 @@ class SplineInterpolate1D(SplineInterpolateBase):
 
         if x_out is not None:
             x_out = x_out.float()
-            self.Bx_out = self.bspline_basis_natural(x_out, self.kx, self.tx)
+            x_clamped = torch.clamp(
+                x_out, self.tx[self.kx], self.tx[-self.kx - 1]
+            )
+            self.Bx_out = self.bspline_basis_natural(
+                x_clamped, self.kx, self.tx
+            )
 
         coef = self.spline_fit_natural(Z)
         Z_interp = self.evaluate_spline(coef)
@@ -406,10 +412,12 @@ class SplineInterpolate2D(SplineInterpolateBase):
         self.register_buffer("ByT_By", ByT_By)
 
         if self.x_out is not None:
-            Bx_out = self.bspline_basis_natural(x_out, kx, self.tx)
+            x_clamped = torch.clamp(x_out, tx[kx], tx[-kx - 1])
+            Bx_out = self.bspline_basis_natural(x_clamped, kx, self.tx)
             self.register_buffer("Bx_out", Bx_out)
         if self.y_out is not None:
-            By_out = self.bspline_basis_natural(y_out, ky, self.ty)
+            y_clamped = torch.clamp(y_out, ty[ky], ty[-ky - 1])
+            By_out = self.bspline_basis_natural(y_clamped, ky, self.ty)
             self.register_buffer("By_out", By_out)
 
     def bivariate_spline_fit_natural(self, Z):
@@ -500,10 +508,20 @@ class SplineInterpolate2D(SplineInterpolateBase):
 
         if x_out is not None:
             x_out = x_out.float()
-            self.Bx_out = self.bspline_basis_natural(x_out, self.kx, self.tx)
+            x_clamped = torch.clamp(
+                x_out, self.tx[self.kx], self.tx[-self.kx - 1]
+            )
+            self.Bx_out = self.bspline_basis_natural(
+                x_clamped, self.kx, self.tx
+            )
         if y_out is not None:
             y_out = y_out.float()
-            self.By_out = self.bspline_basis_natural(y_out, self.ky, self.ty)
+            y_clamped = torch.clamp(
+                y_out, self.ty[self.ky], self.ty[-self.ky - 1]
+            )
+            self.By_out = self.bspline_basis_natural(
+                y_clamped, self.ky, self.ty
+            )
 
         coef = self.bivariate_spline_fit_natural(Z)
         Z_interp = self.evaluate_bivariate_spline(coef)

@@ -8,7 +8,7 @@ from jaxtyping import Float, Int
 from torch import Tensor
 
 from ..types import FrequencySeries1to3d, TimeSeries1to3d, TimeSeries3d
-from .spline_interpolation import SplineInterpolate1D, SplineInterpolate2D
+from .spline_interpolation import SplineInterpolate1D
 
 """
 All based on https://github.com/gwpy/gwpy/blob/v3.0.8/gwpy/signal/qtransform.py
@@ -265,11 +265,10 @@ class SingleQTransform(torch.nn.Module):
                     x_in=torch.arange(0, self.duration, self.duration / tiles),
                     x_out=t_out,
                 )
-                for tiles, idx in zip(unique_ntiles, self.stack_idx)
+                for tiles in unique_ntiles
             ]
         )
 
-        t_in = t_out
         f_in = self.freqs
         f_out = torch.logspace(
             math.log10(self.frange[0]),
@@ -277,13 +276,10 @@ class SingleQTransform(torch.nn.Module):
             self.spectrogram_shape[0],
         )
 
-        self.interpolator = SplineInterpolate2D(
+        self.interpolator = SplineInterpolate1D(
             kx=3,
-            ky=3,
-            x_in=t_in,
-            y_in=f_in,
-            x_out=t_out,
-            y_out=f_out,
+            x_in=f_in,
+            x_out=f_out,
         )
 
     def get_freqs(self) -> Float[Tensor, " nfreq"]:
@@ -377,14 +373,15 @@ class SingleQTransform(torch.nn.Module):
             ]
             time_interped = torch.cat(
                 [
-                    interpolator(qtile)
-                    for qtile, interpolator in zip(
+                    qtile_interpolator(qtile)
+                    for qtile, qtile_interpolator in zip(
                         qtiles, self.qtile_interpolators
                     )
                 ],
                 dim=-2,
             )
-            return self.interpolator(time_interped)
+            # Transpose because the final dimension gets interpolated
+            return self.interpolator(time_interped.mT).mT
         num_f_bins, num_t_bins = self.spectrogram_shape
         resampled = [
             F.interpolate(
