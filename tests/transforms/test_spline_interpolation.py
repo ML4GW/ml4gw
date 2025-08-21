@@ -4,7 +4,7 @@ import torch
 from scipy.interpolate import RectBivariateSpline, UnivariateSpline
 from torch import Tensor
 
-from ml4gw.transforms import SplineInterpolate
+from ml4gw.transforms import SplineInterpolate1D, SplineInterpolate2D
 
 
 class TestSplineInterpolate:
@@ -31,7 +31,7 @@ class TestSplineInterpolate:
         x_in = Tensor(x_in)
         x_out = Tensor(x_out)
 
-        torch_spline = SplineInterpolate(
+        torch_spline = SplineInterpolate1D(
             x_in=x_in,
             x_out=x_out,
             kx=3,
@@ -43,6 +43,13 @@ class TestSplineInterpolate:
         # Check that passing output grid behaves as expected
         actual = torch_spline(data, x_out).squeeze().numpy()
         assert np.allclose(actual, expected, rtol=1e-4)
+
+        # Test data with height dimension
+        height = 5
+        data = Tensor(data).repeat(5, 1)
+        actual = torch_spline(data).squeeze().numpy()
+        for i in range(height):
+            assert np.allclose(actual[i], expected, rtol=1e-4)
 
     def test_2d_interpolation(self, x_out_len, y_out_len):
         x_min = 0
@@ -67,7 +74,7 @@ class TestSplineInterpolate:
         y_in = Tensor(y_in)
         y_out = Tensor(y_out)
 
-        torch_spline = SplineInterpolate(
+        torch_spline = SplineInterpolate2D(
             x_in=x_in,
             x_out=x_out,
             y_in=y_in,
@@ -84,9 +91,9 @@ class TestSplineInterpolate:
         assert np.allclose(actual, expected, rtol=1e-4)
 
     def test_errors(self):
-        x_in = torch.arange(10, dtype=torch.float32)
+        x_in = torch.arange(10)
         x_out = x_in
-        torch_spline = SplineInterpolate(x_in)
+        torch_spline = SplineInterpolate1D(x_in)
         data = torch.randn(len(x_in))
         with pytest.raises(ValueError) as exc:
             torch_spline(data)
@@ -97,8 +104,8 @@ class TestSplineInterpolate:
             torch_spline(data, x_out=x_out)
         assert str(exc.value).startswith("Input data has more than 4")
 
-        y_in = torch.arange(10, dtype=torch.float32)
-        torch_spline = SplineInterpolate(x_in=x_in, y_in=y_in)
+        y_in = torch.arange(10)
+        torch_spline = SplineInterpolate2D(x_in=x_in, y_in=y_in)
         data = torch.randn(len(x_in))
         with pytest.raises(ValueError) as exc:
             torch_spline(data, x_out=x_out)

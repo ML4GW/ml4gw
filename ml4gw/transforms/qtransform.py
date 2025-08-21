@@ -8,7 +8,7 @@ from jaxtyping import Float, Int
 from torch import Tensor
 
 from ..types import FrequencySeries1to3d, TimeSeries1to3d, TimeSeries3d
-from .spline_interpolation import SplineInterpolate
+from .spline_interpolation import SplineInterpolate1D, SplineInterpolate2D
 
 """
 All based on https://github.com/gwpy/gwpy/blob/v3.0.8/gwpy/signal/qtransform.py
@@ -260,12 +260,10 @@ class SingleQTransform(torch.nn.Module):
         )
         self.qtile_interpolators = torch.nn.ModuleList(
             [
-                SplineInterpolate(
+                SplineInterpolate1D(
                     kx=3,
                     x_in=torch.arange(0, self.duration, self.duration / tiles),
-                    y_in=torch.arange(len(idx)),
                     x_out=t_out,
-                    y_out=torch.arange(len(idx)),
                 )
                 for tiles, idx in zip(unique_ntiles, self.stack_idx)
             ]
@@ -279,7 +277,7 @@ class SingleQTransform(torch.nn.Module):
             self.spectrogram_shape[0],
         )
 
-        self.interpolator = SplineInterpolate(
+        self.interpolator = SplineInterpolate2D(
             kx=3,
             ky=3,
             x_in=t_in,
