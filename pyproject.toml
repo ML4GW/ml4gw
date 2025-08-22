@@ -66,6 +66,7 @@ build-backend = "setuptools.build_meta"
 [tool.ruff]
 line-length = 79
 extend-exclude = ["docs", "examples"]
+ignore = ["B905"]
 
 [tool.ruff.lint]
 extend-safe-fixes = ["C408"]
