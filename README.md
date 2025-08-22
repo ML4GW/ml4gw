@@ -30,12 +30,12 @@
 | ml4gw/transforms/\_\_init\_\_.py          |       10 |        0 |    100% |           |
 | ml4gw/transforms/iirfilter.py             |       18 |        0 |    100% |           |
 | ml4gw/transforms/pearson.py               |       28 |        3 |     89% |47, 52, 59 |
-| ml4gw/transforms/qtransform.py            |      172 |       14 |     92% |149, 328, 336-338, 345-354 |
+| ml4gw/transforms/qtransform.py            |      171 |       14 |     92% |149, 322, 330-332, 339-348 |
 | ml4gw/transforms/scaler.py                |       32 |        0 |    100% |           |
 | ml4gw/transforms/snr\_rescaler.py         |       40 |       16 |     60% |51-67, 74-88 |
 | ml4gw/transforms/spectral.py              |       32 |        0 |    100% |           |
 | ml4gw/transforms/spectrogram.py           |       58 |        0 |    100% |           |
-| ml4gw/transforms/spline\_interpolation.py |      102 |        0 |    100% |           |
+| ml4gw/transforms/spline\_interpolation.py |      162 |        0 |    100% |           |
 | ml4gw/transforms/transform.py             |       38 |        0 |    100% |           |
 | ml4gw/transforms/waveforms.py             |       42 |        0 |    100% |           |
 | ml4gw/transforms/whitening.py             |       48 |        0 |    100% |           |
@@ -55,7 +55,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
 | ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
-|                                 **TOTAL** | **2980** |  **229** | **92%** |           |
+|                                 **TOTAL** | **3039** |  **229** | **92%** |           |
 
 
 ## Setup coverage badge
