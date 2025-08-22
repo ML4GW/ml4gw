@@ -8,5 +8,7 @@ ml4gw.transforms.spline\_interpolation
 
    .. autosummary::
    
-      SplineInterpolate
+      SplineInterpolate1D
+      SplineInterpolate2D
+      SplineInterpolateBase
    
