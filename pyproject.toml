@@ -1,6 +1,6 @@
 [project]
 name = "ml4gw"
-version = "0.7.6"
+dynamic = ["version"]
 description = "Tools for training torch models on gravitational wave data"
 authors = [
     { name = "Ethan Marx", email = "emarx@mit.edu" },
@@ -55,9 +55,13 @@ default-groups = [
     "docs",
 ]
 
+[tool.setuptools-git-versioning]
+enabled = true
+dev_template = "{tag}.post{ccount}+git.{sha}"
+
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = [ "setuptools>=77.0.3", "wheel", "setuptools-git-versioning>=2.0,<3",]
+build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 line-length = 79
