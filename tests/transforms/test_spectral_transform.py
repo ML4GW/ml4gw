@@ -261,7 +261,7 @@ def test_transform_with_csd(
             x = x.transpose(1, 0)
             y = [y] * len(x)
 
-        for i, j in zip(x, y):
+        for i, j in zip(x, y, strict=True):
             _, result = signal.csd(
                 i,
                 j,

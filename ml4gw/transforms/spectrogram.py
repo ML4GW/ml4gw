@@ -127,7 +127,10 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             size = lengths[1]
             kwargs = {k: v * int(size / len(v)) for k, v in kwargs.items()}
 
-        return [dict(zip(kwargs, col)) for col in zip(*kwargs.values())]
+        return [
+            dict(zip(kwargs, col, strict=True))
+            for col in zip(*kwargs.values(), strict=True)
+        ]
 
     def forward(
         self, X: TimeSeries3d
@@ -161,6 +164,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             self.right_pad,
             self.top_pad,
             self.bottom_pad,
+            strict=True,
         ):
             padded_specs.append(F.pad(spec, (left, right, top, bottom)))
 
