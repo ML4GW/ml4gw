@@ -99,7 +99,7 @@ def test_snapshotter(snapshot_size, stride_size, batch_size, channels):
     # of the windows in each batch contains
     # the expected data
     offset = 0
-    for output, channel_dim in zip(outputs, channels, strict=False):
+    for output, channel_dim in zip(outputs, channels, strict=True):
         expected = (batch_size, channel_dim, snapshot_size)
         assert output.shape == tuple(expected)
 

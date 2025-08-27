@@ -231,7 +231,7 @@ def test_fast_spectral_density_with_y(
             x = x.transpose(1, 0)
             y = [y] * len(x)
 
-        for i, j in zip(x, y, strict=False):
+        for i, j in zip(x, y, strict=True):
             _, result = signal.csd(
                 i,
                 j,

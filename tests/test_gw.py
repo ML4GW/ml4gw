@@ -68,7 +68,7 @@ def bilby_get_ifo_response(ifos, batch_size):
     def func(ra, dec, psi, geocent_time, modes):
         responses = np.zeros((batch_size, len(modes), len(ifos)))
         for i, (r, d, p, t) in enumerate(
-            zip(ra, dec, psi, geocent_time, strict=False)
+            zip(ra, dec, psi, geocent_time, strict=True)
         ):
             for j, ifo in enumerate(ifos):
                 for k, mode in enumerate(modes):
@@ -156,10 +156,10 @@ def bilby_shift_responses(
     def func(ra, dec, geocent_time, responses):
         output = np.zeros_like(responses)
         for i, (r, d, t, sample) in enumerate(
-            zip(ra, dec, geocent_time, responses, strict=False)
+            zip(ra, dec, geocent_time, responses, strict=True)
         ):
             for j, (response, ifo) in enumerate(
-                zip(sample, ifos, strict=False)
+                zip(sample, ifos, strict=True)
             ):
                 shifted = do_shift(ifo, r, d, t, response)
                 output[i, j] = shifted

@@ -375,7 +375,7 @@ class SingleQTransform(torch.nn.Module):
                 [
                     qtile_interpolator(qtile)
                     for qtile, qtile_interpolator in zip(
-                        qtiles, self.qtile_interpolators, strict=False
+                        qtiles, self.qtile_interpolators, strict=True
                     )
                 ],
                 dim=-2,

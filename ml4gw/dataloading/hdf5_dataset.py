@@ -154,7 +154,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             fnames, return_inverse=True, return_counts=True
         )
         for i, (fname, count) in enumerate(
-            zip(unique_fnames, counts, strict=False)
+            zip(unique_fnames, counts, strict=True)
         ):
             size = self.sizes[fname]
             max_idx = size - self.kernel_size
@@ -188,7 +188,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             # kernels for each batch element it occupies
             with h5py.File(fname, "r") as f:
                 for b, c, i in zip(
-                    batch_indices, channel_indices, idx, strict=False
+                    batch_indices, channel_indices, idx, strict=True
                 ):
                     x[b, c] = f[self.channels[c]][i : i + self.kernel_size]
         return torch.Tensor(x)

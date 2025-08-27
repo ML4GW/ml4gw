@@ -128,8 +128,8 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             kwargs = {k: v * int(size / len(v)) for k, v in kwargs.items()}
 
         return [
-            dict(zip(kwargs, col, strict=False))
-            for col in zip(*kwargs.values(), strict=False)
+            dict(zip(kwargs, col, strict=True))
+            for col in zip(*kwargs.values(), strict=True)
         ]
 
     def forward(
@@ -164,7 +164,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             self.right_pad,
             self.top_pad,
             self.bottom_pad,
-            strict=False,
+            strict=True,
         ):
             padded_specs.append(F.pad(spec, (left, right, top, bottom)))
 

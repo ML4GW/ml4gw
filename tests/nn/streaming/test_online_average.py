@@ -33,7 +33,7 @@ def validate_output(num_updates, update_size, num_channels):
     def f(start, stop, offset, output):
         expected = np.arange(start, stop)
         for channel in output:
-            for n, (i, j) in enumerate(zip(expected, channel, strict=False)):
+            for n, (i, j) in enumerate(zip(expected, channel, strict=True)):
                 step = (offset * update_size + n) // update_size
                 factor = min((step + 1) / num_updates, 1)
                 assert isclose(i * factor, j, rel_tol=1e-6)
