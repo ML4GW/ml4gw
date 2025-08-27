@@ -41,7 +41,7 @@ def test_chirp_time_bound(masses, spins, fstart):
 
     result = utils.chirp_time_bound(fstart, m1, m2, s1, s2)
     for i, (fs, m1_val, m2_val, s1_val, s2_val) in enumerate(
-        zip(fstart, m1, m2, s1, s2)
+        zip(fstart, m1, m2, s1, s2, strict=False)
     ):
         expected = lalsimulation.SimInspiralChirpTimeBound(
             fs.item(),
@@ -60,7 +60,7 @@ def test_final_black_hole_spin_bound(spins):
 
     result = utils.final_black_hole_spin_bound(s1, s2)
 
-    for i, (s1_val, s2_val) in enumerate(zip(s1, s2)):
+    for i, (s1_val, s2_val) in enumerate(zip(s1, s2, strict=False)):
         expected = lalsimulation.SimInspiralFinalBlackHoleSpinBound(
             s1_val.item(), s2_val.item()
         )
@@ -74,7 +74,7 @@ def test_merge_time_bound(masses):
 
     result = utils.merge_time_bound(m1, m2)
 
-    for i, (m1_val, m2_val) in enumerate(zip(m1, m2)):
+    for i, (m1_val, m2_val) in enumerate(zip(m1, m2, strict=False)):
         expected = lalsimulation.SimInspiralMergeTimeBound(
             m1_val.item(), m2_val.item()
         )
@@ -91,7 +91,9 @@ def test_ringdown_time_bound(masses, spins):
 
     result = utils.ringdown_time_bound(total_mass, s)
 
-    for i, (total_mass_val, s_val) in enumerate(zip(total_mass, s)):
+    for i, (total_mass_val, s_val) in enumerate(
+        zip(total_mass, s, strict=False)
+    ):
         expected = lalsimulation.SimInspiralRingdownTimeBound(
             total_mass_val.item(), s_val.item()
         )
@@ -106,7 +108,9 @@ def test_chirp_start_frequency_bound(fstart, spins, masses):
     tchirp = utils.chirp_time_bound(fstart, m1, m2, s1, s2)
     result = utils.chirp_start_frequency_bound(tchirp, m1, m2)
 
-    for i, (tchirp_val, m1_val, m2_val) in enumerate(zip(tchirp, m1, m2)):
+    for i, (tchirp_val, m1_val, m2_val) in enumerate(
+        zip(tchirp, m1, m2, strict=False)
+    ):
         expected = lalsimulation.SimInspiralChirpStartFrequencyBound(
             tchirp_val.item(), m1_val.item(), m2_val.item()
         )

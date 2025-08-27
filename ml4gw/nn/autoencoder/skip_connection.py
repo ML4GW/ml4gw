@@ -43,5 +43,5 @@ class ConcatSkipConnect(SkipConnection):
 
         X = torch.split(X, self.groups, dim=1)
         state = torch.split(state, self.groups, dim=1)
-        frags = [i for j in zip(X, state) for i in j]
+        frags = [i for j in zip(X, state, strict=False) for i in j]
         return torch.cat(frags, dim=1)
