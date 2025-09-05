@@ -145,10 +145,10 @@ the interpolated Q-transform with the highest energy.</p>
 <code class="docutils literal notranslate"><span class="pre">(num_f_bins,</span> <span class="pre">num_t_bins)</span></code>. Because the
 frequency spacing of the Q-tiles is in log-space, the frequency
 interpolation is log-spaced as well.</p></li>
-<li><p><strong>qrange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper values of Q to consider. The
+<li><p><strong>qrange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The lower and upper values of Q to consider. The
 actual values of Q used for the transforms are
 determined by the <code class="docutils literal notranslate"><span class="pre">get_qs</span></code> method</p></li>
-<li><p><strong>frange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper frequency limit to consider for
+<li><p><strong>frange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The lower and upper frequency limit to consider for
 the transform. If unspecified, default values will
 be chosen based on q, sample_rate, and duration</p></li>
 <li><p><strong>mismatch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The maximum fractional mismatch between neighboring tiles</p></li>
@@ -170,7 +170,7 @@ used to initialize this object. Expected input shape is
 number of channels, and B is the number of batches. If less
 than three-dimensional, axes will be added during Q-tile
 computation.</p></li>
-<li><p><strong>fsearch_range</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper frequency values within which to search
+<li><p><strong>fsearch_range</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The lower and upper frequency values within which to search
 for the maximum energy</p></li>
 <li><p><strong>norm</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- The method of interpolation used by each QTile</p></li>
 </ul>
@@ -296,7 +296,7 @@ three dimensions or fewer.</p>
 frequency spacing of the Q-tiles is in log-space, the frequency
 interpolation is log-spaced as well.</p></li>
 <li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The Q value to use for the Q transform</p></li>
-<li><p><strong>frange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span>) -- The lower and upper frequency limit to consider for
+<li><p><strong>frange</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- The lower and upper frequency limit to consider for
 the transform. If unspecified, default values will
 be chosen based on q, sample_rate, and duration</p></li>
 <li><p><strong>mismatch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The maximum fractional mismatch between neighboring tiles</p></li>
@@ -383,7 +383,7 @@ energy value is sought.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fsearch_range</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>fsearch_range</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>)</p></li>
 <li><p><strong>dimension</strong> (<em>str</em>)</p></li>
 </ul>
 </dd>
