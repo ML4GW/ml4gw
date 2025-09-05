@@ -9,8 +9,8 @@
 | ml4gw/constants.py                        |       12 |        0 |    100% |           |
 | ml4gw/dataloading/\_\_init\_\_.py         |        3 |        0 |    100% |           |
 | ml4gw/dataloading/chunked\_dataset.py     |       45 |        2 |     96% |    61, 96 |
-| ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |86, 197-201 |
-| ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 201-202 |
+| ml4gw/dataloading/hdf5\_dataset.py        |       73 |        4 |     95% |86, 201-205 |
+| ml4gw/dataloading/in\_memory\_dataset.py  |       63 |        4 |     94% |157-158, 203-204 |
 | ml4gw/distributions.py                    |      146 |        2 |     99% |   114-115 |
 | ml4gw/gw.py                               |       99 |        0 |    100% |           |
 | ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
