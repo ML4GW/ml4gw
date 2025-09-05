@@ -191,7 +191,9 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             # indices we'll need rather than having to generate
             # everything.
             idx = [range(self.num_kernels) for _ in range(len(self.X))]
-            idx = zip(range(num_kernels), itertools.product(*idx), strict=True)
+            idx = zip(
+                range(num_kernels), itertools.product(*idx), strict=False
+            )
             idx = torch.stack([torch.Tensor(i[1]) for i in idx])
             idx = idx.type(torch.int64).to(device)
         elif self.shuffle:
