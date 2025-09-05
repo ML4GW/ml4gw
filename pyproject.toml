@@ -8,16 +8,16 @@ authors = [
     { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
     { name = "Alec Gunny", email = "alec.gunny@ligo.org" },
 ]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.10,<3.13"
 classifiers = [
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
 ]
 readme = "README.md"
+license = "GPL-3.0-or-later"
 dependencies = [
     "jaxtyping>=0.2,<0.3",
     "torch~=2.0",
@@ -66,6 +66,7 @@ build-backend = "setuptools.build_meta"
 [tool.ruff]
 line-length = 79
 extend-exclude = ["docs", "examples"]
+target-version = "py312"
 
 [tool.ruff.lint]
 extend-safe-fixes = ["C408"]
@@ -82,17 +83,16 @@ per-file-ignores =  {"**/__init__.py" = ["F401", "F403"]}
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{39,310,311,312}
+envlist = py{310,311,312}
 isolated_build = true
 
 [gh-actions]
 python =
-    3.9: py39
     3.10: py310
     3.11: py311
     3.12: py312
 
-[testenv:py{39,310,311,312}]
+[testenv:py{310,311,312}]
 deps = 
     coverage[toml]>=7.6,<8
     pytest>=7,<8

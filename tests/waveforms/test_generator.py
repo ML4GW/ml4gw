@@ -163,7 +163,7 @@ def test_cbc_waveform_generator(
         # if any of them satisfy the tolerances
 
         for ml4gw_pol, gwsignal_pol in zip(
-            [hp, hc], [hp_gwsignal, hc_gwsignal]
+            [hp, hc], [hp_gwsignal, hc_gwsignal], strict=True
         ):
             argsorted = np.argsort(ml4gw_pol)[::-1]
             for j in range(2):

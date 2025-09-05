@@ -289,7 +289,7 @@ class ResNet1D(nn.Module):
         # striding or dilating depending on the stride_type
         # argument)
         residual_layers = [self._make_layer(64, layers[0], kernel_size)]
-        it = zip(layers[1:], stride_type)
+        it = zip(layers[1:], stride_type, strict=True)
         for i, (num_blocks, stride) in enumerate(it):
             block_size = 64 * 2 ** (i + 1)
             layer = self._make_layer(
