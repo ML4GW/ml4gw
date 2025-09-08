@@ -9,7 +9,7 @@ class WhiteNoiseBurst(nn.Module):
 
     On each forward() call, new independent white-noise bursts are generated (one
     for h₊ and one for hₓ) following these steps:
-      - Compute the time-series length: floor(21 * duration / delta_t / 2)*2 + 1.
+      - Compute the time-series length: floor(k_len * duration / delta_t / 2)*2 + 1. (lal's implementation uses k_len=21)
       - Apply a time-domain Gaussian window with effective sigma = sqrt(duration²/4 - 1/(π² * bandwidth²)).
       - Transform to the frequency domain (rFFT).
       - Apply a frequency-domain Gaussian envelope centered at 'frequency' (with width = bandwidth/2),
@@ -27,12 +27,13 @@ class WhiteNoiseBurst(nn.Module):
             device: "cpu" or "cuda".
         """
         super().__init__()
+        k_len: float = 7.0
         self.sample_rate = sample_rate
         self.duration = duration
         self.dt = 1.0 / sample_rate
 
         # Determine time-series length as in C: length = floor(21.0*duration/dt/2)*2 + 1.
-        half_len = math.floor(21.0 * duration / self.dt / 2.0)
+        half_len = math.floor(k_len * duration / self.dt / 2.0)
         self.length = 2 * half_len + 1
 
         # Build a time axis, centered so that the middle sample is t = 0.

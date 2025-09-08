@@ -9,7 +9,8 @@ class Gaussian(torch.nn.Module):
         self.duration = duration                      # = Δt in the LAL docs
 
         # 21 Δt samples, centred on zero
-        num_samples = int(round(21 * duration * sample_rate))
+        k_len = 7 # At LAL the klen is 21, but it's kainda overkill so here we scale down to 7
+        num_samples = int(round(k_len * duration * sample_rate))
         t = (torch.arange(num_samples, dtype=torch.float64) -
              (num_samples - 1) / 2) / sample_rate
         self.register_buffer("times", t)

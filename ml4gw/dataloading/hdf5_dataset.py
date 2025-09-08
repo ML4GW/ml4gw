@@ -143,7 +143,8 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.num_files_per_batch = len(fnames) if num_files_per_batch is None else num_files_per_batch
         self.cache_dir = cache_dir
         self.remake_cache = remake_cache
-
+        self.exam_per_batch = False # Need to be added to __init__ args 
+        
         self.sizes, self.valid, self.cache_paths, self.num_valid = {}, {}, {}, {}
         for fname in self.fnames:
             basename = os.path.basename(fname).replace(".h5", "")
@@ -231,7 +232,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         return np.random.choice(subf, size=size, replace=True, p=p)
 
     def _sample_batch(self) -> WaveformTensor:
-        x = np.zeros((self.batch_size, self.num_channels, self.kernel_size), dtype=np.float32)
+        x = np.empty((self.batch_size, self.num_channels, self.kernel_size), dtype=np.float32)
 
         size = (self.batch_size,) if self.coincident else (self.batch_size, self.num_channels)
         files = self.sample_files(size)
@@ -261,20 +262,16 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
 
             with h5py.File(fname, "r") as f:
                 for b, c, s in zip(b_idx, ch_idx, starts):
-                    x[b, c] = f[self.channels[c]][s:s + self.kernel_size]
+                    f[self.channels[c]].read_direct(x[b, c], np.s_[s:s + self.kernel_size])
 
-        return torch.tensor(x)
-    
-    def sample_batch(self) -> WaveformTensor:
-        x = self._sample_batch()
-        while torch.any(x==0) or torch.any(torch.isnan(x)):
-            x = self._sample_batch()
-        return x
+        return torch.from_numpy(x)
 
     def sample_batch(self) -> WaveformTensor:
         x = self._sample_batch()
-        while torch.any(x==0) or torch.any(torch.isnan(x)):
-            x = self._sample_batch()
+        if self.exam_per_batch:
+            while torch.any(x==0) or torch.any(torch.isnan(x)):
+                warnings.warn("Critical: sampled batch with zeros or NaNs, re-sampling...")
+                x = self._sample_batch()  
         return x
 
     def __iter__(self):
