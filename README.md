@@ -25,9 +25,25 @@ To build with a specific version of PyTorch/CUDA, please see the PyTorch install
 pip install ml4gw torch==2.5.1--extra-index-url=https://download.pytorch.org/whl/cu118
 ```
 
+### UV installation
+If you want to develop `ml4gw`, you can use [uv](https://docs.astral.sh/uv/getting-started/installation/) to install the project in editable mode.
+For example, create a virtualenv using
+```bash
+$ uv venv --python=3.11
+```
+Then sync the dependencies from the [uv lock file](/uv.lock) using
+```bash
+$ uv sync --all-extras
+```
+Code changes can be tested using
+```bash
+uv run pytest
+```
+See [contribution guide](/CONTRIBUTING.md) for more details.
+
 ## Contributing
 If you come across errors in the code, have difficulties using this software, or simply find that the current version doesn't cover your use case, please file an issue on our GitHub page, and we'll be happy to offer support.
-We encourage users who encounter these difficulties to file issues on GitHub, and we'll be happy to offer support to extend our coverage to new or improved functionality.
+If you want to add feature, please refer to the [contribution guide](/CONTRIBUTING.md) for more details.
 We also strongly encourage ML users in the GW physics space to try their hand at working on these issues and joining on as collaborators!
 For more information about how to get involved, feel free to reach out to [ml4gw@ligo.mit.edu](mailto:ml4gw@ligo.mit.edu).
 By bringing in new users with new use cases, we hope to develop this library into a truly general-purpose tool that makes deep learning more accessible for gravitational wave physicists everywhere.
