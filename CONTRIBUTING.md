@@ -90,7 +90,7 @@ uv sync --group docs
 and then run the following at the root of the repo to create the html pages under
 `docs/_build`:
 ```bash
-uv run sphinx-build ./docs .docs/_build
+uv run sphinx-build ./docs ./docs/_build
 ```
 Open the `index.html` in a browser and navigate to the section of added documentation
 to check the rendering.

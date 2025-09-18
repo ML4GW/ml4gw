@@ -8,7 +8,7 @@ Welcome to ml4gw's documentation!
 
 .. note:: 
    This documentation is a work in progress!
-   If you have any questions or suggestions, please feel free to reach out create an `issue <https://github.com/ML4GW/ml4gw/issues>\_
+   If you have any questions or suggestions, please feel free to create an `issue <https://github.com/ML4GW/ml4gw/issues>`_
 
 ml4gw
 =====
@@ -42,7 +42,7 @@ Projects
 ========
 Currently, the following projects are using ml4gw to support their research:
 
-* `Aframe <https://github.com/ml4gw/aframev2>`_ - Gravitational wave detection of binary black hole mergers
+* `Aframe <https://github.com/ml4gw/aframe>`_ - Gravitational wave detection of binary black hole mergers
 * `AMPLFI <https://github.com/ml4gw/amplfi>`_ - Parameter estimation of gravitational wave signals
 
 
