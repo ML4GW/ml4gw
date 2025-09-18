@@ -49,7 +49,7 @@ git diff upstream/main
 ```
 You have to be on your working branch for the diff to show correctly.
 
-Also note that there is code formatting check as a part of the continuous integration.
+Also note that there is a code formatting check as a part of the continuous integration.
 This can be done by installing the [pre-commit hook](https://pre-commit.com/)
 which is a part of the development dependencies, and should run with a `git commit`.
 However, it can be installed and run manually as
@@ -57,7 +57,8 @@ However, it can be installed and run manually as
 uv run pre-commit install
 uv run pre-commit run --all-files
 ```
-which will apply the necessary formatting.
+which will apply the necessary formatting, or indicate the issue for you to fix
+if an automatic fix is not possible.
 
 ## Good practices
 
@@ -67,11 +68,11 @@ which will apply the necessary formatting.
    routine, add unittests that demonstrate the API and dimensions of inputs and outputs.
    If relevant, add tests that demonstrate scientific correctness, for example, a
    limiting behavior.
-3. It is possible (and likely) that the librarians will ask for additional tests
-   beyond what is covered in the unittests. Note that every feature also adds maintenance
-   costs, hence the usecase of a new feature will also need to well motivated for
-   gravitational-wave data analysis. For example, if you have used your personal
-   fork of `ml4gw` and performed an analysis that is published, it can be a strong
+3. It is possible (and likely) that the librarians will ask for additional tests to cover 
+   a new feature beyond what is covered in the unittests. Note that every feature also 
+   adds maintenance costs, hence the usecase of a new feature will also need to well 
+   motivated for gravitational-wave data analysis. For example, if you have used your 
+   personal fork of `ml4gw` and performed an analysis that is published, it can be a strong
    usecase.
 4. Please [cite](/CITATION.cff) the repository if you have used `ml4gw` in your work.
 
@@ -89,7 +90,7 @@ uv sync --group docs
 and then run the following at the root of the repo to create the html pages under
 `docs/_build`:
 ```bash
-uv run sphinx-build ./docs .docs/_build
+uv run sphinx-build ./docs ./docs/_build
 ```
 Open the `index.html` in a browser and navigate to the section of added documentation
 to check the rendering.
