@@ -11,7 +11,6 @@ from ..types import (
 )
 from .transform import FittableSpectralTransform
 
-
 class Whiten(torch.nn.Module):
     """
     Normalize the frequency content of timeseries
@@ -61,8 +60,8 @@ class Whiten(torch.nn.Module):
         super().__init__()
         self.fduration = fduration
         self.sample_rate = sample_rate
-        self.highpass = highpass
-        self.lowpass = lowpass
+        self.default_highpass = highpass
+        self.default_lowpass = lowpass
 
         # register a window up front to signify our
         # fduration at inference time
@@ -71,7 +70,11 @@ class Whiten(torch.nn.Module):
         self.register_buffer("window", window)
 
     def forward(
-        self, X: TimeSeries3d, psd: FrequencySeries1to3d
+        self, 
+        X: TimeSeries3d, 
+        psd: FrequencySeries1to3d, 
+        lowpass: Optional[float] = None, 
+        highpass: Optional[float] = None,
     ) -> TimeSeries3d:
         """
         Whiten a batch of multichannel timeseries by a
@@ -103,14 +106,16 @@ class Whiten(torch.nn.Module):
                 samples cropped from each edge. Output shape will then
                 be (B, C, N - `fduration * sample_rate`).
         """
+        lowpass = lowpass if lowpass is not None else self.default_lowpass
+        highpass = highpass if highpass is not None else self.default_highpass
 
         return spectral.whiten(
             X,
             psd,
             fduration=self.window,
             sample_rate=self.sample_rate,
-            highpass=self.highpass,
-            lowpass=self.lowpass,
+            highpass=highpass,
+            lowpass=lowpass,
         )
 
 

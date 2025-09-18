@@ -34,8 +34,8 @@ class GroupNorm1D(torch.nn.Module):
         self.bias = torch.nn.Parameter(torch.zeros(shape))
 
     def forward(
-        self, x: Float[Tensor, "batch channel length"]
-    ) -> Float[Tensor, "batch channel length"]:
+        self, x: torch.Tensor
+    ) -> torch.Tensor:
         if len(x.shape) != 3:
             raise ValueError(
                 "GroupNorm1D requires 3-dimensional input, "
@@ -45,8 +45,8 @@ class GroupNorm1D(torch.nn.Module):
         keepdims = self.num_groups == self.num_channels
 
         # compute group variance via the E[x**2] - E**2[x] trick
-        mean = x.mean(-1, keepdims=keepdims)
-        sq_mean = (x**2).mean(-1, keepdims=keepdims)
+        mean = x.mean(dim=[-1], keepdim=keepdims)
+        sq_mean = (x**2).mean(dim=[-1], keepdim=keepdims)
 
         # if we have groups, do some reshape magic
         # to calculate group level stats then
@@ -56,7 +56,7 @@ class GroupNorm1D(torch.nn.Module):
             mean = mean.reshape(
                 -1, 2, self.num_groups, self.channels_per_group
             )
-            mean = mean.mean(-1, keepdims=True)
+            mean = mean.mean(dim=[-1], keepdim=True)
             mean = mean.expand(-1, -1, -1, self.channels_per_group)
             mean = mean.reshape(-1, 2, self.num_channels, 1)
             mean, sq_mean = mean[:, 0], mean[:, 1]

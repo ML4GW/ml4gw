@@ -511,7 +511,6 @@ def whiten(
         Batch of whitened multichannel timeseries with
             `fduration / 2` seconds trimmed from each side.
     """
-
     # figure out how much data we'll need to slice
     # off after whitening
     if isinstance(fduration, Tensor):
@@ -549,5 +548,4 @@ def whiten(
         highpass,
         lowpass,
     )
-
     return normalize_by_psd(X, psd, sample_rate, pad)
