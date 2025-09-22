@@ -9,7 +9,10 @@ Torch utilities for training neural networks in gravitational wave physics appli
 
 ## Documentation
 Please visit our [documentation page](https://ml4gw.github.io/ml4gw/) to see descriptions and examples of the functions and modules available in `ml4gw`.
-We also have an interactive Jupyter notebook that demonstrates much of the core functionality available in the `examples` directory.
+We also have an interactive Jupyter notebook demonstrating much of the core functionality available [here](https://github.com/ML4GW/ml4gw/blob/main/docs/tutorials/ml4gw_tutorial.ipynb).
+To run this notebook, download it from the above link and follow the instructions within it to install the required packages.
+See also the [documentation page](https://ml4gw.github.io/ml4gw/tutorials/ml4gw_tutorial.html) for the tutorial to look
+through it without running the code.
 
 ## Installation
 ### Pip installation
@@ -25,15 +28,15 @@ To build with a specific version of PyTorch/CUDA, please see the PyTorch install
 pip install ml4gw torch==2.5.1--extra-index-url=https://download.pytorch.org/whl/cu118
 ```
 
-### UV installation
+### uv installation
 If you want to develop `ml4gw`, you can use [uv](https://docs.astral.sh/uv/getting-started/installation/) to install the project in editable mode.
-For example, create a virtualenv using
+For example, after cloning the repository, create a virtualenv using
 ```bash
-$ uv venv --python=3.11
+uv venv --python=3.11
 ```
 Then sync the dependencies from the [uv lock file](/uv.lock) using
 ```bash
-$ uv sync --all-extras
+uv sync --all-extras
 ```
 Code changes can be tested using
 ```bash
