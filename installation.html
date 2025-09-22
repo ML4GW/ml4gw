@@ -102,21 +102,18 @@ to see how to specify the desired torch version and <code class="code docutils l
 <section id="uv">
 <h2>uv<a class="headerlink" href="#uv" title="Link to this heading"></a></h2>
 <p>If you want to develop <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code>, you can use <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> to install the project in editable mode.
-For example, after cloning the repository, create a virtualenv using
-.. code-block:: console</p>
-<blockquote>
-<div><p>uv venv --python=3.11</p>
-</div></blockquote>
-<p>Then sync the dependencies from the uv lock file using
-.. code-block:: console</p>
-<blockquote>
-<div><p>uv sync --all-extras</p>
-</div></blockquote>
-<p>The suite of unit tests can be run using
-.. code-block:: console</p>
-<blockquote>
-<div><p>uv run pytest</p>
-</div></blockquote>
+For example, after cloning the repository, create a virtualenv using</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>venv<span class="w"> </span>--python<span class="o">=</span><span class="m">3</span>.11
+</pre></div>
+</div>
+<p>Then sync the dependencies from the uv lock file using</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>sync<span class="w"> </span>--all-extras
+</pre></div>
+</div>
+<p>The suite of unit tests can be run using</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>pytest
+</pre></div>
+</div>
 </section>
 </section>
 
