@@ -1,4 +1,5 @@
 import torch
+import pytest
 import numpy as np
 from scipy.interpolate import interp1d
 from ml4gw.waveforms import IMRPhenomD
@@ -48,6 +49,7 @@ def test_decimator():
 
     hc, hp = waveform_generator(**param_dict)
 
+    # Positive Tests
     # Decimation
     schedule = torch.tensor(
         [[0, 40, 256], [40, 58, 512], [58, 60, 2048]],
@@ -55,23 +57,50 @@ def test_decimator():
         device=device,
     )
 
-    decimator = Decimator(
-        sample_rate=sample_rate, schedule=schedule, device=device
-    )
+    decimator = Decimator(sample_rate=sample_rate, schedule=schedule)
 
     indices = decimator.idx
 
-    dec_hp = decimator(strain=hp, device=hp.device)
-    dec_hc = decimator(strain=hc, device=hc.device)
+    dec_hc = decimator(strain=hc)
+    dec_hp = decimator(strain=hp)
 
     time = torch.arange(0, waveform_duration, 1 / sample_rate).to(device)
     time_dec = time[indices]
 
-    f_hp = interp1d(time_dec.cpu().numpy(), dec_hp.cpu().numpy(), kind="cubic")
     f_hc = interp1d(time_dec.cpu().numpy(), dec_hc.cpu().numpy(), kind="cubic")
+    f_hp = interp1d(time_dec.cpu().numpy(), dec_hp.cpu().numpy(), kind="cubic")
 
-    up_hp = f_hp(time.cpu().numpy())
     up_hc = f_hc(time.cpu().numpy())
+    up_hp = f_hp(time.cpu().numpy())
 
-    assert np.allclose(hp.cpu().numpy() * 1e22, up_hp * 1e22, atol=1e-2)
     assert np.allclose(hc.cpu().numpy() * 1e22, up_hc * 1e22, atol=1e-2)
+    assert np.allclose(hp.cpu().numpy() * 1e22, up_hp * 1e22, atol=1e-2)
+
+    # Testing the split functionality
+    # Each segment length matches schedule * target rate
+    seg = decimator(strain=hc, split=True)
+    exp_len = (
+        ((schedule[:, 1] - schedule[:, 0]) * schedule[:, 2]).long().tolist()
+    )
+    actual_len = [s.shape[-1] for s in seg]
+    assert actual_len == exp_len
+
+    # Negative Tests
+    wrong_schedule_shape = torch.tensor([[0, 40]])
+    with pytest.raises(ValueError, match="Schedule must be of shape"):
+        Decimator(sample_rate=2048, schedule=wrong_schedule_shape)
+
+    wrong_schedule_time = torch.tensor([[10, 5, 256]])
+    with pytest.raises(ValueError, match="end_time > start_time"):
+        Decimator(sample_rate=2048, schedule=wrong_schedule_time)
+
+    wrong_target_sr = torch.tensor([[0, 10, 500]])
+    with pytest.raises(ValueError, match="must be divisible"):
+        Decimator(sample_rate=2048, schedule=wrong_target_sr)
+
+    wrong_strain_len = torch.randn(1, 1, 100)
+    decimator_valid = Decimator(
+        sample_rate=2048, schedule=torch.tensor([[0, 2, 256]])
+    )
+    with pytest.raises(ValueError, match="does not match schedule duration"):
+        decimator_valid(wrong_strain_len)
