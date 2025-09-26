@@ -61,8 +61,8 @@ def test_decimator():
 
     indices = decimator.idx
 
-    dec_hc = decimator(strain=hc)
-    dec_hp = decimator(strain=hp)
+    dec_hc = decimator(hc)
+    dec_hp = decimator(hp)
 
     time = torch.arange(0, waveform_duration, 1 / sample_rate).to(device)
     time_dec = time[indices]
@@ -78,7 +78,7 @@ def test_decimator():
 
     # Testing the split functionality
     # Each segment length matches schedule * target rate
-    seg = decimator(strain=hc, split=True)
+    seg = decimator(hc, split=True)
     exp_len = (
         ((schedule[:, 1] - schedule[:, 0]) * schedule[:, 2]).long().tolist()
     )
@@ -98,9 +98,9 @@ def test_decimator():
     with pytest.raises(ValueError, match="must be divisible"):
         Decimator(sample_rate=2048, schedule=wrong_target_sr)
 
-    wrong_strain_len = torch.randn(1, 1, 100)
+    wrong_input_len = torch.randn(1, 1, 100)
     decimator_valid = Decimator(
         sample_rate=2048, schedule=torch.tensor([[0, 2, 256]])
     )
     with pytest.raises(ValueError, match="does not match schedule duration"):
-        decimator_valid(wrong_strain_len)
+        decimator_valid(wrong_input_len)

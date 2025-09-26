@@ -2,32 +2,78 @@ import torch
 
 
 class Decimator(torch.nn.Module):
-    """
-    Downsample/decimate timeseries according to a schedule.
+    r"""
+    Downsample (decimate) a timeseries according to a user-defined schedule.
 
-    The schedule is a tensor of shape (N, 3), where each row is:
-    [start_time, end_time, target_sample_rate]
+    .. note::
 
-    Example schedule (seconds, Hz):
-    [[0, 40, 256],   # first 40s at 256 Hz
-     [40, 58, 512],  # next 18s at 512 Hz
-     [58, 60, 2048]] # last 2s at full 2048 Hz
+        This is a naive decimator that does not use any IIR/FIR filtering
+        and selects every M-th sample according to the schedule.
 
-    Strain: Tensor of shape (B, C, T), where
-    B=batch size, C=channels, T=time.
+    The schedule specifies which segments of the input to keep and at what
+    sampling rate. Each row of the schedule has the form:
 
-    Functions:
-        build_variable_indices(sample_rate, schedule, device)
-            Compute the sample indices to keep from the full strain.
-        split_by_schedule(strain, schedule)
-            Split a strain into segments according to the schedule.
+        `[start_time, end_time, target_sample_rate]`
+
+    Args:
+        sample_rate (int):
+            Sampling rate (Hz) of the input timeseries.
+        schedule (torch.Tensor):
+            Tensor of shape `(N, 3)` defining start time, end time,
+            and target sample rate for each segment.
+
+    Shape:
+        - Input: `(B, C, T)` where
+            - B = batch size
+            - C = channels
+            - T = number of timesteps
+                    (must equal schedule duration × sample_rate)
+        - Output:
+            - If ``split=False`` → `(B, C, T')` where `T'` is total
+              number of decimated samples across all segments.
+            - If ``split=True`` → list of tensors, one per segment.
+
+    Returns:
+        torch.Tensor or List[torch.Tensor]:
+            The decimated timeseries, or list of decimated segments if
+            ``split=True``.
+
+    Example:
+        .. code-block:: python
+
+            >>> import torch
+            >>> from ml4gw.transforms.decimator import Decimator
+
+            >>> sample_rate = 2048
+            >>> X_duration = 60
+
+            >>> schedule = torch.tensor(
+            ...     [[0, 40, 256], [40, 58, 512], [58, 60, 2048]],
+            ...     dtype=torch.int,
+            ... )
+
+            >>> decimator = Decimator(sample_rate=sample_rate,
+            ...    schedule=schedule)
+            >>> X = torch.randn(1, 1, sample_rate * X_duration)
+            >>> X_dec = decimator(X)
+            >>> X_seg = decimator(X, split=True)
+
+            >>> print("Original shape:", X.shape)
+            Original shape: torch.Size([1, 1, 122880])
+            >>> print("Decimated shape:", X_dec.shape)
+            Decimated shape: torch.Size([1, 1, 23552])
+            >>> for i, seg in enumerate(X_seg):
+            ...     print(f"Segment {i} shape:", seg.shape)
+            Segment 0 shape: torch.Size([1, 1, 10240])
+            Segment 1 shape: torch.Size([1, 1, 9216])
+            Segment 2 shape: torch.Size([1, 1, 4096])
     """
 
     def __init__(
         self,
         sample_rate: int = None,
         schedule: torch.Tensor = None,
-    ):
+    ) -> None:
         super().__init__()
         self.sample_rate = sample_rate
         self.schedule = schedule
@@ -36,52 +82,38 @@ class Decimator(torch.nn.Module):
         idx = self.build_variable_indices()
         self.register_buffer("idx", idx)
 
-    def _validate_inputs(
-        self,
-        strain: torch.Tensor = None,
-    ):
+        self.expected_len = int(
+            (self.schedule[:, 1][-1] - self.schedule[:, 0][0])
+            * self.sample_rate
+        )
+
+    def _validate_inputs(self) -> None:
+        r"""
+        Validate the schedule and sample_rate.
         """
-        Validate inputs for compatibility.
-        If `strain` is None, only validates schedule and sample_rate.
-        If `strain` is provided, validate only strain (called in forward).
-        """
-        if strain is None:
-            if self.schedule.ndim != 2 or self.schedule.shape[1] != 3:
-                raise ValueError(
-                    f"Schedule must be of shape (N, 3), got \
-                        {self.schedule.shape}"
-                )
-
-            if not torch.all(self.schedule[:, 1] > self.schedule[:, 0]):
-                raise ValueError(
-                    "Each schedule segment must have end_time > start_time"
-                )
-
-            if torch.any(self.sample_rate % self.schedule[:, 2].long() != 0):
-                raise ValueError(
-                    f"Sample rate {self.sample_rate} must be divisible by all "
-                    f"target rates {self.schedule[:, 2].tolist()}"
-                )
-
-        else:
-            if strain.ndim < 1:
-                raise ValueError(
-                    "strain must have at least 1 dimension (time axis)"
-                )
-
-            strain_len = int(
-                (self.schedule[:, 1][-1] - self.schedule[:, 0][0])
-                * self.sample_rate
+        if self.schedule.ndim != 2 or self.schedule.shape[1] != 3:
+            raise ValueError(
+                f"Schedule must be of shape (N, 3), got {self.schedule.shape}"
             )
-            if strain_len != strain.shape[-1]:
-                raise ValueError(
-                    f"Waveform length {strain.shape[-1]} does not match "
-                    f"schedule duration {strain_len}"
-                )
 
-    def build_variable_indices(self):
-        """
-        Build a mask of indices to decimate a strain according to the schedule.
+        if not torch.all(self.schedule[:, 1] > self.schedule[:, 0]):
+            raise ValueError(
+                "Each schedule segment must have end_time > start_time"
+            )
+
+        if torch.any(self.sample_rate % self.schedule[:, 2].long() != 0):
+            raise ValueError(
+                f"Sample rate {self.sample_rate} must be divisible by all "
+                f"target rates {self.schedule[:, 2].tolist()}"
+            )
+
+    def build_variable_indices(self) -> torch.Tensor:
+        r"""
+        Compute the time indices to keep based on the schedule.
+
+        Returns:
+            torch.Tensor:
+                1D tensor of indices used to decimate the input.
         """
         idx = torch.tensor([], dtype=torch.long)
 
@@ -96,42 +128,56 @@ class Decimator(torch.nn.Module):
             idx = torch.cat((idx, new_idx))
         return idx
 
-    def split_by_schedule(self, strain: torch.Tensor):
-        """
-        Split a strain into segments according to schedule.
+    def split_by_schedule(self, X: torch.Tensor) -> tuple[torch.Tensor, ...]:
+        r"""
+        Split a decimated timeseries into segments according to the schedule.
+
+        Args:
+            X (torch.Tensor):
+                Decimated input of shape `(B, C, T')`.
+
+        Returns:
+            tuple of torch.Tensor:
+                Each segment has shape :math:`(B, C, T_i)`
+                where :math:`T_i` is the length implied by
+                the corresponding schedule row.
         """
         split_sizes = (
             ((self.schedule[:, 1] - self.schedule[:, 0]) * self.schedule[:, 2])
             .long()
             .tolist()
         )
-        segments = torch.split(strain, split_sizes, dim=-1)
-        return segments
+
+        return torch.split(X, split_sizes, dim=-1)
 
     def forward(
         self,
-        strain: torch.Tensor,
+        X: torch.Tensor,
         split: bool = False,
-    ):
-        """
-        Run decimation: get decimated waveform and/or return split segments.
+    ) -> torch.Tensor | list[torch.Tensor]:
+        r"""
+        Apply decimation to the input timeseries.
 
         Args:
-            strain : torch.Tensor
-                Input tensor of shape (B, C, T), where the last dimension
-                is time.
-            split : bool, optional
-                If True, returns list of segments split by schedule along
-                the last dim.
+            X (torch.Tensor):
+                Input tensor of shape `(B, C, T)`, where `T` must equal
+                schedule duration × sample_rate.
+            split (bool, optional):
+                If True, return a list of segments instead of a single
+                concatenated tensor. Default: False.
 
         Returns:
-            torch.Tensor or List[torch.Tensor]
-                Decimated strain or list of segments if split=True.
+            torch.Tensor or List[torch.Tensor]:
+                Decimated timeseries, or list of decimated segments.
         """
+        if X.shape[-1] != self.expected_len:
+            raise ValueError(
+                f"X length {X.shape[-1]} does not match "
+                f"expected schedule duration {self.expected_len}"
+            )
 
-        self._validate_inputs(strain=strain)
-        dec_strain = strain.index_select(dim=-1, index=self.idx)
+        X_dec = X.index_select(dim=-1, index=self.idx)
 
         if split:
-            dec_strain = self.split_by_schedule(dec_strain)  # list of segments
-        return dec_strain
+            X_dec = self.split_by_schedule(X_dec)
+        return X_dec
