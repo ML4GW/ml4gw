@@ -102,5 +102,5 @@ def test_decimator():
     decimator_valid = Decimator(
         sample_rate=2048, schedule=torch.tensor([[0, 2, 256]])
     )
-    with pytest.raises(ValueError, match="does not match schedule duration"):
+    with pytest.raises(ValueError, match="expected schedule duration"):
         decimator_valid(wrong_input_len)
