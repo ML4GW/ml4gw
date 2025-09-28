@@ -10,6 +10,7 @@ ml4gw.transforms
    :toctree:
    :recursive:
 
+   decimator
    iirfilter
    pearson
    qtransform

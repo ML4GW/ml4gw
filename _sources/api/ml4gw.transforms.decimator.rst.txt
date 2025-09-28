@@ -1,0 +1,12 @@
+ml4gw.transforms.decimator
+==========================
+
+.. automodule:: ml4gw.transforms.decimator
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Decimator
+   

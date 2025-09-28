@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.transforms.decimator &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.transforms.iirfilter" href="ml4gw.transforms.iirfilter.html" />
+    <link rel="prev" title="ml4gw.transforms" href="ml4gw.transforms.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.transforms.decimator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.decimator.Decimator"><code class="docutils literal notranslate"><span class="pre">Decimator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.iirfilter.html">ml4gw.transforms.iirfilter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.pearson.html">ml4gw.transforms.pearson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.qtransform.html">ml4gw.transforms.qtransform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.scaler.html">ml4gw.transforms.scaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.snr_rescaler.html">ml4gw.transforms.snr_rescaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectral.html">ml4gw.transforms.spectral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectrogram.html">ml4gw.transforms.spectrogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spline_interpolation.html">ml4gw.transforms.spline_interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.transform.html">ml4gw.transforms.transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.waveforms.html">ml4gw.transforms.waveforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.whitening.html">ml4gw.transforms.whitening</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+      <li class="breadcrumb-item active">ml4gw.transforms.decimator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.transforms.decimator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.transforms.decimator">
+<span id="ml4gw-transforms-decimator"></span><h1>ml4gw.transforms.decimator<a class="headerlink" href="#module-ml4gw.transforms.decimator" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.decimator.Decimator" title="ml4gw.transforms.decimator.Decimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decimator</span></code></a>([sample_rate, schedule])</p></td>
+<td><p>Downsample (decimate) a timeseries according to a user-defined schedule.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.decimator.Decimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.decimator.</span></span><span class="sig-name descname"><span class="pre">Decimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Downsample (decimate) a timeseries according to a user-defined schedule.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a naive decimator that does not use any IIR/FIR filtering
+and selects every M-th sample according to the schedule.</p>
+</div>
+<p>The schedule specifies which segments of the input to keep and at what
+sampling rate. Each row of the schedule has the form:</p>
+<blockquote>
+<div><p><cite>[start_time, end_time, target_sample_rate]</cite></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_rate</strong> (<em>int</em>) -- Sampling rate (Hz) of the input timeseries.</p></li>
+<li><p><strong>schedule</strong> (<em>torch.Tensor</em>) -- Tensor of shape <cite>(N, 3)</cite> defining start time, end time,
+and target sample rate for each segment.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Input: <cite>(B, C, T)</cite> where</dt><dd><ul>
+<li><p>B = batch size</p></li>
+<li><p>C = channels</p></li>
+<li><dl class="simple">
+<dt>T = number of timesteps</dt><dd><p>(must equal schedule duration × sample_rate)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Output:</dt><dd><ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">split=False</span></code> → <cite>(B, C, T')</cite> where <cite>T'</cite> is total
+number of decimated samples across all segments.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">split=True</span></code> → list of tensors, one per segment.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decimated timeseries, or list of decimated segments if
+<code class="docutils literal notranslate"><span class="pre">split=True</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>torch.Tensor or List[torch.Tensor]</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_rate</strong> (<em>int</em>)</p></li>
+<li><p><strong>schedule</strong> (<em>Tensor</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms.decimator</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimator</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">2048</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_duration</span> <span class="o">=</span> <span class="mi">60</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schedule</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">58</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span> <span class="p">[</span><span class="mi">58</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">2048</span><span class="p">]],</span>
+<span class="gp">... </span>    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decimator</span> <span class="o">=</span> <span class="n">Decimator</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">schedule</span><span class="o">=</span><span class="n">schedule</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">*</span> <span class="n">X_duration</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_dec</span> <span class="o">=</span> <span class="n">decimator</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_seg</span> <span class="o">=</span> <span class="n">decimator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original shape:&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">Original shape: torch.Size([1, 1, 122880])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Decimated shape:&quot;</span><span class="p">,</span> <span class="n">X_dec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">Decimated shape: torch.Size([1, 1, 23552])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">seg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X_seg</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Segment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> shape:&quot;</span><span class="p">,</span> <span class="n">seg</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">Segment 0 shape: torch.Size([1, 1, 10240])</span>
+<span class="go">Segment 1 shape: torch.Size([1, 1, 9216])</span>
+<span class="go">Segment 2 shape: torch.Size([1, 1, 4096])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.decimator.Decimator.build_variable_indices">
+<span class="sig-name descname"><span class="pre">build_variable_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator.build_variable_indices" title="Link to this definition"></a></dt>
+<dd><p>Compute the time indices to keep based on the schedule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D tensor of indices used to decimate the input.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.decimator.Decimator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator.forward" title="Link to this definition"></a></dt>
+<dd><p>Apply decimation to the input timeseries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>torch.Tensor</em>) -- Input tensor of shape <cite>(B, C, T)</cite>, where <cite>T</cite> must equal
+schedule duration × sample_rate.</p></li>
+<li><p><strong>split</strong> (<em>bool</em><em>, </em><em>optional</em>) -- If True, return a list of segments instead of a single
+concatenated tensor. Default: False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Decimated timeseries, or list of decimated segments.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor or List[torch.Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.decimator.Decimator.split_by_schedule">
+<span class="sig-name descname"><span class="pre">split_by_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator.split_by_schedule" title="Link to this definition"></a></dt>
+<dd><p>Split a decimated timeseries into segments according to the schedule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>torch.Tensor</em>) -- Decimated input of shape <cite>(B, C, T')</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Each segment has shape <span class="math notranslate nohighlight">\((B, C, T_i)\)</span>
+where <span class="math notranslate nohighlight">\(T_i\)</span> is the length implied by
+the corresponding schedule row.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple of torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.transforms.html" class="btn btn-neutral float-left" title="ml4gw.transforms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.transforms.iirfilter.html" class="btn btn-neutral float-right" title="ml4gw.transforms.iirfilter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
