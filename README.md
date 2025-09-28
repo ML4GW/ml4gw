@@ -28,6 +28,7 @@
 | ml4gw/nn/streaming/snapshotter.py         |       35 |        2 |     94% |   96, 110 |
 | ml4gw/spectral.py                         |      147 |        0 |    100% |           |
 | ml4gw/transforms/\_\_init\_\_.py          |       10 |        0 |    100% |           |
+| ml4gw/transforms/decimator.py             |       38 |        0 |    100% |           |
 | ml4gw/transforms/iirfilter.py             |       18 |        0 |    100% |           |
 | ml4gw/transforms/pearson.py               |       28 |        3 |     89% |47, 52, 59 |
 | ml4gw/transforms/qtransform.py            |      171 |       14 |     92% |149, 322, 330-332, 339-348 |
@@ -55,7 +56,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
 | ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
-|                                 **TOTAL** | **3039** |  **229** | **92%** |           |
+|                                 **TOTAL** | **3077** |  **229** | **93%** |           |
 
 
 ## Setup coverage badge
