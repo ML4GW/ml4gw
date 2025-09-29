@@ -13,14 +13,17 @@
 import os
 import sys
 
+from importlib.metadata import distribution
+
 sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "ml4gw"
-copyright = "2025, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
-author = "Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
+dist = distribution("ml4gw")
+project = dist.metadata['name']
+copyright = f"2025, {dist.metadata['maintainer-email']}"
+author = dist.metadata['author-email']
 
 
 # -- General configuration ---------------------------------------------------
@@ -62,7 +65,7 @@ language = "python"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".pytest_cache", "jupyter_execute"]
 
 
 # -- Options for HTML output -------------------------------------------------
