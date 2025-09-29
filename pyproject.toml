@@ -7,6 +7,12 @@ authors = [
     { name = "Will Benoit", email = "benoi090@umn.edu" },
     { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
     { name = "Alec Gunny", email = "alec.gunny@ligo.org" },
+    { name = "Ravi Kumar", email = "ravi.kumar@ligo.org" },
+]
+maintainers = [
+    { name = "Ethan Marx", email = "emarx@mit.edu" },
+    { name = "Will Benoit", email = "benoi090@umn.edu" },
+    { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
 ]
 requires-python = ">=3.10,<3.13"
 classifiers = [
