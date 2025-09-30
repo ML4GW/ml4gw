@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import torch
 from jaxtyping import Float, Int64
 from torch import Tensor
@@ -7,7 +5,7 @@ from torch.nn.functional import unfold
 
 from ..types import TimeSeries1d, TimeSeries1to3d, TimeSeries2d, TimeSeries3d
 
-BatchTimeSeriesTensor = Union[Float[Tensor, "batch time"], TimeSeries3d]
+BatchTimeSeriesTensor = Float[Tensor, "batch time"] | TimeSeries3d
 
 
 def unfold_windows(
@@ -15,11 +13,11 @@ def unfold_windows(
     window_size: int,
     stride: int,
     drop_last: bool = True,
-) -> Union[
-    Float[TimeSeries1d, " window"],
-    Float[TimeSeries2d, " window"],
-    Float[TimeSeries3d, " window"],
-]:
+) -> (
+    Float[TimeSeries1d, " window"]
+    | Float[TimeSeries2d, " window"]
+    | Float[TimeSeries3d, " window"]
+):
     """Unfold a timeseries into windows
 
     Args:
@@ -171,10 +169,8 @@ def slice_kernels(
         # to select _different_ kernels from each channel
         if len(x) != idx.shape[1]:
             raise ValueError(
-                (
-                    "Can't slice array with shape {} with indices "
-                    "with shape {}"
-                ).format(x.shape, idx.shape)
+                f"Can't slice array with shape {x.shape} with indices "
+                f"with shape {idx.shape}"
             )
 
         # batch_size x num_channels x kernel_size
@@ -204,8 +200,8 @@ def slice_kernels(
         # of multichannel timeseries
         if len(idx) != len(x):
             raise ValueError(
-                "Can't slice kernels from batch of length {} "
-                "using indices of length {}".format(len(x), len(idx))
+                f"Can't slice kernels from batch of length {len(x)} "
+                f"using indices of length {len(idx)}"
             )
 
         # batch_size x kernel_size
@@ -231,8 +227,8 @@ def slice_kernels(
 def sample_kernels(
     X: TimeSeries1to3d,
     kernel_size: int,
-    N: Optional[int] = None,
-    max_center_offset: Optional[int] = None,
+    N: int | None = None,
+    max_center_offset: int | None = None,
     coincident: bool = True,
 ) -> BatchTimeSeriesTensor:
     """Randomly sample kernels from a single or multichannel timeseries
@@ -286,9 +282,8 @@ def sample_kernels(
 
     if X.shape[-1] < kernel_size:
         raise ValueError(
-            "Can't sample kernels of size {} from tensor with shape {}".format(
-                kernel_size, X.shape
-            )
+            f"Can't sample kernels of size {kernel_size} from tensor "
+            f"with shape {X.shape}"
         )
     elif X.ndim > 3:
         raise ValueError(
@@ -300,10 +295,8 @@ def sample_kernels(
         )
     elif X.ndim == 3 and N is not None and N != len(X):
         raise ValueError(
-            (
-                "Can't sample {} kernels from 3D tensor with "
-                "batch dimension {}"
-            ).format(N, len(X))
+            f"Can't sample {N} kernels from 3D tensor with "
+            f"batch dimension {len(X)}"
         )
 
     if X.ndim == 1:
@@ -334,20 +327,16 @@ def sample_kernels(
             # the kernel length, we won't be able to sample
             # any kernels at all
             raise ValueError(
-                "Negative center offset value {} is too large "
-                "for requested kernel size {}".format(
-                    max_center_offset, kernel_size
-                )
+                f"Negative center offset value {max_center_offset} is too "
+                f"large for requested kernel size {kernel_size}"
             )
 
     if min_val < 0:
         # if kernel_size > center - max_center_offset,
         # we may end up with negative indices
         raise ValueError(
-            (
-                "Kernel size {} is too large for requested center "
-                "offset value {}"
-            ).format(kernel_size, max_center_offset)
+            f"Kernel size {kernel_size} is too large for requested center "
+            f"offset value {max_center_offset}"
         )
 
     if X.ndim == 3 or coincident:

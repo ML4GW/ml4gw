@@ -1,5 +1,4 @@
 import itertools
-from typing import Optional, Tuple, Union
 
 import torch
 from jaxtyping import Float
@@ -79,10 +78,10 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
         self,
         X: Float[Tensor, "channels time"],
         kernel_size: int,
-        y: Optional[Float[Tensor, " time"]] = None,
+        y: Float[Tensor, " time"] | None = None,
         batch_size: int = 32,
         stride: int = 1,
-        batches_per_epoch: Optional[int] = None,
+        batches_per_epoch: int | None = None,
         coincident: bool = True,
         shuffle: bool = True,
         device: str = "cpu",
@@ -122,10 +121,9 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             batch_size * batches_per_epoch
         ):
             raise ValueError(
-                "Number of kernels {} in timeseries insufficient "
-                "to generate {} batches of size {}".format(
-                    self.num_kernels, batch_size, batches_per_epoch
-                )
+                f"Number of kernels {self.num_kernels} in timeseries "
+                f"insufficient to generate {batch_size} batches of size "
+                f"{batches_per_epoch}"
             )
 
         self.batch_size = batch_size
@@ -210,10 +208,10 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
     def __iter__(
         self,
-    ) -> Union[
-        Float[Tensor, "batch channel time"],
-        Tuple[Float[Tensor, "batch channel time"], Float[Tensor, " batch"]],
-    ]:
+    ) -> (
+        Float[Tensor, "batch channel time"]
+        | tuple[Float[Tensor, "batch channel time"], Float[Tensor, " batch"]]
+    ):
         indices = self.init_indices()
         for i in range(len(self)):
             # slice the array of _indices_ we'll be using to

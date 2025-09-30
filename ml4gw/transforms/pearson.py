@@ -52,15 +52,14 @@ class ShiftedPearsonCorrelation(torch.nn.Module):
             raise ValueError(
                 "y may not have more dimensions that x for "
                 "ShiftedPearsonCorrelation, but found shapes "
-                "{} and {}".format(y.shape, x.shape)
+                f"{y.shape} and {x.shape}"
             )
         for dim in range(y.ndim):
             if y.size(-dim - 1) != x.size(-dim - 1):
                 raise ValueError(
                     "x and y expected to have same size along "
-                    "last dimensions, but found shapes {} and {}".format(
-                        x.shape, y.shape
-                    )
+                    f"last dimensions, but found shapes {x.shape} and "
+                    f"{y.shape}"
                 )
 
     def forward(

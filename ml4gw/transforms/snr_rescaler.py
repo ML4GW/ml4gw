@@ -1,5 +1,3 @@
-from typing import Optional
-
 import torch
 
 from ..gw import compute_network_snr
@@ -13,8 +11,8 @@ class SnrRescaler(FittableSpectralTransform):
         num_channels: int,
         sample_rate: float,
         waveform_duration: float,
-        highpass: Optional[float] = None,
-        lowpass: Optional[float] = None,
+        highpass: float | None = None,
+        lowpass: float | None = None,
         dtype: torch.dtype = torch.float32,
     ) -> None:
         super().__init__()
@@ -45,15 +43,13 @@ class SnrRescaler(FittableSpectralTransform):
     def fit(
         self,
         *background: TimeSeries2d,
-        fftlength: Optional[float] = None,
-        overlap: Optional[float] = None,
+        fftlength: float | None = None,
+        overlap: float | None = None,
     ):
         if len(background) != self.num_channels:
             raise ValueError(
-                "Expected to fit whitening transform on {} background "
-                "timeseries, but was passed {}".format(
-                    self.num_channels, len(background)
-                )
+                f"Expected to fit whitening transform on {self.num_channels} "
+                f"background timeseries, but was passed {len(background)}"
             )
 
         num_freqs = self.background.size(1)
@@ -69,7 +65,7 @@ class SnrRescaler(FittableSpectralTransform):
     def forward(
         self,
         responses: WaveformTensor,
-        target_snrs: Optional[BatchTensor] = None,
+        target_snrs: BatchTensor | None = None,
     ):
         snrs = compute_network_snr(
             responses,

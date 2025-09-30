@@ -86,10 +86,8 @@ def bilby_spins_to_lalsim(
     # check if f_ref is valid
     if f_ref <= 0.0:
         raise ValueError(
-            (
-                "f_ref <= 0 is invalid. "
-                "Please pass in the starting GW frequency instead."
-            )
+            "f_ref <= 0 is invalid. "
+            "Please pass in the starting GW frequency instead."
         )
 
     # starting frame: LNhat is along the z-axis and the unit

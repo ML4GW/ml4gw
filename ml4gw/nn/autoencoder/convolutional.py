@@ -1,5 +1,4 @@
 from collections.abc import Callable, Sequence
-from typing import Optional
 
 import torch
 from torch import Tensor
@@ -21,9 +20,9 @@ class ConvBlock(Autoencoder):
         groups: int = 1,
         activation: torch.nn.Module = torch.nn.ReLU,
         norm: Module = torch.nn.BatchNorm1d,
-        decode_channels: Optional[int] = None,
-        output_activation: Optional[torch.nn.Module] = None,
-        skip_connection: Optional[SkipConnection] = None,
+        decode_channels: int | None = None,
+        output_activation: torch.nn.Module | None = None,
+        skip_connection: SkipConnection | None = None,
     ) -> None:
         super().__init__(skip_connection=None)
 
@@ -98,10 +97,10 @@ class ConvolutionalAutoencoder(Autoencoder):
         stride: int = 1,
         groups: int = 1,
         activation: torch.nn.Module = torch.nn.ReLU,
-        output_activation: Optional[torch.nn.Module] = None,
+        output_activation: torch.nn.Module | None = None,
         norm: Module = torch.nn.BatchNorm1d,
-        decode_channels: Optional[int] = None,
-        skip_connection: Optional[SkipConnection] = None,
+        decode_channels: int | None = None,
+        skip_connection: SkipConnection | None = None,
     ) -> None:
         # TODO: how to do this dynamically? Maybe the base
         # architecture looks for overlapping arguments between
@@ -145,9 +144,7 @@ class ConvolutionalAutoencoder(Autoencoder):
             self.blocks.append(block)
             in_channels = channels * groups
 
-    def decode(
-        self, *X, states=None, input_size: Optional[int] = None
-    ) -> Tensor:
+    def decode(self, *X, states=None, input_size: int | None = None) -> Tensor:
         X = super().decode(*X, states=states)
         if input_size is not None:
             return match_size(X, input_size)

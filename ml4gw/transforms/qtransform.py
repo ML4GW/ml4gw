@@ -1,6 +1,5 @@
 import math
 import warnings
-from typing import List, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -146,7 +145,7 @@ class QTile(torch.nn.Module):
                 means = torch.mean(energy, dim=-1, keepdim=True)
                 energy /= means
             else:
-                raise ValueError("Invalid normalisation %r" % norm)
+                raise ValueError(f"Invalid normalisation {norm}")
             energy = energy.type(torch.float32)
         return energy
 
@@ -194,9 +193,9 @@ class SingleQTransform(torch.nn.Module):
         self,
         duration: float,
         sample_rate: float,
-        spectrogram_shape: Tuple[int, int],
+        spectrogram_shape: tuple[int, int],
         q: float = 12,
-        frange: List[float] = None,
+        frange: list[float] = None,
         mismatch: float = 0.2,
         interpolation_method: str = "bicubic",
     ) -> None:
@@ -303,7 +302,7 @@ class SingleQTransform(torch.nn.Module):
         return torch.unique(freqs)
 
     def get_max_energy(
-        self, fsearch_range: List[float] = None, dimension: str = "both"
+        self, fsearch_range: list[float] = None, dimension: str = "both"
     ):
         """
         Gets the maximum energy value among the QTiles. The maximum can
@@ -459,9 +458,9 @@ class QScan(torch.nn.Module):
         self,
         duration: float,
         sample_rate: float,
-        spectrogram_shape: Tuple[int, int],
-        qrange: List[float] = None,
-        frange: List[float] = None,
+        spectrogram_shape: tuple[int, int],
+        qrange: list[float] = None,
+        frange: list[float] = None,
         interpolation_method="bicubic",
         mismatch: float = 0.2,
     ) -> None:
@@ -500,7 +499,7 @@ class QScan(torch.nn.Module):
             ]
         )
 
-    def get_qs(self) -> List[float]:
+    def get_qs(self) -> list[float]:
         """
         Determine the values of Q to try for the set of Q-transforms
         """
@@ -518,7 +517,7 @@ class QScan(torch.nn.Module):
     def forward(
         self,
         X: TimeSeries1to3d,
-        fsearch_range: List[float] = None,
+        fsearch_range: list[float] = None,
         norm: str = "median",
     ):
         """

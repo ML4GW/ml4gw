@@ -4,7 +4,8 @@ https://github.com/pytorch/vision/blob/main/torchvision/models/resnet.py
 but with arbitrary kernel sizes
 """
 
-from typing import Callable, List, Literal, Optional
+from typing import Literal
+from collections.abc import Callable
 
 import torch
 import torch.nn as nn
@@ -55,11 +56,11 @@ class BasicBlock(nn.Module):
         planes: int,
         kernel_size: int = 3,
         stride: int = 1,
-        downsample: Optional[nn.Module] = None,
+        downsample: nn.Module | None = None,
         groups: int = 1,
         base_width: int = 64,
         dilation: int = 1,
-        norm_layer: Optional[Callable[..., nn.Module]] = None,
+        norm_layer: Callable[..., nn.Module] | None = None,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -120,11 +121,11 @@ class Bottleneck(nn.Module):
         planes: int,
         kernel_size: int = 3,
         stride: int = 1,
-        downsample: Optional[nn.Module] = None,
+        downsample: nn.Module | None = None,
         groups: int = 1,
         base_width: int = 64,
         dilation: int = 1,
-        norm_layer: Optional[Callable[..., nn.Module]] = None,
+        norm_layer: Callable[..., nn.Module] | None = None,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -232,14 +233,14 @@ class ResNet2D(nn.Module):
     def __init__(
         self,
         in_channels: int,
-        layers: List[int],
+        layers: list[int],
         classes: int,
         kernel_size: int = 3,
         zero_init_residual: bool = False,
         groups: int = 1,
         width_per_group: int = 64,
-        stride_type: Optional[List[Literal["stride", "dilation"]]] = None,
-        norm_layer: Optional[NormLayer] = None,
+        stride_type: list[Literal["stride", "dilation"]] | None = None,
+        norm_layer: NormLayer | None = None,
     ) -> None:
         super().__init__()
         # default to using InstanceNorm if no
@@ -257,10 +258,8 @@ class ResNet2D(nn.Module):
             stride_type = ["stride"] * (len(layers) - 1)
         if len(stride_type) != (len(layers) - 1):
             raise ValueError(
-                (
-                    "'stride_type' should be None or a {}-element "
-                    "tuple, got {}"
-                ).format(len(layers) - 1, stride_type)
+                f"'stride_type' should be None or a {len(layers) - 1}-element "
+                f"tuple, got {stride_type}"
             )
 
         self.groups = groups
@@ -316,7 +315,7 @@ class ResNet2D(nn.Module):
                 nn.init.kaiming_normal_(
                     m.weight, mode="fan_out", nonlinearity="relu"
                 )
-            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+            elif isinstance(m, nn.BatchNorm2d | nn.GroupNorm):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 

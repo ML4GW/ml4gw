@@ -1,5 +1,3 @@
-from typing import Optional
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -52,20 +50,17 @@ class SpectralDensity(torch.nn.Module):
         self,
         sample_rate: float,
         fftlength: float,
-        overlap: Optional[float] = None,
+        overlap: float | None = None,
         average: str = "mean",
-        window: Optional[
-            Float[Tensor, " {int(fftlength*sample_rate)}"]
-        ] = None,
+        window: Float[Tensor, " {int(fftlength*sample_rate)}"] | None = None,
         fast: bool = False,
     ) -> None:
         if overlap is None:
             overlap = fftlength / 2
         elif overlap >= fftlength:
             raise ValueError(
-                "Can't have overlap {} longer than fftlength {}".format(
-                    overlap, fftlength
-                )
+                f"Can't have overlap {overlap} longer than fftlength "
+                f"{fftlength}"
             )
 
         super().__init__()
@@ -80,9 +75,7 @@ class SpectralDensity(torch.nn.Module):
 
         if window.size(0) != self.nperseg:
             raise ValueError(
-                "Window must have length {} got {}".format(
-                    self.nperseg, window.size(0)
-                )
+                f"Window must have length {self.nperseg} got {window.size(0)}"
             )
         self.register_buffer("window", window)
 
@@ -99,7 +92,7 @@ class SpectralDensity(torch.nn.Module):
         self.fast = fast
 
     def forward(
-        self, x: TimeSeries1to3d, y: Optional[TimeSeries1to3d] = None
+        self, x: TimeSeries1to3d, y: TimeSeries1to3d | None = None
     ) -> FrequencySeries1to3d:
         if self.fast:
             return fast_spectral_density(

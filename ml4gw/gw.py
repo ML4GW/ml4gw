@@ -8,8 +8,6 @@ Specifically code from
 `this module <https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py>`_.
 """  # noqa E501
 
-from typing import List, Tuple, Union
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -58,7 +56,7 @@ def compute_antenna_responses(
     psi: BatchTensor,
     phi: BatchTensor,
     detector_tensors: NetworkDetectorTensors,
-    modes: List[str],
+    modes: list[str],
 ) -> Float[Tensor, "batch polarizations num_ifos"]:
     """
     Compute the antenna pattern factors of a batch of
@@ -257,7 +255,7 @@ def compute_observed_strain(
 
 def get_ifo_geometry(
     *ifos: str,
-) -> Tuple[NetworkDetectorTensors, NetworkVertices]:
+) -> tuple[NetworkDetectorTensors, NetworkVertices]:
     """
     For a given list of interferometer names, retrieve and
     concatenate the associated detector tensors and vertices
@@ -286,8 +284,8 @@ def compute_ifo_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
-    lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    highpass: float | Float[Tensor, " frequency"] | None = None,
+    lowpass: float | Float[Tensor, " frequency"] | None = None,
 ) -> Float[Tensor, "batch num_ifos"]:
     """Compute the SNRs of a batch of interferometer responses
 
@@ -367,10 +365,9 @@ def compute_ifo_snr(
             highpass = freqs >= highpass
         elif len(highpass) != integrand.shape[-1]:
             raise ValueError(
-                "Can't apply highpass filter mask with {} frequency bins"
-                "to signal fft with {} frequency bins".format(
-                    len(highpass), integrand.shape[-1]
-                )
+                f"Can't apply highpass filter mask with {len(highpass)} "
+                f"frequency bins to signal fft with {integrand.shape[-1]} "
+                "frequency bins"
             )
         integrand *= highpass.to(integrand.device)
     if lowpass is not None:
@@ -379,10 +376,9 @@ def compute_ifo_snr(
             lowpass = freqs < lowpass
         elif len(lowpass) != integrand.shape[-1]:
             raise ValueError(
-                "Can't apply lowpass filter mask with {} frequency bins"
-                "to signal fft with {} frequency bins".format(
-                    len(lowpass), integrand.shape[-1]
-                )
+                f"Can't apply lowpass filter mask with {len(lowpass)} "
+                f"frequency bins to signal fft with {integrand.shape[-1]} "
+                "frequency bins"
             )
         integrand *= lowpass.to(integrand.device)
 
@@ -410,8 +406,8 @@ def compute_network_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
-    lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    highpass: float | Float[Tensor, " frequency"] | None = None,
+    lowpass: float | Float[Tensor, " frequency"] | None = None,
 ) -> BatchTensor:
     """
     Compute the total SNR from a gravitational waveform
@@ -467,11 +463,11 @@ def compute_network_snr(
 
 def reweight_snrs(
     responses: WaveformTensor,
-    target_snrs: Union[float, BatchTensor],
+    target_snrs: float | BatchTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
-    lowpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    highpass: float | Float[Tensor, " frequency"] | None = None,
+    lowpass: float | Float[Tensor, " frequency"] | None = None,
 ) -> WaveformTensor:
     """Scale interferometer responses such that they have a desired SNR
 
