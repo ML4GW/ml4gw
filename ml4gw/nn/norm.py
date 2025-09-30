@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import torch
 from jaxtyping import Float
@@ -16,7 +16,7 @@ class GroupNorm1D(torch.nn.Module):
     def __init__(
         self,
         num_channels: int,
-        num_groups: Optional[int] = None,
+        num_groups: int | None = None,
         eps: float = 1e-5,
     ):
         super().__init__()
@@ -77,7 +77,7 @@ class GroupNorm1DGetter:
     for command-line parameterization with jsonargparse.
     """
 
-    def __init__(self, groups: Optional[int] = None) -> None:
+    def __init__(self, groups: int | None = None) -> None:
         self.groups = groups
 
     def __call__(self, num_channels: int) -> torch.nn.Module:
@@ -96,7 +96,7 @@ class GroupNorm2DGetter:
     for command-line parameterization with jsonargparse.
     """
 
-    def __init__(self, groups: Optional[int] = None) -> None:
+    def __init__(self, groups: int | None = None) -> None:
         self.groups = groups
 
     def __call__(self, num_channels: int) -> torch.nn.Module:

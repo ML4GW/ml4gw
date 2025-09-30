@@ -1,5 +1,3 @@
-from typing import Optional
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -24,7 +22,7 @@ class ChannelWiseScaler(FittableTransform):
             to be 1D (single channel).
     """
 
-    def __init__(self, num_channels: Optional[int] = None) -> None:
+    def __init__(self, num_channels: int | None = None) -> None:
         super().__init__()
 
         shape = (num_channels or 1,)
@@ -37,7 +35,7 @@ class ChannelWiseScaler(FittableTransform):
         self.register_buffer("std", std)
 
     def fit(
-        self, X: Float[Tensor, "... time"], std_reg: Optional[float] = 0.0
+        self, X: Float[Tensor, "... time"], std_reg: float | None = 0.0
     ) -> None:
         """Fit the scaling parameters to a timeseries
 
@@ -59,7 +57,7 @@ class ChannelWiseScaler(FittableTransform):
         else:
             raise ValueError(
                 "Can't fit channel wise mean and standard deviation "
-                "from tensor of shape {}".format(X.shape)
+                f"from tensor of shape {X.shape}"
             )
         std += std_reg * torch.ones_like(std)
         super().build(mean=mean, std=std)

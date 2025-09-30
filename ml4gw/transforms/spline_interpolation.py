@@ -2,8 +2,6 @@
 Adaptation of code from https://github.com/dottormale/Qtransform_torch/
 """
 
-from typing import Optional, Tuple
-
 import torch
 from torch import Tensor
 
@@ -50,7 +48,7 @@ class SplineInterpolateBase(torch.nn.Module):
         t: Tensor,
         d: int,
         m: int,
-    ) -> Tuple[Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor]:
         """
         Compute the L and R values for B-spline basis functions.
         L and R are respectively the first and second coefficient multiplying
@@ -208,7 +206,7 @@ class SplineInterpolate1D(SplineInterpolateBase):
         x_in: Tensor,
         kx: int = 3,
         sx: float = 0.0,
-        x_out: Optional[Tensor] = None,
+        x_out: Tensor | None = None,
     ):
         super().__init__()
 
@@ -284,7 +282,7 @@ class SplineInterpolate1D(SplineInterpolateBase):
     def forward(
         self,
         Z: Tensor,
-        x_out: Optional[Tensor] = None,
+        x_out: Tensor | None = None,
     ) -> Tensor:
         """
         Compute the interpolated data
@@ -377,8 +375,8 @@ class SplineInterpolate2D(SplineInterpolateBase):
         ky: int = 3,
         sx: float = 0.0,
         sy: float = 0.0,
-        x_out: Optional[Tensor] = None,
-        y_out: Optional[Tensor] = None,
+        x_out: Tensor | None = None,
+        y_out: Tensor | None = None,
     ):
         super().__init__()
 
@@ -483,8 +481,8 @@ class SplineInterpolate2D(SplineInterpolateBase):
     def forward(
         self,
         Z: Tensor,
-        x_out: Optional[Tensor] = None,
-        y_out: Optional[Tensor] = None,
+        x_out: Tensor | None = None,
+        y_out: Tensor | None = None,
     ) -> Tensor:
         """
         Compute the interpolated data

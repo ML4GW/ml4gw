@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 import torch
 from astropy.cosmology import Planck18
-from bilby.gw.prior import UniformComovingVolume, UniformSourceFrame
 from bilby.core.utils.random import seed as bilby_seed
+from bilby.gw.prior import UniformComovingVolume, UniformSourceFrame
 from scipy import optimize, stats
 
 from ml4gw import distributions

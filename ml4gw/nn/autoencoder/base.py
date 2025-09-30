@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from typing import Optional, Tuple, Union
 
 import torch
 from torch import Tensor
@@ -28,16 +27,14 @@ class Autoencoder(torch.nn.Module):
     and how they operate.
     """
 
-    def __init__(
-        self, skip_connection: Optional[SkipConnection] = None
-    ) -> None:
+    def __init__(self, skip_connection: SkipConnection | None = None) -> None:
         super().__init__()
         self.skip_connection = skip_connection
         self.blocks = torch.nn.ModuleList()
 
     def encode(
         self, *X: Tensor, return_states: bool = False
-    ) -> Union[Tensor, Tuple[Tensor, Sequence]]:
+    ) -> Tensor | tuple[Tensor, Sequence]:
         states = []
         for block in self.blocks:
             if isinstance(X, tuple):
@@ -53,7 +50,7 @@ class Autoencoder(torch.nn.Module):
             return X, states[:-1]
         return X
 
-    def decode(self, *X, states: Optional[Sequence[Tensor]] = None) -> Tensor:
+    def decode(self, *X, states: Sequence[Tensor] | None = None) -> Tensor:
         if self.skip_connection is not None and states is None:
             raise ValueError(
                 "Must pass intermediate states when autoencoder "
@@ -62,9 +59,8 @@ class Autoencoder(torch.nn.Module):
         elif states is not None:
             if len(states) != len(self.blocks) - 1:
                 raise ValueError(
-                    "Passed {} intermediate states, expected {}".format(
-                        len(states), len(self.blocks) - 1
-                    )
+                    f"Passed {len(states)} intermediate states, expected "
+                    f"{len(self.blocks) - 1}"
                 )
 
             # Don't skip connect the output layer

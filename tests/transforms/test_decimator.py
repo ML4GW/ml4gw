@@ -1,11 +1,12 @@
-import torch
-import pytest
 import numpy as np
+import pytest
+import torch
 from scipy.interpolate import interp1d
-from ml4gw.waveforms import IMRPhenomD
+
 from ml4gw.transforms.decimator import Decimator
-from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
+from ml4gw.waveforms import IMRPhenomD
 from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
+from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
 
 
 def test_decimator():

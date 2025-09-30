@@ -1,5 +1,4 @@
 import warnings
-from typing import Dict, List
 
 import torch
 import torch.nn.functional as F
@@ -104,7 +103,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self.register_buffer("freq_idxs", freq_idxs)
         self.register_buffer("time_idxs", time_idxs)
 
-    def _check_and_format_kwargs(self, kwargs: Dict[str, List]) -> List:
+    def _check_and_format_kwargs(self, kwargs: dict[str, list]) -> list:
         lengths = sorted(len(v) for v in kwargs.values())
         lengths = list(set(lengths))
 

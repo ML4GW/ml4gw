@@ -1,5 +1,5 @@
 import warnings
-from typing import Optional, Sequence, Union
+from collections.abc import Sequence
 
 import h5py
 import numpy as np
@@ -63,13 +63,13 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         kernel_size: int,
         batch_size: int,
         batches_per_epoch: int,
-        coincident: Union[bool, str],
-        num_files_per_batch: Optional[int] = None,
+        coincident: bool | str,
+        num_files_per_batch: int | None = None,
     ) -> None:
         if not isinstance(coincident, bool) and coincident != "files":
             raise ValueError(
                 "coincident must be either a boolean or 'files', "
-                "got unrecognized value {}".format(coincident)
+                f"got unrecognized value {coincident}"
             )
 
         self.fnames = np.array(fnames)
@@ -94,13 +94,11 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                 dset = f[channels[0]]
                 if dset.chunks is None:
                     warnings.warn(
-                        "File {} contains datasets that were generated "
+                        f"File {fname} contains datasets that were generated "
                         "without using chunked storage. This can have "
                         "severe performance impacts at data loading time. "
                         "If you need faster loading, try re-generating "
-                        "your dataset with chunked storage turned on.".format(
-                            fname
-                        ),
+                        "your dataset with chunked storage turned on.",
                         category=ContiguousHdf5Warning,
                         stacklevel=2,
                     )

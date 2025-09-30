@@ -6,7 +6,7 @@ from the corresponding distribution.
 """
 
 import math
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import torch
 import torch.distributions as dist
@@ -104,7 +104,7 @@ class LogNormal(dist.LogNormal):
         self,
         mean: float,
         std: float,
-        low: Optional[float] = None,
+        low: float | None = None,
         validate_args=None,
     ):
         self.low = low

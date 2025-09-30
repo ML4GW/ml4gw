@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import torch
 
 from .. import spectral
@@ -55,8 +53,8 @@ class Whiten(torch.nn.Module):
         self,
         fduration: float,
         sample_rate: float,
-        highpass: Optional[float] = None,
-        lowpass: Optional[float] = None,
+        highpass: float | None = None,
+        lowpass: float | None = None,
     ) -> None:
         super().__init__()
         self.fduration = fduration
@@ -157,11 +155,11 @@ class FixedWhiten(FittableSpectralTransform):
     def fit(
         self,
         fduration: float,
-        *background: Union[TimeSeries1d, FrequencySeries1d],
-        fftlength: Optional[float] = None,
-        highpass: Optional[float] = None,
-        lowpass: Optional[float] = None,
-        overlap: Optional[float] = None,
+        *background: TimeSeries1d | FrequencySeries1d,
+        fftlength: float | None = None,
+        highpass: float | None = None,
+        lowpass: float | None = None,
+        overlap: float | None = None,
     ) -> None:
         """
         Compute the PSD of channel-wise background to
@@ -224,10 +222,8 @@ class FixedWhiten(FittableSpectralTransform):
         """
         if len(background) != self.num_channels:
             raise ValueError(
-                "Expected to fit whitening transform on {} background "
-                "timeseries, but was passed {}".format(
-                    self.num_channels, len(background)
-                )
+                f"Expected to fit whitening transform on {self.num_channels} "
+                f"background timeseries, but was passed {len(background)}"
             )
 
         num_freqs = self.psd.size(-1)
@@ -257,9 +253,8 @@ class FixedWhiten(FittableSpectralTransform):
         if X.size(-1) != expected_dim:
             raise ValueError(
                 "Whitening transform expected a kernel length "
-                "of {}s, but was passed data of length {}s".format(
-                    self.kernel_length, X.size(-1) / self.sample_rate
-                )
+                f"of {self.kernel_length}s, but was passed data "
+                f"of length {X.size(-1) / self.sample_rate}s"
             )
 
         pad = int(self.fduration.item() * self.sample_rate / 2)

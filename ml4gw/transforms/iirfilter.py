@@ -1,5 +1,3 @@
-from typing import Union
-
 import torch
 from scipy.signal import iirfilter
 from torchaudio.functional import filtfilt
@@ -55,9 +53,9 @@ class IIRFilter(torch.nn.Module):
     def __init__(
         self,
         N: int,
-        Wn: Union[float, torch.Tensor],
-        rs: Union[None, float, torch.Tensor] = None,
-        rp: Union[None, float, torch.Tensor] = None,
+        Wn: float | torch.Tensor,
+        rs: None | float | torch.Tensor = None,
+        rp: None | float | torch.Tensor = None,
         btype="band",
         analog=False,
         ftype="butter",

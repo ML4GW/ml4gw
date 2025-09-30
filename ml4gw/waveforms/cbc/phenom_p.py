@@ -3,8 +3,6 @@ Based on the JAX implementation of IMRPhenomPv2 from
 https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
 """
 
-from typing import Dict, Optional, Tuple
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -38,7 +36,7 @@ class IMRPhenomPv2(IMRPhenomD):
         phic: BatchTensor,
         inclination: BatchTensor,
         f_ref: float,
-        tc: Optional[BatchTensor] = None,
+        tc: BatchTensor | None = None,
         **kwargs,
     ):
         """
@@ -207,11 +205,11 @@ class IMRPhenomPv2(IMRPhenomD):
         chi2_l: BatchTensor,
         chip: BatchTensor,
         M: BatchTensor,
-        angcoeffs: Dict[str, BatchTensor],
+        angcoeffs: dict[str, BatchTensor],
         Y2m: BatchTensor,
         alphaoffset: BatchTensor,
         epsilonoffset: BatchTensor,
-    ) -> Tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[BatchTensor, BatchTensor]:
         assert angcoeffs is not None
         assert Y2m is not None
         f = fHz * MTSUN_SI * M.unsqueeze(1)  # Frequency in geometric units
@@ -461,7 +459,7 @@ class IMRPhenomPv2(IMRPhenomD):
         s2x: BatchTensor,
         s2y: BatchTensor,
         s2z: BatchTensor,
-    ) -> Tuple[
+    ) -> tuple[
         BatchTensor,
         BatchTensor,
         BatchTensor,
@@ -634,7 +632,7 @@ class IMRPhenomPv2(IMRPhenomD):
         SL: BatchTensor,
         eta: BatchTensor,
         Sp: BatchTensor,
-    ) -> Tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[BatchTensor, BatchTensor]:
         # We define the shorthand s := Sp / (L + SL)
         L = self.L2PNR(v, eta)
         s = (Sp / (L + SL)).mT
@@ -650,7 +648,7 @@ class IMRPhenomPv2(IMRPhenomD):
         q: BatchTensor,
         chil: BatchTensor,
         chip: BatchTensor,
-    ) -> Dict[str, BatchTensor]:
+    ) -> dict[str, BatchTensor]:
         m2 = q / (1.0 + q)
         m1 = 1.0 / (1.0 + q)
         dm = m1 - m2
@@ -796,7 +794,7 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def phP_get_fRD_fdamp(
         self, m1, m2, chi1_l, chi2_l, chip
-    ) -> Tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[BatchTensor, BatchTensor]:
         # m1 > m2 should hold here
         finspin = self.FinalSpin_inplane(m1, m2, chi1_l, chi2_l, chip)
         m1_s = m1 * MTSUN_SI

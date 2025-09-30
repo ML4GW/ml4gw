@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
 
 import torch
 from jaxtyping import Float
@@ -58,15 +58,13 @@ class Snapshotter(torch.nn.Module):
         snapshot_size: int,
         stride_size: int,
         batch_size: int,
-        channels_per_snapshot: Optional[Sequence[int]] = None,
+        channels_per_snapshot: Sequence[int] | None = None,
     ) -> None:
         super().__init__()
         if stride_size >= snapshot_size:
             raise ValueError(
-                "Snapshotter can't accommodate stride {} "
-                "which is greater than snapshot size {}".format(
-                    stride_size, snapshot_size
-                )
+                f"Snapshotter can't accommodate stride {stride_size} "
+                f"which is greater than snapshot size {snapshot_size}"
             )
 
         self.snapshot_size = snapshot_size
@@ -77,9 +75,8 @@ class Snapshotter(torch.nn.Module):
         if channels_per_snapshot is not None:
             if sum(channels_per_snapshot) != num_channels:
                 raise ValueError(
-                    "Can't break {} channels into {}".format(
-                        num_channels, channels_per_snapshot
-                    )
+                    f"Can't break {num_channels} channels into "
+                    f"{channels_per_snapshot}"
                 )
         self.channels_per_snapshot = channels_per_snapshot
         self.num_channels = num_channels
@@ -90,8 +87,8 @@ class Snapshotter(torch.nn.Module):
     def forward(
         self,
         update: Float[Tensor, "channel time1"],
-        snapshot: Optional[Float[Tensor, "channel time2"]] = None,
-    ) -> Tuple[Tensor, ...]:
+        snapshot: Float[Tensor, "channel time2"] | None = None,
+    ) -> tuple[Tensor, ...]:
         if snapshot is None:
             snapshot = self.get_initial_state()
 
@@ -108,9 +105,8 @@ class Snapshotter(torch.nn.Module):
         if self.channels_per_snapshot is not None:
             if snapshots.size(1) != self.num_channels:
                 raise ValueError(
-                    "Expected {} channels, found {}".format(
-                        self.num_channels, snapshots.size(1)
-                    )
+                    f"Expected {self.num_channels} channels, found "
+                    f"{snapshots.size(1)}"
                 )
             snapshots = torch.split(
                 snapshots, self.channels_per_snapshot, dim=1

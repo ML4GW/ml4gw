@@ -9,8 +9,6 @@ and
 https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 """
 
-from typing import Optional, Union
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -36,13 +34,11 @@ def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     return torch.quantile(x, q=0.5, axis=axis) / bias
 
 
-def _validate_shapes(
-    x: Tensor, nperseg: int, y: Optional[Tensor] = None
-) -> None:
+def _validate_shapes(x: Tensor, nperseg: int, y: Tensor | None = None) -> None:
     if x.shape[-1] < nperseg:
         raise ValueError(
-            "Number of samples {} in input x is insufficient "
-            "for number of fft samples {}".format(x.shape[-1], nperseg)
+            f"Number of samples {x.shape[-1]} in input x is insufficient "
+            f"for number of fft samples {nperseg}"
         )
     elif x.ndim > 3:
         raise ValueError(
@@ -59,30 +55,30 @@ def _validate_shapes(
     if x.shape[-1] != y.shape[-1]:
         raise ValueError(
             "Time dimensions of x and y tensors must "
-            "be the same, found {} and {}".format(x.shape[-1], y.shape[-1])
+            f"be the same, found {x.shape[-1]} and {y.shape[-1]}"
         )
     elif x.ndim == 1 and not y.ndim == 1:
         raise ValueError(
             "Can't compute cross spectral density of "
-            "1D tensor x with {}D tensor y".format(y.ndim)
+            f"1D tensor x with {y.ndim}D tensor y"
         )
     elif x.ndim > 1 and y.ndim == x.ndim:
         if not y.shape == x.shape:
             raise ValueError(
                 "If x and y tensors have the same number "
                 "of dimensions, shapes must fully match. "
-                "Found shapes {} and {}".format(x.shape, y.shape)
+                f"Found shapes {x.shape} and {y.shape}"
             )
     elif x.ndim > 1 and y.ndim != (x.ndim - 1):
         raise ValueError(
             "Can't compute cross spectral density of "
-            "tensors with shapes {} and {}".format(x.shape, y.shape)
+            f"tensors with shapes {x.shape} and {y.shape}"
         )
     elif x.ndim > 2 and y.shape[0] != x.shape[0]:
         raise ValueError(
             "If x is a 3D tensor and y is a 2D tensor, "
             "0th batch dimensions must match, but found "
-            "values {} and {}".format(x.shape[0], y.shape[0])
+            f"values {x.shape[0]} and {y.shape[0]}"
         )
 
 
@@ -93,7 +89,7 @@ def fast_spectral_density(
     window: Float[Tensor, " {nperseg//2+1}"],
     scale: float,
     average: str = "median",
-    y: Optional[TimeSeries1to3d] = None,
+    y: TimeSeries1to3d | None = None,
 ) -> FrequencySeries1to3d:
     """
     Compute the power spectral density of a multichannel
@@ -340,10 +336,10 @@ def spectral_density(
 
 def truncate_inverse_power_spectrum(
     psd: PSDTensor,
-    fduration: Union[Float[Tensor, " time"], float],
+    fduration: Float[Tensor, " time"] | float,
     sample_rate: float,
-    highpass: Optional[float] = None,
-    lowpass: Optional[float] = None,
+    highpass: float | None = None,
+    lowpass: float | None = None,
 ) -> PSDTensor:
     """
     Truncate the length of the time domain response
@@ -460,10 +456,10 @@ def normalize_by_psd(
 def whiten(
     X: WaveformTensor,
     psd: PSDTensor,
-    fduration: Union[Float[Tensor, " time"], float],
+    fduration: Float[Tensor, " time"] | float,
     sample_rate: float,
-    highpass: Optional[float] = None,
-    lowpass: Optional[float] = None,
+    highpass: float | None = None,
+    lowpass: float | None = None,
 ) -> WaveformTensor:
     """
     Whiten a batch of timeseries using the specified
@@ -522,10 +518,8 @@ def whiten(
     N = X.size(-1)
     if N <= (2 * pad):
         raise ValueError(
-            (
-                "Not enough timeseries samples {} for number of "
-                "padded samples {}"
-            ).format(N, 2 * pad)
+            f"Not enough timeseries samples {N} for number of "
+            f"padded samples {2 * pad}"
         )
 
     # normalize the number of expected dimensions in the PSD

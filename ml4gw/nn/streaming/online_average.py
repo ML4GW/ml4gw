@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -38,7 +36,7 @@ class OnlineAverager(torch.nn.Module):
         batch_size: int,
         num_updates: int,
         num_channels: int,
-        offset: Optional[int] = None,
+        offset: int | None = None,
     ) -> None:
         super().__init__()
         self.update_size = update_size
@@ -76,8 +74,8 @@ class OnlineAverager(torch.nn.Module):
     def forward(
         self,
         update: Float[Tensor, "batch channel time1"],
-        state: Optional[Float[Tensor, "channel time2"]] = None,
-    ) -> Tuple[Float[Tensor, "channel time3"], Float[Tensor, "channel time4"]]:
+        state: Float[Tensor, "channel time2"] | None = None,
+    ) -> tuple[Float[Tensor, "channel time3"], Float[Tensor, "channel time4"]]:
         if state is None:
             state = self.get_initial_state()
 
