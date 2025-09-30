@@ -194,7 +194,7 @@ geocenter</p></li>
 <li><p><strong>detector_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3</span> <span class="pre">3']</span></code></span>) -- Detector tensor for each of the interferometers
 for which a response is being calculated, stacked
 along the 0th axis</p></li>
-<li><p><strong>modes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Which polarization modes to compute the response for</p></li>
+<li><p><strong>modes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Which polarization modes to compute the response for</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -248,13 +248,13 @@ two dimensions of <code class="docutils literal notranslate"><span class="pre">p
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The minimum frequency above which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
 left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, all frequencies up to <code class="docutils literal notranslate"><span class="pre">lowpass</span></code>
 will contribute to the SNR calculation.</p></li>
-<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The maximum frequency below which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out high frequency components.
 If a float, it will be used to compute such a mask. If
@@ -298,13 +298,13 @@ two dimensions of <code class="docutils literal notranslate"><span class="pre">p
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The minimum frequency above which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
 left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, all frequencies up to <code class="docutils literal notranslate"><span class="pre">sample_rate</span> <span class="pre">/</span> <span class="pre">2</span></code>
 will contribute to the SNR calculation.</p></li>
-<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The maximum frequency below which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out high frequency components.
 If a float, it will be used to compute such a mask. If
@@ -394,7 +394,7 @@ of those interferometers.</p>
 <dd class="field-odd"><p><strong>ifos</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Names of the interferometers whose geometry to retrieve</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3</span> <span class="pre">3']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3']</span></code>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3</span> <span class="pre">3']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">3']</span></code>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A concatenation of the detector tensors of each interferometer
@@ -445,7 +445,7 @@ A concatenation of the vertices of each interferometer</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>responses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">num_ifos</span> <span class="pre">time']</span></code></span>) -- A batch of interferometer responses to a batch of
 raw gravitational waveforms</p></li>
-<li><p><strong>target_snrs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code>]</span>) -- Either a tensor of desired SNRs for each waveform,
+<li><p><strong>target_snrs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch']</span></code></span>) -- Either a tensor of desired SNRs for each waveform,
 or a single SNR to which all waveforms should be scaled.</p></li>
 <li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- The one-sided power spectral density of the background
 noise at each interferometer to which a response
@@ -458,13 +458,13 @@ two dimensions of <code class="docutils literal notranslate"><span class="pre">p
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- The frequency at which the waveform responses timeseries
 have been sampled. Upon fourier transforming, should
 match the frequency resolution of the provided PSDs.</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The minimum frequency above which to compute the SNR.
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The minimum frequency above which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out low frequency components.
 If a float, it will be used to compute such a mask. If
 left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, all frequencies up to <code class="docutils literal notranslate"><span class="pre">sample_rate</span> <span class="pre">/</span> <span class="pre">2</span></code>
 will contribute to the SNR calculation.</p></li>
-<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) -- The maximum frequency below which to compute the SNR.
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The maximum frequency below which to compute the SNR.
 If a tensor is provided, it will be assumed to be a
 pre-computed mask used to 0-out high frequency components.
 If a float, it will be used to compute such a mask. If

@@ -132,7 +132,7 @@ will be sampled from the time (1st) dimension for all
 channels along the channel (0th) dimension.</p></li>
 <li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The length of the windows to sample from <code class="docutils literal notranslate"><span class="pre">X</span></code> in units
 of samples.</p></li>
-<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>]</span>) -- Target timeseries to be iterated through. If specified,
+<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Target timeseries to be iterated through. If specified,
 should be a single channel and have shape
 <code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">*</span> <span class="pre">sample_rate,)</span></code>. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, only windows
 sampled from <code class="docutils literal notranslate"><span class="pre">X</span></code> will be returned during iteration.
@@ -154,7 +154,7 @@ specified timeseries, in units of samples. E.g. if
 from an index of <code class="docutils literal notranslate"><span class="pre">X</span></code> which is a multiple of 2. Obviously,
 this reduces the number of windows which can be iterated
 through by a factor of <code class="docutils literal notranslate"><span class="pre">stride</span></code>.</p></li>
-<li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- Number of batches of window to produce during iteration
+<li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Number of batches of window to produce during iteration
 before raising a <code class="docutils literal notranslate"><span class="pre">StopIteration</span></code>. Must be specified if
 performing non-coincident sampling. Otherwise, if left
 as <code class="docutils literal notranslate"><span class="pre">None</span></code>, windows will be sampled until the entire

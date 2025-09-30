@@ -151,7 +151,7 @@ generated batches.</p></li>
 <li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of windows to sample at each iteration.</p></li>
 <li><p><strong>batches_per_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of batches to generate during each call
 to <code class="docutils literal notranslate"><span class="pre">__iter__</span></code>.</p></li>
-<li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) -- Whether windows for each channel in a given batch
+<li><p><strong>coincident</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) -- Whether windows for each channel in a given batch
 element should be sampled coincidentally, i.e.
 corresponding to the same time indices from the
 same files, or should be sampled independently.
@@ -162,7 +162,7 @@ windows independently within a given file for each
 channel. The latter setting limits the amount of
 entropy in the effective dataset, but can provide
 over 2x improvement in total throughput.</p></li>
-<li><p><strong>num_files_per_batch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- The number of unique files from which to sample
+<li><p><strong>num_files_per_batch</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The number of unique files from which to sample
 batch elements each epoch. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>,
 will use all available files. Useful when reading
 from many files is bottlenecking dataloading.</p></li>

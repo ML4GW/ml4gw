@@ -136,16 +136,16 @@ Uses SciPy's <code class="docutils literal notranslate"><span class="pre">iirfil
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>N</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The order of the filter.</p></li>
-<li><p><strong>Wn</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- A scalar or length-2 sequence giving the critical frequencies.
+<li><p><strong>Wn</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- A scalar or length-2 sequence giving the critical frequencies.
 For digital filters, Wn are in the same units as fs. By
 default, fs is 2 half-cycles/sample, so these are normalized
 from 0 to 1, where 1 is the Nyquist frequency. (Wn is thus in
 half-cycles / sample). For analog filters, Wn is an angular
 frequency (e.g., rad/s). When Wn is a length-2 sequence,``Wn[0]``
 must be less than <code class="docutils literal notranslate"><span class="pre">Wn[1]</span></code>.</p></li>
-<li><p><strong>rp</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- For Chebyshev and elliptic filters, provides the maximum ripple in
+<li><p><strong>rp</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- For Chebyshev and elliptic filters, provides the maximum ripple in
 the passband. (dB)</p></li>
-<li><p><strong>rs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- For Chebyshev and elliptic filters, provides the minimum
+<li><p><strong>rs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- For Chebyshev and elliptic filters, provides the minimum
 attenuation in the stop band. (dB)</p></li>
 <li><p><strong>btype</strong> -- The type of filter. Default is 'bandpass'.</p></li>
 <li><p><strong>analog</strong> -- When True, return an analog filter, otherwise a digital filter

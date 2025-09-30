@@ -166,7 +166,7 @@ at the expense of longer filter settle-in
 time. As such <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds of data
 will be removed from each edge of whitened
 timeseries.</p></li>
-<li><p><strong>*background</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>]</span>) -- 1D arrays capturing the signal to be used to
+<li><p><strong>*background</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code></span>) -- 1D arrays capturing the signal to be used to
 whiten each channel at call time. If <code class="docutils literal notranslate"><span class="pre">fftlength</span></code>
 is left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will be assumed that these
 already represent frequency-domain data that will
@@ -178,24 +178,24 @@ Welch's method using the specified <code class="docutils literal notranslate"><s
 and <code class="docutils literal notranslate"><span class="pre">overlap</span></code>, with a Hann window used to window
 the FFT frames by default. Should have the same
 number of args as <code class="docutils literal notranslate"><span class="pre">self.num_channels</span></code>.</p></li>
-<li><p><strong>fftlength</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Length of frames used to convert time-domain
+<li><p><strong>fftlength</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Length of frames used to convert time-domain
 data to the frequency-domain via Welch's method.
 If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will be assumed that the
 background arrays passed already represent frequency-
 domain data and don't require any conversion.</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Cutoff frequency, in Hz, used for highpass filtering
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Cutoff frequency, in Hz, used for highpass filtering
 with the fit whitening filter. This is achieved by
 setting the frequency response of the fit PSDs
 in the frequency bins below this value to 0.
 If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, the fit filter won't have any
 highpass filtering properties.</p></li>
-<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Cutoff frequency, in Hz, used for lowpass filtering
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Cutoff frequency, in Hz, used for lowpass filtering
 with the fit whitening filter. This is achieved by
 setting the frequency response of the fit PSDs
 in the frequency bins above this value to 0.
 If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, the fit filter won't have any
 lowpass filtering properties.</p></li>
-<li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Overlap between FFT frames used to convert
+<li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Overlap between FFT frames used to convert
 time-domain data to the frequency domain via
 Welch's method. If <code class="docutils literal notranslate"><span class="pre">fftlength</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, this
 is ignored. Otherwise, if left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will
@@ -254,10 +254,10 @@ worth of data will be cropped from the edges
 of the whitened timeseries.</p></li>
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which timeseries data passed at call
 time is expected to be sampled</p></li>
-<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Cutoff frequency to apply highpass filtering
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Cutoff frequency to apply highpass filtering
 during whitening. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no highpass
 filtering will be performed.</p></li>
-<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) -- Cutoff frequency to apply lowpass filtering
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Cutoff frequency to apply lowpass filtering
 during whitening. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no lowpass
 filtering will be performed.</p></li>
 </ul>
@@ -276,7 +276,7 @@ Should have the shape <code class="docutils literal notranslate"><span class="pr
 <code class="docutils literal notranslate"><span class="pre">B</span></code> is the batch size, <code class="docutils literal notranslate"><span class="pre">C</span></code> is the number of
 channels, and <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of seconds
 in the timeseries times <code class="docutils literal notranslate"><span class="pre">self.sample_rate</span></code>.</p></li>
-<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code>]</span>) -- Power spectral density used to whiten the
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code></span>) -- Power spectral density used to whiten the
 provided timeseries. Can be either 1D, 2D,
 or 3D, with the last dimension representing
 power at each frequency value. All other

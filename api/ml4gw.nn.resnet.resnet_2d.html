@@ -233,13 +233,13 @@ output of the layer.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>in_channels</strong> (<em>int</em>)</p></li>
-<li><p><strong>layers</strong> (<em>List</em><em>[</em><em>int</em><em>]</em>)</p></li>
+<li><p><strong>layers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>)</p></li>
 <li><p><strong>classes</strong> (<em>int</em>)</p></li>
 <li><p><strong>kernel_size</strong> (<em>int</em>)</p></li>
 <li><p><strong>zero_init_residual</strong> (<em>bool</em>)</p></li>
 <li><p><strong>groups</strong> (<em>int</em>)</p></li>
 <li><p><strong>width_per_group</strong> (<em>int</em>)</p></li>
-<li><p><strong>stride_type</strong> (<em>List</em><em>[</em><em>Literal</em><em>[</em><em>'stride'</em><em>, </em><em>'dilation'</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>stride_type</strong> (<em>list</em><em>[</em><em>Literal</em><em>[</em><em>'stride'</em><em>, </em><em>'dilation'</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>norm_layer</strong> (<em>Callable</em><em>[</em><em>[</em><em>int</em><em>]</em><em>, </em><em>Module</em><em>] </em><em>| </em><em>None</em>)</p></li>
 </ul>
 </dd>
@@ -263,7 +263,7 @@ to support the longer timeseries used in BBH detection.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>in_channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The number of channels in input tensor.</p></li>
-<li><p><strong>layers</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- A list representing the number of residual
+<li><p><strong>layers</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) -- A list representing the number of residual
 blocks to include in each &quot;layer&quot; of the
 network. Total layers (e.g. 50 in ResNet50)
 is <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">+</span> <span class="pre">sum(layers)</span> <span class="pre">*</span> <span class="pre">factor</span></code>, where factor
@@ -287,7 +287,7 @@ need this to be &gt;1, and wil raise an error if
 which is scaled up by the typical expansion
 factor at each layer of the network. Meaningless
 for vanilla <code class="docutils literal notranslate"><span class="pre">ResNet</span></code>.</p></li>
-<li><p><strong>stride_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'stride'</span></code>, <code class="docutils literal notranslate"><span class="pre">'dilation'</span></code>]]]</span>) -- Whether to achieve downsampling on the time axis
+<li><p><strong>stride_type</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'stride'</span></code>, <code class="docutils literal notranslate"><span class="pre">'dilation'</span></code>]] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Whether to achieve downsampling on the time axis
 by strided or dilated convolutions for each layer.
 If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, strided convolutions will be
 used at each layer. Otherwise, <code class="docutils literal notranslate"><span class="pre">stride_type</span></code> should

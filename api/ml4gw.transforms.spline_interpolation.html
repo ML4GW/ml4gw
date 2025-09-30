@@ -163,7 +163,7 @@ Default is cubic.</p></li>
 inversion for interpolation along the width dimension. Not
 to be confused with the <code class="docutils literal notranslate"><span class="pre">s</span></code> parameter in scipy's spline
 methods, which controls the number of knots.</p></li>
-<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates for the data to be interpolated to along the
+<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Coordinates for the data to be interpolated to along the
 width dimension. If not specified during initialization,
 this must be specified during the object call.</p></li>
 </ul>
@@ -196,7 +196,7 @@ this must be specified during the object call.</p></li>
 <li><p><strong>Z</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of data to be interpolated. Must be between 2 and 4
 dimensions. The shape of the tensor must agree with the
 input coordinates given on initialization.</p></li>
-<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates to interpolate the data to along the width
+<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Coordinates to interpolate the data to along the width
 dimension. Overrides any value that was set during
 initialization.</p></li>
 </ul>
@@ -251,10 +251,10 @@ to be confused with the <code class="docutils literal notranslate"><span class="
 methods, which controls the number of knots.</p></li>
 <li><p><strong>sy</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Regularization factor to avoid singularities during matrix
 inversion for interpolation along the height dimension.</p></li>
-<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates for the data to be interpolated to along the
+<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Coordinates for the data to be interpolated to along the
 width dimension. If not specified during initialization,
 this must be specified during the object call.</p></li>
-<li><p><strong>y_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates for the data to be interpolated to along the
+<li><p><strong>y_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Coordinates for the data to be interpolated to along the
 height dimension. If not specified during initialization,
 this must be specified during the object call.</p></li>
 </ul>
@@ -292,10 +292,10 @@ this must be specified during the object call.</p></li>
 <li><p><strong>Z</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor of data to be interpolated. Must be between 2 and 4
 dimensions. The shape of the tensor must agree with the
 input coordinates given on initialization.</p></li>
-<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates to interpolate the data to along the width
+<li><p><strong>x_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Coordinates to interpolate the data to along the width
 dimension. Overrides any value that was set during
 initialization.</p></li>
-<li><p><strong>y_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</span>) -- Coordinates to interpolate the data to along the height
+<li><p><strong>y_out</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Coordinates to interpolate the data to along the height
 dimension. Overrides any value that was set during
 initialization.</p></li>
 </ul>
