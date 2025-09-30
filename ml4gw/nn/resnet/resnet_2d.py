@@ -4,8 +4,8 @@ https://github.com/pytorch/vision/blob/main/torchvision/models/resnet.py
 but with arbitrary kernel sizes
 """
 
-from typing import Literal
 from collections.abc import Callable
+from typing import Literal
 
 import torch
 import torch.nn as nn

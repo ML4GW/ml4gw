@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
 import torch
-from gwpy.signal.qtransform import QPlane
+from gwpy.signal.qtransform import QPlane, QTiling
 from gwpy.signal.qtransform import QTile as gwpy_QTile
-from gwpy.signal.qtransform import QTiling
 
 from ml4gw.transforms import QScan, SingleQTransform
 from ml4gw.transforms.qtransform import QTile

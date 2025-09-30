@@ -7,8 +7,8 @@ where training-time statistics are entirely arbitrary due to
 simulations.
 """
 
-from typing import Literal
 from collections.abc import Callable
+from typing import Literal
 
 import torch
 import torch.nn as nn
