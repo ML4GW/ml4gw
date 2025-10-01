@@ -22,19 +22,27 @@ def gps_from_fname(fname: str) -> tuple[int, int]:
     return int(g0), int(dur)
 
 
-def read_glitch_times(glitch_file: str, ifos: Sequence[str]) -> np.ndarray:
+def read_glitch_times(glitch_file: str, ifos: Sequence[str]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Returns an array (possibly empty) with all Omicron trigger gps times
-    stored under <ifo>/time in the given *glitch_file*.
+    Return (t_mean, t_start, t_end) as float arrays (possibly empty).
     """
     if not os.path.exists(glitch_file):
-        return np.array([])
-    ts = []
+        empty = np.array([], dtype=float)
+        return empty, empty, empty
+
+    tmean, tstart, tend = [], [], []
     with h5py.File(glitch_file, "r") as f:
         for ifo in ifos:
-            if ifo in f and "time" in f[ifo]:
-                ts.extend(f[ifo]["time"][:])
-    return np.asarray(ts, dtype=float)
+            if ifo in f:
+                grp = f[ifo]
+                has = all(k in grp for k in ("time", "tstart", "tend"))
+                if has:
+                    tmean.extend(np.asarray(grp["time"]))
+                    tstart.extend(np.asarray(grp["tstart"]))
+                    tend.extend(np.asarray(grp["tend"]))
+    return (np.asarray(tmean, dtype=float),
+            np.asarray(tstart, dtype=float),
+            np.asarray(tend,  dtype=float))
 
 
 class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
@@ -90,7 +98,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
             "clean" –- sample exactly as raw **but**
                     -– discard any window whose *post-PSD* segment
                        (length = fduration + kernel_length) overlaps
-                       a glitch (±glitch_margin seconds).
+                       a glitch ([glitch_start:glitch_end] seconds).
 
             "glitch" -– pick one glitch time *tgps*
                      -– start-index  s = (tgps - gps_start) * fs − psd_samples
@@ -110,7 +118,6 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                  mode: str = "raw",
                  glitch_root: str = "/path/to/omicron/HL",
                  ifos: Sequence[str] = ("H1", "L1"),
-                 glitch_margin: float = 2.0,
                  num_files_per_batch: Optional[int] = None,
                  cache_dir: Optional[str] = None,
                  remake_cache: bool = False):
@@ -139,12 +146,11 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         self.mode = mode
         self.glitch_root = glitch_root
         self.ifos = ifos
-        self.glitch_margin = glitch_margin
         self.num_files_per_batch = len(fnames) if num_files_per_batch is None else num_files_per_batch
         self.cache_dir = cache_dir
         self.remake_cache = remake_cache
-        self.exam_per_batch = False # Need to be added to __init__ args 
-        
+        self.exam_per_batch = False # Need to be added to __init__ args
+
         self.sizes, self.valid, self.cache_paths, self.num_valid = {}, {}, {}, {}
         for fname in self.fnames:
             basename = os.path.basename(fname).replace(".h5", "")
@@ -176,13 +182,13 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
 
             g0, dur = gps_from_fname(fname)
             glitch_file = os.path.join(glitch_root, f"Segs_{g0}_{dur}", "glitch_info.h5")
-            tglitch = read_glitch_times(glitch_file, ifos)
+            tglitch, tglitch_start, tglitch_end = read_glitch_times(glitch_file, ifos)
 
             mask = np.zeros(self.sizes[fname], dtype=bool)
-            if len(tglitch):
-                for tg in tglitch:
-                    lo = int((tg - g0 - glitch_margin) * self.fs)
-                    hi = int((tg - g0 + glitch_margin) * self.fs)
+            if len(tglitch_start):
+                for tgs, tge in zip(tglitch_start, tglitch_end):
+                    lo = int((tgs - g0) * self.fs)
+                    hi = int((tge - g0) * self.fs)
                     mask[max(lo, 0):min(hi, self.sizes[fname])] = True
 
             if mode == "clean":
@@ -240,10 +246,10 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         uniq, inv, count = np.unique(files, return_inverse=True, return_counts=True)
         for u, (fname, cnt) in enumerate(zip(uniq, count)):
             if self.mode == "raw":
-                # just need to sample a number from 0 to self.sizes[fname] - self.kernel_size
                 valid_cache = self.sizes[fname] - self.kernel_size
             else:
                 valid_cache = self.valid[fname]
+
             inds = np.where(inv == u)[0]
             if self.coincident:
                 b_idx = np.repeat(inds, self.num_channels)
@@ -253,26 +259,27 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                 ch_idx = inds % self.num_channels
 
             if self.coincident is True:
-                #starts = np.random.choice(self.valid[fname], size=cnt)
                 starts = np.random.choice(valid_cache, size=cnt)
                 starts = np.repeat(starts, self.num_channels)
             else:
-                #starts = np.random.choice(self.valid[fname], size=len(b_idx))
                 starts = np.random.choice(valid_cache, size=len(b_idx))
 
             with h5py.File(fname, "r") as f:
                 for b, c, s in zip(b_idx, ch_idx, starts):
+                    # read data window
                     f[self.channels[c]].read_direct(x[b, c], np.s_[s:s + self.kernel_size])
 
         return torch.from_numpy(x)
 
+
     def sample_batch(self) -> WaveformTensor:
         x = self._sample_batch()
         if self.exam_per_batch:
-            while torch.any(x==0) or torch.any(torch.isnan(x)):
+            while torch.any(x == 0) or torch.any(torch.isnan(x)):
                 warnings.warn("Critical: sampled batch with zeros or NaNs, re-sampling...")
-                x = self._sample_batch()  
+                x = self._sample_batch()
         return x
+
 
     def __iter__(self):
         wi = torch.utils.data.get_worker_info()
