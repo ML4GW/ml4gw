@@ -1,3 +1,8 @@
+"""
+This module defines common types used for type
+annotation throughout the package
+"""
+
 from jaxtyping import Float
 from torch import Tensor
 

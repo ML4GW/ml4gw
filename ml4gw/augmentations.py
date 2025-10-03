@@ -1,3 +1,8 @@
+"""
+This module contains transformations that may be useful
+for augmenting timeseries data during training
+"""
+
 import torch
 from jaxtyping import Float
 from torch import Tensor

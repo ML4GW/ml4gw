@@ -1,6 +1,7 @@
 """
-Tools for manipulating raw gravitational waveforms
-and projecting them onto interferometer responses.
+Tools for manipulating raw gravitational waveforms,
+projecting them onto interferometer responses, and
+calculating SNRs.
 Much of the projection code is an extension of the
 implementation made available in
 `bilby <https://arxiv.org/abs/1811.02042>`_.
