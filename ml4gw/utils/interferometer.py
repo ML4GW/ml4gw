@@ -1,10 +1,27 @@
+"""
+This module contains the interferometer geometry
+used to calculate waveform projection.
+
+Values taken from
+https://lscsoft.docs.ligo.org/lalsuite/lal/_l_a_l_detectors_8h_source.html
+"""
+
+from typing import Literal
+
 import torch
 
 
-# based on values from
-# https://lscsoft.docs.ligo.org/lalsuite/lal/_l_a_l_detectors_8h_source.html
 class InterferometerGeometry:
-    def __init__(self, name: str) -> None:
+    """
+    Contains geometric information for the LIGO, Virgo, and KAGRA
+    interferometers.
+
+    Args:
+        name: The name of the interferometer. This should be either
+        'H1', 'L1', 'V1', or 'K1'.
+    """
+
+    def __init__(self, name: Literal["H1", "L1", "V1", "K1"]) -> None:
         if name == "H1":
             self.x_arm = torch.Tensor(
                 (-0.22389266154, +0.79983062746, +0.55690487831)

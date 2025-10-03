@@ -1,3 +1,10 @@
+"""
+This module contains functions for randomly sampling
+windows of data from timeseries data, as well as for
+unfolding timeseries data into potentially overlapping
+windows.
+"""
+
 import torch
 from jaxtyping import Float, Int64
 from torch import Tensor

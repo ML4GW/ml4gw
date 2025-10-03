@@ -1,3 +1,9 @@
+"""
+This module contains a variety of data transformation classes,
+including objects to calculate spectral densities, whiten data,
+and compute Q-transforms.
+"""
+
 from .iirfilter import IIRFilter
 from .pearson import ShiftedPearsonCorrelation
 from .qtransform import QScan, SingleQTransform

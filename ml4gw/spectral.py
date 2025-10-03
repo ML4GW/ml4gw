@@ -1,4 +1,7 @@
 """
+This module provides functions for calculation of spectral densities
+and for whitening.
+
 Several implementation details are derived from the scipy csd and welch
 implementations. For more info, see
 
