@@ -91,11 +91,15 @@
              
   <section id="module-ml4gw.utils.interferometer">
 <span id="ml4gw-utils-interferometer"></span><h1>ml4gw.utils.interferometer<a class="headerlink" href="#module-ml4gw.utils.interferometer" title="Link to this heading"></a></h1>
+<p>This module contains the interferometer geometry
+used to calculate waveform projection.</p>
+<p>Values taken from
+<a class="reference external" href="https://lscsoft.docs.ligo.org/lalsuite/lal/_l_a_l_detectors_8h_source.html">https://lscsoft.docs.ligo.org/lalsuite/lal/_l_a_l_detectors_8h_source.html</a></p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.utils.interferometer.InterferometerGeometry" title="ml4gw.utils.interferometer.InterferometerGeometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InterferometerGeometry</span></code></a>(name)</p></td>
-<td><p></p></td>
+<td><p>Contains geometric information for the LIGO, Virgo, and KAGRA interferometers.</p></td>
 </tr>
 </tbody>
 </table>
@@ -103,9 +107,17 @@
 <dt class="sig sig-object py" id="ml4gw.utils.interferometer.InterferometerGeometry">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.utils.interferometer.</span></span><span class="sig-name descname"><span class="pre">InterferometerGeometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.utils.interferometer.InterferometerGeometry" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Contains geometric information for the LIGO, Virgo, and KAGRA
+interferometers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<em>str</em>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'H1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'L1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'V1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'K1'</span></code>]</span>) -- The name of the interferometer. This should be either</p></li>
+<li><p><strong>'H1'</strong></p></li>
+<li><p><strong>'L1'</strong></p></li>
+<li><p><strong>'V1'</strong></p></li>
+<li><p><strong>'K1'.</strong> (<em>or</em>)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
