@@ -225,8 +225,10 @@ class UniformComovingVolume(dist.Distribution):
                 f"or 'luminosity_distance'; got {distance_type}"
             )
 
-        self.minimum = minimum
-        self.maximum = maximum
+        self.minimum = torch.as_tensor(minimum)
+        self.maximum = torch.as_tensor(maximum)
+        if self.minimum.device != self.maximum.device:
+            raise RuntimeError("Min and max values are not on same device")
         self.distance_type = distance_type
         self.grid_size = grid_size
         self.z_grid_max = z_grid_max
@@ -265,7 +267,9 @@ class UniformComovingVolume(dist.Distribution):
         distances, using the specified distance type.
         """
         self._generate_distance_grids()
-        bounds = torch.tensor([self.minimum, self.maximum])
+        bounds = torch.tensor(
+            [self.minimum, self.maximum], device=self.minimum.device
+        )
         z_min, z_max = self._linear_interp_1d(
             self.distance_grid, self.z_grid, bounds
         )
@@ -276,7 +280,9 @@ class UniformComovingVolume(dist.Distribution):
         """
         Generate distance grids based on the specified redshift range.
         """
-        self.z_grid = torch.linspace(0, self.z_grid_max, self.grid_size)
+        self.z_grid = torch.linspace(
+            0, self.z_grid_max, self.grid_size, device=self.minimum.device
+        )
         self.dz = self.z_grid[1] - self.z_grid[0]
         # C is specfied in m/s, h0 in km/s/Mpc, so divide by 1000 to convert
         comoving_dist_grid = (
@@ -285,7 +291,9 @@ class UniformComovingVolume(dist.Distribution):
             )
             / 1000
         )
-        zero_prefix = torch.zeros(1, dtype=comoving_dist_grid.dtype)
+        zero_prefix = torch.zeros(
+            1, dtype=comoving_dist_grid.dtype, device=self.minimum.device
+        )
         self.comoving_dist_grid = torch.cat([zero_prefix, comoving_dist_grid])
         self.luminosity_dist_grid = self.comoving_dist_grid * (1 + self.z_grid)
 
@@ -315,7 +323,9 @@ class UniformComovingVolume(dist.Distribution):
             p_of_distance, self.distance_grid
         )
         cdf = torch.cumulative_trapezoid(self.pdf, self.distance_grid)
-        zero_prefix = torch.zeros(1, dtype=cdf.dtype)
+        zero_prefix = torch.zeros(
+            1, dtype=cdf.dtype, device=self.minimum.device
+        )
         self.cdf = torch.cat([zero_prefix, cdf])
         self.log_pdf = torch.log(self.pdf)
 
@@ -333,7 +343,7 @@ class UniformComovingVolume(dist.Distribution):
 
     def rsample(self, sample_shape: torch.Size = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
-        u = torch.rand(sample_shape)
+        u = torch.rand(sample_shape, device=self.minimum.device)
         return self._linear_interp_1d(self.cdf, self.distance_grid, u)
 
     def log_prob(self, value: Tensor) -> Tensor:
@@ -341,7 +351,9 @@ class UniformComovingVolume(dist.Distribution):
             self.distance_grid, self.log_pdf, value
         )
         inside_range = (value >= self.minimum) & (value <= self.maximum)
-        log_prob[~inside_range] = float("-inf")
+        log_prob[~inside_range] = torch.as_tensor(
+            float("-inf"), device=self.minimum.device
+        )
         return log_prob
 
 
