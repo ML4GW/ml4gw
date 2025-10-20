@@ -16,7 +16,7 @@ authors:
     affiliation: "2, 3"
   - name: Deep Chatterjee
     orcid: 0000-0003-0038-5468
-    affiliation: 3
+    affiliation: "2, 3"
   - name: Ravi Kumar
     affiliation: 4
   - name: Alec Gunny
