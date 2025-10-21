@@ -52,7 +52,7 @@ However, the standard GW libraries are not designed for the scale or speed desir
 `ml4gw` addresses this gap by re-writing common GW processing steps as PyTorch [@paszke2019pytorch] modules, taking advantage of the natural parallelization that comes with PyTorch's batch processing, and adding the option to accelerate these steps using GPUs and other coprocessors supported by the PyTorch framework.
 From libraries such as GWpy [@gwpy], `ml4gw` re-implements power spectral density estimation, signal-to-noise ratio calculation, whitening filters, and Q-transforms.
 Like bilby [@bilby], `ml4gw` provides the functionality to sample from astrophysical parameter distributions, which can then be used to simulate waveforms, mimicking the simulation features of lalsuite [@lalsuite].
-`ml4gw` has available basic compact binary merger waveform families used in online searches and inference (TaylorF2, IMRPhenomD, and IMRPhenomPv2), as well as sine-gaussian waveforms for capturing unmodeled GW signals, with more complex waveforms planned for the future.
+`ml4gw` has available basic compact binary merger waveform families used in online searches and inference (TaylorF2, IMRPhenomD, and IMRPhenomPv2), as well as sine-Gaussian waveforms for capturing unmodeled GW signals, with more complex waveforms planned for the future.
 All of these modules have been designed to work with batches of multi-channel time-series data, run on accelerated hardware, and be composable so that the output of one function can easily become the input of another.
 
 Additionally, `ml4gw` contains a number of general utility features:
