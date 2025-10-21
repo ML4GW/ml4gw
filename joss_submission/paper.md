@@ -55,7 +55,7 @@ Like bilby [@bilby], `ml4gw` provides the functionality to sample from astrophys
 `ml4gw` has available basic compact binary merger waveform families used in online searches and inference (TaylorF2, IMRPhenomD, and IMRPhenomPv2), as well as sine-gaussian waveforms for capturing unmodeled GW signals, with more complex waveforms planned for the future.
 All of these modules have been designed to work with batches of multi-channel time-series data, run on accelerated hardware, and be composable so that the output of one function can easily become the input of another.
 
-Additionally, `ml4gw` contains a number of general utility features.
+Additionally, `ml4gw` contains a number of general utility features:
 
 - Efficient out-of-memory dataloading to scale the quantity of data used for training
 - Random sampling of windows from batches of multi-channel time-series data
