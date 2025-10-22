@@ -135,6 +135,11 @@ class FixedWhiten(FittableSpectralTransform):
             frequency bins in the fit PSD.
         sample_rate:
             Rate at which timeseries will be sampled, in Hz
+        crop:
+            If ``True``, crop ``fduration / 2`` seconds of data
+            from both sides of the time dimension to remove the
+            corruption from the filter. If ``False``, return the
+            full timeseries.
         dtype:
             Datatype with which background PSD will be stored
     """
@@ -144,12 +149,14 @@ class FixedWhiten(FittableSpectralTransform):
         num_channels: float,
         kernel_length: float,
         sample_rate: float,
+        crop: bool = True,
         dtype: torch.dtype = torch.float64,
     ) -> None:
         super().__init__()
         self.num_channels = num_channels
         self.sample_rate = sample_rate
         self.kernel_length = kernel_length
+        self.crop = crop
 
         N = int(kernel_length * sample_rate)
         num_freqs = N // 2 + 1
@@ -266,4 +273,6 @@ class FixedWhiten(FittableSpectralTransform):
             )
 
         pad = int(self.fduration.item() * self.sample_rate / 2)
-        return spectral.normalize_by_psd(X, self.psd, self.sample_rate, pad)
+        return spectral.normalize_by_psd(
+            X, self.psd, self.sample_rate, pad, self.crop
+        )
