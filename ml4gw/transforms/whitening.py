@@ -47,11 +47,6 @@ class Whiten(torch.nn.Module):
             Cutoff frequency to apply lowpass filtering
             during whitening. If left as ``None``, no lowpass
             filtering will be performed.
-        crop:
-            If ``True``, crop ``fduration / 2`` seconds of data
-            from both sides of the time dimension to remove the
-            corruption from the filter. If ``False``, return the
-            full timeseries.
     """
 
     def __init__(
@@ -60,14 +55,12 @@ class Whiten(torch.nn.Module):
         sample_rate: float,
         highpass: float | None = None,
         lowpass: float | None = None,
-        crop: bool = True,
     ) -> None:
         super().__init__()
         self.fduration = fduration
         self.sample_rate = sample_rate
         self.highpass = highpass
         self.lowpass = lowpass
-        self.crop = crop
 
         # register a window up front to signify our
         # fduration at inference time
@@ -76,7 +69,10 @@ class Whiten(torch.nn.Module):
         self.register_buffer("window", window)
 
     def forward(
-        self, X: TimeSeries3d, psd: FrequencySeries1to3d
+        self,
+        X: TimeSeries3d,
+        psd: FrequencySeries1to3d,
+        crop: bool = True,
     ) -> TimeSeries3d:
         """
         Whiten a batch of multichannel timeseries by a
@@ -103,6 +99,11 @@ class Whiten(torch.nn.Module):
                 For more information about what these different
                 shapes for ``psd`` represent, consult the documentation
                 for :meth:`~ml4gw.spectral.whiten`.
+            crop:
+                If ``True``, crop ``fduration / 2`` seconds of data
+                from both sides of the time dimension to remove the
+                corruption from the filter. If ``False``, return the
+                full timeseries.
         Returns:
             Whitened timeseries, with ``fduration * sample_rate / 2``
                 samples cropped from each edge. Output shape will then
@@ -116,7 +117,7 @@ class Whiten(torch.nn.Module):
             sample_rate=self.sample_rate,
             highpass=self.highpass,
             lowpass=self.lowpass,
-            crop=self.crop,
+            crop=crop,
         )
 
 
@@ -156,7 +157,6 @@ class FixedWhiten(FittableSpectralTransform):
         self.num_channels = num_channels
         self.sample_rate = sample_rate
         self.kernel_length = kernel_length
-        self.crop = crop
 
         N = int(kernel_length * sample_rate)
         num_freqs = N // 2 + 1
@@ -258,11 +258,24 @@ class FixedWhiten(FittableSpectralTransform):
         fduration = torch.Tensor([fduration])
         self.build(psd=psd, fduration=fduration)
 
-    def forward(self, X: TimeSeries3d) -> TimeSeries3d:
+    def forward(self, X: TimeSeries3d, crop: bool = True) -> TimeSeries3d:
         """
         Whiten the input timeseries tensor using the
         PSD fit by the ``.fit`` method, which must be
         called **before** the first call to ``.forward``.
+
+        Args:
+            X:
+                Batch of multichannel timeseries to whiten.
+                Should have the shape ``(B, C, N)``, where
+                ``B`` is the batch size, ``C`` is the number of
+                channels, and ``N`` is the number of seconds
+                in the timeseries times ``self.sample_rate``.
+            crop:
+                If ``True``, crop ``fduration / 2`` seconds of data
+                from both sides of the time dimension to remove the
+                corruption from the filter. If ``False``, return the
+                full timeseries.
         """
         expected_dim = int(self.kernel_length * self.sample_rate)
         if X.size(-1) != expected_dim:
@@ -274,5 +287,5 @@ class FixedWhiten(FittableSpectralTransform):
 
         pad = int(self.fduration.item() * self.sample_rate / 2)
         return spectral.normalize_by_psd(
-            X, self.psd, self.sample_rate, pad, self.crop
+            X, self.psd, self.sample_rate, pad, crop
         )
