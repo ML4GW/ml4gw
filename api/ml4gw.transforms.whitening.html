@@ -141,7 +141,8 @@ calling the <code class="docutils literal notranslate"><span class="pre">.fit</s
 in seconds. Determines the number of
 frequency bins in the fit PSD.</p></li>
 <li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Rate at which timeseries will be sampled, in Hz</p></li>
-<li><p><strong>dtype</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code></span>) -- Datatype with which background PSD will be stored</p></li>
+<li><p><strong>crop</strong> -- Datatype with which background PSD will be stored</p></li>
+<li><p><strong>dtype</strong> (<em>dtype</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -210,16 +211,26 @@ be set to half of <code class="docutils literal notranslate"><span class="pre">f
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedWhiten.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.forward" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten.forward" title="Link to this definition"></a></dt>
 <dd><p>Whiten the input timeseries tensor using the
 PSD fit by the <code class="docutils literal notranslate"><span class="pre">.fit</span></code> method, which must be
 called <strong>before</strong> the first call to <code class="docutils literal notranslate"><span class="pre">.forward</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span>) -- Batch of multichannel timeseries to whiten.
+Should have the shape <code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">N)</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">B</span></code> is the batch size, <code class="docutils literal notranslate"><span class="pre">C</span></code> is the number of
+channels, and <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of seconds
+in the timeseries times <code class="docutils literal notranslate"><span class="pre">self.sample_rate</span></code>.</p></li>
+<li><p><strong>crop</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, crop <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds of data
+from both sides of the time dimension to remove the
+corruption from the filter. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, return the
+full timeseries.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>X</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch channel time'</em><em>]</em>)</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -265,7 +276,7 @@ filtering will be performed.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.Whiten.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten.forward" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.Whiten.forward" title="Link to this definition"></a></dt>
 <dd><p>Whiten a batch of multichannel timeseries by a
 background power spectral density.</p>
 <dl class="field-list simple">
@@ -289,6 +300,10 @@ to <code class="docutils literal notranslate"><span class="pre">X.size(1)</span>
 For more information about what these different
 shapes for <code class="docutils literal notranslate"><span class="pre">psd</span></code> represent, consult the documentation
 for <a class="reference internal" href="ml4gw.spectral.html#ml4gw.spectral.whiten" title="ml4gw.spectral.whiten"><code class="xref py py-meth docutils literal notranslate"><span class="pre">whiten()</span></code></a>.</p></li>
+<li><p><strong>crop</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, crop <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds of data
+from both sides of the time dimension to remove the
+corruption from the filter. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, return the
+full timeseries.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

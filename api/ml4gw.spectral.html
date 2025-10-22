@@ -121,7 +121,7 @@ implementations. For more info, see</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.median" title="ml4gw.spectral.median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">median</span></code></a>(x, axis)</p></td>
 <td><p>Implements a median calculation that matches numpy's behavior for an even number of elements and includes the same bias correction used by <a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">scipy's implementation</a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd" title="ml4gw.spectral.normalize_by_psd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_by_psd</span></code></a>(X, psd, sample_rate, pad)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd" title="ml4gw.spectral.normalize_by_psd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_by_psd</span></code></a>(X, psd, sample_rate, pad[, ...])</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.spectral_density" title="ml4gw.spectral.spectral_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spectral_density</span></code></a>(x, nperseg, nstride, ...[, ...])</p></td>
@@ -222,7 +222,7 @@ the same bias correction used by
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.spectral.normalize_by_psd">
-<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">normalize_by_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.normalize_by_psd" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">normalize_by_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.normalize_by_psd" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -230,6 +230,7 @@ the same bias correction used by
 <li><p><strong>psd</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'num_ifos frequency'</em><em>]</em>)</p></li>
 <li><p><strong>sample_rate</strong> (<em>float</em>)</p></li>
 <li><p><strong>pad</strong> (<em>int</em>)</p></li>
+<li><p><strong>crop</strong> (<em>bool</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -320,7 +321,7 @@ tapered.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.spectral.whiten">
-<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.whiten" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.whiten" title="Link to this definition"></a></dt>
 <dd><p>Whiten a batch of timeseries using the specified
 background one-sided power spectral densities (PSDs),
 modified to have the desired time domain response length
@@ -357,6 +358,10 @@ highpass filtering will be applied.</p></li>
 the data, setting the frequency response in the
 whitening filter to 0. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, no
 lowpass filtering will be applied.</p></li>
+<li><p><strong>crop</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, crop <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds of data
+from both sides of the time dimension to remove the
+corruption from the filter. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, return the
+full timeseries.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -364,7 +369,7 @@ lowpass filtering will be applied.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
-<dt>Batch of whitened multichannel timeseries with</dt><dd><p><code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds trimmed from each side.</p>
+<dt>Batch of whitened multichannel timeseries with <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code></dt><dd><p>seconds optionally trimmed from each side.</p>
 </dd>
 </dl>
 </p>
