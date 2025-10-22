@@ -47,6 +47,11 @@ class Whiten(torch.nn.Module):
             Cutoff frequency to apply lowpass filtering
             during whitening. If left as ``None``, no lowpass
             filtering will be performed.
+        crop:
+            If ``True``, crop ``fduration / 2`` seconds of data
+            from both sides of the time dimension to remove the
+            corruption from the filter. If ``False``, return the
+            full timeseries.
     """
 
     def __init__(
@@ -55,12 +60,14 @@ class Whiten(torch.nn.Module):
         sample_rate: float,
         highpass: float | None = None,
         lowpass: float | None = None,
+        crop: bool = True,
     ) -> None:
         super().__init__()
         self.fduration = fduration
         self.sample_rate = sample_rate
         self.highpass = highpass
         self.lowpass = lowpass
+        self.crop = crop
 
         # register a window up front to signify our
         # fduration at inference time
@@ -109,6 +116,7 @@ class Whiten(torch.nn.Module):
             sample_rate=self.sample_rate,
             highpass=self.highpass,
             lowpass=self.lowpass,
+            crop=self.crop,
         )
 
 
