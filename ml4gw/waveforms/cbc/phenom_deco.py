@@ -105,16 +105,16 @@ class IMRPhenomDECO(IMRPhenomD):
 
         fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
         Mf_peak_phase = self.fmaxCalc(fRD, fDM, gamma2, gamma3,0.5)
-        _, t0 = self.phenom_d_mrd_phase(Mf_peak_phase, eta, eta2, chi1, chi2, xi)
+        _, t0 = self.phenom_d_mrd_phase(Mf_peak_phase, eta, eta2, chi1, chi2, xi, fRD, fDM )
 
         Mf = torch.outer(M_s, f)
         Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
 
         Psi, _ = self.phenom_d_phase(
-            Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi
+            Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM 
         )
         Psi_ref, _ = self.phenom_d_phase(
-            Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi
+            Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM 
         )
 
         Psi = (Psi.mT - 2 * phic).mT
@@ -188,7 +188,7 @@ class IMRPhenomDECO(IMRPhenomD):
 
         # Geometric peak and joining frequencies
         Mf_peak = (torch.ones_like(Mf).mT * Mf_peak).mT
-        Mf_join_ins = 0.014 * (2*compactness)**(3/2.)*torch.ones_like(Mf)
+        Mf_join_ins = 0.014 * (torch.ones_like(Mf).mT * (2 * compactness) ** (3 /2. )).mT
         # construct full IMR Amp
         theta_minus_f1 = torch.heaviside(
             Mf_join_ins - Mf, torch.tensor(0.0, device=Mf.device)
@@ -238,7 +238,7 @@ class IMRPhenomDECO(IMRPhenomD):
         # Geometric frequency definition from PhenomD header file
         AMP_fJoin_INS = 0.014 * (2*compactness)**(3/2.)
 
-        Mf1 = AMP_fJoin_INS * torch.ones_like(Mf)
+        Mf1 = (AMP_fJoin_INS * torch.ones_like(Mf).mT).mT
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
 
