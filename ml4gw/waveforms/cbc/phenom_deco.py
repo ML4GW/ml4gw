@@ -188,7 +188,7 @@ class IMRPhenomDECO(IMRPhenomD):
 
         # Geometric peak and joining frequencies
         Mf_peak = (torch.ones_like(Mf).mT * Mf_peak).mT
-        Mf_join_ins = 0.014 * (2*compactness)**(3/2.)*torch.ones_like(Mf)
+        Mf_join_ins = 0.014 * (torch.ones_like(Mf).mT * (2 * compactness) ** (3 /2. )).mT
         # construct full IMR Amp
         theta_minus_f1 = torch.heaviside(
             Mf_join_ins - Mf, torch.tensor(0.0, device=Mf.device)
@@ -238,7 +238,7 @@ class IMRPhenomDECO(IMRPhenomD):
         # Geometric frequency definition from PhenomD header file
         AMP_fJoin_INS = 0.014 * (2*compactness)**(3/2.)
 
-        Mf1 = AMP_fJoin_INS * torch.ones_like(Mf)
+        Mf1 = (AMP_fJoin_INS * torch.ones_like(Mf).mT).mT
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
 
