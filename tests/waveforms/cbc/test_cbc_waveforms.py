@@ -333,7 +333,7 @@ def test_phenom_d(
             1e21 * hc_lal_data.imag, 1e21 * hc_ml4gw.imag.numpy(), atol=2e-3
         )
 
-def test_phenom_deco(
+def test_phenom_deco_bbh_limit(
     chirp_mass,
     mass_ratio,
     chi1,
@@ -344,6 +344,11 @@ def test_phenom_deco(
     sample_rate,
     f_ref,
 ):
+    """
+    This test checks that the PhenomDECO implementation reduces to
+    the lalsimulation implementation of PhenomD
+    in the binary black–hole limit (compactness=0.5)
+    """
     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
         chirp_mass, mass_ratio
     )
@@ -391,7 +396,8 @@ def test_phenom_deco(
         lal_freqs = lal_freqs[lal_mask]
         torch_freqs = torch.tensor(lal_freqs, dtype=torch.float32)
 
-        compactness = 0.5*torch.ones_like(chirp_mass)
+        # pin compactness to 0.5 for producing BBH waveforms
+        compactness = 0.5 * torch.ones_like(chirp_mass)
 
         # generate waveforms using ml4gw
         hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomDECO()(
