@@ -118,14 +118,14 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.decimator.Decimator" title="ml4gw.transforms.decimator.Decimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decimator</span></code></a>([sample_rate, schedule])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.decimator.Decimator" title="ml4gw.transforms.decimator.Decimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Decimator</span></code></a>([sample_rate, schedule, split])</p></td>
 <td><p>Downsample (decimate) a timeseries according to a user-defined schedule.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.decimator.Decimator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.decimator.</span></span><span class="sig-name descname"><span class="pre">Decimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.decimator.</span></span><span class="sig-name descname"><span class="pre">Decimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Downsample (decimate) a timeseries according to a user-defined schedule.</p>
 <div class="admonition note">
@@ -144,6 +144,14 @@ sampling rate. Each row of the schedule has the form:</p>
 <li><p><strong>sample_rate</strong> (<em>int</em>) -- Sampling rate (Hz) of the input timeseries.</p></li>
 <li><p><strong>schedule</strong> (<em>torch.Tensor</em>) -- Tensor of shape <cite>(N, 3)</cite> defining start time, end time,
 and target sample rate for each segment.</p></li>
+<li><p><strong>split</strong> (<em>bool</em><em>, </em><em>optional</em>) -- <ul>
+<li><p>If True, the module returns a list of decimated segments
+(one per schedule entry). Overlapping schedule segments are
+only allowed when <code class="docutils literal notranslate"><span class="pre">split=True</span></code>.</p></li>
+<li><p>If False (default), the segments are concatenated into a
+single continuous output tensor.</p></li>
+</ul>
+</p></li>
 </ul>
 </dd>
 </dl>
@@ -154,7 +162,7 @@ and target sample rate for each segment.</p></li>
 <li><p>B = batch size</p></li>
 <li><p>C = channels</p></li>
 <li><dl class="simple">
-<dt>T = number of timesteps</dt><dd><p>(must equal schedule duration × sample_rate)</p>
+<dt>T = number of timesteps</dt><dd><p>(must equal schedule duration x sample_rate)</p>
 </dd>
 </dl>
 </li>
@@ -164,9 +172,11 @@ and target sample rate for each segment.</p></li>
 </li>
 <li><dl class="simple">
 <dt>Output:</dt><dd><ul>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">split=False</span></code> → <cite>(B, C, T')</cite> where <cite>T'</cite> is total
+<li><p>If <code class="docutils literal notranslate"><span class="pre">split=False</span></code> → <cite>(B, C, T')</cite> where <cite>T'</cite> is the total
 number of decimated samples across all segments.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">split=True</span></code> → list of tensors, one per segment.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">split=True</span></code> → list of tensors, each with shape
+<span class="math notranslate nohighlight">\((B, C, T_i)\)</span>, corresponding to the decimated samples
+in each schedule segment.</p></li>
 </ul>
 </dd>
 </dl>
@@ -186,6 +196,7 @@ number of decimated samples across all segments.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sample_rate</strong> (<em>int</em>)</p></li>
 <li><p><strong>schedule</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>split</strong> (<em>bool</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -194,16 +205,16 @@ number of decimated samples across all segments.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms.decimator</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimator</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">2048</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">X_duration</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_duration</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># seconds</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">*</span> <span class="n">X_duration</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schedule</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">58</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span> <span class="p">[</span><span class="mi">58</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">2048</span><span class="p">]],</span>
 <span class="gp">... </span>    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
-
 <span class="gp">&gt;&gt;&gt; </span><span class="n">decimator</span> <span class="o">=</span> <span class="n">Decimator</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
-<span class="gp">... </span>   <span class="n">schedule</span><span class="o">=</span><span class="n">schedule</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">*</span> <span class="n">X_duration</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">schedule</span><span class="o">=</span><span class="n">schedule</span><span class="p">)</span>
+
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X_dec</span> <span class="o">=</span> <span class="n">decimator</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X_seg</span> <span class="o">=</span> <span class="n">decimator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -216,6 +227,22 @@ number of decimated samples across all segments.</p></li>
 <span class="go">Segment 0 shape: torch.Size([1, 1, 10240])</span>
 <span class="go">Segment 1 shape: torch.Size([1, 1, 9216])</span>
 <span class="go">Segment 2 shape: torch.Size([1, 1, 4096])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">overlap_schedule</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">58</span><span class="p">,</span> <span class="mi">512</span><span class="p">]],</span> <span class="p">[</span><span class="mi">52</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">2048</span><span class="p">]],</span>
+<span class="gp">... </span>    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decimator_ov</span> <span class="o">=</span> <span class="n">Decimator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">schedule</span><span class="o">=</span><span class="n">overlap_schedule</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_overlap</span> <span class="o">=</span> <span class="n">decimator_ov</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">seg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X_overlap</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overlapping segment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> shape:&quot;</span><span class="p">,</span> <span class="n">seg</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">Overlapping segment 0 shape: torch.Size([1, 1, 10240])</span>
+<span class="go">Overlapping segment 1 shape: torch.Size([1, 1, 13312])</span>
+<span class="go">Overlapping segment 2 shape: torch.Size([1, 1, 16384])</span>
 </pre></div>
 </div>
 <dl class="py method">
@@ -234,22 +261,24 @@ number of decimated samples across all segments.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.decimator.Decimator.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator.forward" title="Link to this definition"></a></dt>
-<dd><p>Apply decimation to the input timeseries.</p>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator.forward" title="Link to this definition"></a></dt>
+<dd><p>Apply decimation to the input timeseries according to the schedule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<em>torch.Tensor</em>) -- Input tensor of shape <cite>(B, C, T)</cite>, where <cite>T</cite> must equal
-schedule duration × sample_rate.</p></li>
-<li><p><strong>split</strong> (<em>bool</em><em>, </em><em>optional</em>) -- If True, return a list of segments instead of a single
-concatenated tensor. Default: False.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>X</strong> (<em>torch.Tensor</em>) -- Input tensor of shape <cite>(B, C, T)</cite>, where <cite>T</cite> must equal
+schedule duration x sample_rate.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Decimated timeseries, or list of decimated segments.</p>
+<dd class="field-even"><p><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">split=False</span></code> (default), returns a single decimated
+tensor of shape <cite>(B, C, T')</cite>.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">split=True</span></code>, returns a list of decimated segments,
+one per schedule entry.</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>torch.Tensor or List[torch.Tensor]</p>
+<dd class="field-odd"><p>torch.Tensor or list[torch.Tensor]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -257,10 +286,13 @@ concatenated tensor. Default: False.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="ml4gw.transforms.decimator.Decimator.split_by_schedule">
 <span class="sig-name descname"><span class="pre">split_by_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.decimator.Decimator.split_by_schedule" title="Link to this definition"></a></dt>
-<dd><p>Split a decimated timeseries into segments according to the schedule.</p>
+<dd><p>Split and decimate a timeseries into segments according to the
+schedule.</p>
+<p>This method applies the decimation defined by each schedule row
+and returns a list of the resulting segments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> (<em>torch.Tensor</em>) -- Decimated input of shape <cite>(B, C, T')</cite>.</p>
+<dd class="field-odd"><p><strong>X</strong> (<em>torch.Tensor</em>) -- Input timeseries of shape <cite>(B, C, T)</cite> before decimation.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Each segment has shape <span class="math notranslate nohighlight">\((B, C, T_i)\)</span>
