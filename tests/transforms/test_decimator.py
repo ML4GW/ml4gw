@@ -79,11 +79,37 @@ def test_decimator():
 
     # Testing the split functionality
     # Each segment length matches schedule * target rate
-    seg = decimator(hc, split=True)
+    decimator_split = Decimator(
+        sample_rate=sample_rate, schedule=schedule, split=True
+    )
+    seg = decimator_split(hc)
     exp_len = (
         ((schedule[:, 1] - schedule[:, 0]) * schedule[:, 2]).long().tolist()
     )
     actual_len = [s.shape[-1] for s in seg]
+    assert actual_len == exp_len
+
+    # Testing the split functionality for overlapping schedule
+    overlap_schedule = torch.tensor(
+        [[0, 40, 256], [32, 58, 512], [52, 60, 2048]],
+        dtype=torch.int,
+        device=device,
+    )
+
+    decimator_ov = Decimator(
+        sample_rate=sample_rate, schedule=overlap_schedule, split=True
+    )
+    seg_ov = decimator_ov(hc)
+
+    exp_len = (
+        (
+            (overlap_schedule[:, 1] - overlap_schedule[:, 0])
+            * overlap_schedule[:, 2]
+        )
+        .long()
+        .tolist()
+    )
+    actual_len = [s.shape[-1] for s in seg_ov]
     assert actual_len == exp_len
 
     # Negative Tests
@@ -105,3 +131,10 @@ def test_decimator():
     )
     with pytest.raises(ValueError, match="expected schedule duration"):
         decimator_valid(wrong_input_len)
+
+    overlapping_schedule = torch.tensor(
+        [[0, 10, 256], [8, 15, 512]],
+        dtype=torch.int,
+    )
+    with pytest.raises(ValueError, match="overlapping"):
+        Decimator(sample_rate=2048, schedule=overlapping_schedule, split=False)
