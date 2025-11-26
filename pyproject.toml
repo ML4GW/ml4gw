@@ -25,11 +25,11 @@ classifiers = [
 readme = "README.md"
 license = "GPL-3.0-or-later"
 dependencies = [
-    "jaxtyping>=0.2",
+    "jaxtyping>=0.2,<0.3",
     "torch~=2.0",
     "torchaudio~=2.0",
     "numpy>2.0.0",
-    "scipy>=1.16",
+    "scipy>=1.9.0,<1.15",
 ]
 
 [dependency-groups]
@@ -105,7 +105,7 @@ deps =
     lalsuite>=7,<8
     bilby>=2.1
     gwpy>=3.0
-    numpy>=1,<2
+    numpy>=2
     scipy>=1.9,<1.14
 pass_env = COVERAGE_FILE
 commands = coverage run -m pytest tests
