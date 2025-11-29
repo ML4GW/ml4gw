@@ -1927,7 +1927,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "jaxtyping", specifier = ">=0.2,<0.3" },
-    { name = "numpy", specifier = ">2.0.0" },
+    { name = "numpy", specifier = ">=1.0.0" },
     { name = "scipy", specifier = ">=1.9.0,<1.15" },
     { name = "torch", specifier = "~=2.0" },
     { name = "torchaudio", specifier = "~=2.0" },
