@@ -436,6 +436,7 @@ def normalize_by_psd(
     psd: PSDTensor,
     sample_rate: float,
     pad: int,
+    crop: bool = True,
 ):
     # compute the FFT of the section we want to whiten
     # and divide it by the ASD of the background section.
@@ -452,7 +453,8 @@ def normalize_by_psd(
     X = X.float() / sample_rate**0.5
 
     # slice off corrupted data at edges of kernel
-    X = X[:, :, pad:-pad]
+    if crop:
+        X = X[:, :, pad:-pad]
     return X
 
 
@@ -463,6 +465,7 @@ def whiten(
     sample_rate: float,
     highpass: float | None = None,
     lowpass: float | None = None,
+    crop: bool = True,
 ) -> WaveformTensor:
     """
     Whiten a batch of timeseries using the specified
@@ -506,9 +509,14 @@ def whiten(
             the data, setting the frequency response in the
             whitening filter to 0. If left as ``None``, no
             lowpass filtering will be applied.
+        crop:
+            If ``True``, crop ``fduration / 2`` seconds of data
+            from both sides of the time dimension to remove the
+            corruption from the filter. If ``False``, return the
+            full timeseries.
     Returns:
-        Batch of whitened multichannel timeseries with
-            ``fduration / 2`` seconds trimmed from each side.
+        Batch of whitened multichannel timeseries with ``fduration / 2``
+            seconds optionally trimmed from each side.
     """
 
     # figure out how much data we'll need to slice
@@ -549,4 +557,4 @@ def whiten(
         lowpass,
     )
 
-    return normalize_by_psd(X, psd, sample_rate, pad)
+    return normalize_by_psd(X, psd, sample_rate, pad, crop)

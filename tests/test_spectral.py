@@ -415,14 +415,22 @@ def test_whiten(
         X = torch.randn(batch_size, num_channels, failure_size)
         whiten(X, psd, fduration, sample_rate, highpass, lowpass)
     size = int(whiten_length * sample_rate)
+    filter_size = int(fduration * sample_rate)
     X = mean + std * torch.randn(batch_size, num_channels, size)
-    whitened = whiten(X, psd, fduration, sample_rate, highpass, lowpass)
-    expected_size = int((whiten_length - fduration) * sample_rate)
-    assert whitened.shape == (batch_size, num_channels, expected_size)
 
+    whitened = whiten(X, psd, fduration, sample_rate, highpass, lowpass)
+    expected_size = size - filter_size
+    assert whitened.shape == (batch_size, num_channels, expected_size)
     validate_whitened(
         whitened, highpass, lowpass, sample_rate, 1 / whiten_length
     )
+
+    # Check that not cropping produces the expected values and shape
+    whitened_uncropped = whiten(
+        X, psd, fduration, sample_rate, highpass, lowpass, crop=False
+    )
+    pad = filter_size // 2
+    assert torch.all(whitened_uncropped[..., pad:-pad] == whitened)
 
     # inject a gaussian pulse into the timeseries and
     # ensure that its max value comes out to the same place
