@@ -151,6 +151,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
         unique_fnames, inv, counts = np.unique(
             fnames, return_inverse=True, return_counts=True
         )
+        inv = inv.reshape(-1)
         for i, (fname, count) in enumerate(
             zip(unique_fnames, counts, strict=True)
         ):
