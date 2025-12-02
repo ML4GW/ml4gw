@@ -4,6 +4,7 @@ including objects to calculate spectral densities, whiten data,
 and compute Q-transforms.
 """
 
+from .decimator import Decimator
 from .iirfilter import IIRFilter
 from .pearson import ShiftedPearsonCorrelation
 from .qtransform import QScan, SingleQTransform
