@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial on distribution approximation and posterior estimation &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw" href="../api/ml4gw.html" />
+    <link rel="prev" title="ml4gw Tutorial" href="ml4gw_tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw_tutorial.html"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial on distribution approximation and posterior estimation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#approximating-the-two-moon-distribution">Approximating the two-moon distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#normalizing-flow-using-autoregressive-transforms">Normalizing flow using Autoregressive Transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#now-we-learn-this-distribution">Now we learn this distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compose-several-transforms">Compose several transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#condition-and-sample-from-each-mode">Condition and sample from each mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conditional-distribution">Conditional distribution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#posterior-estimation-of-gravitational-wave-events">Posterior estimation of gravitational-wave events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-background-data-from-ligo-detectors">Get background data from LIGO detectors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#create-simulations-using-ml4gw-tools">Create simulations using ML4GW tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#we-will-infer-only-on-a-subset-of-parameters-for-this-exercise">We will infer only on a subset of parameters for this exercise</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#now-we-build-the-normalizing-flow-as-a-lightningmodule">Now we build the Normalizing flow as a <code class="docutils literal notranslate"><span class="pre">LightningModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-model-against-gw150914">Test model against GW150914</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/ml4gw.html">ml4gw</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial on distribution approximation and posterior estimation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/ml4gw_lfi_tutorial.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-on-distribution-approximation-and-posterior-estimation">
+<h1>Tutorial on distribution approximation and posterior estimation<a class="headerlink" href="#tutorial-on-distribution-approximation-and-posterior-estimation" title="Link to this heading"></a></h1>
+<p>This notebook is an exercise in distribution approximation using Normalizing flows as implemented in the <a class="reference external" href="https://pyro.ai/">pyro</a> library. The second half of the exercise shows the use case of posterior estimation using ML4GW tools.</p>
+<p>Libraries needed for the notebook are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ml4gw==0.7.8</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyro-ppl</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lightning</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code></p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># uncomment to install these dependencies</span>
+<span class="c1"># ! pip install ml4gw==0.7.8 scikit-learn lightning pyro-ppl</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">datasets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">optim</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">TransformedDistribution</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyro.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoRegressiveNN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyro.distributions.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">AffineAutoregressive</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Check if GPU is available</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using device: </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Using device: cuda
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">samples</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">make_moons</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="approximating-the-two-moon-distribution">
+<h2>Approximating the two-moon distribution<a class="headerlink" href="#approximating-the-two-moon-distribution" title="Link to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Two moon distribution&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;$x$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$y$&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;$y$&#39;)
+</pre></div>
+</div>
+<img alt="../_images/c2250ce5bf9493b90f7a8cc531d50467f3425c7a186c72a78599149fd634a883.png" src="../_images/c2250ce5bf9493b90f7a8cc531d50467f3425c7a186c72a78599149fd634a883.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">samples</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="normalizing-flow-using-autoregressive-transforms">
+<h2>Normalizing flow using Autoregressive Transforms<a class="headerlink" href="#normalizing-flow-using-autoregressive-transforms" title="Link to this heading"></a></h2>
+<p>The normalizing flow we implement below has affine autoregressive transforms. Most of the constructs are available in the pyro API.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># data dimension</span>
+<span class="n">hidden_dims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="o">*</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">50</span><span class="o">*</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">50</span><span class="o">*</span><span class="n">input_dim</span><span class="p">]</span>
+
+<span class="n">base_dist</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">),</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">arn</span> <span class="o">=</span> <span class="n">AutoRegressiveNN</span><span class="p">(</span>
+    <span class="n">input_dim</span><span class="p">,</span>
+    <span class="n">hidden_dims</span><span class="p">,</span>
+    <span class="n">param_dims</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># two dimensional input -&gt; mu and sigma</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">arn</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(tensor([[0.0149, 0.0908]], device=&#39;cuda:0&#39;), tensor([[-0.0225, -0.0576]], device=&#39;cuda:0&#39;))
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span>  <span class="n">AffineAutoregressive</span><span class="p">(</span><span class="n">arn</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>  <span class="c1"># the &quot;affine&quot; part implies the linear relation between hidden dimensions</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># the flow implementation is torch transformed distribution</span>
+<span class="n">flow_dist</span> <span class="o">=</span> <span class="n">TransformedDistribution</span><span class="p">(</span><span class="n">base_dist</span><span class="p">,</span> <span class="p">[</span><span class="n">transform</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">flow_dist</span></code> is the normalizing flow: It is a distribution which can be evaluated, and sampled from.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flow_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="mi">10</span><span class="p">])</span> <span class="c1"># -&gt; 10 samples</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([[-0.3092,  2.6174],
+        [-0.0878, -0.7060],
+        [ 0.3213, -0.1771],
+        [-1.4481,  2.3316],
+        [ 0.0378, -2.5415],
+        [-0.3469,  0.7560],
+        [-1.3134, -0.0269],
+        [-0.8357, -1.3689],
+        [-0.4421,  0.1139],
+        [-1.5013, -0.7086]], device=&#39;cuda:0&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># or evaluate the density</span>
+<span class="n">example_points</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+    <span class="p">],</span>
+    <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+<span class="p">)</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">sample_log_prob</span> <span class="o">=</span> <span class="n">flow_dist</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">example_points</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">sample</span><span class="p">,</span> <span class="n">log_prob</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">example_points</span><span class="p">,</span> <span class="n">sample_log_prob</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;log p(</span><span class="si">{</span><span class="n">sample</span><span class="si">}</span><span class="s2">) = </span><span class="si">{</span><span class="n">log_prob</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>log p(tensor([0., 0.], device=&#39;cuda:0&#39;)) = -1.749e+00
+log p(tensor([0., 1.], device=&#39;cuda:0&#39;)) = -2.220e+00
+log p(tensor([1., 0.], device=&#39;cuda:0&#39;)) = -2.252e+00
+log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="now-we-learn-this-distribution">
+<h2>Now we learn this distribution<a class="headerlink" href="#now-we-learn-this-distribution" title="Link to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">transform</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_output</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">live_plot</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Auxiliary function to visualize the distribution&quot;&quot;&quot;</span>
+    <span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;proxy&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+               <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Orig.&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;iteration </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">num_iter</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">)):</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="c1"># take the original samples, and evaluate the likelihood.</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">flow_dist</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="n">flow_dist</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>  <span class="c1"># pyro modules cache values and derivatives for performance</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">samples_flow</span> <span class="o">=</span> <span class="n">flow_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">1000</span><span class="p">,]))</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">live_plot</span><span class="p">(</span><span class="n">samples_flow</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples_flow</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/d0d536bcc7ce4e7fac33368428b99b4952e40fb2b18c8ad98e2e0d028783d55d.png" src="../_images/d0d536bcc7ce4e7fac33368428b99b4952e40fb2b18c8ad98e2e0d028783d55d.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:14&lt;00:00, 67.72it/s]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="compose-several-transforms">
+<h2>Compose several transforms<a class="headerlink" href="#compose-several-transforms" title="Link to this heading"></a></h2>
+<p>In the previous case we just had a single transform. Now we compose several of those and repeat</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">AffineAutoregressive</span><span class="p">(</span>
+        <span class="n">AutoRegressiveNN</span><span class="p">(</span>
+            <span class="n">input_dim</span><span class="p">,</span> <span class="n">hidden_dims</span><span class="p">,</span>
+            <span class="n">param_dims</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">flow_dist</span> <span class="o">=</span> <span class="n">TransformedDistribution</span><span class="p">(</span><span class="n">base_dist</span><span class="p">,</span> <span class="n">transforms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainable_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">transforms</span><span class="p">:</span>
+    <span class="n">trainable_parameters</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">parameters</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">trainable_parameters</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">num_iter</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">)):</span>
+
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">flow_dist</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="n">flow_dist</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">samples_flow</span> <span class="o">=</span> <span class="n">flow_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">1000</span><span class="p">,])</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+        <span class="n">live_plot</span><span class="p">(</span><span class="n">samples_flow</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples_flow</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">((</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">((</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/5b1ff1ab5451af8a4072f0f5c36a56d81e2817fe0dc129e8d06eb35322456cf3.png" src="../_images/5b1ff1ab5451af8a4072f0f5c36a56d81e2817fe0dc129e8d06eb35322456cf3.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:36&lt;00:00, 27.65it/s]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="condition-and-sample-from-each-mode">
+<h2>Condition and sample from each mode<a class="headerlink" href="#condition-and-sample-from-each-mode" title="Link to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Two colored moon&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;$x$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$y$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.colorbar.Colorbar at 0x7f59f05af760&gt;
+</pre></div>
+</div>
+<img alt="../_images/c9b776a1f824bd7bdb0518f2668af235a71504642c7ca413333b19abf9f6e39b.png" src="../_images/c9b776a1f824bd7bdb0518f2668af235a71504642c7ca413333b19abf9f6e39b.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+<span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="conditional-distribution">
+<h3>Conditional distribution<a class="headerlink" href="#conditional-distribution" title="Link to this heading"></a></h3>
+<p>Let's learn the conditional approximator based on the color</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyro.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalTransformedDistribution</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyro.distributions.conditional</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalComposeTransformModule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyro.nn.auto_reg_nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalAutoRegressiveNN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyro.distributions.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalAffineAutoregressive</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">condition_dim</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># the color is either 0 or 1</span>
+<span class="n">arn</span> <span class="o">=</span> <span class="n">ConditionalAutoRegressiveNN</span><span class="p">(</span>
+    <span class="n">input_dim</span><span class="p">,</span>
+    <span class="n">condition_dim</span><span class="p">,</span>
+    <span class="n">hidden_dims</span><span class="p">,</span>
+    <span class="n">param_dims</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">arn</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">),</span>
+            <span class="c1"># need to supply additional context</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(tensor([[-0.1096, -0.0174],
+        [-0.1096, -0.0174],
+        [-0.1096, -0.0174],
+        [-0.1096, -0.0174],
+        [-0.1096, -0.0174]], device=&#39;cuda:0&#39;), tensor([[-0.0531,  0.0315],
+        [-0.0531,  0.0315],
+        [-0.0531,  0.0315],
+        [-0.0531,  0.0315],
+        [-0.0531,  0.0315]], device=&#39;cuda:0&#39;))
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">ConditionalAffineAutoregressive</span><span class="p">(</span>
+        <span class="n">ConditionalAutoRegressiveNN</span><span class="p">(</span>
+            <span class="n">input_dim</span><span class="p">,</span> <span class="n">condition_dim</span><span class="p">,</span> <span class="n">hidden_dims</span><span class="p">,</span>
+            <span class="n">param_dims</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">conditional_flow_dist</span> <span class="o">=</span> <span class="n">ConditionalTransformedDistribution</span><span class="p">(</span><span class="n">base_dist</span><span class="p">,</span> <span class="n">transforms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainable_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">transforms</span><span class="p">:</span>
+    <span class="n">trainable_parameters</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">parameters</span><span class="p">()))</span>
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">trainable_parameters</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+
+
+<span class="n">num_iter</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">)):</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">conditional_flow_dist</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="n">conditional_flow_dist</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">inference_label</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">100</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span>  <span class="c1"># alternate between modes</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">samples_one</span> <span class="o">=</span> <span class="n">conditional_flow_dist</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">inference_label</span><span class="p">,])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">1000</span><span class="p">,]))</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+        <span class="n">live_plot</span><span class="p">(</span><span class="n">samples_one</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples_one</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">((</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">((</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b21cdf07a6c26214e7b67f62c6d332cb5c7352984aeccb1c87317863da87ca05.png" src="../_images/b21cdf07a6c26214e7b67f62c6d332cb5c7352984aeccb1c87317863da87ca05.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:25&lt;00:00, 39.95it/s]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="posterior-estimation-of-gravitational-wave-events">
+<h2>Posterior estimation of gravitational-wave events<a class="headerlink" href="#posterior-estimation-of-gravitational-wave-events" title="Link to this heading"></a></h2>
+<section id="get-background-data-from-ligo-detectors">
+<h3>Get background data from LIGO detectors<a class="headerlink" href="#get-background-data-from-ligo-detectors" title="Link to this heading"></a></h3>
+<p>We will download some data from Sept 15, 2015, the day after the detection of GW150914</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">gwpy.timeseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">TimeSeriesDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Point this to whatever directory you want to house</span>
+<span class="c1"># all of the data products this notebook creates</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/tmp/data&quot;</span><span class="p">)</span>
+
+<span class="c1"># And this to the directory where you want to download the data</span>
+<span class="n">background_dir</span> <span class="o">=</span> <span class="n">data_dir</span> <span class="o">/</span> <span class="s2">&quot;background_data&quot;</span>
+<span class="n">background_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># This is a 10000s segment on Sept 15, 2015, the day after</span>
+<span class="c1"># GW150914 was detected</span>
+<span class="n">segments</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mi">1126310417</span><span class="p">,</span> <span class="mi">1126320417</span><span class="p">),</span> 
+<span class="p">]</span>
+<span class="n">ifos</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">]</span>  <span class="c1"># Hanford and Livingston</span>
+<span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">2048</span>  <span class="c1"># Hz</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
+    <span class="c1"># Download the data from GWOSC. This will take a few minutes.</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">background_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;background-</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">.hdf5&quot;</span>
+    <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">continue</span>
+
+    <span class="n">ts_dict</span> <span class="o">=</span> <span class="n">TimeSeriesDict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ifo</span> <span class="ow">in</span> <span class="n">ifos</span><span class="p">:</span>
+        <span class="n">ts_dict</span><span class="p">[</span><span class="n">ifo</span><span class="p">]</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">ifo</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ts_dict</span> <span class="o">=</span> <span class="n">ts_dict</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+    <span class="n">ts_dict</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;hdf5&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/env/lib/python3.10/site-packages/gwpy/time/__init__.py:36: UserWarning: Wswiglal-redir-stdio:
+
+SWIGLAL standard output/error redirection is enabled in IPython.
+This may lead to performance penalties. To disable locally, use:
+
+with lal.no_swig_redirect_standard_output_error():
+    ...
+
+To disable globally, use:
+
+lal.swig_redirect_standard_output_error(False)
+
+Note however that this will likely lead to error messages from
+LAL functions being either misdirected or lost when called from
+Jupyter notebooks.
+
+To suppress this warning, use:
+
+import warnings
+warnings.filterwarnings(&quot;ignore&quot;, &quot;Wswiglal-redir-stdio&quot;)
+import lal
+
+  from lal import LIGOTimeGPS
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="create-simulations-using-ml4gw-tools">
+<h2>Create simulations using ML4GW tools<a class="headerlink" href="#create-simulations-using-ml4gw-tools" title="Link to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Uniform</span>
+
+<span class="c1"># ml4gw components</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">IMRPhenomD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeDomainCBCWaveformGenerator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">chirp_mass_and_mass_ratio_to_components</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.gw</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_observed_strain</span><span class="p">,</span> <span class="n">get_ifo_geometry</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Whiten</span><span class="p">,</span> <span class="n">SpectralDensity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">PowerLaw</span><span class="p">,</span> <span class="n">Sine</span><span class="p">,</span> <span class="n">Cosine</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We will use <code class="docutils literal notranslate"><span class="pre">InMemoryDataset</span></code> for dataloading. This can send the entire background to the GPU memory before training commences, and generates waveforms on-the-fly.</p>
+<p>This is useful for prototyping with small background stretches that is not too large to fit in device memory.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.dataloading</span><span class="w"> </span><span class="kn">import</span> <span class="n">InMemoryDataset</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define priors to generate waveforms</span>
+<span class="n">prior_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;chirp_mass&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span>
+    <span class="s2">&quot;mass_ratio&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
+    <span class="s2">&quot;chi1&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.999</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
+    <span class="s2">&quot;chi2&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.999</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
+    <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="n">PowerLaw</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>
+    <span class="s2">&quot;phic&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
+    <span class="s2">&quot;inclination&quot;</span><span class="p">:</span> <span class="n">Sine</span><span class="p">()</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="we-will-infer-only-on-a-subset-of-parameters-for-this-exercise">
+<h3>We will infer only on a subset of parameters for this exercise<a class="headerlink" href="#we-will-infer-only-on-a-subset-of-parameters-for-this-exercise" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define inference parameters for posterior estimation</span>
+<span class="n">inference_params</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">prior_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;chirp_mass&#39;</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">]}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">InMemoryDataset</span></code> is an <code class="docutils literal notranslate"><span class="pre">IterableDataset</span></code> that lazily loads batches from the background that is in device memory. We create a derived class that adds the capacity to do injections on top of lazily loaded batches.</p>
+<p>The main method below is <code class="docutils literal notranslate"><span class="pre">inject</span></code>. This yields a new background batch, dynamically estimates the PSD, generates and injects a batch of waveforms, and whitens it with the estimated PSD, all using <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> tools.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">InMemoryInjectionDataset</span><span class="p">(</span><span class="n">InMemoryDataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">ifos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+        <span class="n">kernel_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+        <span class="c1"># PSD/whitening args</span>
+        <span class="n">fduration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">psd_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="n">sample_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2048</span><span class="p">,</span>
+        <span class="n">fftlength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">highpass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="c1"># Dataloading args</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">batches_per_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">approximant</span> <span class="o">=</span> <span class="n">IMRPhenomD</span><span class="p">,</span>
+        <span class="n">prior_dict</span> <span class="o">=</span> <span class="n">prior_dict</span><span class="p">,</span>
+        <span class="n">f_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">f_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">f_ref</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kernel_length</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span> <span class="o">=</span> <span class="n">sample_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fduration</span> <span class="o">=</span> <span class="n">fduration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">fduration</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">psd_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">psd_length</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batches_per_epoch</span> <span class="o">=</span> <span class="n">batches_per_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">psd_size</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">batches_per_epoch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batches_per_epoch</span><span class="p">,</span>
+            <span class="n">coincident</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ifos</span> <span class="o">=</span> <span class="n">ifos</span>
+        <span class="c1"># real-time transformations defined with torch Modules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectral_density</span> <span class="o">=</span> <span class="n">SpectralDensity</span><span class="p">(</span>
+            <span class="n">sample_rate</span><span class="p">,</span> <span class="n">fftlength</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">whitener</span> <span class="o">=</span> <span class="n">Whiten</span><span class="p">(</span>
+            <span class="n">fduration</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">highpass</span><span class="o">=</span><span class="n">highpass</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="c1"># define some sky parameter distributions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior_dict</span> <span class="o">=</span> <span class="n">prior_dict</span>
+        <span class="n">torch_pi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dec</span> <span class="o">=</span> <span class="n">Cosine</span><span class="p">(</span><span class="o">-</span><span class="n">torch_pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">torch_pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">psi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">torch_pi</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">torch_pi</span><span class="p">,</span> <span class="n">torch_pi</span>
+        <span class="p">)</span>  <span class="c1"># relative RAs of detector and source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">approx</span> <span class="o">=</span> <span class="n">approximant</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waveform_generator</span> <span class="o">=</span> <span class="n">TimeDomainCBCWaveformGenerator</span><span class="p">(</span>
+            <span class="n">approximant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">approx</span><span class="p">,</span>
+            <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="n">kernel_length</span> <span class="o">+</span> <span class="n">fduration</span><span class="p">,</span>
+            <span class="n">f_min</span><span class="o">=</span><span class="n">f_min</span><span class="p">,</span>
+            <span class="n">f_ref</span><span class="o">=</span><span class="n">f_ref</span><span class="p">,</span>
+            <span class="n">right_pad</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>  <span class="c1"># this means the merger is 0.5 seconds from the end</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector_tensors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector_vertices</span> <span class="o">=</span> <span class="n">get_ifo_geometry</span><span class="p">(</span><span class="o">*</span><span class="n">ifos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector_tensors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector_tensors</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector_vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector_vertices</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">project_waveforms</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">hc</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">hp</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="c1"># sample sky parameters</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hc</span><span class="p">)</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">N</span><span class="p">,))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">hc</span><span class="p">)</span>
+        <span class="n">psi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psi</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">N</span><span class="p">,))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">hc</span><span class="p">)</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">N</span><span class="p">,))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">hc</span><span class="p">)</span>
+
+        <span class="n">proj_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;dec&quot;</span><span class="p">:</span> <span class="n">dec</span><span class="p">,</span>
+            <span class="s2">&quot;psi&quot;</span><span class="p">:</span> <span class="n">psi</span><span class="p">,</span>
+            <span class="s2">&quot;phi&quot;</span><span class="p">:</span> <span class="n">phi</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># project to interferometer response</span>
+        <span class="k">return</span> <span class="n">compute_observed_strain</span><span class="p">(</span>
+            <span class="n">dec</span><span class="o">=</span><span class="n">dec</span><span class="p">,</span>
+            <span class="n">psi</span><span class="o">=</span><span class="n">psi</span><span class="p">,</span>
+            <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span>
+            <span class="n">detector_tensors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_tensors</span><span class="p">,</span>
+            <span class="n">detector_vertices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_vertices</span><span class="p">,</span>
+            <span class="n">sample_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">,</span>
+            <span class="n">cross</span><span class="o">=</span><span class="n">hc</span><span class="p">,</span>
+            <span class="n">plus</span><span class="o">=</span><span class="n">hp</span><span class="p">,</span>
+        <span class="p">),</span> <span class="n">proj_params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="c1"># attach component masses if not present</span>
+        <span class="k">if</span> <span class="s2">&quot;mass_1&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;mass_1&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;mass_2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chirp_mass_and_mass_ratio_to_components</span><span class="p">(</span>
+                <span class="n">params</span><span class="p">[</span><span class="s2">&quot;chirp_mass&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;mass_ratio&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;s1z&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;s1z&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;s2z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;chi1&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;chi2&quot;</span><span class="p">]</span>
+        <span class="n">hc</span><span class="p">,</span> <span class="n">hp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveform_generator</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hc</span><span class="p">,</span> <span class="n">hp</span><span class="p">,</span> <span class="n">params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">inject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="c1"># break off &quot;background&quot; from target kernel and compute its PSD</span>
+        <span class="c1"># (in double precision since our scale is so small)</span>
+        <span class="n">background</span><span class="p">,</span> <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">psd_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">psd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectral_density</span><span class="p">(</span><span class="n">background</span><span class="o">.</span><span class="n">double</span><span class="p">())</span>
+
+        <span class="c1"># generate polarizations</span>
+        <span class="n">hc</span><span class="p">,</span> <span class="n">hp</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+
+        <span class="c1"># project </span>
+        <span class="n">responses</span><span class="p">,</span> <span class="n">proj_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_waveforms</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">hp</span><span class="p">)</span>
+        
+        <span class="c1"># include sky params in returned params</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">proj_params</span><span class="p">)</span>
+
+        <span class="c1"># inject waveform into background and whiten</span>
+        <span class="n">X</span> <span class="o">+=</span> <span class="n">responses</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">whitener</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">psd</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">():</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">X</span><span class="p">,</span> <span class="n">params</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now create a <code class="docutils literal notranslate"><span class="pre">Lightning</span></code> datamodule using the above dataset.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pytorch_lightning</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ML4GWInferenceDatamodule</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningDataModule</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">background_file</span><span class="p">,</span>
+        <span class="n">ifos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+        <span class="n">kernel_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+        <span class="c1"># PSD/whitening args</span>
+        <span class="n">fduration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">psd_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="n">sample_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2048</span><span class="p">,</span>
+        <span class="n">fftlength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">highpass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="c1"># Dataloading args</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">batches_per_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">approximant</span> <span class="o">=</span> <span class="n">IMRPhenomD</span><span class="p">,</span>
+        <span class="n">prior_dict</span> <span class="o">=</span> <span class="n">prior_dict</span><span class="p">,</span>
+        <span class="n">inference_params</span> <span class="o">=</span> <span class="n">inference_params</span><span class="p">,</span>
+        <span class="n">valid_frac</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">f_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">f_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">f_ref</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span>
+            <span class="n">ignore</span><span class="o">=</span><span class="p">[</span>
+                <span class="s2">&quot;background_file&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ifos&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;approximant&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;prior_dict&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;inference_params&quot;</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">background_file</span> <span class="o">=</span> <span class="n">background_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ifos</span> <span class="o">=</span> <span class="n">ifos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">approximant</span> <span class="o">=</span> <span class="n">approximant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior_dict</span> <span class="o">=</span> <span class="n">prior_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inference_params</span> <span class="o">=</span> <span class="n">inference_params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s1">&#39;fit&#39;</span> <span class="ow">or</span> <span class="n">stage</span> <span class="o">==</span> <span class="s1">&#39;validate&#39;</span><span class="p">:</span>
+            <span class="c1"># load background data</span>
+            <span class="n">background</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">background_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ifo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ifos</span><span class="p">:</span>
+                    <span class="n">hoft</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">ifo</span><span class="p">][:]</span>
+                    <span class="n">background</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hoft</span><span class="p">)</span>
+            <span class="n">background</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">background</span><span class="p">))</span>
+            <span class="c1"># background, valid_background = split(</span>
+            <span class="c1">#     background, 1 - self.hparams.valid_frac, 1)</span>
+            <span class="n">valid_background_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">valid_frac</span> <span class="o">*</span> <span class="n">background</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">background</span><span class="p">,</span> <span class="n">valid_background</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+                <span class="n">background</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="n">background</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">valid_background_size</span><span class="p">,</span>
+                    <span class="n">valid_background_size</span>
+                <span class="p">],</span>
+                <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+            <span class="n">common_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">ifos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ifos</span><span class="p">,</span>
+                <span class="n">kernel_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">kernel_length</span><span class="p">,</span>
+                <span class="n">fduration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">fduration</span><span class="p">,</span>
+                <span class="n">psd_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">psd_length</span><span class="p">,</span>
+                <span class="n">sample_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">,</span>
+                <span class="n">fftlength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">fftlength</span><span class="p">,</span>
+                <span class="n">highpass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">highpass</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">batches_per_epoch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">batches_per_epoch</span><span class="p">,</span>
+                <span class="n">approximant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">approximant</span><span class="p">,</span>
+                <span class="n">prior_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prior_dict</span><span class="p">,</span>
+                <span class="n">f_min</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">f_min</span><span class="p">,</span>
+                <span class="n">f_max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">f_max</span><span class="p">,</span>
+                <span class="n">f_ref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">f_ref</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_dataset</span> <span class="o">=</span> <span class="n">InMemoryInjectionDataset</span><span class="p">(</span>
+                <span class="n">background</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_kwargs</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validation_dataset</span> <span class="o">=</span> <span class="n">InMemoryInjectionDataset</span><span class="p">(</span>
+                <span class="n">valid_background</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_kwargs</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_dataset</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_dataset</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># example usage of the datamodule</span>
+<span class="n">datamodule</span> <span class="o">=</span> <span class="n">ML4GWInferenceDatamodule</span><span class="p">(</span><span class="n">background_dir</span> <span class="o">/</span> <span class="s2">&quot;background-1126310417-10000.hdf5&quot;</span><span class="p">)</span>
+<span class="n">datamodule</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s1">&#39;validate&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">X_inj</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">datamodule</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">():</span>
+    <span class="k">break</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">X_inj</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;chirp_mass&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([10, 2, 8192])
+tensor([31.4181, 31.1354, 26.2650, 30.3907, 30.0710, 29.9760, 31.2173, 34.3678,
+        33.4446, 32.2733])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="now-we-build-the-normalizing-flow-as-a-lightningmodule">
+<h2>Now we build the Normalizing flow as a <code class="docutils literal notranslate"><span class="pre">LightningModule</span></code><a class="headerlink" href="#now-we-build-the-normalizing-flow-as-a-lightningmodule" title="Link to this heading"></a></h2>
+<p>The module has a learnable <code class="docutils literal notranslate"><span class="pre">architecture</span></code> which is used to summarize the strain data. The normalizing flow learns the distribution of the inference parameters given this data summary.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ML4GWInferenceModel</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A LFI model using ML4GW tools&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">architecture</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+        <span class="n">inference_params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">inference_params</span><span class="p">,</span>
+        <span class="n">num_transforms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">num_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">hidden_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
+        <span class="n">context_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+        <span class="n">activation</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span>
+            <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;architecture&quot;</span><span class="p">,]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nn</span> <span class="o">=</span> <span class="n">architecture</span>
+        <span class="c1"># build the normalizing flow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inference_params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_flow</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">embedding_net</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="n">strain</span><span class="p">,</span> <span class="n">param_dict</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">inference_params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_dict</span><span class="p">[</span><span class="n">_</span><span class="p">])</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">strain</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+            <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="n">strain</span><span class="p">,</span> <span class="n">param_dict</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">inference_params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_dict</span><span class="p">[</span><span class="n">_</span><span class="p">])</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">strain</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+            <span class="s2">&quot;valid_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">OneCycleLR</span><span class="p">(</span>
+            <span class="n">optimizer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="n">pct_start</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+            <span class="n">total_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">estimated_stepping_batches</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">scheduler_config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">scheduler_config</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">chkpt</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">ModelCheckpoint</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="s2">&quot;valid_loss&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;min&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">chkpt</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns single autoregressive transform&quot;&quot;&quot;</span>
+        <span class="n">param_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">inference_params</span><span class="p">)</span>
+        <span class="n">arn</span> <span class="o">=</span> <span class="n">ConditionalAutoRegressiveNN</span><span class="p">(</span>
+            <span class="n">param_dim</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">context_dim</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">num_blocks</span> <span class="o">*</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">hidden_features</span><span class="p">],</span>
+            <span class="n">nonlinearity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">activation</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">ConditionalAffineAutoregressive</span><span class="p">(</span><span class="n">arn</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transform</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">flow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;transforms&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Flow is not built&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ConditionalTransformedDistribution</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the base distribution for the flow&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Normal</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the transform&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">num_transforms</span><span class="p">):</span>
+            <span class="n">_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_block</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">_transform</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="n">ConditionalComposeTransformModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transforms</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper `log_prob` from TransformedDistribution&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;transforms&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Flow is not built&quot;</span><span class="p">)</span>
+        <span class="n">embedded_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_net</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">embedded_context</span><span class="p">)</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper around sample from TransformedDistribution object&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;transforms&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Flow is not built&quot;</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">n</span>
+        <span class="n">embedded_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_net</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">embedded_context</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.nn.resnet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResNet1D</span>
+<span class="c1"># we use a ResNet1D as the embedding network</span>
+<span class="n">architecture</span> <span class="o">=</span> <span class="n">ResNet1D</span><span class="p">(</span>
+    <span class="n">in_channels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="n">classes</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">kernel_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">log_dir</span> <span class="o">=</span> <span class="s2">&quot;/tmp/pl-logs&quot;</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">CSVLogger</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ml4gw-lfi-expt&quot;</span><span class="p">)</span>
+
+<span class="c1"># create a fresh instance of the model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ML4GWInferenceModel</span><span class="p">(</span>
+    <span class="n">architecture</span><span class="o">=</span><span class="n">architecture</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">datamodule</span> <span class="o">=</span> <span class="n">ML4GWInferenceDatamodule</span><span class="p">(</span>
+    <span class="n">background_dir</span> <span class="o">/</span> <span class="s2">&quot;background-1126310417-10000.hdf5&quot;</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">500</span>  <span class="c1"># adjust based on your device memory</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># invoke trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">check_val_every_n_epoch</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;16-mixed&quot;</span><span class="p">,</span>
+    <span class="n">log_every_n_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+    <span class="n">accelerator</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">=</span><span class="n">datamodule</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Using 16bit Automatic Mixed Precision (AMP)
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+HPU available: False, using: 0 HPUs
+The following callbacks returned in `LightningModule.configure_callbacks` will override existing callbacks passed to Trainer: ModelCheckpoint
+You are using a CUDA device (&#39;NVIDIA A100-SXM4-40GB&#39;) that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision(&#39;medium&#39; | &#39;high&#39;)` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Loading `train_dataloader` to estimate number of stepping batches.
+/env/lib/python3.10/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:231: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
+
+  | Name       | Type                              | Params | Mode 
+-------------------------------------------------------------------------
+0 | nn         | ResNet1D                          | 1.0 M  | train
+1 | transforms | ConditionalComposeTransformModule | 5.2 M  | train
+-------------------------------------------------------------------------
+6.2 M     Trainable params
+0         Non-trainable params
+6.2 M     Total params
+24.862    Total estimated model params size (MB)
+274       Modules in train mode
+0         Modules in eval mode
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1d356cd66d564b688a8d4c084bf5a07c", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "791e1095f8684d20872b2a0a8f806f01", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/env/lib/python3.10/site-packages/torch/optim/lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b79bd4e7ffb84c39aa161fa55ece33af", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "b1077a3dd2aa4bcc84933f37e933fedd", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "2cc435cfd64c4257b92f90df7e218e5a", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "b44c7cf97b614b278e911688ac37e707", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "c15436e7c41e4b76acf685fea8729529", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "15b55213fdde4e369a962278fa290bc0", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`Trainer.fit` stopped: `max_epochs=30` reached.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="test-model-against-gw150914">
+<h2>Test model against GW150914<a class="headerlink" href="#test-model-against-gw150914" title="Link to this heading"></a></h2>
+<p>We will download data around GW150914 and whiten it using <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> tools</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ML4GWInferenceModel(
+  (nn): ResNet1D(
+    (conv1): Conv1d(2, 64, kernel_size=(7,), stride=(2,), padding=(3,), bias=False)
+    (bn1): GroupNorm1D()
+    (relu): ReLU(inplace=True)
+    (maxpool): MaxPool1d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+    (residual_layers): ModuleList(
+      (0): Sequential(
+        (0): BasicBlock(
+          (conv1): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (1): BasicBlock(
+          (conv1): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (2): BasicBlock(
+          (conv1): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (3): BasicBlock(
+          (conv1): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (4): BasicBlock(
+          (conv1): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+      )
+      (1): Sequential(
+        (0): BasicBlock(
+          (conv1): Conv1d(64, 128, kernel_size=(5,), stride=(2,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+          (downsample): Sequential(
+            (0): Conv1d(64, 128, kernel_size=(1,), stride=(2,), bias=False)
+            (1): GroupNorm1D()
+          )
+        )
+        (1): BasicBlock(
+          (conv1): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (2): BasicBlock(
+          (conv1): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (3): BasicBlock(
+          (conv1): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (4): BasicBlock(
+          (conv1): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(128, 128, kernel_size=(5,), stride=(1,), padding=(2,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+      )
+    )
+    (avgpool): AdaptiveAvgPool1d(output_size=1)
+    (fc): Linear(in_features=128, out_features=32, bias=True)
+  )
+  (transforms): ConditionalComposeTransformModule(
+    (0-19): 20 x ConditionalAffineAutoregressive(
+      (nn): ConditionalAutoRegressiveNN(
+        (layers): ModuleList(
+          (0): MaskedLinear(in_features=34, out_features=250, bias=True)
+          (1-4): 4 x MaskedLinear(in_features=250, out_features=250, bias=True)
+          (5): MaskedLinear(in_features=250, out_features=4, bias=True)
+        )
+        (f): Tanh()
+      )
+    )
+  )
+)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download and whiten GW150914 data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gwpy.timeseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSeries</span>
+
+<span class="n">trigger_time</span> <span class="o">=</span> <span class="mf">1126259462.4</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">post_trigger_duration</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># whitening will trim 1s on each side</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">trigger_time</span> <span class="o">+</span> <span class="n">post_trigger_duration</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">duration</span>
+
+<span class="n">psd_duration</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">duration</span>
+<span class="n">psd_start_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">-</span> <span class="n">psd_duration</span>
+<span class="n">psd_end_time</span> <span class="o">=</span> <span class="n">start_time</span>
+
+<span class="n">data_ts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">psd_data_ts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloading analysis data for ifo </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">det</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+    <span class="n">data_ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloading psd data for ifo </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
+    <span class="n">psd_data</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">det</span><span class="p">,</span> <span class="n">psd_start_time</span><span class="p">,</span> <span class="n">psd_end_time</span><span class="p">)</span>
+    <span class="n">psd_data</span> <span class="o">=</span> <span class="n">psd_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+    <span class="n">psd_data_ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">psd_data</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading analysis data for ifo H1
+Downloading psd data for ifo H1
+Downloading analysis data for ifo L1
+Downloading psd data for ifo L1
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fftlength</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">fduration</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="n">spectral_density</span> <span class="o">=</span> <span class="n">SpectralDensity</span><span class="p">(</span>
+    <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+    <span class="n">fftlength</span><span class="o">=</span><span class="n">fftlength</span><span class="p">,</span>
+    <span class="n">overlap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">average</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">whiten</span> <span class="o">=</span> <span class="n">Whiten</span><span class="p">(</span>
+    <span class="n">fduration</span><span class="o">=</span><span class="n">fduration</span><span class="p">,</span>
+    <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+    <span class="n">highpass</span><span class="o">=</span><span class="mi">20</span>
+<span class="p">)</span>
+
+<span class="n">data_whitened</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">psd_data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data_ts</span><span class="p">,</span> <span class="n">psd_data_ts</span><span class="p">):</span>
+    <span class="n">psd</span> <span class="o">=</span> <span class="n">spectral_density</span><span class="p">(</span><span class="n">psd_data</span><span class="p">)</span>
+    <span class="n">data_whitened</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">whiten</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">psd</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+
+<span class="n">data_whitened</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">data_whitened</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">times</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span> <span class="o">-</span> <span class="n">fduration</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">duration</span> <span class="o">-</span> <span class="n">fduration</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">d_whitened</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data_whitened</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;H1&#39;</span><span class="p">,</span> <span class="s1">&#39;L1&#39;</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">d_whitened</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="n">det</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Whitened GW150914 data&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Whitened Strain&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Whitened Strain&#39;)
+</pre></div>
+</div>
+<img alt="../_images/9aa7d5f2cb503171f440c551cf7195231d8236a9f1819a932e1197f7cebb407c.png" src="../_images/9aa7d5f2cb503171f440c551cf7195231d8236a9f1819a932e1197f7cebb407c.png" />
+</div>
+</div>
+<p>Sample from the flow, using the whitened data as context</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">samples</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">data_whitened</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">corner</span><span class="w"> </span><span class="kn">import</span> <span class="n">corner</span>
+<span class="n">figure</span> <span class="o">=</span> <span class="n">corner</span><span class="p">(</span>
+    <span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+    <span class="n">labels</span><span class="o">=</span><span class="p">[</span>
+        <span class="sa">r</span><span class="s2">&quot;$M_c$&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;$D_L$&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+    <span class="n">show_titles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">title_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/e39b70dedbde9164386f20e0b7ee0251471902d8cf2508495001505b149cada5.png" src="../_images/e39b70dedbde9164386f20e0b7ee0251471902d8cf2508495001505b149cada5.png" />
+</div>
+</div>
+<p>This is not the best constraining result since the flow needs to train for longer. For reference the <a class="reference external" href="https://gwosc.org/eventapi/html/GWTC-1-confident/GW150914/v3/">results from GWTC-1</a> is $M_c = 28.6^{+1.7}<em>{-1.5};M</em>{\odot}$ and $D_L = 440^{+150}_{-170}$. But it is in the ballpark.</p>
+<p>There are a few key improvements in the production models deployed in LIGO-Virgo-KAGRA fourth observing run, compared to this tutorial (see the AMPLFI <a class="reference external" href="https://doi.org/10.1088/2632-2153/ad8982">methods</a> and <a class="reference external" href="https://doi.org/10.48550/arXiv.2509.22561">validation</a> papers):</p>
+<ul class="simple">
+<li><p>A multimodal embedding network involving both time and frequency-domain data views</p></li>
+<li><p>Standard scaling the parameters before forward-modeling with the normalizing flow</p></li>
+<li><p>Marginalizing over a time-of-arrival window using data augmentation and self-supervised learning</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw_tutorial.html" class="btn btn-neutral float-left" title="ml4gw Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/ml4gw.html" class="btn btn-neutral float-right" title="ml4gw" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ethan Marx &lt;emarx@mit.edu&gt;, Will Benoit &lt;benoi090@umn.edu&gt;, Deep Chatterjee &lt;deep1018@mit.edu&gt;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

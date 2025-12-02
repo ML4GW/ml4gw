@@ -26,6 +26,7 @@ usage examples and tutorial below for help on getting started.
    installation
    usage
    tutorials/ml4gw_tutorial
+   tutorials/ml4gw_lfi_tutorial
 
 API:
 ----
