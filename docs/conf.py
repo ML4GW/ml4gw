@@ -52,6 +52,18 @@ autodoc_typehints = "description"
 autodoc_inherit_docstrings = False
 nb_execution_mode = "off"
 
+# MyST configuration
+myst_enable_extensions = [
+    "dollarmath",      # Enable $...$ and $$...$$ for math
+    "amsmath",         # Enable advanced math environments
+    "colon_fence",     # Enable ::: fences
+    "deflist",         # Enable definition lists
+    "html_image",      # Enable HTML images
+    "replacements",    # Enable replacements
+    "smartquotes",     # Enable smart quotes
+    "substitution",    # Enable substitutions
+]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
