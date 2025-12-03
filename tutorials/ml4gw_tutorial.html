@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ml4gw Tutorial &mdash; ml4gw  documentation</title>
+  <title>Tutorial on the basics of ml4gw &mdash; ml4gw  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -49,11 +49,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial on the basics of <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#waveform-generation">Waveform Generation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generating-a-single-waveform">Generating a single waveform</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parameter-sampling">Parameter sampling</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#generation-in-the-frequency-domain">Generation in the frequency domain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#batch-waveforms-generation">Batch waveforms generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#time-domain-waveforms">Time-domain waveforms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#waveform-projection">Waveform projection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#psd-estimation">PSD Estimation</a></li>
@@ -64,7 +65,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#whitening">Whitening</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transforms">Transforms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#architectures">Architectures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#example-training-setup">Example training setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-training-setup">Example training setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation-against-gw190521">Evaluation against GW190521</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ml4gw_lfi_tutorial.html">Tutorial on distribution approximation and posterior estimation</a></li>
@@ -89,7 +93,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> Tutorial</li>
+      <li class="breadcrumb-item active">Tutorial on the basics of <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code></li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tutorials/ml4gw_tutorial.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -99,8 +103,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section class="tex2jax_ignore mathjax_ignore" id="ml4gw-tutorial">
-<h1><a class="reference external" href="https://github.com/ML4GW/ml4gw"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code></a> Tutorial<a class="headerlink" href="#ml4gw-tutorial" title="Link to this heading"></a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="tutorial-on-the-basics-of-ml4gw">
+<h1>Tutorial on the basics of <a class="reference external" href="https://github.com/ML4GW/ml4gw"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code></a><a class="headerlink" href="#tutorial-on-the-basics-of-ml4gw" title="Link to this heading"></a></h1>
 <p>This tutorial has two parts:</p>
 <ol class="arabic simple">
 <li><p>An overview of many of the features of <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code>, with demonstrations</p></li>
@@ -108,13 +112,13 @@
 </ol>
 <p><strong>Requirements:</strong> This notebook requires a number of packages besides <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> to run completely.
 Install with:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;ml4gw&gt;=0.7.6&quot;</span><span class="w"> </span><span class="s2">&quot;gwpy&gt;=3.0&quot;</span><span class="w"> </span><span class="s2">&quot;h5py&gt;=3.12&quot;</span><span class="w"> </span><span class="s2">&quot;torchmetrics&gt;=1.6&quot;</span><span class="w"> </span><span class="s2">&quot;lightning&gt;=2.4.0&quot;</span><span class="w"> </span><span class="s2">&quot;rich&gt;=10.2.2,&lt;14.0&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;ml4gw&gt;=0.7.10&quot;</span><span class="w"> </span><span class="s2">&quot;gwpy&gt;=3.0&quot;</span><span class="w"> </span><span class="s2">&quot;h5py&gt;=3.12&quot;</span><span class="w"> </span><span class="s2">&quot;torchmetrics&gt;=1.6&quot;</span><span class="w"> </span><span class="s2">&quot;lightning&gt;=2.4.0&quot;</span><span class="w"> </span><span class="s2">&quot;rich&gt;=10.2.2,&lt;14.0&quot;</span>
 </pre></div>
 </div>
 <p>To install these packages into your current environment, uncomment and run the code block below.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># !pip install &quot;ml4gw&gt;=0.7.6&quot; &quot;gwpy&gt;=3.0&quot; &quot;h5py&gt;=3.12&quot; &quot;torchmetrics&gt;=1.6&quot; &quot;lightning&gt;=2.4.0&quot; &quot;rich&gt;=10.2.2,&lt;14.0&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># !pip install &quot;ml4gw&gt;=0.7.10&quot; &quot;gwpy&gt;=3.0&quot; &quot;h5py&gt;=3.12&quot; &quot;torchmetrics&gt;=1.6&quot; &quot;lightning&gt;=2.4.0&quot; &quot;rich&gt;=10.2.2,&lt;14.0&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -135,6 +139,8 @@ which makes BBH detection a good test case.</p>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">101588</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
     <span class="p">{</span>
@@ -158,6 +164,10 @@ which makes BBH detection a good test case.</p>
 <p>We’ll start by generating some BBH waveforms. Currently, <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> has implemented the following <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/waveforms/cbc">CBC waveforms</a>: TaylorF2, IMRPhenomD, and IMRPhenomPv2. We’ll use IMRPhenomD for our example. These are all frequency-domain waveforms, and so return a frequency-series of gravitational-wave strain. We provide the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/waveforms/generator.py"><code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code></a> class for producing time-domain signals; however, we’ll start with frequency-domain.</p>
 <p>Additionally, sine-gaussian and ringdown (damped cosinusoidal) waveforms are <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/waveforms/adhoc">available</a>.</p>
 <p>These modules allow simultaneous generation of batches of waveforms from a set of parameters.</p>
+<p>Future feature:</p>
+<ul class="simple">
+<li><p>Additional waveforms</p></li>
+</ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Desired duration of time-domain waveform</span>
@@ -175,16 +185,53 @@ which makes BBH detection a good test case.</p>
 <span class="n">num_freqs</span> <span class="o">=</span> <span class="n">num_samples</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
 
 <span class="c1"># Create an array of frequency values at which to generate our waveform</span>
-<span class="c1"># At the moment, only frequency-domain approximants have been implemented</span>
-<span class="n">frequencies</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nyquist</span><span class="p">,</span> <span class="n">num_freqs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-<span class="n">freq_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">frequencies</span> <span class="o">&gt;=</span> <span class="n">f_min</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">frequencies</span> <span class="o">&lt;</span> <span class="n">f_max</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">frequencies</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nyquist</span><span class="p">,</span> <span class="n">num_freqs</span><span class="p">)</span>
+<span class="n">freq_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">frequencies</span> <span class="o">&gt;=</span> <span class="n">f_min</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">frequencies</span> <span class="o">&lt;</span> <span class="n">f_max</span><span class="p">)</span>
+<span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span><span class="p">[</span><span class="n">freq_mask</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 </div>
+<section id="generating-a-single-waveform">
+<h3>Generating a single waveform<a class="headerlink" href="#generating-a-single-waveform" title="Link to this heading"></a></h3>
+<p>To begin, let’s generate and plot a single waveform using the IMRPhenomD approximant. Note that the arguments are all expected to be a PyTorch <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> (other than <code class="docutils literal notranslate"><span class="pre">f_ref</span></code>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">IMRPhenomD</span>
+
+<span class="n">approximant</span> <span class="o">=</span> <span class="n">IMRPhenomD</span><span class="p">()</span>
+
+<span class="c1"># Calling the approximant with the frequency array, reference frequency, and waveform parameters</span>
+<span class="c1"># returns the cross and plus polarizations</span>
+<span class="n">hp</span><span class="p">,</span> <span class="n">hc</span> <span class="o">=</span> <span class="n">approximant</span><span class="p">(</span>
+    <span class="n">f</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span>
+    <span class="n">chirp_mass</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">30</span><span class="p">]),</span>
+    <span class="n">mass_ratio</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.9</span><span class="p">]),</span>
+    <span class="n">distance</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">500</span><span class="p">]),</span>
+    <span class="n">chi1</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="n">chi2</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="n">phic</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="n">inclination</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="n">f_ref</span><span class="o">=</span><span class="n">f_ref</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hp</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Strain&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/fd892a2cf71d1b303732e8f2f7fab272d75f0f9df024677027333dcc6d6ad4dc.png" src="../_images/fd892a2cf71d1b303732e8f2f7fab272d75f0f9df024677027333dcc6d6ad4dc.png" />
+</div>
+</div>
+</section>
 <section id="parameter-sampling">
 <h3>Parameter sampling<a class="headerlink" href="#parameter-sampling" title="Link to this heading"></a></h3>
-<p>To generate waveforms, we need sets of parameters. For creating a training dataset, we’d like to randomly sample these parameters from some probability distributions.</p>
+<p>To generate many waveforms, we need sets of parameters. For creating a training dataset, we’d like to randomly sample these parameters from some probability distributions. These distributions could represent actual astrophysical priors, or they could simply be tuned to train an effective model.</p>
 <p>PyTorch has its own <a class="reference external" href="https://pytorch.org/docs/stable/distributions.html">probability distributions</a>, but there are some distributions that they haven’t yet implemented (at least at time of writing), so we implemented them <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/distributions.py">ourselves</a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -193,7 +240,7 @@ which makes BBH detection a good test case.</p>
 
 <span class="c1"># On CPU, keep the number of waveforms around 100. On GPU, you can go higher,</span>
 <span class="c1"># subject to memory constraints.</span>
-<span class="n">num_waveforms</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">num_waveforms</span> <span class="o">=</span> <span class="mi">1000</span>
 
 <span class="c1"># Create a dictionary of parameter distributions</span>
 <span class="c1"># This is not intended to be an astrophysically</span>
@@ -208,7 +255,8 @@ which makes BBH detection a good test case.</p>
     <span class="s2">&quot;inclination&quot;</span><span class="p">:</span> <span class="n">Sine</span><span class="p">(),</span>
 <span class="p">}</span>
 
-<span class="c1"># And then sample from each of those distributions</span>
+<span class="c1"># And then sample from each of those distributions.</span>
+<span class="c1"># Note that the samples are immediately moved to the desired device.</span>
 <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">num_waveforms</span><span class="p">,))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">param_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
 <span class="p">}</span>
@@ -217,33 +265,32 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 </section>
-<section id="generation-in-the-frequency-domain">
-<h3>Generation in the frequency domain<a class="headerlink" href="#generation-in-the-frequency-domain" title="Link to this heading"></a></h3>
+<section id="batch-waveforms-generation">
+<h3>Batch waveforms generation<a class="headerlink" href="#batch-waveforms-generation" title="Link to this heading"></a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">IMRPhenomD</span>
 
 <span class="n">approximant</span> <span class="o">=</span> <span class="n">IMRPhenomD</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
-<span class="c1"># Calling the approximant with the frequency array, reference frequency, and waveform parameters</span>
-<span class="c1"># returns the cross and plus polarizations</span>
-<span class="n">hc_f</span><span class="p">,</span> <span class="n">hp_f</span> <span class="o">=</span> <span class="n">approximant</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">frequencies</span><span class="p">[</span><span class="n">freq_mask</span><span class="p">],</span> <span class="n">f_ref</span><span class="o">=</span><span class="n">f_ref</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+<span class="c1"># Generate all of the waveforms in a single batch</span>
+<span class="n">hc_f</span><span class="p">,</span> <span class="n">hp_f</span> <span class="o">=</span> <span class="n">approximant</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">frequencies</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">f_ref</span><span class="o">=</span><span class="n">f_ref</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">hc_f</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">hp_f</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([500, 8032]) torch.Size([500, 8032])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1000, 8032]) torch.Size([1000, 8032])
 </pre></div>
 </div>
 </div>
 </div>
-<p>We now have the plus and cross polarizations 500 BBH waveforms in the frequency domain. We can plot one of them, just to take a look:</p>
+<p>We now have the plus and cross polarizations of 1000 BBH waveforms in the frequency domain. We can plot one of them, just to take a look:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that I have to move data to CPU to plot</span>
 <span class="c1"># In an actual training setup, you wouldn&#39;t be moving data between devices so much</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">[</span><span class="n">freq_mask</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hp_f</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hp_f</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">)</span>
@@ -253,25 +300,27 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/f99b47d6179c28a1bd0678b7ca25c8498aeb9d4b8f3b861391a24ae41a639743.png" src="../_images/f99b47d6179c28a1bd0678b7ca25c8498aeb9d4b8f3b861391a24ae41a639743.png" />
+<img alt="../_images/c42bd3584b70983d388c80f6bfd0519675b9679575ad8597918c6c2e6723e412.png" src="../_images/c42bd3584b70983d388c80f6bfd0519675b9679575ad8597918c6c2e6723e412.png" />
 </div>
 </div>
 </section>
 <section id="time-domain-waveforms">
 <h3>Time-domain waveforms<a class="headerlink" href="#time-domain-waveforms" title="Link to this heading"></a></h3>
-<p>We’ll now generate waveforms in the time domain using the <code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code>. This <code class="docutils literal notranslate"><span class="pre">Module</span></code> uses the <code class="docutils literal notranslate"><span class="pre">approximant</span></code> to generate a waveform <code class="docutils literal notranslate"><span class="pre">duration</span></code> seconds long with the given <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>. The coalescence point of the signal is placed <code class="docutils literal notranslate"><span class="pre">right_pad</span></code> seconds from the right edge of the window. For conditioning the frequency-domain waveforms, the parameter dictionary is required to contain the <code class="docutils literal notranslate"><span class="pre">mass_1</span></code>, <code class="docutils literal notranslate"><span class="pre">mass_2</span></code>, <code class="docutils literal notranslate"><span class="pre">s1z</span></code>, and <code class="docutils literal notranslate"><span class="pre">s2z</span></code> keys. We’ll use a conversion function from <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/waveforms/conversion.py"><code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.conversion</span></code></a> to add these keys.</p>
-<p>Because we’re using IMRPhenomD and have aligned spins <code class="docutils literal notranslate"><span class="pre">s1z</span> <span class="pre">=</span> <span class="pre">chi1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2z</span> <span class="pre">=</span> <span class="pre">chi2</span></code>. If we had non-aligned spins, we could use the <code class="docutils literal notranslate"><span class="pre">bilby_spins_to_lalsim</span></code> conversion function to compute the cartesian spin components.</p>
+<p>We’ll now generate waveforms in the time domain using the <code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code>. This module uses the <code class="docutils literal notranslate"><span class="pre">approximant</span></code> to generate a waveform that is <code class="docutils literal notranslate"><span class="pre">duration</span></code> seconds long with the given <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>. The coalescence point of the signal is placed <code class="docutils literal notranslate"><span class="pre">right_pad</span></code> seconds from the right edge of the window. For conditioning the frequency-domain waveforms, the parameter dictionary is required to contain the <code class="docutils literal notranslate"><span class="pre">mass_1</span></code>, <code class="docutils literal notranslate"><span class="pre">mass_2</span></code>, <code class="docutils literal notranslate"><span class="pre">s1z</span></code>, and <code class="docutils literal notranslate"><span class="pre">s2z</span></code> keys. We’ll use a conversion function from <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/waveforms/conversion.py"><code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.conversion</span></code></a> to add these keys.</p>
+<p>Because we’re using IMRPhenomD and have aligned spins <code class="docutils literal notranslate"><span class="pre">s1z</span> <span class="pre">=</span> <span class="pre">chi1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2z</span> <span class="pre">=</span> <span class="pre">chi2</span></code>. If we had non-aligned spins, we could use the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6a52100fcfa4aa893147eaf9e460775418260121/ml4gw/waveforms/conversion.py#L53"><code class="docutils literal notranslate"><span class="pre">bilby_spins_to_lalsim</span></code></a> conversion function to compute the cartesian spin components.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeDomainCBCWaveformGenerator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">chirp_mass_and_mass_ratio_to_components</span>
 
+<span class="c1"># We&#39;ll place the waveform coalescence 0.05 seconds from the right edge</span>
+<span class="c1"># to give some room for the ringdown</span>
 <span class="n">waveform_generator</span> <span class="o">=</span> <span class="n">TimeDomainCBCWaveformGenerator</span><span class="p">(</span>
     <span class="n">approximant</span><span class="o">=</span><span class="n">approximant</span><span class="p">,</span>
     <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
     <span class="n">f_min</span><span class="o">=</span><span class="n">f_min</span><span class="p">,</span>
     <span class="n">duration</span><span class="o">=</span><span class="n">waveform_duration</span><span class="p">,</span>
-    <span class="n">right_pad</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">right_pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
     <span class="n">f_ref</span><span class="o">=</span><span class="n">f_ref</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
@@ -287,12 +336,12 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([500, 16384]) torch.Size([500, 16384])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1000, 16384]) torch.Size([1000, 16384])
 </pre></div>
 </div>
 </div>
 </div>
-<p>We now have 500 BBH waveforms, 8 seconds long and sampled at 2048 Hz. We can plot one of these as well:</p>
+<p>We now have 1000 BBH waveforms, 8 seconds long and sampled at 2048 Hz. We can plot one of these as well:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">times</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">waveform_duration</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">)</span>
@@ -304,13 +353,13 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/6cbdcfc355023dc893e6a0c885e15012ff1ce49fc82561f562709044fbe512ba.png" src="../_images/6cbdcfc355023dc893e6a0c885e15012ff1ce49fc82561f562709044fbe512ba.png" />
+<img alt="../_images/4ff4ef64213a276570a16ab6fca8e1ec0c85e7065830242d7e98d7163580ba54.png" src="../_images/4ff4ef64213a276570a16ab6fca8e1ec0c85e7065830242d7e98d7163580ba54.png" />
 </div>
 </div>
 </section>
 <section id="waveform-projection">
 <h3>Waveform projection<a class="headerlink" href="#waveform-projection" title="Link to this heading"></a></h3>
-<p>We can now project these waveforms and get the observed strain. At present, the projection is the most basic, assuming a fixed orientation between the detector and the source over the duration of the signal. The source code for these functions can be found <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/gw.py">here</a>.</p>
+<p>We can now project these waveforms onto the detectors and get the observed strain. At present, the projection is the most basic, assuming a fixed orientation between the detector and the source over the duration of the signal. The source code for these functions can be found <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/gw.py">here</a>.</p>
 <p>Future feature:</p>
 <ul class="simple">
 <li><p>Account for the Earth’s rotation and orbit</p></li>
@@ -319,13 +368,12 @@ which makes BBH detection a good test case.</p>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.gw</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_ifo_geometry</span><span class="p">,</span> <span class="n">compute_observed_strain</span>
 
-<span class="c1"># Define probability distributions for sky location and polarization angle</span>
+<span class="c1"># Define probability distributions for uniform sky location and polarization angle</span>
 <span class="n">dec</span> <span class="o">=</span> <span class="n">Cosine</span><span class="p">()</span>
 <span class="n">psi</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 <span class="n">phi</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
-<span class="c1"># The interferometer geometry for V1 and K1 are also in ml4gw</span>
-<span class="n">ifos</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">]</span>
+<span class="n">ifos</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">,</span> <span class="s2">&quot;V1&quot;</span><span class="p">,</span> <span class="s2">&quot;K1&quot;</span><span class="p">]</span>
 <span class="n">tensors</span><span class="p">,</span> <span class="n">vertices</span> <span class="o">=</span> <span class="n">get_ifo_geometry</span><span class="p">(</span><span class="o">*</span><span class="n">ifos</span><span class="p">)</span>
 
 <span class="c1"># Pass the detector geometry, along with the polarizations and sky parameters,</span>
@@ -345,7 +393,7 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([500, 2, 16384])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1000, 4, 16384])
 </pre></div>
 </div>
 </div>
@@ -356,6 +404,8 @@ which makes BBH detection a good test case.</p>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;L1&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;V1&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;K1&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Strain&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
@@ -364,13 +414,13 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/eea6cf21748edeb3c8f5a045b035793556c41f134f51f89b67651b7a8bd46d5c.png" src="../_images/eea6cf21748edeb3c8f5a045b035793556c41f134f51f89b67651b7a8bd46d5c.png" />
+<img alt="../_images/27b966415cc56d7015293c71bea46aa88a9c33f13a5570a67103700505cf190d.png" src="../_images/27b966415cc56d7015293c71bea46aa88a9c33f13a5570a67103700505cf190d.png" />
 </div>
 </div>
 </section>
 <section id="psd-estimation">
 <h3>PSD Estimation<a class="headerlink" href="#psd-estimation" title="Link to this heading"></a></h3>
-<p>Now that we have our waveforms generated, one thing we might want to do is calculate their SNRs with respect to some background data. To do that, we’ll need the power spectral density of the background. The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/transforms/spectral.py"><code class="docutils literal notranslate"><span class="pre">SpectralDensity</span></code></a> module can take a batch of multi-channel timeseries data and compute the PSD along the time dimension. We’ll begin by downloading some background data from the Gravitational Wave Open Science Center (GWOSC). This data comes from the Hanford and Livingston and was taken during O3.</p>
+<p>Now that we have our waveforms generated, one thing we might want to do is calculate their SNRs with respect to some background data. To do that, we’ll need the power spectral density (PSD) of the background. The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/transforms/spectral.py"><code class="docutils literal notranslate"><span class="pre">SpectralDensity</span></code></a> module can take a batch of multi-channel timeseries data and compute the PSD along the time dimension. We’ll begin by downloading some background data from the Gravitational Wave Open Science Center (GWOSC). This data comes from the Hanford and Livingston and was taken during O3.</p>
 <p>One important piece to note is that, due to the scale of the strain, the background data is cast to <code class="docutils literal notranslate"><span class="pre">double</span></code> precision before being given to the module to avoid certain values being zeroed out.</p>
 <p>Future feature:</p>
 <ul class="simple">
@@ -378,7 +428,8 @@ which makes BBH detection a good test case.</p>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">gwpy.timeseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">TimeSeriesDict</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gwpy.timeseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">TimeSeriesDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="c1"># Point this to whatever directory you want to house</span>
@@ -400,6 +451,10 @@ which makes BBH detection a good test case.</p>
     <span class="p">(</span><span class="mi">1240658942</span><span class="p">,</span> <span class="mi">1240668052</span><span class="p">),</span>
 <span class="p">]</span>
 
+<span class="c1"># We&#39;ll stick with HL data for the remainder of this notebook</span>
+<span class="n">ifos</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">]</span>
+<span class="n">waveforms</span> <span class="o">=</span> <span class="n">waveforms</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
 <span class="k">for</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
     <span class="c1"># Download the data from GWOSC. This will take a few minutes.</span>
     <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
@@ -412,6 +467,12 @@ which makes BBH detection a good test case.</p>
         <span class="n">ts_dict</span><span class="p">[</span><span class="n">ifo</span><span class="p">]</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">ifo</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">ts_dict</span> <span class="o">=</span> <span class="n">ts_dict</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
     <span class="n">ts_dict</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;hdf5&quot;</span><span class="p">)</span>
+
+<span class="c1"># Load in one of the background files to compute PSDs</span>
+<span class="n">background_file</span> <span class="o">=</span> <span class="n">background_dir</span> <span class="o">/</span> <span class="s2">&quot;background-1240579783-7829.hdf5&quot;</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">background_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">background</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="n">ifo</span><span class="p">][:])</span> <span class="k">for</span> <span class="n">ifo</span> <span class="ow">in</span> <span class="n">ifos</span><span class="p">]</span>
+    <span class="n">background</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">background</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -419,7 +480,6 @@ which makes BBH detection a good test case.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpectralDensity</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 
 <span class="n">fftlength</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">spectral_density</span> <span class="o">=</span> <span class="n">SpectralDensity</span><span class="p">(</span>
@@ -428,13 +488,6 @@ which makes BBH detection a good test case.</p>
     <span class="n">overlap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">average</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-
-<span class="c1"># This is H1 and L1 data from O3 that I downloaded earlier</span>
-<span class="c1"># We have tools for dataloading that I&#39;ll get to later</span>
-<span class="n">background_file</span> <span class="o">=</span> <span class="n">background_dir</span> <span class="o">/</span> <span class="s2">&quot;background-1240579783-7829.hdf5&quot;</span>
-<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">background_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">background</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="n">ifo</span><span class="p">][:])</span> <span class="k">for</span> <span class="n">ifo</span> <span class="ow">in</span> <span class="n">ifos</span><span class="p">]</span>
-    <span class="n">background</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">background</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
 <span class="c1"># Note cast to double</span>
 <span class="n">psd</span> <span class="o">=</span> <span class="n">spectral_density</span><span class="p">(</span><span class="n">background</span><span class="o">.</span><span class="n">double</span><span class="p">())</span>
@@ -464,7 +517,7 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/83ca7181a7cb361be5c27bde71a9c67cd0c7a62edaa20eb66f2d6b5f3a5a8daa.png" src="../_images/83ca7181a7cb361be5c27bde71a9c67cd0c7a62edaa20eb66f2d6b5f3a5a8daa.png" />
+<img alt="../_images/f442084a93d7b021720a4a406ffe85d89d7329d4916edacd58074babdca0fa1c.png" src="../_images/f442084a93d7b021720a4a406ffe85d89d7329d4916edacd58074babdca0fa1c.png" />
 </div>
 </div>
 </section>
@@ -474,7 +527,7 @@ which makes BBH detection a good test case.</p>
 <p>Note: the shape of the PSDs is determined by the sampling rate and the FFT length used in the calculation, and so may not match up with the shape of the FFT’ed waveforms. We can interpolate the PSDs so that the dimensions match.</p>
 <p>Future feature:</p>
 <ul class="simple">
-<li><p>Do this interpolation automatically somewhere unless the user specifies otherwise</p></li>
+<li><p>Do this interpolation automatically</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -515,9 +568,9 @@ which makes BBH detection a good test case.</p>
 <p>Let’s plot histograms of each of these SNR arrays:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h1_snr</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;H1&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">l1_snr</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">network_snr</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Network&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h1_snr</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;H1&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">l1_snr</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">network_snr</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Network&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;SNR&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Count&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
@@ -527,7 +580,7 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/64c1c99b6ff40e8cc7394c785b72af0098833bcc84f529ecdc4b9604de484ff8.png" src="../_images/64c1c99b6ff40e8cc7394c785b72af0098833bcc84f529ecdc4b9604de484ff8.png" />
+<img alt="../_images/719cbff0e3a56de8d004c33c85af64754636e1f4cb584529d719ee43415fb971.png" src="../_images/719cbff0e3a56de8d004c33c85af64754636e1f4cb584529d719ee43415fb971.png" />
 </div>
 </div>
 <p>This looks more or less like expected. But we’ve got a lot of low SNR signals, which a search will have trouble detecting. We can rescale our waveforms so that the SNR distribution is more favorable. This could be useful for something like curriculum learning: your network could begin with higher SNR events, and slowly be shown lower SNR events as training continues.</p>
@@ -560,7 +613,7 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/70cb6d178bf84e76f9ccb10e8f32d953948f78a6fb6f558d0a3ee494e39574fd.png" src="../_images/70cb6d178bf84e76f9ccb10e8f32d953948f78a6fb6f558d0a3ee494e39574fd.png" />
+<img alt="../_images/b7d1fe9b8fa05859bfd21e34e256c15d7275e2bdf15a0f3d8588a3be7eaa0277.png" src="../_images/b7d1fe9b8fa05859bfd21e34e256c15d7275e2bdf15a0f3d8588a3be7eaa0277.png" />
 </div>
 </div>
 <p>We now have a set of waveforms that are much easier to detect.</p>
@@ -569,7 +622,7 @@ which makes BBH detection a good test case.</p>
 <section id="dataloading">
 <h2>Dataloading<a class="headerlink" href="#dataloading" title="Link to this heading"></a></h2>
 <p>When training a model, it’s beneficial to provide as much variety in data as you can. We benefit from having multiple independent detectors, which allows for combinatorially more background samples than a single detector would, as the samples don’t have to be coincident.</p>
-<p>The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/dataloading/hdf5_dataset.py#L15"><code class="docutils literal notranslate"><span class="pre">Hdf5TimeSeriesDataset</span></code></a> allows for randomly sampling windows of data from hdf5 files, provided they all have the same structure. Here, we have a set of background files, each containing H1 and L1 strain data. We could chop this data up into samples prior to training, but we’d be limited by the number of samples we could create and fit on disk. Instead, during training, we grab the data we need for each batch by randomly sampling from all of these files, giving us effectively unlimited background data to train on.</p>
+<p>The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/dataloading/hdf5_dataset.py#L15"><code class="docutils literal notranslate"><span class="pre">Hdf5TimeSeriesDataset</span></code></a> allows for randomly sampling windows of data from HDF5 files, provided they all have the same structure. Here, we have a set of background files, each containing H1 and L1 strain data. We could chop this data up into samples prior to training, but we’d be limited by the number of samples we could create and fit on disk. Instead, during training, we grab the data we need for each batch by randomly sampling from all of these files, giving us effectively unlimited background data to train on.</p>
 <p>Future feature:</p>
 <ul class="simple">
 <li><p>Allow sampling from multiple datasets within the same file</p></li>
@@ -618,9 +671,10 @@ background-1240624412-20000.hdf5
     <span class="n">fnames</span><span class="o">=</span><span class="n">fnames</span><span class="p">,</span>
     <span class="n">channels</span><span class="o">=</span><span class="n">ifos</span><span class="p">,</span>
     <span class="n">kernel_size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">window_length</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">),</span>
-    <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span>
-    <span class="o">*</span> <span class="n">num_waveforms</span><span class="p">,</span>  <span class="c1"># Grab twice as many background samples as we have waveforms</span>
-    <span class="n">batches_per_epoch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Just doing 1 here for demonstration purposes</span>
+    <span class="c1"># Grab twice as many background samples as we have waveforms</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">num_waveforms</span><span class="p">,</span>  
+    <span class="c1"># Just doing 1 here for demonstration purposes</span>
+    <span class="n">batches_per_epoch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
     <span class="n">coincident</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -630,7 +684,7 @@ background-1240624412-20000.hdf5
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1000, 2, 39936])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([2000, 2, 39936])
 </pre></div>
 </div>
 </div>
@@ -639,11 +693,7 @@ background-1240624412-20000.hdf5
 <section id="whitening">
 <h2>Whitening<a class="headerlink" href="#whitening" title="Link to this heading"></a></h2>
 <p>It’s crucial to normalize your data before putting it through a neural network, and whitening provides a physically meaningful way of doing that. The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/transforms/whitening.py#L15"><code class="docutils literal notranslate"><span class="pre">Whiten</span></code></a> module will whiten and optionally highpass batches of multi-channel data with a provided set of PSDs. If the tensor of PSDs is 2D, each batch element of data will be whitened using the same PSDs. If 3D, each batch element will be whitened by the PSDs contained along the 0th dimension. In other words, you can provide a single PSD for each channel to whiten all elements in that channel, or you can provide a PSD for each element. We’re doing the latter here.</p>
-<p>Note that the whitening process automatically removes <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds from either side of the input data.</p>
-<p>Future feature:</p>
-<ul class="simple">
-<li><p>Add an option to not crop</p></li>
-</ul>
+<p>Note that the whitening process by default removes <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds from either side of the input data, though <code class="docutils literal notranslate"><span class="pre">crop</span> <span class="pre">=</span> <span class="pre">False</span></code> can be set when calling.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Whiten</span>
@@ -652,10 +702,20 @@ background-1240624412-20000.hdf5
     <span class="n">fduration</span><span class="o">=</span><span class="n">fduration</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">highpass</span><span class="o">=</span><span class="n">f_min</span>
 <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
+<span class="c1"># Use the background from earlier to demonstrate whitening</span>
+<span class="c1"># with a 2D PSD tensor.</span>
+<span class="n">psd</span> <span class="o">=</span> <span class="n">spectral_density</span><span class="p">(</span><span class="n">background</span><span class="o">.</span><span class="n">double</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;2D PSD shape: </span><span class="si">{</span><span class="n">psd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">whitened</span> <span class="o">=</span> <span class="n">whiten</span><span class="p">(</span><span class="n">background_samples</span><span class="p">,</span> <span class="n">psd</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Whitened shape: </span><span class="si">{</span><span class="n">whitened</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Now with a 3D PSD tensor. Using local background for whitening</span>
+<span class="c1"># helps the model stay robust to changing noise conditions.</span>
+
 <span class="c1"># Create PSDs using the first psd_length seconds of each sample</span>
 <span class="c1"># with the SpectralDensity module we defined earlier</span>
 <span class="n">psd</span> <span class="o">=</span> <span class="n">spectral_density</span><span class="p">(</span><span class="n">background_samples</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">psd_size</span><span class="p">]</span><span class="o">.</span><span class="n">double</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PSD shape: </span><span class="si">{</span><span class="n">psd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;3D PSD shape: </span><span class="si">{</span><span class="n">psd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="c1"># Take everything after the first psd_length as our input kernel</span>
 <span class="n">kernel</span> <span class="o">=</span> <span class="n">background_samples</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">psd_size</span><span class="p">:]</span>
@@ -667,9 +727,13 @@ background-1240624412-20000.hdf5
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PSD shape: torch.Size([1000, 2, 2049])
-Kernel shape: torch.Size([1000, 2, 7168])
-Whitened kernel shape: torch.Size([1000, 2, 3072])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2D PSD shape: torch.Size([2, 2049])
+Whitened shape: torch.Size([2000, 2, 35840])
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3D PSD shape: torch.Size([2000, 2, 2049])
+Kernel shape: torch.Size([2000, 2, 7168])
+Whitened kernel shape: torch.Size([2000, 2, 3072])
 </pre></div>
 </div>
 </div>
@@ -692,8 +756,8 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/7d77df03ae075e16e9d8012da81165346934c500eb78a0a712923d827b38f54f.png" src="../_images/7d77df03ae075e16e9d8012da81165346934c500eb78a0a712923d827b38f54f.png" />
-<img alt="../_images/c621d7d219820a7550a25bbe3c93a31efa083f1115aec0abd631f9fb5dbde4df.png" src="../_images/c621d7d219820a7550a25bbe3c93a31efa083f1115aec0abd631f9fb5dbde4df.png" />
+<img alt="../_images/bd037611c6b1736d63b1f6cefa6292ebd4af7459d189f9f95e055b3ae288a91a.png" src="../_images/bd037611c6b1736d63b1f6cefa6292ebd4af7459d189f9f95e055b3ae288a91a.png" />
+<img alt="../_images/7ed3e790e3cf216647bbc581f8518882b9f4eb0aafcef6eeef6bc27060ae036b.png" src="../_images/7ed3e790e3cf216647bbc581f8518882b9f4eb0aafcef6eeef6bc27060ae036b.png" />
 </div>
 </div>
 <p>Next, we can add our waveforms into half of these background samples, taking care not to add them into data that will be removed during whitening. We’ll use only the final <code class="docutils literal notranslate"><span class="pre">kernel_length</span></code> seconds of each waveform.</p>
@@ -702,6 +766,8 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pad</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fduration</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
 <span class="n">injected</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
 <span class="c1"># Inject waveforms into every other background sample</span>
+<span class="c1"># The merger time was placed 0.5 seconds from the right edge,</span>
+<span class="c1"># so it ends up 1 second into the kernel</span>
 <span class="n">injected</span><span class="p">[::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="n">pad</span><span class="p">:</span><span class="o">-</span><span class="n">pad</span><span class="p">]</span> <span class="o">+=</span> <span class="n">waveforms</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="n">kernel_size</span><span class="p">:]</span>
 <span class="c1"># And whiten with the same PSDs as before</span>
 <span class="n">whitened_injected</span> <span class="o">=</span> <span class="n">whiten</span><span class="p">(</span><span class="n">injected</span><span class="p">,</span> <span class="n">psd</span><span class="p">)</span>
@@ -730,8 +796,8 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/daa31e7eda2b36f7b0dd5643cc10418713ca3521bc64663f87a20a4f364a3014.png" src="../_images/daa31e7eda2b36f7b0dd5643cc10418713ca3521bc64663f87a20a4f364a3014.png" />
-<img alt="../_images/50d0f46ea356faa9bfe813f86a9c3ad11c7ecd585ec6d220c8aa80b4a30dc5eb.png" src="../_images/50d0f46ea356faa9bfe813f86a9c3ad11c7ecd585ec6d220c8aa80b4a30dc5eb.png" />
+<img alt="../_images/1186aa966973da7d2126b09fca5160f0420ba8f1fcf57f2052c6ef10d721ea60.png" src="../_images/1186aa966973da7d2126b09fca5160f0420ba8f1fcf57f2052c6ef10d721ea60.png" />
+<img alt="../_images/a306575f655645fbf97c6f90b1d1306a17b67712d4b00e6bd6ced6097f960a3a.png" src="../_images/a306575f655645fbf97c6f90b1d1306a17b67712d4b00e6bd6ced6097f960a3a.png" />
 </div>
 </div>
 <p>We’ll use this dataset we just created as a validation dataset during the training example, so I’ll create a tensor of labels and save everything to file.</p>
@@ -763,11 +829,8 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 <span class="n">mrs</span> <span class="o">=</span> <span class="n">MultiResolutionSpectrogram</span><span class="p">(</span>
     <span class="n">kernel_length</span><span class="o">=</span><span class="n">kernel_length</span><span class="p">,</span>
     <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
-    <span class="n">n_fft</span><span class="o">=</span><span class="p">[</span>
-        <span class="mi">64</span><span class="p">,</span>
-        <span class="mi">128</span><span class="p">,</span>
-        <span class="mi">256</span><span class="p">,</span>
-    <span class="p">],</span>  <span class="c1"># Specififying just one value will create a single-resolution spectrogram</span>
+    <span class="c1"># Specififying just one value will create a single-resolution spectrogram</span>
+    <span class="n">n_fft</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span>
 <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
 <span class="c1"># The Q-transform can be accessed either through the QScan,</span>
@@ -779,11 +842,12 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
     <span class="n">spectrogram_shape</span><span class="o">=</span><span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
     <span class="n">qrange</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">128</span><span class="p">],</span>
 <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
 <span class="n">sqt</span> <span class="o">=</span> <span class="n">SingleQTransform</span><span class="p">(</span>
     <span class="n">duration</span><span class="o">=</span><span class="n">kernel_length</span><span class="p">,</span>
     <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
     <span class="n">spectrogram_shape</span><span class="o">=</span><span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
-    <span class="n">q</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+    <span class="n">q</span><span class="o">=</span><span class="mf">5.5</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -802,55 +866,128 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">specgram</span> <span class="o">=</span> <span class="n">mrs</span><span class="p">(</span><span class="n">whitened_injected</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">specgram</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Normalized energy&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c01f5af8db0dd3c5a206c1504a03c8a00c7ee93862acdc9657db305e55ce1adb.png" src="../_images/c01f5af8db0dd3c5a206c1504a03c8a00c7ee93862acdc9657db305e55ce1adb.png" />
+<img alt="../_images/c3aeab9f8925314c95d0f0297e275134293e22ff8df765482688661a7ab0cf9a.png" src="../_images/c3aeab9f8925314c95d0f0297e275134293e22ff8df765482688661a7ab0cf9a.png" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">specgram</span> <span class="o">=</span> <span class="n">qscan</span><span class="p">(</span><span class="n">whitened_injected</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">specgram</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Normalized energy&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/d8c72a7cb0e1223668cb751b40f29b33626abc773f549b8bfdf66bfc91f1b007.png" src="../_images/d8c72a7cb0e1223668cb751b40f29b33626abc773f549b8bfdf66bfc91f1b007.png" />
+<img alt="../_images/437550d394d34bded71b7495e15c1ec4f26c064799acb678978035a96c8a60fd.png" src="../_images/437550d394d34bded71b7495e15c1ec4f26c064799acb678978035a96c8a60fd.png" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">specgram</span> <span class="o">=</span> <span class="n">sqt</span><span class="p">(</span><span class="n">whitened_injected</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">specgram</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Normalized energy&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/125dc6158f59b8ba54ccf9b3b514e12c7cd5a33ba13c79a9d70972a44d193b43.png" src="../_images/125dc6158f59b8ba54ccf9b3b514e12c7cd5a33ba13c79a9d70972a44d193b43.png" />
+<img alt="../_images/c8cda7f3f5f0a9859028b6e7b259cfa868edb5b9ff10cd733137b254c8b63ffd.png" src="../_images/c8cda7f3f5f0a9859028b6e7b259cfa868edb5b9ff10cd733137b254c8b63ffd.png" />
 </div>
 </div>
 <p>The big benefit here is <em>speed</em>. We computed 2,000 Q-transforms in a fraction of a second. The downside is that we needed to use the same q value for each of them, but there are applications where that may not be a problem. For instance, BBH signals are typically better represented with lower q values.</p>
-<p>There are other <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/transforms">transforms</a> that I don’t have time to go into:</p>
+<p>Another thing to be aware of is that the <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> uses bicubic interpolation by default, so the final product will be slightly different than GWpy’s, which uses cubic spline interpolation. PyTorch doesn’t have the option to do spline interpolation, so we’ve <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/transforms/spline_interpolation.py">implemented</a> it ourselves. To create Q-transforms with spline interpolation, you can set <code class="docutils literal notranslate"><span class="pre">interpolation_method</span> <span class="pre">=</span> <span class="pre">&quot;spline&quot;</span></code>, but note that the transform will be slower and use more memory.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bicubic_sqt</span> <span class="o">=</span> <span class="n">SingleQTransform</span><span class="p">(</span>
+    <span class="n">duration</span><span class="o">=</span><span class="n">kernel_length</span><span class="p">,</span>
+    <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+    <span class="n">spectrogram_shape</span><span class="o">=</span><span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
+    <span class="n">q</span><span class="o">=</span><span class="mf">5.5</span><span class="p">,</span>
+    <span class="n">interpolation_method</span><span class="o">=</span><span class="s2">&quot;bicubic&quot;</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">spline_sqt</span> <span class="o">=</span> <span class="n">SingleQTransform</span><span class="p">(</span>
+    <span class="n">duration</span><span class="o">=</span><span class="n">kernel_length</span><span class="p">,</span>
+    <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+    <span class="n">spectrogram_shape</span><span class="o">=</span><span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
+    <span class="n">q</span><span class="o">=</span><span class="mf">5.5</span><span class="p">,</span>
+    <span class="n">interpolation_method</span><span class="o">=</span><span class="s2">&quot;spline&quot;</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">bicubic_specgram</span> <span class="o">=</span> <span class="n">bicubic_sqt</span><span class="p">(</span><span class="n">whitened_injected</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">bicubic_specgram</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Amplitude&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">spline_specgram</span> <span class="o">=</span> <span class="n">spline_sqt</span><span class="p">(</span><span class="n">whitened_injected</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">spline_specgram</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Amplitude&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/4494b8e6f1b077c388bf35b935a167577f4de1ad21e01822ae77288c031f210d.png" src="../_images/4494b8e6f1b077c388bf35b935a167577f4de1ad21e01822ae77288c031f210d.png" />
+<img alt="../_images/931f3def613ee38655bf7d08c55584c8ab9846fc4fc7ec56fa6cd0ede01fec6f.png" src="../_images/931f3def613ee38655bf7d08c55584c8ab9846fc4fc7ec56fa6cd0ede01fec6f.png" />
+</div>
+</div>
+<p>Another data representation that could be useful for longer signals is the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/transforms/decimator.py"><code class="docutils literal notranslate"><span class="pre">Decimator</span></code></a> module, which down-samples a timeseries to different sampling rates according to a given schedule. This way, the low-frequency inspiral of the signal can be compressed, while the high-frequency merger and ringdown can have full fidelity.</p>
+<p>It may not be all that useful our 1.5 seconds windows, but I show it here to demonstrate the API.</p>
+<p>Future feature:</p>
 <ul class="simple">
-<li><p>Channel-wise scaler</p></li>
-<li><p>Spline interpolation (though note the caveats)</p></li>
-<li><p>Fixed whitener, which is fit to a set PSD</p></li>
-<li><p>Pearson correlation calculator</p></li>
+<li><p>Add time array as attribute</p></li>
 </ul>
-<p>Future features:</p>
-<ul class="simple">
-<li><p>Fix edge effects of spline interpolation</p></li>
-<li><p>Multi-rate resampling</p></li>
-</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms.decimator</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimator</span>
+
+<span class="n">decimator</span> <span class="o">=</span> <span class="n">Decimator</span><span class="p">(</span>
+    <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+    <span class="c1"># The schedule is a list of tuples with format (start time, end time, target rate)</span>
+    <span class="c1"># Note that times are in seconds, and the segments can overlap if split is True</span>
+    <span class="n">schedule</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">2048</span><span class="p">)]),</span>
+    <span class="c1"># If split is True, returns a list of tensors at different rates</span>
+    <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">decimated</span> <span class="o">=</span> <span class="n">decimator</span><span class="p">(</span><span class="n">whitened_injected</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original shape: </span><span class="si">{</span><span class="n">whitened_injected</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Decimated shape: </span><span class="si">{</span><span class="n">decimated</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">kernel_length</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">),</span> <span class="n">whitened_injected</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Whitened strain&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">decimated</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Decimated&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Sample number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Whitened strain&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original shape: torch.Size([2000, 2, 3072])
+Decimated shape: torch.Size([2000, 2, 1408])
+</pre></div>
+</div>
+<img alt="../_images/26f0816e552d9174560843118fad658b75f70b2620dd39c92b9f78362a58ef97.png" src="../_images/26f0816e552d9174560843118fad658b75f70b2620dd39c92b9f78362a58ef97.png" />
+<img alt="../_images/4c3b38b8a936f37a82f79964c293d22d0d7425b3c6a871c8c2abd7837df86a7f.png" src="../_images/4c3b38b8a936f37a82f79964c293d22d0d7425b3c6a871c8c2abd7837df86a7f.png" />
+</div>
+</div>
 </section>
 <section id="architectures">
 <h2>Architectures<a class="headerlink" href="#architectures" title="Link to this heading"></a></h2>
-<p>We’ve implemented a couple basic <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/nn">neural network architectures</a> for out-of-the-box convenience. Today, we’ll be using a 1D ResNet, which is mostly copied from PyTorch’s implementation, but with a few key differences:</p>
+<p>We’ve implemented a couple basic <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/nn">neural network architectures</a> for out-of-the-box convenience. Aframe uses a 1D ResNet, which is mostly copied from PyTorch’s implementation, but with a few key differences:</p>
 <ul class="simple">
 <li><p>Arbitrary kernel sizes</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">GroupNorm</span></code> as the default normalization layer, as training statistics in general won’t match testing statistics</p></li>
@@ -874,7 +1011,7 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([[-0.3213]], device=&#39;cuda:0&#39;)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([[0.3792]], device=&#39;cuda:0&#39;)
 </pre></div>
 </div>
 </div>
@@ -1224,7 +1361,7 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">CSVLogger</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ml4gw-expt&quot;</span><span class="p">)</span>
 <span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
-    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;16-mixed&quot;</span><span class="p">,</span>
     <span class="n">log_every_n_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
@@ -1236,27 +1373,29 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Trainer will use only 1 of 8 GPUs because it is running inside an interactive / notebook environment. You may try to set `Trainer(devices=8)` but please note that multi-GPU inside interactive / notebook environments is considered experimental and unstable. Your mileage may vary.
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Trainer will use only 1 of 2 GPUs because it is running inside an interactive / notebook environment. You may try to set `Trainer(devices=2)` but please note that multi-GPU inside interactive / notebook environments is considered experimental and unstable. Your mileage may vary.
 Using 16bit Automatic Mixed Precision (AMP)
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
 GPU available: True (cuda), used: True
 TPU available: False, using: 0 TPU cores
-HPU available: False, using: 0 HPUs
 The following callbacks returned in `LightningModule.configure_callbacks` will override existing callbacks passed to Trainer: ModelCheckpoint
-LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+You are using a CUDA device (&#39;NVIDIA A30&#39;) that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision(&#39;medium&#39; | &#39;high&#39;)` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
 Loading `train_dataloader` to estimate number of stepping batches.
+/home/william.benoit/GWPAW_2025_Tutorials/.venv/lib64/python3.11/site-packages/lightning/pytorch/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
 </pre></div>
 </div>
-<div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┓
-┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold">   </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Name               </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Type                           </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Params </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Mode  </span>┃
-┡━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━┩
-│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 0 </span>│ nn                 │ ResNet1D                       │  232 K │ train │
-│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 1 </span>│ metric             │ BinaryAUROC                    │      0 │ train │
-│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 2 </span>│ inverter           │ SignalInverter                 │      0 │ train │
-│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 3 </span>│ reverser           │ SignalReverser                 │      0 │ train │
-│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 4 </span>│ spectral_density   │ SpectralDensity                │      0 │ train │
-│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 5 </span>│ whitener           │ Whiten                         │      0 │ train │
-│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 6 </span>│ waveform_generator │ TimeDomainCBCWaveformGenerator │      0 │ train │
-└───┴────────────────────┴────────────────────────────────┴────────┴───────┘
+<div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold">   </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Name               </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Type                           </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Params </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> Mode  </span>┃<span style="color: #800080; text-decoration-color: #800080; font-weight: bold"> FLOPs </span>┃
+┡━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 0 </span>│ nn                 │ ResNet1D                       │  232 K │ train │     0 │
+│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 1 </span>│ metric             │ BinaryAUROC                    │      0 │ train │     0 │
+│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 2 </span>│ inverter           │ SignalInverter                 │      0 │ train │     0 │
+│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 3 </span>│ reverser           │ SignalReverser                 │      0 │ train │     0 │
+│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 4 </span>│ spectral_density   │ SpectralDensity                │      0 │ train │     0 │
+│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 5 </span>│ whitener           │ Whiten                         │      0 │ train │     0 │
+│<span style="color: #7f7f7f; text-decoration-color: #7f7f7f"> 6 </span>│ waveform_generator │ TimeDomainCBCWaveformGenerator │      0 │ train │     0 │
+└───┴────────────────────┴────────────────────────────────┴────────┴───────┴───────┘
 </pre>
 </div><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Trainable params</span>: 232 K                                                                                            
 <span style="font-weight: bold">Non-trainable params</span>: 0                                                                                            
@@ -1264,12 +1403,13 @@ Loading `train_dataloader` to estimate number of stepping batches.
 <span style="font-weight: bold">Total estimated model params size (MB)</span>: 0                                                                          
 <span style="font-weight: bold">Modules in train mode</span>: 45                                                                                          
 <span style="font-weight: bold">Modules in eval mode</span>: 0                                                                                            
+<span style="font-weight: bold">Total FLOPs</span>: 0                                                                                                     
 </pre>
-</div><script type="application/vnd.jupyter.widget-view+json">{"model_id": "6572d6f8806b449a82cd68a48bee997b", "version_major": 2, "version_minor": 0}</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">/home/william.benoit/ML4GW/ml4gw/.venv/lib/python3.10/site-packages/lightning/pytorch/trainer/connectors/data_conne
-ctor.py:424: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the 
-value of the `num_workers` argument` to `num_workers=79` in the `DataLoader` to improve performance.
+</div><script type="application/vnd.jupyter.widget-view+json">{"model_id": "ff0480f3a6864bdcb209a43c4c69d623", "version_major": 2, "version_minor": 0}</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">/home/william.benoit/GWPAW_2025_Tutorials/.venv/lib64/python3.11/site-packages/lightning/pytorch/trainer/connectors
+/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider 
+increasing the value of the `num_workers` argument` to `num_workers=95` in the `DataLoader` to improve performance.
 </pre>
-</div><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`Trainer.fit` stopped: `max_epochs=30` reached.
+</div><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`Trainer.fit` stopped: `max_epochs=20` reached.
 </pre></div>
 </div>
 <div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
@@ -1312,10 +1452,169 @@ value of the `num_workers` argument` to `num_workers=79` in the `DataLoader` to 
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/56465eba5df86a054809ada0bdcc1a9fb183275754ed757f89f44a5a5ece6402.png" src="../_images/56465eba5df86a054809ada0bdcc1a9fb183275754ed757f89f44a5a5ece6402.png" />
+<img alt="../_images/e0b7fbe58e1e5abbe91228f285c2167fef81297ac6018a62173899f044373ee1.png" src="../_images/e0b7fbe58e1e5abbe91228f285c2167fef81297ac6018a62173899f044373ee1.png" />
 </div>
 </div>
 <p>As we’d hope, the training loss decreases and the validation AUROC approaches 1.</p>
+<section id="evaluation-against-gw190521">
+<h3>Evaluation against GW190521<a class="headerlink" href="#evaluation-against-gw190521" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Ml4gwDetectionModel(
+  (nn): ResNet1D(
+    (conv1): Conv1d(2, 64, kernel_size=(7,), stride=(2,), padding=(3,), bias=False)
+    (bn1): GroupNorm1D()
+    (relu): ReLU(inplace=True)
+    (maxpool): MaxPool1d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+    (residual_layers): ModuleList(
+      (0): Sequential(
+        (0): BasicBlock(
+          (conv1): Conv1d(64, 64, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(64, 64, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+        (1): BasicBlock(
+          (conv1): Conv1d(64, 64, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(64, 64, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+      )
+      (1): Sequential(
+        (0): BasicBlock(
+          (conv1): Conv1d(64, 128, kernel_size=(3,), stride=(2,), padding=(1,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(128, 128, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+          (bn2): GroupNorm1D()
+          (downsample): Sequential(
+            (0): Conv1d(64, 128, kernel_size=(1,), stride=(2,), bias=False)
+            (1): GroupNorm1D()
+          )
+        )
+        (1): BasicBlock(
+          (conv1): Conv1d(128, 128, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+          (bn1): GroupNorm1D()
+          (relu): ReLU(inplace=True)
+          (conv2): Conv1d(128, 128, kernel_size=(3,), stride=(1,), padding=(1,), bias=False)
+          (bn2): GroupNorm1D()
+        )
+      )
+    )
+    (avgpool): AdaptiveAvgPool1d(output_size=1)
+    (fc): Linear(in_features=128, out_features=1, bias=True)
+  )
+  (metric): BinaryAUROC()
+  (inverter): SignalInverter()
+  (reverser): SignalReverser()
+  (spectral_density): SpectralDensity()
+  (whitener): Whiten()
+  (waveform_generator): TimeDomainCBCWaveformGenerator(
+    (approximant): IMRPhenomD()
+    (highpass): IIRFilter()
+  )
+)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download and whiten GW190521 data</span>
+
+<span class="n">trigger_time</span> <span class="o">=</span> <span class="mf">1242459857.46</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">post_trigger_duration</span> <span class="o">=</span> <span class="mi">4</span> 
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">trigger_time</span> <span class="o">+</span> <span class="n">post_trigger_duration</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">duration</span>
+
+<span class="n">psd_duration</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">psd_start_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">-</span> <span class="n">psd_duration</span>
+<span class="n">psd_end_time</span> <span class="o">=</span> <span class="n">start_time</span>
+
+<span class="n">data_ts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">psd_data_ts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloading analysis data for ifo </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">det</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+    <span class="n">data_ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloading psd data for ifo </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
+    <span class="n">psd_data</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">det</span><span class="p">,</span> <span class="n">psd_start_time</span><span class="p">,</span> <span class="n">psd_end_time</span><span class="p">)</span>
+    <span class="n">psd_data</span> <span class="o">=</span> <span class="n">psd_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+    <span class="n">psd_data_ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">psd_data</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+
+<span class="n">psd_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">psd_data_ts</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">data_ts</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading analysis data for ifo H1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading psd data for ifo H1
+Downloading analysis data for ifo L1
+Downloading psd data for ifo L1
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psd</span> <span class="o">=</span> <span class="n">spectral_density</span><span class="p">(</span><span class="n">psd_data</span><span class="o">.</span><span class="n">double</span><span class="p">())</span>
+<span class="n">whitened_data</span> <span class="o">=</span> <span class="n">whiten</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">psd</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inference_sampling_rate</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">stride</span> <span class="o">=</span> <span class="n">sample_rate</span> <span class="o">//</span> <span class="n">inference_sampling_rate</span>
+
+<span class="n">y_pred</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">whitened_data</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
+    <span class="n">stop</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">kernel_size</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">whitened_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">start</span> <span class="p">:</span> <span class="n">stop</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
+    <span class="n">y_pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t0</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">fduration</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">kernel_length</span>
+<span class="n">tf</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">/</span> <span class="n">inference_sampling_rate</span>
+<span class="n">times</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">inference_sampling_rate</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">trigger_time</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;GW190521&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;GPS Time (s)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Model output&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/75a26345db5472cbc34168034189e89791c51dec4f69cf8ace7e5d71a349dce3.png" src="../_images/75a26345db5472cbc34168034189e89791c51dec4f69cf8ace7e5d71a349dce3.png" />
+</div>
+</div>
+<p>Network output is consistently high the entire time that the signal is in the window of the network. Of course, we’d need to understand our background distribution to assign significance, but it’s a good sign to see this shape.</p>
+</section>
 </section>
 </section>
 
