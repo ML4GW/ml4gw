@@ -99,7 +99,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ml4gw-tutorial">
+  <section class="tex2jax_ignore mathjax_ignore" id="ml4gw-tutorial">
 <h1><a class="reference external" href="https://github.com/ML4GW/ml4gw"><code class="docutils literal notranslate"><span class="pre">ml4gw</span></code></a> Tutorial<a class="headerlink" href="#ml4gw-tutorial" title="Link to this heading"></a></h1>
 <p>This tutorial has two parts:</p>
 <ol class="arabic simple">
@@ -121,7 +121,7 @@ Install with:</p>
 </div>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>We'll go through this as though our goal is to build a binary black hole detection model,
+<p>We’ll go through this as though our goal is to build a binary black hole detection model,
 with some excursions to look at other features. Much of this is similar to how the <a class="reference external" href="https://www.github.com/ML4GW/aframe">Aframe</a> algorithm works.
 The development of <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> was guided by what was needed for Aframe,
 which makes BBH detection a good test case.</p>
@@ -155,7 +155,7 @@ which makes BBH detection a good test case.</p>
 </section>
 <section id="waveform-generation">
 <h2>Waveform Generation<a class="headerlink" href="#waveform-generation" title="Link to this heading"></a></h2>
-<p>We'll start by generating some BBH waveforms. Currently, <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> has implemented the following <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/waveforms/cbc">CBC waveforms</a>: TaylorF2, IMRPhenomD, and IMRPhenomPv2. We'll use IMRPhenomD for our example. These are all frequency-domain waveforms, and so return a frequency-series of gravitational-wave strain. We provide the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/waveforms/generator.py"><code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code></a> class for producing time-domain signals; however, we'll start with frequency-domain.</p>
+<p>We’ll start by generating some BBH waveforms. Currently, <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> has implemented the following <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/waveforms/cbc">CBC waveforms</a>: TaylorF2, IMRPhenomD, and IMRPhenomPv2. We’ll use IMRPhenomD for our example. These are all frequency-domain waveforms, and so return a frequency-series of gravitational-wave strain. We provide the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/waveforms/generator.py"><code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code></a> class for producing time-domain signals; however, we’ll start with frequency-domain.</p>
 <p>Additionally, sine-gaussian and ringdown (damped cosinusoidal) waveforms are <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/waveforms/adhoc">available</a>.</p>
 <p>These modules allow simultaneous generation of batches of waveforms from a set of parameters.</p>
 <div class="cell docutils container">
@@ -184,8 +184,8 @@ which makes BBH detection a good test case.</p>
 </div>
 <section id="parameter-sampling">
 <h3>Parameter sampling<a class="headerlink" href="#parameter-sampling" title="Link to this heading"></a></h3>
-<p>To generate waveforms, we need sets of parameters. For creating a training dataset, we'd like to randomly sample these parameters from some probability distributions.</p>
-<p>PyTorch has its own <a class="reference external" href="https://pytorch.org/docs/stable/distributions.html">probability distributions</a>, but there are some distributions that they haven't yet implemented (at least at time of writing), so we implemented them <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/distributions.py">ourselves</a>.</p>
+<p>To generate waveforms, we need sets of parameters. For creating a training dataset, we’d like to randomly sample these parameters from some probability distributions.</p>
+<p>PyTorch has its own <a class="reference external" href="https://pytorch.org/docs/stable/distributions.html">probability distributions</a>, but there are some distributions that they haven’t yet implemented (at least at time of writing), so we implemented them <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/distributions.py">ourselves</a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">PowerLaw</span><span class="p">,</span> <span class="n">Sine</span><span class="p">,</span> <span class="n">Cosine</span><span class="p">,</span> <span class="n">DeltaFunction</span>
@@ -259,8 +259,8 @@ which makes BBH detection a good test case.</p>
 </section>
 <section id="time-domain-waveforms">
 <h3>Time-domain waveforms<a class="headerlink" href="#time-domain-waveforms" title="Link to this heading"></a></h3>
-<p>We'll now generate waveforms in the time domain using the <code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code>. This <code class="docutils literal notranslate"><span class="pre">Module</span></code> uses the <code class="docutils literal notranslate"><span class="pre">approximant</span></code> to generate a waveform <code class="docutils literal notranslate"><span class="pre">duration</span></code> seconds long with the given <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>. The coalescence point of the signal is placed <code class="docutils literal notranslate"><span class="pre">right_pad</span></code> seconds from the right edge of the window. For conditioning the frequency-domain waveforms, the parameter dictionary is required to contain the <code class="docutils literal notranslate"><span class="pre">mass_1</span></code>, <code class="docutils literal notranslate"><span class="pre">mass_2</span></code>, <code class="docutils literal notranslate"><span class="pre">s1z</span></code>, and <code class="docutils literal notranslate"><span class="pre">s2z</span></code> keys. We'll use a conversion function from <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/waveforms/conversion.py"><code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.conversion</span></code></a> to add these keys.</p>
-<p>Because we're using IMRPhenomD and have aligned spins <code class="docutils literal notranslate"><span class="pre">s1z</span> <span class="pre">=</span> <span class="pre">chi1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2z</span> <span class="pre">=</span> <span class="pre">chi2</span></code>. If we had non-aligned spins, we could use the <code class="docutils literal notranslate"><span class="pre">bilby_spins_to_lalsim</span></code> conversion function to compute the cartesian spin components.</p>
+<p>We’ll now generate waveforms in the time domain using the <code class="docutils literal notranslate"><span class="pre">TimeDomainCBCWaveformGenerator</span></code>. This <code class="docutils literal notranslate"><span class="pre">Module</span></code> uses the <code class="docutils literal notranslate"><span class="pre">approximant</span></code> to generate a waveform <code class="docutils literal notranslate"><span class="pre">duration</span></code> seconds long with the given <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>. The coalescence point of the signal is placed <code class="docutils literal notranslate"><span class="pre">right_pad</span></code> seconds from the right edge of the window. For conditioning the frequency-domain waveforms, the parameter dictionary is required to contain the <code class="docutils literal notranslate"><span class="pre">mass_1</span></code>, <code class="docutils literal notranslate"><span class="pre">mass_2</span></code>, <code class="docutils literal notranslate"><span class="pre">s1z</span></code>, and <code class="docutils literal notranslate"><span class="pre">s2z</span></code> keys. We’ll use a conversion function from <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/waveforms/conversion.py"><code class="docutils literal notranslate"><span class="pre">ml4gw.waveforms.conversion</span></code></a> to add these keys.</p>
+<p>Because we’re using IMRPhenomD and have aligned spins <code class="docutils literal notranslate"><span class="pre">s1z</span> <span class="pre">=</span> <span class="pre">chi1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2z</span> <span class="pre">=</span> <span class="pre">chi2</span></code>. If we had non-aligned spins, we could use the <code class="docutils literal notranslate"><span class="pre">bilby_spins_to_lalsim</span></code> conversion function to compute the cartesian spin components.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeDomainCBCWaveformGenerator</span>
@@ -313,7 +313,7 @@ which makes BBH detection a good test case.</p>
 <p>We can now project these waveforms and get the observed strain. At present, the projection is the most basic, assuming a fixed orientation between the detector and the source over the duration of the signal. The source code for these functions can be found <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/gw.py">here</a>.</p>
 <p>Future feature:</p>
 <ul class="simple">
-<li><p>Account for the Earth's rotation and orbit</p></li>
+<li><p>Account for the Earth’s rotation and orbit</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -351,7 +351,7 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <p>We now have a batch of multi-channel time-series data. The first dimension is the batch dimension, and corresponds to the number of waveforms that were generated. The second dimension is the channel dimension, and corresponds to the interferometers that we chose to use in the order they were specified. The third dimension is the time dimension.</p>
-<p>We can plot this as well, though there won't be much difference from before.</p>
+<p>We can plot this as well, though there won’t be much difference from before.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -370,7 +370,7 @@ which makes BBH detection a good test case.</p>
 </section>
 <section id="psd-estimation">
 <h3>PSD Estimation<a class="headerlink" href="#psd-estimation" title="Link to this heading"></a></h3>
-<p>Now that we have our waveforms generated, one thing we might want to do is calculate their SNRs with respect to some background data. To do that, we'll need the power spectral density of the background. The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/transforms/spectral.py"><code class="docutils literal notranslate"><span class="pre">SpectralDensity</span></code></a> module can take a batch of multi-channel timeseries data and compute the PSD along the time dimension. We'll begin by downloading some background data from the Gravitational Wave Open Science Center (GWOSC). This data comes from the Hanford and Livingston and was taken during O3.</p>
+<p>Now that we have our waveforms generated, one thing we might want to do is calculate their SNRs with respect to some background data. To do that, we’ll need the power spectral density of the background. The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/main/ml4gw/transforms/spectral.py"><code class="docutils literal notranslate"><span class="pre">SpectralDensity</span></code></a> module can take a batch of multi-channel timeseries data and compute the PSD along the time dimension. We’ll begin by downloading some background data from the Gravitational Wave Open Science Center (GWOSC). This data comes from the Hanford and Livingston and was taken during O3.</p>
 <p>One important piece to note is that, due to the scale of the strain, the background data is cast to <code class="docutils literal notranslate"><span class="pre">double</span></code> precision before being given to the module to avoid certain values being zeroed out.</p>
 <p>Future feature:</p>
 <ul class="simple">
@@ -471,7 +471,7 @@ which makes BBH detection a good test case.</p>
 <section id="snr-calculation">
 <h3>SNR Calculation<a class="headerlink" href="#snr-calculation" title="Link to this heading"></a></h3>
 <p>With the PSD from H1 and L1, we can calculate the SNRs of the waveforms we generated.</p>
-<p>Note: the shape of the PSDs is determined by the sampling rate and the FFT length used in the calculation, and so may not match up with the shape of the FFT'ed waveforms. We can interpolate the PSDs so that the dimensions match.</p>
+<p>Note: the shape of the PSDs is determined by the sampling rate and the FFT length used in the calculation, and so may not match up with the shape of the FFT’ed waveforms. We can interpolate the PSDs so that the dimensions match.</p>
 <p>Future feature:</p>
 <ul class="simple">
 <li><p>Do this interpolation automatically somewhere unless the user specifies otherwise</p></li>
@@ -512,7 +512,7 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 </div>
-<p>Let's plot histograms of each of these SNR arrays:</p>
+<p>Let’s plot histograms of each of these SNR arrays:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h1_snr</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;H1&quot;</span><span class="p">)</span>
@@ -530,8 +530,8 @@ which makes BBH detection a good test case.</p>
 <img alt="../_images/64c1c99b6ff40e8cc7394c785b72af0098833bcc84f529ecdc4b9604de484ff8.png" src="../_images/64c1c99b6ff40e8cc7394c785b72af0098833bcc84f529ecdc4b9604de484ff8.png" />
 </div>
 </div>
-<p>This looks more or less like expected. But we've got a lot of low SNR signals, which a search will have trouble detecting. We can rescale our waveforms so that the SNR distribution is more favorable. This could be useful for something like curriculum learning: your network could begin with higher SNR events, and slowly be shown lower SNR events as training continues.</p>
-<p>We'll create an array of target SNRs based on a power law distribution that very roughly matches the above, but with a minimum SNR of 12 and maximum of 100.</p>
+<p>This looks more or less like expected. But we’ve got a lot of low SNR signals, which a search will have trouble detecting. We can rescale our waveforms so that the SNR distribution is more favorable. This could be useful for something like curriculum learning: your network could begin with higher SNR events, and slowly be shown lower SNR events as training continues.</p>
+<p>We’ll create an array of target SNRs based on a power law distribution that very roughly matches the above, but with a minimum SNR of 12 and maximum of 100.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.gw</span><span class="w"> </span><span class="kn">import</span> <span class="n">reweight_snrs</span>
@@ -568,8 +568,8 @@ which makes BBH detection a good test case.</p>
 </section>
 <section id="dataloading">
 <h2>Dataloading<a class="headerlink" href="#dataloading" title="Link to this heading"></a></h2>
-<p>When training a model, it's beneficial to provide as much variety in data as you can. We benefit from having multiple independent detectors, which allows for combinatorially more background samples than a single detector would, as the samples don't have to be coincident.</p>
-<p>The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/dataloading/hdf5_dataset.py#L15"><code class="docutils literal notranslate"><span class="pre">Hdf5TimeSeriesDataset</span></code></a> allows for randomly sampling windows of data from hdf5 files, provided they all have the same structure. Here, we have a set of background files, each containing H1 and L1 strain data. We could chop this data up into samples prior to training, but we'd be limited by the number of samples we could create and fit on disk. Instead, during training, we grab the data we need for each batch by randomly sampling from all of these files, giving us effectively unlimited background data to train on.</p>
+<p>When training a model, it’s beneficial to provide as much variety in data as you can. We benefit from having multiple independent detectors, which allows for combinatorially more background samples than a single detector would, as the samples don’t have to be coincident.</p>
+<p>The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/dataloading/hdf5_dataset.py#L15"><code class="docutils literal notranslate"><span class="pre">Hdf5TimeSeriesDataset</span></code></a> allows for randomly sampling windows of data from hdf5 files, provided they all have the same structure. Here, we have a set of background files, each containing H1 and L1 strain data. We could chop this data up into samples prior to training, but we’d be limited by the number of samples we could create and fit on disk. Instead, during training, we grab the data we need for each batch by randomly sampling from all of these files, giving us effectively unlimited background data to train on.</p>
 <p>Future feature:</p>
 <ul class="simple">
 <li><p>Allow sampling from multiple datasets within the same file</p></li>
@@ -638,7 +638,7 @@ background-1240624412-20000.hdf5
 </section>
 <section id="whitening">
 <h2>Whitening<a class="headerlink" href="#whitening" title="Link to this heading"></a></h2>
-<p>It's crucial to normalize your data before putting it through a neural network, and whitening provides a physically meaningful way of doing that. The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/transforms/whitening.py#L15"><code class="docutils literal notranslate"><span class="pre">Whiten</span></code></a> module will whiten and optionally highpass batches of multi-channel data with a provided set of PSDs. If the tensor of PSDs is 2D, each batch element of data will be whitened using the same PSDs. If 3D, each batch element will be whitened by the PSDs contained along the 0th dimension. In other words, you can provide a single PSD for each channel to whiten all elements in that channel, or you can provide a PSD for each element. We're doing the latter here.</p>
+<p>It’s crucial to normalize your data before putting it through a neural network, and whitening provides a physically meaningful way of doing that. The <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/transforms/whitening.py#L15"><code class="docutils literal notranslate"><span class="pre">Whiten</span></code></a> module will whiten and optionally highpass batches of multi-channel data with a provided set of PSDs. If the tensor of PSDs is 2D, each batch element of data will be whitened using the same PSDs. If 3D, each batch element will be whitened by the PSDs contained along the 0th dimension. In other words, you can provide a single PSD for each channel to whiten all elements in that channel, or you can provide a PSD for each element. We’re doing the latter here.</p>
 <p>Note that the whitening process automatically removes <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">/</span> <span class="pre">2</span></code> seconds from either side of the input data.</p>
 <p>Future feature:</p>
 <ul class="simple">
@@ -696,7 +696,7 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 <img alt="../_images/c621d7d219820a7550a25bbe3c93a31efa083f1115aec0abd631f9fb5dbde4df.png" src="../_images/c621d7d219820a7550a25bbe3c93a31efa083f1115aec0abd631f9fb5dbde4df.png" />
 </div>
 </div>
-<p>Next, we can add our waveforms into half of these background samples, taking care not to add them into data that will be removed during whitening. We'll use only the final <code class="docutils literal notranslate"><span class="pre">kernel_length</span></code> seconds of each waveform.</p>
+<p>Next, we can add our waveforms into half of these background samples, taking care not to add them into data that will be removed during whitening. We’ll use only the final <code class="docutils literal notranslate"><span class="pre">kernel_length</span></code> seconds of each waveform.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pad</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fduration</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
@@ -734,7 +734,7 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 <img alt="../_images/50d0f46ea356faa9bfe813f86a9c3ad11c7ecd585ec6d220c8aa80b4a30dc5eb.png" src="../_images/50d0f46ea356faa9bfe813f86a9c3ad11c7ecd585ec6d220c8aa80b4a30dc5eb.png" />
 </div>
 </div>
-<p>We'll use this dataset we just created as a validation dataset during the training example, so I'll create a tensor of labels and save everything to file.</p>
+<p>We’ll use this dataset we just created as a validation dataset during the training example, so I’ll create a tensor of labels and save everything to file.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">injected</span><span class="p">))</span>
@@ -749,9 +749,9 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </section>
 <section id="transforms">
 <h2>Transforms<a class="headerlink" href="#transforms" title="Link to this heading"></a></h2>
-<p>If we wanted to, we could stop with our data as-is and train a time-domain model (which is what we'll do in the example). But we could also transform our data into the time-frequency domain to create spectrograms, and treat this as an image classification problem. <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> has two methods for doing that: the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/transforms/spectrogram.py#L13"><code class="docutils literal notranslate"><span class="pre">MultiResolutionSpectrogram</span></code></a> and the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/transforms/qtransform.py#L154"><code class="docutils literal notranslate"><span class="pre">Q-transform</span></code></a>.</p>
-<p>The multi-resolution spectrogram module creates a single spectrogram by combining multiple spectrograms that were calculated using different numbers of FFTs. This is similar to what PySTAMPAS does as part of their pipeline. The Q-transform is a translation of GWpy's implementation, with some torch-specific speed-ups.</p>
-<p>The spectrogram module uses torchaudio's <a class="reference external" href="https://pytorch.org/audio/main/generated/torchaudio.transforms.Spectrogram.html"><code class="docutils literal notranslate"><span class="pre">Spectrogram</span></code></a> object, and can accept any of the same keyword arguments, given in a list.</p>
+<p>If we wanted to, we could stop with our data as-is and train a time-domain model (which is what we’ll do in the example). But we could also transform our data into the time-frequency domain to create spectrograms, and treat this as an image classification problem. <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code> has two methods for doing that: the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/transforms/spectrogram.py#L13"><code class="docutils literal notranslate"><span class="pre">MultiResolutionSpectrogram</span></code></a> and the <a class="reference external" href="https://github.com/ML4GW/ml4gw/blob/6c68f4bade88362d5d6d27e912410a84765d09a0/ml4gw/transforms/qtransform.py#L154"><code class="docutils literal notranslate"><span class="pre">Q-transform</span></code></a>.</p>
+<p>The multi-resolution spectrogram module creates a single spectrogram by combining multiple spectrograms that were calculated using different numbers of FFTs. This is similar to what PySTAMPAS does as part of their pipeline. The Q-transform is a translation of GWpy’s implementation, with some torch-specific speed-ups.</p>
+<p>The spectrogram module uses torchaudio’s <a class="reference external" href="https://pytorch.org/audio/main/generated/torchaudio.transforms.Spectrogram.html"><code class="docutils literal notranslate"><span class="pre">Spectrogram</span></code></a> object, and can accept any of the same keyword arguments, given in a list.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -789,10 +789,10 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </div>
 </div>
 </div>
-<p>We'll pass our whitened and injected data to each of these transforms, which will process the entire batch at once, and plot the first sample.</p>
+<p>We’ll pass our whitened and injected data to each of these transforms, which will process the entire batch at once, and plot the first sample.</p>
 <p>Note: the axes on each plot correspond to a bin index, not the actual time and frequency</p>
 <p>Note: the multi-resolution spectrogram has linearly-spaced frequency bins, while the Q-transform has log-spaced bins</p>
-<p>Neither of these aspects are really a problem for training a model (all that really matters is that you treat all your data the same way), but it's annoying when it comes to making plots.</p>
+<p>Neither of these aspects are really a problem for training a model (all that really matters is that you treat all your data the same way), but it’s annoying when it comes to making plots.</p>
 <p>Future features:</p>
 <ul class="simple">
 <li><p>Store the time and frequency values corresponding to each bin as attributes of the object</p></li>
@@ -835,7 +835,7 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </div>
 </div>
 <p>The big benefit here is <em>speed</em>. We computed 2,000 Q-transforms in a fraction of a second. The downside is that we needed to use the same q value for each of them, but there are applications where that may not be a problem. For instance, BBH signals are typically better represented with lower q values.</p>
-<p>There are other <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/transforms">transforms</a> that I don't have time to go into:</p>
+<p>There are other <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/transforms">transforms</a> that I don’t have time to go into:</p>
 <ul class="simple">
 <li><p>Channel-wise scaler</p></li>
 <li><p>Spline interpolation (though note the caveats)</p></li>
@@ -850,10 +850,10 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </section>
 <section id="architectures">
 <h2>Architectures<a class="headerlink" href="#architectures" title="Link to this heading"></a></h2>
-<p>We've implemented a couple basic <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/nn">neural network architectures</a> for out-of-the-box convenience. Today, we'll be using a 1D ResNet, which is mostly copied from PyTorch's implementation, but with a few key differences:</p>
+<p>We’ve implemented a couple basic <a class="reference external" href="https://github.com/ML4GW/ml4gw/tree/main/ml4gw/nn">neural network architectures</a> for out-of-the-box convenience. Today, we’ll be using a 1D ResNet, which is mostly copied from PyTorch’s implementation, but with a few key differences:</p>
 <ul class="simple">
 <li><p>Arbitrary kernel sizes</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">GroupNorm</span></code> as the default normalization layer, as training statistics in general won't match testing statistics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GroupNorm</span></code> as the default normalization layer, as training statistics in general won’t match testing statistics</p></li>
 <li><p>Custom <code class="docutils literal notranslate"><span class="pre">GroupNorm</span></code> implementation which is faster than the standard PyTorch version at inference time</p></li>
 </ul>
 <div class="cell docutils container">
@@ -882,7 +882,7 @@ Whitened kernel shape: torch.Size([1000, 2, 3072])
 </section>
 <section id="example-training-setup">
 <h2>Example training setup<a class="headerlink" href="#example-training-setup" title="Link to this heading"></a></h2>
-<p>We'll now go through an example of putting many of these pieces together into a single model, implemented using th <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/">PyTorch Lightning</a> framework.</p>
+<p>We’ll now go through an example of putting many of these pieces together into a single model, implemented using th <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/">PyTorch Lightning</a> framework.</p>
 <p>Begin by clearing the GPU:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1315,7 +1315,7 @@ value of the `num_workers` argument` to `num_workers=79` in the `DataLoader` to 
 <img alt="../_images/56465eba5df86a054809ada0bdcc1a9fb183275754ed757f89f44a5a5ece6402.png" src="../_images/56465eba5df86a054809ada0bdcc1a9fb183275754ed757f89f44a5a5ece6402.png" />
 </div>
 </div>
-<p>As we'd hope, the training loss decreases and the validation AUROC approaches 1.</p>
+<p>As we’d hope, the training loss decreases and the validation AUROC approaches 1.</p>
 </section>
 </section>
 

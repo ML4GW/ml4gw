@@ -19,6 +19,8 @@
         <script src="../_static/documentation_options.js?v=d048f138"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -102,7 +104,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="tutorial-on-distribution-approximation-and-posterior-estimation">
+  <section class="tex2jax_ignore mathjax_ignore" id="tutorial-on-distribution-approximation-and-posterior-estimation">
 <h1>Tutorial on distribution approximation and posterior estimation<a class="headerlink" href="#tutorial-on-distribution-approximation-and-posterior-estimation" title="Link to this heading"></a></h1>
 <p>This notebook is an exercise in distribution approximation using Normalizing flows as implemented in the <a class="reference external" href="https://pyro.ai/">pyro</a> library. The second half of the exercise shows the use case of posterior estimation using ML4GW tools.</p>
 <p>Libraries needed for the notebook are</p>
@@ -446,7 +448,7 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 </div>
 <section id="conditional-distribution">
 <h3>Conditional distribution<a class="headerlink" href="#conditional-distribution" title="Link to this heading"></a></h3>
-<p>Let's learn the conditional approximator based on the color</p>
+<p>Let’s learn the conditional approximator based on the color</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyro.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalTransformedDistribution</span>
@@ -1398,7 +1400,7 @@ Downloading psd data for ifo L1
 <img alt="../_images/e39b70dedbde9164386f20e0b7ee0251471902d8cf2508495001505b149cada5.png" src="../_images/e39b70dedbde9164386f20e0b7ee0251471902d8cf2508495001505b149cada5.png" />
 </div>
 </div>
-<p>This is not the best constraining result since the flow needs to train for longer. For reference the <a class="reference external" href="https://gwosc.org/eventapi/html/GWTC-1-confident/GW150914/v3/">results from GWTC-1</a> is $M_c = 28.6^{+1.7}<em>{-1.5};M</em>{\odot}$ and $D_L = 440^{+150}_{-170}$. But it is in the ballpark.</p>
+<p>This is not the best constraining result since the flow needs to train for longer. For reference the <a class="reference external" href="https://gwosc.org/eventapi/html/GWTC-1-confident/GW150914/v3/">results from GWTC-1</a> is <span class="math notranslate nohighlight">\(M_c = 28.6^{+1.7}_{-1.5}\;M_{\odot}\)</span> and <span class="math notranslate nohighlight">\(D_L = 440^{+150}_{-170}\)</span>. But it is in the ballpark.</p>
 <p>There are a few key improvements in the production models deployed in LIGO-Virgo-KAGRA fourth observing run, compared to this tutorial (see the AMPLFI <a class="reference external" href="https://doi.org/10.1088/2632-2153/ad8982">methods</a> and <a class="reference external" href="https://doi.org/10.48550/arXiv.2509.22561">validation</a> papers):</p>
 <ul class="simple">
 <li><p>A multimodal embedding network involving both time and frequency-domain data views</p></li>
