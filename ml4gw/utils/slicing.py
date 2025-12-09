@@ -314,6 +314,8 @@ def sample_kernels(
 
     if X.ndim == 1:
         idx = torch.randint(len(X) - kernel_size, size=(N,))
+        if return_idx:
+            return slice_kernels(X, idx, kernel_size), idx
         return slice_kernels(X, idx, kernel_size)
 
     center = int(X.shape[-1] // 2)
