@@ -113,7 +113,7 @@ windows.</p>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.utils.slicing.sample_kernels">
-<span class="sig-prename descclassname"><span class="pre">ml4gw.utils.slicing.</span></span><span class="sig-name descname"><span class="pre">sample_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_center_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.utils.slicing.sample_kernels" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ml4gw.utils.slicing.</span></span><span class="sig-name descname"><span class="pre">sample_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_center_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coincident</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.utils.slicing.sample_kernels" title="Link to this definition"></a></dt>
 <dd><p>Randomly sample kernels from a single or multichannel timeseries</p>
 <p>For a tensor representing one or multiple channels of
 timeseries data, randomly slice kernels of a fixed
@@ -128,11 +128,11 @@ either be <code class="docutils literal notranslate"><span class="pre">None</spa
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span>) -- The timeseries tensor from which to sample kernels
-kernel_size: The size of the kernels to sample</p></li>
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">time']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span>) -- The timeseries tensor from which to sample kernels</p></li>
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- The size of the kernels to sample</p></li>
 <li><p><strong>N</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- The number of kernels to sample. Can be left as
 <code class="docutils literal notranslate"><span class="pre">None</span></code> if <code class="docutils literal notranslate"><span class="pre">X</span></code> is 3D, otherwise must be specified</p></li>
-<li><p><strong>max_center_offeset</strong> -- If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 2D, this indicates the maximum distance
+<li><p><strong>max_center_offset</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 2D, this indicates the maximum distance
 from the center of the timeseries the edge of
 sampled kernels may fall. If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, kernels
 will be sampled uniformly across all of <code class="docutils literal notranslate"><span class="pre">X</span></code>'s time
@@ -152,8 +152,7 @@ of <code class="docutils literal notranslate"><span class="pre">X</span></code> 
 independently, i.e. whether the channels of each batch
 element in the output will contain coincident data. If
 <code class="docutils literal notranslate"><span class="pre">X</span></code> is 1D, this argument is ignored.</p></li>
-<li><p><strong>kernel_size</strong> (<em>int</em>)</p></li>
-<li><p><strong>max_center_offset</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>return_idx</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the indices used for slicing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -163,7 +162,9 @@ element in the output will contain coincident data. If
 <dd class="field-odd"><p>A batch of sampled kernels. If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 1D, this will have
 shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">kernel_size)</span></code>. If <code class="docutils literal notranslate"><span class="pre">X</span></code> is 2D, this will have
 shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">num_channels,</span> <span class="pre">kernel_size)</span></code>, where
-<code class="docutils literal notranslate"><span class="pre">num_channels</span> <span class="pre">=</span> <span class="pre">X.shape[0]</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">num_channels</span> <span class="pre">=</span> <span class="pre">X.shape[0]</span></code>. If <code class="docutils literal notranslate"><span class="pre">return_idx</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>,
+the returned value will be a tuple of the sampled kernels
+and the indices used for slicing</p>
 </dd>
 </dl>
 </dd></dl>
