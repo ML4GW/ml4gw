@@ -42,7 +42,7 @@
 | ml4gw/transforms/whitening.py             |       47 |        0 |    100% |           |
 | ml4gw/types.py                            |       17 |        0 |    100% |           |
 | ml4gw/utils/interferometer.py             |       21 |        0 |    100% |           |
-| ml4gw/utils/slicing.py                    |      102 |        0 |    100% |           |
+| ml4gw/utils/slicing.py                    |      106 |        2 |     98% |  318, 369 |
 | ml4gw/waveforms/\_\_init\_\_.py           |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/\_\_init\_\_.py     |        2 |        0 |    100% |           |
 | ml4gw/waveforms/adhoc/ringdown.py         |       36 |       29 |     19% |18-25, 57-109 |
@@ -56,7 +56,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
 | ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
-|                                 **TOTAL** | **3078** |  **228** | **93%** |           |
+|                                 **TOTAL** | **3082** |  **230** | **93%** |           |
 
 
 ## Setup coverage badge
