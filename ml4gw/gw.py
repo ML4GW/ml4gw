@@ -353,6 +353,15 @@ def compute_ifo_snr(
     fft = torch.fft.rfft(responses, axis=-1).type(torch.complex128)
     fft = fft.abs() / sample_rate
 
+    # interpolate the PSD to match the shape of
+    # our FFT'd strain
+    while psd.ndim < 3:
+        psd = psd[None]
+    if psd.size(-1) != fft.size(-1):
+        psd = torch.nn.functional.interpolate(
+            psd, size=(fft.size(-1)), mode="linear"
+        )
+
     # divide by background asd, then go back to FP32 precision
     # and square now that values are back in a reasonable range
     integrand = fft / (psd**0.5)

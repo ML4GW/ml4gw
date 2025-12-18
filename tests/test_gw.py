@@ -362,6 +362,35 @@ def test_compute_ifo_snr(_get_waveforms_from_lalsimulation, highpass, lowpass):
         snr_hc_compute_ifo_snr.numpy(), rel=1e-1
     )
 
+    # test that using a PSD with a non-compatible shape
+    # still results in an accurate value
+    psd = _get_O4_psd(sample_rate, hp.data.data.shape[-1] * 2)
+    num_freqs = len(psd.data.data) // 2 + 1
+    backgrounds = psd.data.data[:num_freqs]
+    backgrounds = torch.from_numpy(backgrounds)
+
+    snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+        hp_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
+    )
+    snr_hc_compute_ifo_snr = injection.compute_ifo_snr(
+        hc_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
+    )
+
+    assert snr_hp_lal == pytest.approx(
+        snr_hp_compute_ifo_snr.numpy(), rel=1e-1
+    )
+    assert snr_hc_lal == pytest.approx(
+        snr_hc_compute_ifo_snr.numpy(), rel=1e-1
+    )
+
 
 def test_compute_network_snr(_get_waveforms_from_lalsimulation):
     """Test network SNR for stellar mass system against lalsimulation
