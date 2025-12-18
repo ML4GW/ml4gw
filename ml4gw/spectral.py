@@ -158,6 +158,10 @@ def fast_spectral_density(
 
     _validate_shapes(x, nperseg, y)
 
+    # Set data to double precision to avoid values
+    # going to zero
+    x = x.double()
+
     if x.ndim > 2:
         # stft only works on 2D input, so roll the
         # channel dimension out along the batch
@@ -283,6 +287,10 @@ def spectral_density(
     """
 
     _validate_shapes(x, nperseg)
+
+    # Set data to double precision to avoid values
+    # going to zero
+    x = x.double()
 
     # for non-fast implementation, we need to unfold
     # the tensor along the time dimension ourselves
