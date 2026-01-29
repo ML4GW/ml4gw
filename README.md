@@ -4,7 +4,7 @@
 
 | Name                                      |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------ | -------: | -------: | ------: | --------: |
-| ml4gw/\_\_init\_\_.py                     |        1 |        0 |    100% |           |
+| ml4gw/\_\_init\_\_.py                     |        3 |        0 |    100% |           |
 | ml4gw/augmentations.py                    |       19 |        0 |    100% |           |
 | ml4gw/constants.py                        |       12 |        0 |    100% |           |
 | ml4gw/dataloading/\_\_init\_\_.py         |        3 |        0 |    100% |           |
@@ -56,7 +56,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
 | ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
-| **TOTAL**                                 | **3088** |  **230** | **93%** |           |
+| **TOTAL**                                 | **3090** |  **230** | **93%** |           |
 
 
 ## Setup coverage badge
