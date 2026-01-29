@@ -4,7 +4,7 @@
 
 | Name                                      |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------ | -------: | -------: | ------: | --------: |
-| ml4gw/\_\_init\_\_.py                     |        3 |        0 |    100% |           |
+| ml4gw/\_\_init\_\_.py                     |        5 |        0 |    100% |           |
 | ml4gw/augmentations.py                    |       19 |        0 |    100% |           |
 | ml4gw/constants.py                        |       12 |        0 |    100% |           |
 | ml4gw/dataloading/\_\_init\_\_.py         |        3 |        0 |    100% |           |
@@ -13,12 +13,12 @@
 | ml4gw/dataloading/in\_memory\_dataset.py  |       62 |        4 |     94% |155-156, 201-202 |
 | ml4gw/distributions.py                    |      148 |        3 |     98% |114-115, 231 |
 | ml4gw/gw.py                               |      102 |        0 |    100% |           |
-| ml4gw/nn/\_\_init\_\_.py                  |        0 |        0 |    100% |           |
-| ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        3 |      0% |       1-3 |
-| ml4gw/nn/autoencoder/base.py              |       43 |       43 |      0% |      1-90 |
-| ml4gw/nn/autoencoder/convolutional.py     |       54 |       54 |      0% |     1-156 |
-| ml4gw/nn/autoencoder/skip\_connection.py  |       30 |       30 |      0% |      1-45 |
-| ml4gw/nn/autoencoder/utils.py             |       12 |       12 |      0% |      1-15 |
+| ml4gw/nn/\_\_init\_\_.py                  |        1 |        0 |    100% |           |
+| ml4gw/nn/autoencoder/\_\_init\_\_.py      |        3 |        0 |    100% |           |
+| ml4gw/nn/autoencoder/base.py              |       43 |       34 |     21% |31-33, 38-51, 54-78, 81-90 |
+| ml4gw/nn/autoencoder/convolutional.py     |       54 |       39 |     28% |27-65, 68-70, 73-75, 110-145, 148-151, 154-156 |
+| ml4gw/nn/autoencoder/skip\_connection.py  |       30 |       18 |     40% |9, 12, 17-18, 23-24, 27, 30-45 |
+| ml4gw/nn/autoencoder/utils.py             |       12 |        9 |     25% |      6-15 |
 | ml4gw/nn/norm.py                          |       51 |        2 |     96% |   87, 106 |
 | ml4gw/nn/resnet/\_\_init\_\_.py           |        2 |        0 |    100% |           |
 | ml4gw/nn/resnet/resnet\_1d.py             |      143 |        1 |     99% |       330 |
@@ -56,7 +56,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
 | ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
-| **TOTAL**                                 | **3090** |  **230** | **93%** |           |
+| **TOTAL**                                 | **3093** |  **188** | **94%** |           |
 
 
 ## Setup coverage badge
