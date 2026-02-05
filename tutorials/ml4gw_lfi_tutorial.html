@@ -58,7 +58,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#now-we-learn-this-distribution">Now we learn this distribution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compose-several-transforms">Compose several transforms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#condition-and-sample-from-each-mode">Condition and sample from each mode</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#conditional-distribution">Conditional distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditional-distribution">Conditional distribution</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conditional-normalizing-flow-using-zuko-library">Conditional Normalizing Flow using zuko library</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#posterior-estimation-of-gravitational-wave-events">Posterior estimation of gravitational-wave events</a><ul>
@@ -106,18 +109,19 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="tutorial-on-distribution-approximation-and-posterior-estimation">
 <h1>Tutorial on distribution approximation and posterior estimation<a class="headerlink" href="#tutorial-on-distribution-approximation-and-posterior-estimation" title="Link to this heading"></a></h1>
-<p>This notebook is an exercise in distribution approximation using Normalizing flows as implemented in the <a class="reference external" href="https://pyro.ai/">pyro</a> library. The second half of the exercise shows the use case of posterior estimation using ML4GW tools.</p>
+<p>This notebook is an exercise in distribution approximation using Normalizing flows as implemented in the <a class="reference external" href="https://pyro.ai/">pyro</a> library. The conditional Normalizing flow is also implemented using the <a class="reference external" href="https://zuko.readthedocs.io/stable/">zuko</a> library (which is used in the <a class="reference external" href="https://amplfi.readthedocs.io/en/latest/">AMPLFI</a> library). The second half of the exercise shows the use case of posterior estimation using ML4GW tools.</p>
 <p>Libraries needed for the notebook are</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ml4gw==0.7.8</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pyro-ppl</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">zuko</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lightning</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code></p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># uncomment to install these dependencies</span>
-<span class="c1"># ! pip install ml4gw==0.7.8 scikit-learn lightning pyro-ppl</span>
+<span class="c1"># ! pip install ml4gw==0.7.8 scikit-learn lightning pyro-ppl zuko</span>
 </pre></div>
 </div>
 </div>
@@ -139,6 +143,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyro.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoRegressiveNN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyro.distributions.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">AffineAutoregressive</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">zuko</span>
 </pre></div>
 </div>
 </div>
@@ -180,7 +186,7 @@
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;$y$&#39;)
 </pre></div>
 </div>
-<img alt="../_images/c2250ce5bf9493b90f7a8cc531d50467f3425c7a186c72a78599149fd634a883.png" src="../_images/c2250ce5bf9493b90f7a8cc531d50467f3425c7a186c72a78599149fd634a883.png" />
+<img alt="../_images/71202849b63e412dc2332364470b5c321036998f8ba2840f805da5efd7092415.png" src="../_images/71202849b63e412dc2332364470b5c321036998f8ba2840f805da5efd7092415.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -342,8 +348,8 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/d0d536bcc7ce4e7fac33368428b99b4952e40fb2b18c8ad98e2e0d028783d55d.png" src="../_images/d0d536bcc7ce4e7fac33368428b99b4952e40fb2b18c8ad98e2e0d028783d55d.png" />
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:14&lt;00:00, 67.72it/s]
+<img alt="../_images/83a06c0641f01de18703432236265ac2dc21c89158c8494463c220b316685c95.png" src="../_images/83a06c0641f01de18703432236265ac2dc21c89158c8494463c220b316685c95.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:14&lt;00:00, 68.87it/s]
 </pre></div>
 </div>
 </div>
@@ -410,8 +416,8 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5b1ff1ab5451af8a4072f0f5c36a56d81e2817fe0dc129e8d06eb35322456cf3.png" src="../_images/5b1ff1ab5451af8a4072f0f5c36a56d81e2817fe0dc129e8d06eb35322456cf3.png" />
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:36&lt;00:00, 27.65it/s]
+<img alt="../_images/62bb81f6eddd5f757080ea31ff942021fe13ab7ae44e3e823c991f2725e6aef3.png" src="../_images/62bb81f6eddd5f757080ea31ff942021fe13ab7ae44e3e823c991f2725e6aef3.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:36&lt;00:00, 27.37it/s]
 </pre></div>
 </div>
 </div>
@@ -430,10 +436,10 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.colorbar.Colorbar at 0x7f59f05af760&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.colorbar.Colorbar at 0x7f705095b3d0&gt;
 </pre></div>
 </div>
-<img alt="../_images/c9b776a1f824bd7bdb0518f2668af235a71504642c7ca413333b19abf9f6e39b.png" src="../_images/c9b776a1f824bd7bdb0518f2668af235a71504642c7ca413333b19abf9f6e39b.png" />
+<img alt="../_images/62b253c96b27fa996f2dfcfd3766dd008143e08a7c2922c3e291e766426af8aa.png" src="../_images/62b253c96b27fa996f2dfcfd3766dd008143e08a7c2922c3e291e766426af8aa.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -546,12 +552,77 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/b21cdf07a6c26214e7b67f62c6d332cb5c7352984aeccb1c87317863da87ca05.png" src="../_images/b21cdf07a6c26214e7b67f62c6d332cb5c7352984aeccb1c87317863da87ca05.png" />
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:25&lt;00:00, 39.95it/s]
+<img alt="../_images/6b061f72de0f75780705bd4f65a8d5678f4480b59eec74db9387a6d7a174079a.png" src="../_images/6b061f72de0f75780705bd4f65a8d5678f4480b59eec74db9387a6d7a174079a.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:24&lt;00:00, 40.15it/s]
 </pre></div>
 </div>
 </div>
 </div>
+<section id="conditional-normalizing-flow-using-zuko-library">
+<h4>Conditional Normalizing Flow using zuko library<a class="headerlink" href="#conditional-normalizing-flow-using-zuko-library" title="Link to this heading"></a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># defining the flow model using zuko&#39;s NSF flow - Neural Spline Flow</span>
+
+<span class="n">flow</span> <span class="o">=</span> <span class="n">zuko</span><span class="o">.</span><span class="n">flows</span><span class="o">.</span><span class="n">NSF</span><span class="p">(</span>
+    <span class="n">features</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span> <span class="c1"># same as before which is 2</span>
+    <span class="n">context</span><span class="o">=</span><span class="n">condition_dim</span><span class="p">,</span> <span class="c1"># conditoning on just 1 context</span>
+    <span class="n">transforms</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># number of transform layers, can be imported from zuko.flows.autoregressive or zuko.lazy</span>
+    <span class="n">hidden_features</span><span class="o">=</span><span class="n">hidden_dims</span><span class="p">,</span> <span class="c1"># same as before [100, 100, 100]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># testing the flow</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">flow</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([-2.9751, -2.9751, -2.9751, -2.9751, -2.9751], device=&#39;cuda:0&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+
+<span class="n">num_iter</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">)):</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">flow</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">inference_label</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">100</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span>  <span class="c1"># alternate between modes</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">samples_one</span> <span class="o">=</span> <span class="n">flow</span><span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">inference_label</span><span class="p">,])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">1000</span><span class="p">,]))</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+        <span class="n">live_plot</span><span class="p">(</span><span class="n">samples_one</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples_one</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">((</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">((</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/ed147d147958cfe678779639145e61be0fbf8eb680bae1b21726caafed77b508.png" src="../_images/ed147d147958cfe678779639145e61be0fbf8eb680bae1b21726caafed77b508.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:31&lt;00:00, 31.78it/s]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 </section>
 <section id="posterior-estimation-of-gravitational-wave-events">
@@ -596,7 +667,7 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/env/lib/python3.10/site-packages/gwpy/time/__init__.py:36: UserWarning: Wswiglal-redir-stdio:
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/u/bgupta1/.conda/envs/mlgw/lib/python3.10/site-packages/gwpy/time/__init__.py:36: UserWarning: Wswiglal-redir-stdio:
 
 SWIGLAL standard output/error redirection is enabled in IPython.
 This may lead to performance penalties. To disable locally, use:
@@ -832,6 +903,12 @@ import lal
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/u/bgupta1/.conda/envs/mlgw/lib/python3.10/site-packages/torchmetrics/utilities/imports.py:22: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools&lt;81.
+  from pkg_resources import DistributionNotFound, get_distribution
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -956,8 +1033,8 @@ import lal
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([10, 2, 8192])
-tensor([31.4181, 31.1354, 26.2650, 30.3907, 30.0710, 29.9760, 31.2173, 34.3678,
-        33.4446, 32.2733])
+tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
+        34.8015, 29.8784])
 </pre></div>
 </div>
 </div>
@@ -1135,16 +1212,19 @@ tensor([31.4181, 31.1354, 26.2650, 30.3907, 30.0710, 29.9760, 31.2173, 34.3678,
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Using 16bit Automatic Mixed Precision (AMP)
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/u/bgupta1/.conda/envs/mlgw/lib/python3.10/site-packages/lightning_fabric/plugins/environments/slurm.py:204: The `srun` command is available on your system but is not used. HINT: If your intention is to run Lightning on SLURM, prepend your python command with `srun` like so: srun python /u/bgupta1/.conda/envs/mlgw/lib/python3.10/site-pack ...
+Using 16bit Automatic Mixed Precision (AMP)
 💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
 GPU available: True (cuda), used: True
 TPU available: False, using: 0 TPU cores
 HPU available: False, using: 0 HPUs
 The following callbacks returned in `LightningModule.configure_callbacks` will override existing callbacks passed to Trainer: ModelCheckpoint
-You are using a CUDA device (&#39;NVIDIA A100-SXM4-40GB&#39;) that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision(&#39;medium&#39; | &#39;high&#39;)` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
-LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+You are using a CUDA device (&#39;NVIDIA A40&#39;) that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision(&#39;medium&#39; | &#39;high&#39;)` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 Loading `train_dataloader` to estimate number of stepping batches.
-/env/lib/python3.10/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:231: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
+/u/bgupta1/.conda/envs/mlgw/lib/python3.10/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:231: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
 
   | Name       | Type                              | Params | Mode 
 -------------------------------------------------------------------------
@@ -1159,11 +1239,11 @@ Loading `train_dataloader` to estimate number of stepping batches.
 0         Modules in eval mode
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1d356cd66d564b688a8d4c084bf5a07c", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "791e1095f8684d20872b2a0a8f806f01", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/env/lib/python3.10/site-packages/torch/optim/lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a4eb89ea39094556a8f2b78b3cbeec8a", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "319ca6b718bd412d9c2669db10ae9f35", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/u/bgupta1/.conda/envs/mlgw/lib/python3.10/site-packages/torch/optim/lr_scheduler.py:224: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
   warnings.warn(
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b79bd4e7ffb84c39aa161fa55ece33af", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "b1077a3dd2aa4bcc84933f37e933fedd", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "2cc435cfd64c4257b92f90df7e218e5a", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "b44c7cf97b614b278e911688ac37e707", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "c15436e7c41e4b76acf685fea8729529", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "15b55213fdde4e369a962278fa290bc0", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`Trainer.fit` stopped: `max_epochs=30` reached.
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d601ef9685434988bb7f5491c804fea5", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "17a5292a982846c9ad72320e24a0ccfd", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "7ed9505e9ec4442bbe56720a4ec20221", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "2756cd756df04da586395a6d4236c28c", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "a136f9e3062b400888e16772c796ad5c", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "f55dcfcf14c74dc49f23fe1d7c10a165", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`Trainer.fit` stopped: `max_epochs=30` reached.
 </pre></div>
 </div>
 </div>
@@ -1318,7 +1398,9 @@ Loading `train_dataloader` to estimate number of stepping batches.
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading analysis data for ifo H1
-Downloading psd data for ifo H1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading psd data for ifo H1
 Downloading analysis data for ifo L1
 Downloading psd data for ifo L1
 </pre></div>
@@ -1369,7 +1451,7 @@ Downloading psd data for ifo L1
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Whitened Strain&#39;)
 </pre></div>
 </div>
-<img alt="../_images/9aa7d5f2cb503171f440c551cf7195231d8236a9f1819a932e1197f7cebb407c.png" src="../_images/9aa7d5f2cb503171f440c551cf7195231d8236a9f1819a932e1197f7cebb407c.png" />
+<img alt="../_images/fe49ad4338e5aafddd847b0c5acb20871972a267e1b84be6070cc3f063265a26.png" src="../_images/fe49ad4338e5aafddd847b0c5acb20871972a267e1b84be6070cc3f063265a26.png" />
 </div>
 </div>
 <p>Sample from the flow, using the whitened data as context</p>
@@ -1397,7 +1479,7 @@ Downloading psd data for ifo L1
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/e39b70dedbde9164386f20e0b7ee0251471902d8cf2508495001505b149cada5.png" src="../_images/e39b70dedbde9164386f20e0b7ee0251471902d8cf2508495001505b149cada5.png" />
+<img alt="../_images/bf07b6b1a9a2b8e45bf0ed28b2204ce505c40836cde94dee91181ed6038b8105.png" src="../_images/bf07b6b1a9a2b8e45bf0ed28b2204ce505c40836cde94dee91181ed6038b8105.png" />
 </div>
 </div>
 <p>This is not the best constraining result since the flow needs to train for longer. For reference the <a class="reference external" href="https://gwosc.org/eventapi/html/GWTC-1-confident/GW150914/v3/">results from GWTC-1</a> is <span class="math notranslate nohighlight">\(M_c = 28.6^{+1.7}_{-1.5}\;M_{\odot}\)</span> and <span class="math notranslate nohighlight">\(D_L = 440^{+150}_{-170}\)</span>. But it is in the ballpark.</p>
