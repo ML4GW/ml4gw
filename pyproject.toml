@@ -71,6 +71,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 line-length = 79
+extend-select = ["T201"]
 extend-exclude = ["docs", "examples"]
 target-version = "py312"
 
