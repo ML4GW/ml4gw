@@ -148,5 +148,5 @@ class SnrRescaler_Online(torch.nn.Module):
         # in order to achieve the target SNRs
         target_snrs.to(snrs.device)
         weights = target_snrs / snrs
-        return responses * weights.view(-1, 1, 1)
+        return responses * weights.view(-1, 1, 1), weights.view(-1, 1, 1)
 
