@@ -1,7 +1,9 @@
-import numpy as np
+from typing import Literal
+
+import torch
 
 
-class TophatIntegrator:
+class TophatIntegrator(torch.nn.Module):
     r"""
     Convolve predictions with boxcar filter to get local
     integration, slicing off of the last values so that
@@ -21,7 +23,7 @@ class TophatIntegrator:
         - Output: `(T,)`
 
     Returns:
-        np.ndarray:
+        torch.Tensor:
             Integrated timeseries with the same length as the input.
     """
 
@@ -30,22 +32,31 @@ class TophatIntegrator:
         inference_sample_rate: int,
         integration_length: int,
     ):
+        super().__init__()
         self.inference_sample_rate = inference_sample_rate
         self.integration_length = integration_length
-        self.window_size = int(
-            self.inference_sample_rate * self.integration_length
+        self.window_size = (
+            int(self.inference_sample_rate * self.integration_length) + 1
         )
-        self.window = np.ones((self.window_size,)) / self.window_size
+        self.register_buffer(
+            "window", torch.ones((1, 1, self.window_size)) / self.window_size
+        )
 
-    def __call__(self, y: np.ndarray) -> np.ndarray:
-        integrated = np.convolve(y, self.window, mode="full")
-        return integrated[: -self.window_size + 1]
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.dim() != 1:
+            raise ValueError("TophatIntegrator expects input shape (T,)")
+
+        x = x.view(1, 1, -1)
+        x = torch.nn.functional.pad(x, (self.window_size - 1, 0))
+        integrated = torch.nn.functional.conv1d(x, self.window)
+
+        return integrated[0, 0, :]
 
 
-class LeakyIntegrator:
+class LeakyIntegrator(torch.nn.Module):
     r"""
     This integrator accumulates evidence when the input exceeds
-    a threshold and decays otherwise. The accumulator can either
+    a threshold and decays linearly. The accumulator can either
     increment by a constant value (event counting) or by the
     input score itself.
 
@@ -71,7 +82,7 @@ class LeakyIntegrator:
         - Output: `(T,)`
 
     Returns:
-        np.ndarray:
+        torch.Tensor:
             Leaky integrated timeseries.
     """
 
@@ -79,42 +90,43 @@ class LeakyIntegrator:
         self,
         threshold: float,
         decay: float,
-        integrate_value: str,
         lower_bound: float,
-        detection_threshold: float | None = None,
+        integrate_value: Literal["count", "score"],
     ):
+        super().__init__()
+
         integrate_value = integrate_value.lower()
+        if integrate_value not in ["count", "score"]:
+            raise ValueError(
+                "Invalid integrate_value: "
+                f"{integrate_value}. Must be 'count' or 'score'."
+            )
+
         self.integrate_value = integrate_value
+        self.register_buffer("threshold", torch.tensor(threshold))
+        self.register_buffer("decay", torch.tensor(decay))
+        self.register_buffer("lower_bound", torch.tensor(lower_bound))
 
-        self.threshold = threshold
-        self.decay = decay
-        self.lower_bound = lower_bound
-        self.detection_threshold = detection_threshold
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.dim() != 1:
+            raise ValueError("LeakyIntegrator expects input shape (T,)")
 
-    def __call__(self, y: np.ndarray) -> np.ndarray:
-        output = []
-        score = self.lower_bound
-        for data in y:
-            data = float(data)
-            if data >= self.threshold:
+        threshold = self.threshold.to(x.dtype)
+        decay = self.decay.to(x.dtype)
+        lower_bound = self.lower_bound.to(x.dtype)
+
+        output = torch.empty_like(x)
+        score = lower_bound
+
+        for i, data in enumerate(x):
+            if data >= threshold:
                 if self.integrate_value == "count":
-                    score += 1.0
-                elif self.integrate_value == "score":
-                    score += data
+                    score = score + 1.0
                 else:
-                    raise ValueError(
-                        "Invalid integrate_value: "
-                        f"{self.integrate_value}. Must be 'count' or 'score'."
-                    )
+                    score = score + data
             else:
-                score = max(self.lower_bound, score - self.decay)
+                score = torch.maximum(lower_bound, score - decay)
 
-            if (
-                self.detection_threshold is not None
-                and score >= self.detection_threshold
-            ):
-                output.append(score)
-                score = self.lower_bound
-            else:
-                output.append(score)
-        return np.asarray(output)
+            output[i] = score
+
+        return output
