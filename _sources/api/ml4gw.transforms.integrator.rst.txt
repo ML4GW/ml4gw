@@ -1,0 +1,13 @@
+ml4gw.transforms.integrator
+===========================
+
+.. automodule:: ml4gw.transforms.integrator
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      LeakyIntegrator
+      TophatIntegrator
+   

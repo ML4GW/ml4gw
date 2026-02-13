@@ -12,6 +12,7 @@ ml4gw.transforms
 
    decimator
    iirfilter
+   integrator
    pearson
    qtransform
    scaler

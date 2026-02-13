@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ml4gw.transforms.integrator &mdash; ml4gw  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d048f138"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ml4gw.transforms.pearson" href="ml4gw.transforms.pearson.html" />
+    <link rel="prev" title="ml4gw.transforms.iirfilter" href="ml4gw.transforms.iirfilter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ml4gw
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html">Tutorial on the basics of <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_lfi_tutorial.html">Tutorial on distribution approximation and posterior estimation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ml4gw.html">ml4gw</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.augmentations.html">ml4gw.augmentations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.constants.html">ml4gw.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.dataloading.html">ml4gw.dataloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.decimator.html">ml4gw.transforms.decimator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.iirfilter.html">ml4gw.transforms.iirfilter</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.transforms.integrator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.integrator.LeakyIntegrator"><code class="docutils literal notranslate"><span class="pre">LeakyIntegrator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.integrator.TophatIntegrator"><code class="docutils literal notranslate"><span class="pre">TophatIntegrator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.pearson.html">ml4gw.transforms.pearson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.qtransform.html">ml4gw.transforms.qtransform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.scaler.html">ml4gw.transforms.scaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.snr_rescaler.html">ml4gw.transforms.snr_rescaler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectral.html">ml4gw.transforms.spectral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectrogram.html">ml4gw.transforms.spectrogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spline_interpolation.html">ml4gw.transforms.spline_interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.transform.html">ml4gw.transforms.transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.waveforms.html">ml4gw.transforms.waveforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.whitening.html">ml4gw.transforms.whitening</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.types.html">ml4gw.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml4gw.waveforms.html">ml4gw.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ml4gw.utils.html">ml4gw.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ml4gw</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
+          <li class="breadcrumb-item"><a href="ml4gw.transforms.html">ml4gw.transforms</a></li>
+      <li class="breadcrumb-item active">ml4gw.transforms.integrator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ml4gw.transforms.integrator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ml4gw.transforms.integrator">
+<span id="ml4gw-transforms-integrator"></span><h1>ml4gw.transforms.integrator<a class="headerlink" href="#module-ml4gw.transforms.integrator" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.integrator.LeakyIntegrator" title="ml4gw.transforms.integrator.LeakyIntegrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeakyIntegrator</span></code></a>(threshold, decay, ...)</p></td>
+<td><p>This integrator accumulates evidence when the input exceeds a threshold and decays linearly.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.transforms.integrator.TophatIntegrator" title="ml4gw.transforms.integrator.TophatIntegrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TophatIntegrator</span></code></a>(sample_rate, integration_length)</p></td>
+<td><p>Applies a causal boxcar (moving-average) filter along the last dimension of the input tensor.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.integrator.LeakyIntegrator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.integrator.</span></span><span class="sig-name descname"><span class="pre">LeakyIntegrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrate_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.integrator.LeakyIntegrator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>This integrator accumulates evidence when the input exceeds
+a threshold and decays linearly. The accumulator can either
+increment by a constant value (event counting) or by the
+input score itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>threshold</strong> (<em>float</em>) -- Minimum value required to contribute to the accumulator.</p></li>
+<li><p><strong>decay</strong> (<em>float</em>) -- Amount subtracted per timestep when the threshold
+condition is not met.</p></li>
+<li><p><strong>lower_bound</strong> (<em>float</em>) -- Lowest allowed value of the cumulative accumulator. The
+output is clipped so it never falls below this value.</p></li>
+<li><p><strong>integrate_value</strong> (<em>Literal</em><em>[</em><em>&quot;count&quot;</em><em>, </em><em>&quot;score&quot;</em><em>]</em>) -- <dl class="simple">
+<dt>Integration mode. Must be one of:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;count&quot;</span></code>: increment by 1 per threshold crossing</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;score&quot;</span></code>: increment by the input value per</dt><dd><p>threshold crossing</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Input: <cite>(..., T)</cite></p></li>
+<li><p>Output: <cite>(..., T)</cite></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cumulative leaky integral of the input sequence.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>torch.Tensor</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>threshold</strong> (<em>float</em>)</p></li>
+<li><p><strong>decay</strong> (<em>float</em>)</p></li>
+<li><p><strong>lower_bound</strong> (<em>float</em>)</p></li>
+<li><p><strong>integrate_value</strong> (<em>Literal</em><em>[</em><em>'count'</em><em>, </em><em>'score'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.integrator.LeakyIntegrator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.integrator.LeakyIntegrator.forward" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>x</strong> (<em>Tensor</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.integrator.TophatIntegrator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.integrator.</span></span><span class="sig-name descname"><span class="pre">TophatIntegrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.integrator.TophatIntegrator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Applies a causal boxcar (moving-average) filter along the
+last dimension of the input tensor. Each output sample
+represents the average of the previous <cite>integration_length</cite>
+seconds of data. Zero-padding is applied on the left so that
+the output has the same length as the input. As a result, the
+first few samples are computed from partial windows and
+therefore have smaller magnitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_rate</strong> (<em>int</em>) -- Sampling rate (Hz) of the input timeseries.</p></li>
+<li><p><strong>integration_length</strong> (<em>int</em>) -- Integration window length in seconds.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Input: <cite>(..., T)</cite></p></li>
+<li><p>Output: <cite>(..., T)</cite></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Integrated timeseries with the same length as the input.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>torch.Tensor</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_rate</strong> (<em>int</em>)</p></li>
+<li><p><strong>integration_length</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.integrator.TophatIntegrator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.integrator.TophatIntegrator.forward" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>x</strong> (<em>Tensor</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ml4gw.transforms.iirfilter.html" class="btn btn-neutral float-left" title="ml4gw.transforms.iirfilter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.transforms.pearson.html" class="btn btn-neutral float-right" title="ml4gw.transforms.pearson" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ethan Marx &lt;emarx@mit.edu&gt;, Will Benoit &lt;benoi090@umn.edu&gt;, Deep Chatterjee &lt;deep1018@mit.edu&gt;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
