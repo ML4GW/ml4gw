@@ -6,6 +6,7 @@ and compute Q-transforms.
 
 from .decimator import Decimator
 from .iirfilter import IIRFilter
+from .integrator import LeakyIntegrator, TophatIntegrator
 from .pearson import ShiftedPearsonCorrelation
 from .qtransform import QScan, SingleQTransform
 from .scaler import ChannelWiseScaler
