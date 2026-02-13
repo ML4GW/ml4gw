@@ -1,27 +1,26 @@
+import pytest
 import torch
 
 from ml4gw.transforms.integrator import LeakyIntegrator, TophatIntegrator
 
 
 def test_tophat_integrator():
-    inference_sample_rate = 10
+    sample_rate = 10
     integration_length = 1
-    integrator = TophatIntegrator(inference_sample_rate, integration_length)
+    integrator = TophatIntegrator(sample_rate, integration_length)
 
     y = torch.ones(100)
     out = integrator(y)
     assert out.shape == y.shape
 
-    start = int(integration_length * inference_sample_rate)
+    start = int(sample_rate * integration_length)
     torch.testing.assert_close(out[start:], torch.ones_like(out[start:]))
 
     y = torch.zeros(50)
     out = integrator(y)
     torch.testing.assert_close(out, torch.zeros_like(out))
 
-    integrator = TophatIntegrator(
-        inference_sample_rate=1, integration_length=3
-    )
+    integrator = TophatIntegrator(sample_rate=1, integration_length=3)
 
     y = torch.randn(5)
     out = integrator(y)
@@ -34,8 +33,6 @@ def test_tophat_integrator():
             (y[0] + y[1] + y[2] + y[3]) / 4,
             (y[1] + y[2] + y[3] + y[4]) / 4,
         ],
-        dtype=y.dtype,
-        device=y.device,
     )
 
     torch.testing.assert_close(out, expected)
@@ -92,3 +89,11 @@ def test_leaky_integrator():
             device=out.device,
         ),
     )
+
+    with pytest.raises(ValueError, match="Must be 'count' or 'score'"):
+        LeakyIntegrator(
+            threshold=0.5,
+            decay=1.0,
+            integrate_value="sum",
+            lower_bound=0.0,
+        )
