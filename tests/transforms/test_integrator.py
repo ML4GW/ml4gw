@@ -90,6 +90,14 @@ def test_leaky_integrator():
         ),
     )
 
+    with pytest.raises(ValueError, match="Must be 'count' or 'score'"):
+        LeakyIntegrator(
+            threshold=0.5,
+            decay=1.0,
+            integrate_value="sum",
+            lower_bound=0.0,
+        )
+
 
 @pytest.mark.parametrize(
     "shape",
