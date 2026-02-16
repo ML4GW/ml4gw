@@ -125,9 +125,7 @@ class FreqDomainSVDProjection(nn.Module):
         if self.per_channel:
             proj_list = []
             for ch in range(self.num_channels):
-                proj_list.append(
-                    self.projections[ch](x_ri[:, ch, :])
-                )
+                proj_list.append(self.projections[ch](x_ri[:, ch, :]))
             x_proj = torch.stack(proj_list, dim=1)
         else:
             x_proj = self.projection(x_ri)

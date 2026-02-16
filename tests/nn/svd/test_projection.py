@@ -51,18 +51,14 @@ class TestFreqDomainSVDProjection:
     def test_init_with_numpy_V(self, num_channels, n_freq, n_svd):
         """Initialization with a numpy V matrix sets weights."""
         V = np.random.randn(2 * n_freq, n_svd).astype(np.float32)
-        proj = FreqDomainSVDProjection(
-            num_channels, n_freq, n_svd, V=V
-        )
+        proj = FreqDomainSVDProjection(num_channels, n_freq, n_svd, V=V)
         expected = torch.from_numpy(V).float().T
         assert torch.allclose(proj.projection.weight.data, expected)
 
     def test_init_with_torch_V(self, num_channels, n_freq, n_svd):
         """Initialization with a torch V tensor sets weights."""
         V = torch.randn(2 * n_freq, n_svd)
-        proj = FreqDomainSVDProjection(
-            num_channels, n_freq, n_svd, V=V
-        )
+        proj = FreqDomainSVDProjection(num_channels, n_freq, n_svd, V=V)
         expected = V.float().T
         assert torch.allclose(proj.projection.weight.data, expected)
 
@@ -95,9 +91,7 @@ class TestFreqDomainSVDProjection:
 
     def test_freeze_unfreeze_per_channel(self, n_freq, n_svd):
         """freeze/unfreeze controls requires_grad for per-channel."""
-        proj = FreqDomainSVDProjection(
-            2, n_freq, n_svd, per_channel=True
-        )
+        proj = FreqDomainSVDProjection(2, n_freq, n_svd, per_channel=True)
         proj.freeze()
         for ch_proj in proj.projections:
             for p in ch_proj.parameters():
