@@ -1,6 +1,7 @@
 import torch
-from torch import Tensor
+
 from ml4gw.types import BatchTensor
+
 
 class Gaussian(torch.nn.Module):
     def __init__(self, sample_rate: float, duration: float):
@@ -8,52 +9,62 @@ class Gaussian(torch.nn.Module):
         self.sample_rate = sample_rate
         self.duration = duration
 
-        num_samples = int(sample_rate * duration)
-        times = torch.arange(num_samples, dtype=torch.float64) / sample_rate
-        times -= 0.5 * duration
+        # 2 Δt samples, centred on zero
+        k_len: float = 2.0
+        num_samples = int(round(k_len * duration * sample_rate)) + 1
+        half_num_samples = int(num_samples / 2)
+        t = (
+            torch.arange(num_samples, dtype=torch.float64)
+            - (num_samples - 1) / 2
+        ) / sample_rate
+        self.register_buffer("times", t)
 
-        self.register_buffer("times", times)
+        # Calculate time window length
+        win_len = int(sample_rate * duration)
+        half_win_len = int(win_len / 2)
+
+        self.win_start = half_num_samples - half_win_len
+        self.win_end = half_num_samples + half_win_len
+
+        # Tukey window with α = 0.5
+        alpha = 0.5
+        n = num_samples
+        tukey = torch.ones(n, dtype=torch.float64)
+        k = int(alpha * (n - 1) / 2)
+        if k > 0:
+            tau = torch.linspace(0, torch.pi, k + 1)[:-1]
+            tukey[:k] = 0.5 * (1 - torch.cos(tau))
+            tukey[-k:] = tukey[:k].flip(0)
+        self.register_buffer("tukey", tukey)
 
     def forward(
         self,
-        hrss: Tensor,
-        polarization: Tensor,
-        eccentricity: Tensor,
+        hrss: BatchTensor,
+        gaussian_width: BatchTensor,
     ):
-
+        # The gaussian_width should be smaller than self.duration
         hrss = hrss.view(-1, 1)
-        polarization = polarization.view(-1, 1)
-        eccentricity = eccentricity.view(-1, 1)  # not used
+        gaussian_width = gaussian_width.view(-1, 1)
 
-        # Basic definitions
-        hplusrss  = hrss * torch.cos(polarization)
-        hcrossrss = hrss * torch.sin(polarization)
+        # correct LAL normalisation
+        h0 = hrss / torch.sqrt(
+            torch.sqrt(
+                torch.tensor(torch.pi, dtype=hrss.dtype, device=hrss.device)
+            )
+            * gaussian_width
+        )
 
-        # If we want "2 / sqrt(pi)" via PyTorch, do:
-        # make pi a tensor, matching the device/dtype of 'hrss'
-        pi_t = torch.tensor(torch.pi, dtype=hrss.dtype, device=hrss.device)
-        FRTH_2_Pi = 2.0 / torch.sqrt(pi_t)
+        h0_plus = h0
+        h0_cross = h0 * 0
 
-        # Also, we want sqrt(self.duration) as a tensor
-        dur_t = torch.tensor(self.duration, dtype=hrss.dtype, device=hrss.device)
-        sigma = torch.sqrt(dur_t)
+        t = self.times.to(hrss.device, hrss.dtype)
+        env = torch.exp(-0.5 * t.pow(2).view(1, -1) / gaussian_width**2)
 
-        # Then compute the "peak" amplitudes
-        h0_plus  = hplusrss  / sigma * FRTH_2_Pi
-        h0_cross = hcrossrss / sigma * FRTH_2_Pi
+        win = self.tukey.to(hrss.device, hrss.dtype)[None, :]
 
-        # Evaluate Gaussian factor
-        # 'self.times' might be on CPU if you didn't move the model to GPU;
-        # to be safe, ensure it matches 'hrss' device/dtype:
-        t = self.times.to(hrss.device, hrss.dtype)  # shape (num_samples,)
-        t2 = t**2
-        t2 = t2.unsqueeze(0)  # shape (1, num_samples)
+        plus = (h0_plus * env) * win
+        cross = (h0_cross * env) * win
 
-        # again we can do a broadcast with float 'self.duration' or
-        # we can just re-use 'dur_t':
-        fac = torch.exp(-t2 / (dur_t**2))
-
-        plus = h0_plus * fac
-        cross = h0_cross * fac
-
+        cross = cross[..., self.win_start : self.win_end]
+        plus = plus[..., self.win_start : self.win_end]
         return cross, plus
