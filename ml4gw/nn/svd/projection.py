@@ -82,9 +82,7 @@ class FreqDomainSVDProjection(nn.Module):
             for _ in range(num_channels):
                 proj = nn.Linear(2 * n_freq, n_svd, bias=False)
                 if V_tensor is not None:
-                    proj.weight.data = V_tensor.transpose(
-                        0, 1
-                    ).contiguous()
+                    proj.weight.data = V_tensor.transpose(0, 1).contiguous()
                 self.projections.append(proj)
         else:
             self.projection = nn.Linear(2 * n_freq, n_svd, bias=False)

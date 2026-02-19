@@ -169,9 +169,7 @@ class TestComputeBasis:
     def test_output_shapes(self):
         """V and s have correct shapes."""
         n_waveforms, n_samples, n_svd = 200, 256, 20
-        waveforms = np.random.randn(n_waveforms, n_samples).astype(
-            np.float32
-        )
+        waveforms = np.random.randn(n_waveforms, n_samples).astype(np.float32)
         V, s = FreqDomainSVDProjection.compute_basis(waveforms, n_svd)
         n_freq = n_samples // 2 + 1
         assert V.shape == (2 * n_freq, n_svd)
@@ -240,18 +238,12 @@ class TestComputeBasis:
         coeffs = rng.standard_normal((n_waveforms, 5))
         waveforms = (coeffs @ basis).astype(np.float32)
 
-        V_few, _ = FreqDomainSVDProjection.compute_basis(
-            waveforms, n_svd=2
-        )
-        V_many, _ = FreqDomainSVDProjection.compute_basis(
-            waveforms, n_svd=20
-        )
+        V_few, _ = FreqDomainSVDProjection.compute_basis(waveforms, n_svd=2)
+        V_many, _ = FreqDomainSVDProjection.compute_basis(waveforms, n_svd=20)
 
         # Project and reconstruct with each basis
         freq_data = np.fft.rfft(waveforms, axis=-1)
-        data_ri = np.concatenate(
-            [freq_data.real, freq_data.imag], axis=-1
-        )
+        data_ri = np.concatenate([freq_data.real, freq_data.imag], axis=-1)
 
         recon_few = data_ri @ V_few @ V_few.T
         recon_many = data_ri @ V_many @ V_many.T
@@ -273,9 +265,7 @@ class TestComputeBasis:
         # 10 waveforms with 64 samples -> matrix is (10, 66)
         # min dim - 1 = 9
         waveforms = np.random.randn(10, 64).astype(np.float32)
-        V, s = FreqDomainSVDProjection.compute_basis(
-            waveforms, n_svd=100
-        )
+        V, s = FreqDomainSVDProjection.compute_basis(waveforms, n_svd=100)
         assert V.shape[1] == 9
         assert s.shape[0] == 9
 
