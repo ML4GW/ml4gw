@@ -14,4 +14,4 @@ These are still a work in progress, and we will be adding more examples over tim
    examples/transforms.qtransform
    examples/transforms.spectral
    examples/transforms.whitening
-   
+   examples/svd
