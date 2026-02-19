@@ -21,7 +21,24 @@ class DenseResidualBlock(nn.Module):
     other 1D feature vectors in gravitational wave detection
     networks.
 
-    Note:
+    .. note::
+        This is intentionally separate from
+        :class:`~ml4gw.nn.resnet.resnet_1d.BasicBlock`, which
+        uses 1D convolutions for time-series data. Key differences:
+
+        - **Layers**: ``nn.Linear`` (dense) vs ``nn.Conv1d``
+        - **Normalization**: ``LayerNorm`` (post-residual) vs
+          ``GroupNorm``/``BatchNorm`` (pre-residual per conv)
+        - **Activation**: ``GELU`` vs ``ReLU``
+        - **Dimensionality**: Fixed ``(batch, dim)`` vs variable
+          channel/spatial dims with optional downsampling
+
+        Unifying these would require a complex abstraction with
+        little practical benefit, since the two blocks target
+        fundamentally different data representations (1D feature
+        vectors vs multi-channel time series).
+
+    .. note::
         BatchNorm is intentionally not supported. In GW detection
         training, batches contain a mix of signal and noise samples
         at varying ratios. BatchNorm learns running statistics from

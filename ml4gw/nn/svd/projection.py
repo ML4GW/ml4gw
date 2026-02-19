@@ -82,18 +82,108 @@ class FreqDomainSVDProjection(nn.Module):
             for _ in range(num_channels):
                 proj = nn.Linear(2 * n_freq, n_svd, bias=False)
                 if V_tensor is not None:
-                    proj.weight.data = V_tensor.T.contiguous()
+                    proj.weight.data = V_tensor.transpose(
+                        0, 1
+                    ).contiguous()
                 self.projections.append(proj)
         else:
             self.projection = nn.Linear(2 * n_freq, n_svd, bias=False)
             if V_tensor is not None:
-                self.projection.weight.data = V_tensor.T.contiguous()
+                self.projection.weight.data = V_tensor.transpose(
+                    0, 1
+                ).contiguous()
 
     @staticmethod
     def _to_tensor(V: np.ndarray | Tensor) -> Tensor:
         if isinstance(V, np.ndarray):
             return torch.from_numpy(V).float()
         return V.float()
+
+    @staticmethod
+    def compute_basis(
+        waveforms: np.ndarray | Tensor,
+        n_svd: int,
+        n_oversamples: int = 20,
+        random_state: int = 42,
+        domain: str = "time",
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute SVD basis vectors from a bank of waveforms.
+
+        Builds the right singular vectors V that can be passed
+        to :class:`FreqDomainSVDProjection` to initialize the
+        projection weights. Adapted from the SVD basis computation
+        in `aframe <https://github.com/ML4GW/aframe>`_.
+
+        Args:
+            waveforms:
+                Waveform bank. If ``domain="time"``, shape is
+                ``(n_waveforms, n_samples)`` and an FFT is applied.
+                If ``domain="frequency"``, shape is
+                ``(n_waveforms, n_freq)`` with complex dtype
+                (already FFT'd).
+            n_svd:
+                Number of SVD basis components to keep.
+            n_oversamples:
+                Extra samples for the randomized SVD solver
+                (higher = more accurate, slower).
+            random_state:
+                Random seed for reproducibility.
+            domain:
+                ``"time"`` or ``"frequency"``. If ``"time"``,
+                the waveforms are FFT'd first. If ``"frequency"``,
+                they are assumed to already be complex frequency-
+                domain data.
+
+        Returns:
+            V:
+                Right singular vectors of shape
+                ``(2 * n_freq, n_svd)``, ready to pass to
+                :class:`FreqDomainSVDProjection`.
+            s:
+                Singular values of shape ``(n_svd,)``, useful
+                for diagnostics (e.g. cumulative energy capture).
+
+        Example::
+
+            # From time-domain waveforms
+            waveforms = np.random.randn(1000, 2048)  # 1000 waveforms
+            V, s = FreqDomainSVDProjection.compute_basis(
+                waveforms, n_svd=50,
+            )
+            n_freq = waveforms.shape[-1] // 2 + 1
+            proj = FreqDomainSVDProjection(
+                num_channels=2, n_freq=n_freq, n_svd=50, V=V,
+            )
+        """
+        from sklearn.utils.extmath import randomized_svd
+
+        if isinstance(waveforms, Tensor):
+            waveforms = waveforms.numpy()
+
+        if domain == "time":
+            waveforms = waveforms.astype(np.float32)
+            freq_data = np.fft.rfft(waveforms, axis=-1)
+        elif domain == "frequency":
+            freq_data = np.asarray(waveforms, dtype=np.complex64)
+        else:
+            raise ValueError(
+                f"domain must be 'time' or 'frequency', got '{domain}'"
+            )
+
+        # Stack real and imaginary into a real-valued matrix
+        data_ri = np.concatenate(
+            [freq_data.real, freq_data.imag], axis=-1
+        ).astype(np.float32)
+
+        n_svd = min(n_svd, min(data_ri.shape) - 1)
+        _, s, Vh = randomized_svd(
+            data_ri,
+            n_components=n_svd,
+            n_oversamples=n_oversamples,
+            random_state=random_state,
+        )
+        V = Vh.T  # (2 * n_freq, n_svd)
+        return V, s
 
     @property
     def output_dim(self) -> int:
