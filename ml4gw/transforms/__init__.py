@@ -5,6 +5,7 @@ and compute Q-transforms.
 """
 
 from .decimator import Decimator
+from .heterodyne import Heterodyne
 from .iirfilter import IIRFilter
 from .integrator import LeakyIntegrator, TophatIntegrator
 from .pearson import ShiftedPearsonCorrelation
