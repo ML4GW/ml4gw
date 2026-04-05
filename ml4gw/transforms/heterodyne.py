@@ -1,6 +1,8 @@
 from typing import Literal
 
 import torch
+from astropy import units as u
+from astropy.constants import G, M_sun, c
 
 
 class Heterodyne(torch.nn.Module):
@@ -106,8 +108,11 @@ class Heterodyne(torch.nn.Module):
             self.chirp_mass_distribution = chirp_mass_distribution
             self.chirp_mass_grid = self._chirp_mass_grid()
 
+        SOLAR_MASS_IN_S = (G * M_sun / c**3).to(u.s).value
         self.pi_m_f = (
-            torch.pi * self.chirp_mass_grid[:, None] * self.freq_grid[None, :]
+            torch.pi
+            * (self.chirp_mass_grid[:, None] * SOLAR_MASS_IN_S)
+            * self.freq_grid[None, :]
         )
         self.heterodyning_phase = self._heterodyning_phase()
         self.return_type = return_type
