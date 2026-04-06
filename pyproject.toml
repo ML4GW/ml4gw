@@ -8,6 +8,7 @@ authors = [
     { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
     { name = "Alec Gunny", email = "alec.gunny@ligo.org" },
     { name = "Ravi Kumar", email = "ravi.kumar@ligo.org" },
+    { name = "Bhavya Gupta", email = "bhavya.gupta@ligo.org" },
 ]
 maintainers = [
     { name = "Ethan Marx", email = "emarx@mit.edu" },
