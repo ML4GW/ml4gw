@@ -27,8 +27,9 @@
 | ml4gw/nn/streaming/online\_average.py     |       48 |        4 |     92% |80, 88-89, 113 |
 | ml4gw/nn/streaming/snapshotter.py         |       35 |        2 |     94% |   93, 107 |
 | ml4gw/spectral.py                         |      149 |        0 |    100% |           |
-| ml4gw/transforms/\_\_init\_\_.py          |       12 |        0 |    100% |           |
+| ml4gw/transforms/\_\_init\_\_.py          |       13 |        0 |    100% |           |
 | ml4gw/transforms/decimator.py             |       50 |        0 |    100% |           |
+| ml4gw/transforms/heterodyne.py            |       30 |        0 |    100% |           |
 | ml4gw/transforms/iirfilter.py             |       17 |        0 |    100% |           |
 | ml4gw/transforms/integrator.py            |       32 |        0 |    100% |           |
 | ml4gw/transforms/pearson.py               |       28 |        3 |     89% |47, 52, 59 |
@@ -57,7 +58,7 @@
 | ml4gw/waveforms/cbc/utils.py              |       48 |        0 |    100% |           |
 | ml4gw/waveforms/conversion.py             |       81 |        0 |    100% |           |
 | ml4gw/waveforms/generator.py              |      103 |        0 |    100% |           |
-| **TOTAL**                                 | **3126** |  **188** | **94%** |           |
+| **TOTAL**                                 | **3157** |  **188** | **94%** |           |
 
 
 ## Setup coverage badge
