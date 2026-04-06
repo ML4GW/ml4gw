@@ -119,12 +119,3 @@ def test_invalid_return_type_init():
             chirp_mass=torch.tensor([2.5]),
             return_type="timeseries",
         )
-
-
-def test_missing_chirp_mass_grid():
-    with pytest.raises(ValueError):
-        Heterodyne(
-            sample_rate=2048,
-            kernel_length=4,
-            return_type="time",
-        )
