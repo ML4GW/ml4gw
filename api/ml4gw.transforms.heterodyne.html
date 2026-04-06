@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ml4gw.transforms.waveforms &mdash; ml4gw  documentation</title>
+  <title>ml4gw.transforms.heterodyne &mdash; ml4gw  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -19,11 +19,13 @@
         <script src="../_static/documentation_options.js?v=d048f138"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ml4gw.transforms.whitening" href="ml4gw.transforms.whitening.html" />
-    <link rel="prev" title="ml4gw.transforms.transform" href="ml4gw.transforms.transform.html" /> 
+    <link rel="next" title="ml4gw.transforms.iirfilter" href="ml4gw.transforms.iirfilter.html" />
+    <link rel="prev" title="ml4gw.transforms.decimator" href="ml4gw.transforms.decimator.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -64,7 +66,10 @@
 <li class="toctree-l2"><a class="reference internal" href="ml4gw.spectral.html">ml4gw.spectral</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="ml4gw.transforms.html">ml4gw.transforms</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.decimator.html">ml4gw.transforms.decimator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.heterodyne.html">ml4gw.transforms.heterodyne</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.transforms.heterodyne</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.heterodyne.Heterodyne"><code class="docutils literal notranslate"><span class="pre">Heterodyne</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.iirfilter.html">ml4gw.transforms.iirfilter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.integrator.html">ml4gw.transforms.integrator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.pearson.html">ml4gw.transforms.pearson</a></li>
@@ -75,11 +80,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spectrogram.html">ml4gw.transforms.spectrogram</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.spline_interpolation.html">ml4gw.transforms.spline_interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.transform.html">ml4gw.transforms.transform</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.transforms.waveforms</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.waveforms.WaveformProjector"><code class="docutils literal notranslate"><span class="pre">WaveformProjector</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.waveforms.WaveformSampler"><code class="docutils literal notranslate"><span class="pre">WaveformSampler</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.waveforms.html">ml4gw.transforms.waveforms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.whitening.html">ml4gw.transforms.whitening</a></li>
 </ul>
 </li>
@@ -106,9 +107,9 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
           <li class="breadcrumb-item"><a href="ml4gw.transforms.html">ml4gw.transforms</a></li>
-      <li class="breadcrumb-item active">ml4gw.transforms.waveforms</li>
+      <li class="breadcrumb-item active">ml4gw.transforms.heterodyne</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/ml4gw.transforms.waveforms.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/ml4gw.transforms.heterodyne.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -116,66 +117,124 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-ml4gw.transforms.waveforms">
-<span id="ml4gw-transforms-waveforms"></span><h1>ml4gw.transforms.waveforms<a class="headerlink" href="#module-ml4gw.transforms.waveforms" title="Link to this heading"></a></h1>
+  <section id="module-ml4gw.transforms.heterodyne">
+<span id="ml4gw-transforms-heterodyne"></span><h1>ml4gw.transforms.heterodyne<a class="headerlink" href="#module-ml4gw.transforms.heterodyne" title="Link to this heading"></a></h1>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.waveforms.WaveformProjector" title="ml4gw.transforms.waveforms.WaveformProjector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaveformProjector</span></code></a>(ifos, sample_rate)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.transforms.waveforms.WaveformSampler" title="ml4gw.transforms.waveforms.WaveformSampler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaveformSampler</span></code></a>([parameters])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.heterodyne.Heterodyne" title="ml4gw.transforms.heterodyne.Heterodyne"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Heterodyne</span></code></a>(sample_rate, kernel_length, ...)</p></td>
+<td><p>Heterodyne transform for time-series data using a single chirp mass or a grid of chirp masses.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
-<dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformProjector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.waveforms.</span></span><span class="sig-name descname"><span class="pre">WaveformProjector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ifos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformProjector" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ml4gw.transforms.heterodyne.Heterodyne">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.heterodyne.</span></span><span class="sig-name descname"><span class="pre">Heterodyne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chirp_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.heterodyne.Heterodyne" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Heterodyne transform for time-series data using a single
+chirp mass or a grid of chirp masses.</p>
+<p>This module applies a frequency-domain heterodyne
+transformation to an input timeseries by multiplying its
+Fourier transform with a bank of phase factors corresponding
+to different chirp masses. The result is a set of heterodyned
+signals.</p>
+<p>The heterodyning phase is defined as the leading-order (0PN) term
+in the post-Newtonian expansion of the inspiral phase:</p>
+<div class="math notranslate nohighlight">
+\[e^{\frac{3i}{128} (\pi \mathcal{M}_c f)^{-5/3}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{M}_c\)</span> is the chirp mass and <span class="math notranslate nohighlight">\(f\)</span> is
+the frequency.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This uses only the 0PN phase term. Higher-order PN corrections
+are not included in this heterodyne transform.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ifos</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p></li>
-<li><p><strong>sample_rate</strong> (<em>float</em>)</p></li>
+<li><p><strong>sample_rate</strong> (<em>int</em>) -- Sampling rate (Hz) of the input timeseries.</p></li>
+<li><p><strong>kernel_length</strong> (<em>int</em>) -- Duration (seconds) of the input timeseries segment.</p></li>
+<li><p><strong>chirp_mass</strong> (<em>torch.Tensor</em>) -- 1D tensor of chirp mass(es) in units of solar masses. The
+shape should be <cite>(M,)</cite> where <cite>M</cite> is the number of masses.</p></li>
+<li><p><strong>return_type</strong> (<em>Literal</em><em>[</em><em>&quot;time&quot;</em><em>, </em><em>&quot;freq&quot;</em><em>, </em><em>&quot;both&quot;</em><em>]</em>) -- <dl class="simple">
+<dt>Specifies whether to return -</dt><dd><ul>
+<li><p>&quot;time&quot;: heterodyned time-domain signals</p></li>
+<li><p>&quot;freq&quot;: heterodyned frequency-domain signals</p></li>
+<li><p>&quot;both&quot;: tuple of (time, frequency) representations</p></li>
+</ul>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Input: <cite>(B, C, T)</cite> where</dt><dd><ul>
+<li><p>B = batch size</p></li>
+<li><p>C = number of channels (e.g., detectors for GW strain)</p></li>
+<li><p>T = number of time samples (= sample_rate * kernel_length)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Frequency-domain intermediate:</dt><dd><p><cite>(B, C, F)</cite> where F = T // 2 + 1</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>After heterodyning:</dt><dd><p><cite>(B, C, M, F)</cite> where M = number of chirp masses</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Output:</dt><dd><ul>
+<li><p>If <cite>return_type=time</cite> → <cite>(B, C, M, T)</cite></p></li>
+<li><p>If <cite>return_type=freq</cite> → <cite>(B, C, M, F)</cite></p></li>
+<li><p>If <cite>return_type=both</cite> → tuple: <cite>(B, C, M, T)</cite>, <cite>(B, C, M, F)</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Heterodyned signals in the requested domain(s).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>torch.Tensor or Tuple[torch.Tensor, torch.Tensor]</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_rate</strong> (<em>int</em>)</p></li>
+<li><p><strong>kernel_length</strong> (<em>int</em>)</p></li>
+<li><p><strong>chirp_mass</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>return_type</strong> (<em>Literal</em><em>[</em><em>'time'</em><em>, </em><em>'freq'</em><em>, </em><em>'both'</em><em>]</em>)</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformProjector.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">polarizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformProjector.forward" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dec</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
-<li><p><strong>psi</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
-<li><p><strong>phi</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch'</em><em>]</em>)</p></li>
-<li><p><strong>polarizations</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch time'</em><em>]</em>)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformSampler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.waveforms.</span></span><span class="sig-name descname"><span class="pre">WaveformSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">polarizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformSampler" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dt class="sig sig-object py" id="ml4gw.transforms.heterodyne.Heterodyne.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.heterodyne.Heterodyne.forward" title="Link to this definition"></a></dt>
+<dd><p>Apply the heterodyne transformation to the input timeseries.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parameters</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch num_params'</em><em>] </em><em>| </em><em>None</em>)</p></li>
-<li><p><strong>polarizations</strong> (<em>Float</em><em>[</em><em>Tensor</em><em>, </em><em>'batch time'</em><em>]</em>)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>X</strong> (<em>torch.Tensor</em>) -- Input tensor of shape <cite>(B, C, T)</cite>.</p>
 </dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="ml4gw.transforms.waveforms.WaveformSampler.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.waveforms.WaveformSampler.forward" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>N</strong> (<em>int</em>)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=time</span></code> → <cite>(B, C, M, T)</cite></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=freq</span></code> → <cite>(B, C, M, F)</cite></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=both</span></code> → <cite>(time, freq)</cite></p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor or Tuple[torch.Tensor, torch.Tensor]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -188,8 +247,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ml4gw.transforms.transform.html" class="btn btn-neutral float-left" title="ml4gw.transforms.transform" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ml4gw.transforms.whitening.html" class="btn btn-neutral float-right" title="ml4gw.transforms.whitening" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ml4gw.transforms.decimator.html" class="btn btn-neutral float-left" title="ml4gw.transforms.decimator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.transforms.iirfilter.html" class="btn btn-neutral float-right" title="ml4gw.transforms.iirfilter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
