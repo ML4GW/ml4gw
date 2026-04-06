@@ -9,15 +9,16 @@ def test_time_output_shape():
     kernel_length = 4
     batch = 5
     channels = 2
-    num_chirp_masses = 5
+    chirp_mass = torch.exp(
+        torch.linspace(
+            torch.log(torch.tensor(1.0)), torch.log(torch.tensor(2.5)), 5
+        )
+    )
 
     heterodyne = Heterodyne(
         sample_rate=sample_rate,
         kernel_length=kernel_length,
-        num_chirp_masses=num_chirp_masses,
-        min_chirp_mass=1.0,
-        max_chirp_mass=2.5,
-        chirp_mass_distribution="log_uniform",
+        chirp_mass=chirp_mass,
         return_type="time",
     )
 
@@ -26,7 +27,7 @@ def test_time_output_shape():
     assert out.shape == (
         batch,
         channels,
-        num_chirp_masses,
+        5,
         int(sample_rate * kernel_length),
     )
 
@@ -36,22 +37,23 @@ def test_freq_output_shape():
     kernel_length = 4
     batch = 5
     channels = 2
-    num_chirp_masses = 5
+    chirp_mass = torch.exp(
+        torch.linspace(
+            torch.log(torch.tensor(1.0)), torch.log(torch.tensor(2.5)), 5
+        )
+    )
     freqs = int(sample_rate * kernel_length) // 2 + 1
 
     heterodyne = Heterodyne(
         sample_rate=sample_rate,
         kernel_length=kernel_length,
-        num_chirp_masses=num_chirp_masses,
-        min_chirp_mass=1.0,
-        max_chirp_mass=2.5,
-        chirp_mass_distribution="log_uniform",
+        chirp_mass=chirp_mass,
         return_type="freq",
     )
 
     X = torch.randn(batch, channels, int(sample_rate * kernel_length))
     out = heterodyne(X)
-    assert out.shape == (batch, channels, num_chirp_masses, freqs)
+    assert out.shape == (batch, channels, 5, freqs)
 
 
 def test_return_both():
@@ -59,16 +61,17 @@ def test_return_both():
     kernel_length = 4
     batch = 5
     channels = 2
-    num_chirp_masses = 5
+    chirp_mass = torch.exp(
+        torch.linspace(
+            torch.log(torch.tensor(1.0)), torch.log(torch.tensor(2.5)), 5
+        )
+    )
     freqs = int(sample_rate * kernel_length) // 2 + 1
 
     heterodyne = Heterodyne(
         sample_rate=sample_rate,
         kernel_length=kernel_length,
-        num_chirp_masses=num_chirp_masses,
-        min_chirp_mass=1.0,
-        max_chirp_mass=2.5,
-        chirp_mass_distribution="log_uniform",
+        chirp_mass=chirp_mass,
         return_type="both",
     )
 
@@ -77,10 +80,10 @@ def test_return_both():
     assert time.shape == (
         batch,
         channels,
-        num_chirp_masses,
+        5,
         int(sample_rate * kernel_length),
     )
-    assert freq.shape == (batch, channels, num_chirp_masses, freqs)
+    assert freq.shape == (batch, channels, 5, freqs)
 
 
 def test_single_chirp_mass():
@@ -88,7 +91,7 @@ def test_single_chirp_mass():
     kernel_length = 4
     batch = 5
     channels = 2
-    chirp_mass = 2.5
+    chirp_mass = torch.tensor([2.5])
 
     heterodyne = Heterodyne(
         sample_rate=sample_rate,
@@ -113,7 +116,7 @@ def test_invalid_return_type_init():
         Heterodyne(
             sample_rate=2048,
             kernel_length=4,
-            chirp_mass=2.5,
+            chirp_mass=torch.tensor([2.5]),
             return_type="timeseries",
         )
 

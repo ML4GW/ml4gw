@@ -1,8 +1,8 @@
 from typing import Literal
 
 import torch
-from astropy import units as u
-from astropy.constants import G, M_sun, c
+
+from ml4gw.constants import MTSUN_SI
 
 
 class Heterodyne(torch.nn.Module):
@@ -16,33 +16,26 @@ class Heterodyne(torch.nn.Module):
     to different chirp masses. The result is a set of heterodyned
     signals.
 
-    The heterodyning phase is defined as:
+    The heterodyning phase is defined as the leading-order (0PN) term
+    in the post-Newtonian expansion of the inspiral phase:
 
     .. math:: e^{\frac{3i}{128} (\pi \mathcal{M}_c f)^{-5/3}}
 
     where :math:`\mathcal{M}_c` is the chirp mass and :math:`f` is
     the frequency.
 
+    .. note::
+        This uses only the 0PN phase term. Higher-order PN corrections
+        are not included in this heterodyne transform.
+
     Args:
         sample_rate (int):
             Sampling rate (Hz) of the input timeseries.
         kernel_length (int):
             Duration (seconds) of the input timeseries segment.
-        chirp_mass (float, optional):
-            Chirp mass in units of solar masses. If provided,
-            a single chirp mass is used for heterodyning.
-        num_chirp_masses (int, optional):
-            Number of chirp mass templates. Required if
-            `chirp_mass` is not provided.
-        min_chirp_mass (float, optional):
-            Minimum chirp mass (in solar masses) in the grid.
-            Required if `chirp_mass` is not provided.
-        max_chirp_mass (float, optional):
-            Maximum chirp mass (in solar masses) in the grid.
-            Required if `chirp_mass` is not provided.
-        chirp_mass_distribution (Literal["uniform", "log_uniform"], optional):
-            Distribution used to construct the chirp mass grid.
-            Required if `chirp_mass` is not provided.
+        chirp_mass (torch.Tensor):
+            1D tensor of chirp mass(es) in units of solar masses. The
+            shape should be `(M,)` where `M` is the number of masses.
         return_type (Literal["time", "freq", "both"]):
             Specifies whether to return -
                 - "time": heterodyned time-domain signals
@@ -75,95 +68,31 @@ class Heterodyne(torch.nn.Module):
         self,
         sample_rate: int,
         kernel_length: int,
+        chirp_mass: torch.Tensor,
         return_type: Literal["time", "freq", "both"],
-        num_chirp_masses: int | None = None,
-        min_chirp_mass: float | None = None,
-        max_chirp_mass: float | None = None,
-        chirp_mass_distribution: Literal["uniform", "log_uniform"]
-        | None = None,
-        chirp_mass: float | None = None,
     ):
         super().__init__()
         self.sample_rate = sample_rate
         self.kernel_length = kernel_length
-        self.freq_grid = self._freq_grid()
+        self.chirp_mass = chirp_mass
 
-        if chirp_mass is not None:
-            self.chirp_mass_grid = torch.tensor([chirp_mass])
-        else:
-            if None in (
-                num_chirp_masses,
-                min_chirp_mass,
-                max_chirp_mass,
-                chirp_mass_distribution,
-            ):
-                raise ValueError(
-                    "For chirp mass grid, provide num_chirp_masses,"
-                    "min_chirp_mass, max_chirp_mass, and"
-                    "chirp_mass_distribution."
-                )
-            self.num_chirp_masses = num_chirp_masses
-            self.min_chirp_mass = min_chirp_mass
-            self.max_chirp_mass = max_chirp_mass
-            self.chirp_mass_distribution = chirp_mass_distribution
-            self.chirp_mass_grid = self._chirp_mass_grid()
+        self.freq_grid = torch.fft.rfftfreq(
+            self.kernel_length * self.sample_rate, d=1 / self.sample_rate
+        )
 
-        SOLAR_MASS_IN_S = (G * M_sun / c**3).to(u.s).value
         self.pi_m_f = (
             torch.pi
-            * (self.chirp_mass_grid[:, None] * SOLAR_MASS_IN_S)
+            * (self.chirp_mass[:, None] * MTSUN_SI)
             * self.freq_grid[None, :]
         )
-        self.heterodyning_phase = self._heterodyning_phase()
+
+        self.register_buffer("heterodyning_phase", self._heterodyning_phase())
+
         self.return_type = return_type
         if self.return_type not in {"time", "freq", "both"}:
             raise ValueError(
                 "Invalid return_type. Must be one of {'time', 'freq', 'both'}."
             )
-
-    def _freq_grid(self):
-        r"""
-        Compute the frequency grid for the Fourier transform
-        based on the sample rate and kernel length.
-
-        This corresponds to the frequencies for an input timeseries
-        of length ``T = sample_rate x kernel_length``.
-
-        Returns:
-            torch.Tensor:
-                1D tensor of shape `(F,)` where `F = T // 2 + 1`,
-                containing frequency bins in Hz.
-        """
-        freq_grid = torch.fft.rfftfreq(
-            self.kernel_length * self.sample_rate, d=1 / self.sample_rate
-        )
-        return freq_grid
-
-    def _chirp_mass_grid(self):
-        r"""
-        Compute the chirp mass grid, used for heterodyning, based
-        on the specified distribution.
-
-        The grid spans the interval `[min_chirp_mass, max_chirp_mass]`
-        using either linear or logarithmic spacing.
-
-        Returns:
-            torch.Tensor:
-                1D tensor of shape `(M,)` containing chirp masses.
-        """
-        if self.chirp_mass_distribution == "uniform":
-            chirp_mass_grid = torch.linspace(
-                self.min_chirp_mass, self.max_chirp_mass, self.num_chirp_masses
-            )
-        elif self.chirp_mass_distribution == "log_uniform":
-            chirp_mass_grid = torch.logspace(
-                torch.log10(torch.tensor(self.min_chirp_mass)),
-                torch.log10(torch.tensor(self.max_chirp_mass)),
-                self.num_chirp_masses,
-            )
-        else:
-            raise ValueError("Invalid chirp mass distribution")
-        return chirp_mass_grid
 
     def _heterodyning_phase(self):
         r"""
@@ -173,8 +102,8 @@ class Heterodyne(torch.nn.Module):
             torch.Tensor:
                 Tensor of shape `(M, F)` containing complex phase factors.
         """
-        heterodyning_phase = torch.exp((3j / 128) * (self.pi_m_f ** (-5 / 3)))
-        return heterodyning_phase
+        phase = torch.exp((3j / 128) * (self.pi_m_f ** (-5 / 3)))
+        return phase
 
     def forward(self, X: torch.Tensor) -> torch.Tensor | list[torch.Tensor]:
         r"""
