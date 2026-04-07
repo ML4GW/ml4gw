@@ -15,11 +15,12 @@ maintainers = [
     { name = "Will Benoit", email = "benoi090@umn.edu" },
     { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
 ]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.11,<3.15"
 classifiers = [
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Astronomy",
     "Topic :: Scientific/Engineering :: Physics",
 ]
@@ -30,7 +31,7 @@ dependencies = [
     "torch>=2.0,<2.11",
     "torchaudio>=2.0,<2.11",
     "numpy>=1.0.0",
-    "scipy>=1.9.0,<1.16",
+    "scipy>=1.9.0",
 ]
 
 [dependency-groups]
