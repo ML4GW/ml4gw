@@ -123,3 +123,4 @@ pythonVersion = "3.10"
 pythonPlatform = "Linux"
 typeCheckingMode = "basic"
 reportMissingModuleSource = false
+exclude = ["docs", "examples"]
