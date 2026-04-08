@@ -36,7 +36,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "coverage[toml]>=7.6.10,<8",
-    "pre-commit~=2.16",
+    "prek>=0.1",
     "pytest~=7.0",
     "lalsuite~=7.0",
     "bilby~=2.1",
