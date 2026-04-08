@@ -37,7 +37,6 @@ dependencies = [
 dev = [
     "coverage[toml]>=7.6.10,<8",
     "prek>=0.1",
-    "basedpyright>=1.0",
     "pytest~=7.0",
     "lalsuite~=7.0",
     "bilby~=2.1",
@@ -117,10 +116,3 @@ commands = coverage run -m pytest tests
 [tool.coverage.run]
 source = ["ml4gw"]
 relative_files = true
-
-[tool.basedpyright]
-pythonVersion = "3.10"
-pythonPlatform = "Linux"
-typeCheckingMode = "basic"
-reportMissingModuleSource = false
-exclude = ["docs", "examples", "**/.*", "**/__pycache__"]
