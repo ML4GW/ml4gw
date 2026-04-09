@@ -50,12 +50,12 @@ git diff upstream/main
 You have to be on your working branch for the diff to show correctly.
 
 Also note that there is a code formatting check as a part of the continuous integration.
-This can be done by installing the [pre-commit hook](https://pre-commit.com/)
+This can be done by installing the [pre-commit hook](https://prek.j178.dev)
 which is a part of the development dependencies, and should run with a `git commit`.
 However, it can be installed and run manually as
 ```bash
-uv run pre-commit install
-uv run pre-commit run --all-files
+uvx prek install
+uvx prek run --all-files
 ```
 which will apply the necessary formatting, or indicate the issue for you to fix
 if an automatic fix is not possible.
