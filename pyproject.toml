@@ -40,13 +40,8 @@ dev = [
     "pytest~=7.0",
     "lalsuite~=7.0",
     "bilby~=2.1",
-    "jupyter>=1.0.0,<2",
-    "gwpy~=3.0",
     "pytest-repeat>=0.9.3,<0.10",
     "h5py~=3.12",
-    "torchmetrics~=1.6.0",
-    "lightning~=2.4.0",
-    "rich>=10.2.2,<14.0",
 ]
 docs = [
     "Sphinx>5.0",
@@ -54,6 +49,11 @@ docs = [
     "myst-parser>=2.0.0,<3",
     "myst-nb>=1.3.0",
     "sphinx-autodoc-typehints>=2.0.0,<3",
+    "torchmetrics~=1.6.0",
+    "lightning~=2.4.0",
+    "rich>=10.2.2,<14.0",
+    "gwpy~=3.0",
+    "jupyter>=1.0.0,<2",
 ]
 
 [tool.uv]
@@ -88,30 +88,8 @@ ignore = ["W605", "E203", "F722"]
 # import errors in __init__ files
 per-file-ignores =  {"**/__init__.py" = ["F401", "F403"]}
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py{310,311,312}
-isolated_build = true
-
-[gh-actions]
-python =
-    3.10: py310
-    3.11: py311
-    3.12: py312
-
-[testenv:py{310,311,312}]
-deps = 
-    coverage[toml]>=7.6,<8
-    pytest>=7,<8
-    lalsuite>=7,<8
-    bilby>=2.1,<3.0
-    gwpy>=3.0,<4.0
-    numpy>=1
-    scipy>=1.9,<1.14
-pass_env = COVERAGE_FILE
-commands = coverage run -m pytest tests
-"""
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["ml4gw"]
