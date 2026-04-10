@@ -1877,23 +1877,23 @@ dependencies = [
 dev = [
     { name = "bilby" },
     { name = "coverage", extra = ["toml"] },
-    { name = "gwpy" },
     { name = "h5py" },
-    { name = "jupyter" },
     { name = "lalsuite" },
-    { name = "lightning" },
     { name = "prek" },
     { name = "pytest" },
     { name = "pytest-repeat" },
-    { name = "rich" },
-    { name = "torchmetrics" },
 ]
 docs = [
+    { name = "gwpy" },
+    { name = "jupyter" },
+    { name = "lightning" },
     { name = "myst-nb" },
     { name = "myst-parser" },
+    { name = "rich" },
     { name = "sphinx" },
     { name = "sphinx-autodoc-typehints" },
     { name = "sphinx-rtd-theme" },
+    { name = "torchmetrics" },
 ]
 
 [package.metadata]
@@ -1909,23 +1909,23 @@ requires-dist = [
 dev = [
     { name = "bilby", specifier = "~=2.1" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.6.10,<8" },
-    { name = "gwpy", specifier = "~=3.0" },
     { name = "h5py", specifier = "~=3.12" },
-    { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "lalsuite", specifier = "~=7.0" },
-    { name = "lightning", specifier = "~=2.4.0" },
     { name = "prek", specifier = ">=0.1" },
     { name = "pytest", specifier = "~=7.0" },
     { name = "pytest-repeat", specifier = ">=0.9.3,<0.10" },
-    { name = "rich", specifier = ">=10.2.2,<14.0" },
-    { name = "torchmetrics", specifier = "~=1.6.0" },
 ]
 docs = [
+    { name = "gwpy", specifier = "~=3.0" },
+    { name = "jupyter", specifier = ">=1.0.0,<2" },
+    { name = "lightning", specifier = "~=2.4.0" },
     { name = "myst-nb", specifier = ">=1.3.0" },
     { name = "myst-parser", specifier = ">=2.0.0,<3" },
+    { name = "rich", specifier = ">=10.2.2,<14.0" },
     { name = "sphinx", specifier = ">5.0" },
     { name = "sphinx-autodoc-typehints", specifier = ">=2.0.0,<3" },
     { name = "sphinx-rtd-theme", specifier = ">=2.0.0,<3" },
+    { name = "torchmetrics", specifier = "~=1.6.0" },
 ]
 
 [[package]]
