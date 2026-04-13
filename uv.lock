@@ -973,7 +973,7 @@ wheels = [
 
 [[package]]
 name = "gwpy"
-version = "3.0.13"
+version = "3.0.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy" },
@@ -992,9 +992,9 @@ dependencies = [
     { name = "scipy" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/5e/a210178c2ca8ac3ff2df25634f960077a1b537e9187321c27a101bb99d50/gwpy-3.0.13.tar.gz", hash = "sha256:59a2dc90a9c2edde3efae090303c0f8afeb6c644dae6c8fdd4d92bf0799374b1", size = 1542843, upload-time = "2025-07-02T09:30:47.183Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/05/cd/bb165e47b18cd255c1ee1fcd59802544d8de57566b449cfdaf848b69108f/gwpy-3.0.14.tar.gz", hash = "sha256:bf25d19763c9128f515144349d3f70925a8334bbd22950c01d35bb954f323f52", size = 1543294, upload-time = "2026-01-16T13:02:28.432Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/c4/ab7685faa52c8a7ec730f54880832eec8cc4d43a7bce812f7842b8616046/gwpy-3.0.13-py3-none-any.whl", hash = "sha256:a63f42424ad29b02e74c3b14830fb9e4219e1f0a47f56c22ae7cc8e701668337", size = 1395551, upload-time = "2025-07-02T09:30:45.137Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/46/c893a66bd97f08ddf4a7cfde52cc58fb8e2c83acfa915f3c02c00f0aa721/gwpy-3.0.14-py3-none-any.whl", hash = "sha256:f61ed9d4b3eba7f9f534f72f03956f158ed7f9101726b5387c29fe57ce45c77e", size = 1395825, upload-time = "2026-01-16T13:02:26.55Z" },
 ]
 
 [[package]]
@@ -1666,7 +1666,7 @@ wheels = [
 
 [[package]]
 name = "lightning"
-version = "2.4.0"
+version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fsspec", extra = ["http"] },
@@ -1679,9 +1679,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/d0/78ea244ac044cd4df15aa8294a50ff3561fb177e7e5ba788aaa542046cae/lightning-2.4.0.tar.gz", hash = "sha256:9156604cc56e4b2b603f34fa7f0fe5107375c8e6d85e74544b319a15faa9ed0e", size = 620632, upload-time = "2024-08-07T09:46:44.399Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/15/ad/a1c91a795521be252209d45fb080f28a4f1e7244d3b37121fcc6e3e43034/lightning-2.6.1.tar.gz", hash = "sha256:859104b98c61add6fe60d0c623abf749baf25f2950a66ebdfb4bd18aa7decba9", size = 663175, upload-time = "2026-01-30T14:59:13.92Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/2c/85eaf42c983b0cd81bcda5876da2c8e2a9fd347908666ea9855724369171/lightning-2.4.0-py3-none-any.whl", hash = "sha256:560163af9711cf59055c448232c473150a299089efce0d2be3cc3288082d8768", size = 810971, upload-time = "2024-08-07T09:46:39.874Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/6d/42640e15a8c34b57dc7ea922152440c0c6692214a08d5282b6e3eb46ddf4/lightning-2.6.1-py3-none-any.whl", hash = "sha256:30e1adac23004c713663928541bd72ecb1371b7abc9aff9f46b7fd2644988d30", size = 853631, upload-time = "2026-01-30T14:59:11.687Z" },
 ]
 
 [[package]]
@@ -1917,7 +1917,7 @@ dev = [
 docs = [
     { name = "gwpy", specifier = "~=3.0" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
-    { name = "lightning", specifier = "~=2.4.0" },
+    { name = "lightning", specifier = ">=2.4,<2.7" },
     { name = "myst-nb", specifier = ">=1.3.0" },
     { name = "myst-parser", specifier = ">=2.0.0,<5" },
     { name = "rich", specifier = ">=10.2.2,<16.0" },
