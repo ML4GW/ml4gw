@@ -1919,7 +1919,7 @@ docs = [
     { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "lightning", specifier = "~=2.4.0" },
     { name = "myst-nb", specifier = ">=1.3.0" },
-    { name = "myst-parser", specifier = ">=2.0.0,<3" },
+    { name = "myst-parser", specifier = ">=2.0.0,<5" },
     { name = "rich", specifier = ">=10.2.2,<16.0" },
     { name = "sphinx", specifier = ">5.0" },
     { name = "sphinx-autodoc-typehints", specifier = ">=2.0.0,<3" },
@@ -2025,7 +2025,7 @@ wheels = [
 
 [[package]]
 name = "myst-parser"
-version = "2.0.0"
+version = "4.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "docutils" },
@@ -2035,9 +2035,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "sphinx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e8/c1/48ea47b78ade0bb0281f34c9e343e3ea0c681fbc81464dbfd134e983954f/myst_parser-2.0.0.tar.gz", hash = "sha256:ea929a67a6a0b1683cdbe19b8d2e724cd7643f8aa3e7bb18dd65beac3483bead", size = 85800, upload-time = "2023-06-13T16:30:30.136Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/a5/9626ba4f73555b3735ad86247a8077d4603aa8628537687c839ab08bfe44/myst_parser-4.0.1.tar.gz", hash = "sha256:5cfea715e4f3574138aecbf7d54132296bfd72bb614d31168f48c477a830a7c4", size = 93985, upload-time = "2025-02-12T10:53:03.833Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1d/f6/6d61a023d758f488e36638076e8a4ec4447a2cdf86938cf6c60cf1c860e6/myst_parser-2.0.0-py3-none-any.whl", hash = "sha256:7c36344ae39c8e740dad7fdabf5aa6fc4897a813083c6cc9990044eb93656b14", size = 77158, upload-time = "2023-06-13T16:30:27.697Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/df/76d0321c3797b54b60fef9ec3bd6f4cfd124b9e422182156a1dd418722cf/myst_parser-4.0.1-py3-none-any.whl", hash = "sha256:9134e88959ec3b5780aedf8a99680ea242869d012e8821db3126d427edc9c95d", size = 84579, upload-time = "2025-02-12T10:53:02.078Z" },
 ]
 
 [[package]]
