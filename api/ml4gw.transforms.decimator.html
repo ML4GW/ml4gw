@@ -192,7 +192,7 @@ in each schedule segment.</p></li>
 <code class="docutils literal notranslate"><span class="pre">split=True</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>torch.Tensor or List[torch.Tensor]</p>
+<dd class="field-even"><p>torch.Tensor or list[torch.Tensor]</p>
 </dd>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -216,9 +216,11 @@ in each schedule segment.</p></li>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">decimator</span> <span class="o">=</span> <span class="n">Decimator</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">schedule</span><span class="o">=</span><span class="n">schedule</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decimator_seg</span> <span class="o">=</span> <span class="n">Decimator</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">schedule</span><span class="o">=</span><span class="n">schedule</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X_dec</span> <span class="o">=</span> <span class="n">decimator</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">X_seg</span> <span class="o">=</span> <span class="n">decimator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_seg</span> <span class="o">=</span> <span class="n">decimator_seg</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original shape:&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="go">Original shape: torch.Size([1, 1, 122880])</span>

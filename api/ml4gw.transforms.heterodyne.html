@@ -150,8 +150,8 @@ are not included in this heterodyne transform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sample_rate</strong> (<em>int</em>) -- Sampling rate (Hz) of the input timeseries.</p></li>
-<li><p><strong>kernel_length</strong> (<em>int</em>) -- Duration (seconds) of the input timeseries segment.</p></li>
+<li><p><strong>sample_rate</strong> (<em>float</em>) -- Sampling rate (Hz) of the input timeseries.</p></li>
+<li><p><strong>kernel_length</strong> (<em>float</em>) -- Duration (seconds) of the input timeseries segment.</p></li>
 <li><p><strong>chirp_mass</strong> (<em>torch.Tensor</em>) -- 1D tensor of chirp mass(es) in units of solar masses. The
 shape should be <cite>(M,)</cite> where <cite>M</cite> is the number of masses.</p></li>
 <li><p><strong>return_type</strong> (<em>Literal</em><em>[</em><em>&quot;time&quot;</em><em>, </em><em>&quot;freq&quot;</em><em>, </em><em>&quot;both&quot;</em><em>]</em>) -- <dl class="simple">
@@ -189,9 +189,9 @@ shape should be <cite>(M,)</cite> where <cite>M</cite> is the number of masses.<
 </li>
 <li><dl class="simple">
 <dt>Output:</dt><dd><ul>
-<li><p>If <cite>return_type=time</cite> → <cite>(B, C, M, T)</cite></p></li>
-<li><p>If <cite>return_type=freq</cite> → <cite>(B, C, M, F)</cite></p></li>
-<li><p>If <cite>return_type=both</cite> → tuple: <cite>(B, C, M, T)</cite>, <cite>(B, C, M, F)</cite></p></li>
+<li><p>If <cite>return_type=&quot;time&quot;</cite> → <cite>(B, C, M, T)</cite></p></li>
+<li><p>If <cite>return_type=&quot;freq&quot;</cite> → <cite>(B, C, M, F)</cite></p></li>
+<li><p>If <cite>return_type=&quot;both&quot;</cite> → tuple: <cite>(B, C, M, T)</cite>, <cite>(B, C, M, F)</cite></p></li>
 </ul>
 </dd>
 </dl>
@@ -204,12 +204,12 @@ shape should be <cite>(M,)</cite> where <cite>M</cite> is the number of masses.<
 <dd class="field-odd"><p>Heterodyned signals in the requested domain(s).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>torch.Tensor or Tuple[torch.Tensor, torch.Tensor]</p>
+<dd class="field-even"><p>torch.Tensor or tuple[torch.Tensor, torch.Tensor]</p>
 </dd>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sample_rate</strong> (<em>int</em>)</p></li>
-<li><p><strong>kernel_length</strong> (<em>int</em>)</p></li>
+<li><p><strong>sample_rate</strong> (<em>float</em>)</p></li>
+<li><p><strong>kernel_length</strong> (<em>float</em>)</p></li>
 <li><p><strong>chirp_mass</strong> (<em>Tensor</em>)</p></li>
 <li><p><strong>return_type</strong> (<em>Literal</em><em>[</em><em>'time'</em><em>, </em><em>'freq'</em><em>, </em><em>'both'</em><em>]</em>)</p></li>
 </ul>
@@ -225,14 +225,14 @@ shape should be <cite>(M,)</cite> where <cite>M</cite> is the number of masses.<
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=time</span></code> → <cite>(B, C, M, T)</cite></p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=freq</span></code> → <cite>(B, C, M, F)</cite></p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=both</span></code> → <cite>(time, freq)</cite></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=&quot;time&quot;</span></code> → <cite>(B, C, M, T)</cite></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=&quot;freq&quot;</span></code> → <cite>(B, C, M, F)</cite></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_type=&quot;both&quot;</span></code> → <cite>(time, freq)</cite></p></li>
 </ul>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>torch.Tensor or Tuple[torch.Tensor, torch.Tensor]</p>
+<dd class="field-odd"><p>torch.Tensor or tuple[torch.Tensor, torch.Tensor]</p>
 </dd>
 </dl>
 </dd></dl>
