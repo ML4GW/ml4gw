@@ -42,7 +42,7 @@ class Decimator(torch.nn.Module):
               in each schedule segment.
 
     Returns:
-        torch.Tensor or List[torch.Tensor]:
+        torch.Tensor or list[torch.Tensor]:
             The decimated timeseries, or list of decimated segments if
             ``split=True``.
 
@@ -62,9 +62,11 @@ class Decimator(torch.nn.Module):
             ... )
             >>> decimator = Decimator(sample_rate=sample_rate,
             ...     schedule=schedule)
+            >>> decimator_seg = Decimator(sample_rate=sample_rate,
+            ...     schedule=schedule, split=True)
 
             >>> X_dec = decimator(X)
-            >>> X_seg = decimator(X, split=True)
+            >>> X_seg = decimator_seg(X)
 
             >>> print("Original shape:", X.shape)
             Original shape: torch.Size([1, 1, 122880])
