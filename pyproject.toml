@@ -26,11 +26,11 @@ classifiers = [
 readme = "README.md"
 license = "GPL-3.0-or-later"
 dependencies = [
-    "jaxtyping>=0.2,<0.3",
+    "jaxtyping>=0.2,<0.4",
     "torch~=2.0",
     "torchaudio~=2.0",
     "numpy>=1.0.0",
-    "scipy>=1.9.0,<1.15",
+    "scipy>=1.9.0,<1.16",
 ]
 
 [dependency-groups]
