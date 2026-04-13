@@ -29,9 +29,9 @@ class Heterodyne(torch.nn.Module):
         are not included in this heterodyne transform.
 
     Args:
-        sample_rate (int):
+        sample_rate (float):
             Sampling rate (Hz) of the input timeseries.
-        kernel_length (int):
+        kernel_length (float):
             Duration (seconds) of the input timeseries segment.
         chirp_mass (torch.Tensor):
             1D tensor of chirp mass(es) in units of solar masses. The
@@ -55,19 +55,19 @@ class Heterodyne(torch.nn.Module):
             `(B, C, M, F)` where M = number of chirp masses
 
         - Output:
-            - If `return_type=time` → `(B, C, M, T)`
-            - If `return_type=freq` → `(B, C, M, F)`
-            - If `return_type=both` → tuple: `(B, C, M, T)`, `(B, C, M, F)`
+            - If `return_type="time"` → `(B, C, M, T)`
+            - If `return_type="freq"` → `(B, C, M, F)`
+            - If `return_type="both"` → tuple: `(B, C, M, T)`, `(B, C, M, F)`
 
     Returns:
-        torch.Tensor or Tuple[torch.Tensor, torch.Tensor]:
+        torch.Tensor or tuple[torch.Tensor, torch.Tensor]:
             Heterodyned signals in the requested domain(s).
     """
 
     def __init__(
         self,
-        sample_rate: int,
-        kernel_length: int,
+        sample_rate: float,
+        kernel_length: float,
         chirp_mass: torch.Tensor,
         return_type: Literal["time", "freq", "both"],
     ):
@@ -77,7 +77,7 @@ class Heterodyne(torch.nn.Module):
         self.chirp_mass = chirp_mass
 
         self.freq_grid = torch.fft.rfftfreq(
-            self.kernel_length * self.sample_rate, d=1 / self.sample_rate
+            int(self.kernel_length * self.sample_rate), d=1 / self.sample_rate
         )
 
         self.pi_m_f = (
@@ -105,7 +105,9 @@ class Heterodyne(torch.nn.Module):
         phase = torch.exp((3j / 128) * (self.pi_m_f ** (-5 / 3)))
         return phase
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor | list[torch.Tensor]:
+    def forward(
+        self, X: torch.Tensor
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         r"""
         Apply the heterodyne transformation to the input timeseries.
 
@@ -114,10 +116,10 @@ class Heterodyne(torch.nn.Module):
                 Input tensor of shape `(B, C, T)`.
 
         Returns:
-            torch.Tensor or Tuple[torch.Tensor, torch.Tensor]:
-                - If ``return_type=time`` → `(B, C, M, T)`
-                - If ``return_type=freq`` → `(B, C, M, F)`
-                - If ``return_type=both`` → `(time, freq)`
+            torch.Tensor or tuple[torch.Tensor, torch.Tensor]:
+                - If ``return_type="time"`` → `(B, C, M, T)`
+                - If ``return_type="freq"`` → `(B, C, M, F)`
+                - If ``return_type="both"`` → `(time, freq)`
         """
 
         X_fft = torch.fft.rfft(X, dim=-1)
