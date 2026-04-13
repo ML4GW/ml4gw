@@ -23,7 +23,7 @@ jobs:
         uv run make html
     - 
       name: Deploy pages
-      uses: JamesIves/github-pages-deploy-action@v4.2.5
+      uses: JamesIves/github-pages-deploy-action@v4.8.0
       with:
         branch: gh-pages
         folder: docs/_build/html
