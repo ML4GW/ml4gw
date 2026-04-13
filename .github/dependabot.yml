@@ -10,29 +10,28 @@ updates:
       default-days: 7
 
     groups:
-      dependencies:
-        production:
-          dependency-type: "production"
-        development:
-          dependency-type: "development"
-          exclude-patterns:
-            - "Sphinx"
-            - "sphinx*"
-            - "myst*"
-            - "torchmetrics"
-            - "lightning"
-            - "rich"
-            - "gwpy"
-            - "jupyter"
-        documentation:
-          patterns:
-            - "Sphinx"
-            - "sphinx*"
-            - "myst*"
-            - "torchmetrics"
-            - "lightning"
-            - "rich"
-            - "gwpy"
-            - "jupyter"
+      production:
+        dependency-type: "production"
+      development:
+        dependency-type: "development"
+        exclude-patterns:
+          - "Sphinx"
+          - "sphinx*"
+          - "myst*"
+          - "torchmetrics"
+          - "lightning"
+          - "rich"
+          - "gwpy"
+          - "jupyter"
+      documentation:
+        patterns:
+          - "Sphinx"
+          - "sphinx*"
+          - "myst*"
+          - "torchmetrics"
+          - "lightning"
+          - "rich"
+          - "gwpy"
+          - "jupyter"
 
     versioning-strategy: increase-if-necessary
