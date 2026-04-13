@@ -5,27 +5,20 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-
     cooldown:
       default-days: 7
-
     groups:
       production:
-        dependency-type: "production"
-      development:
-        dependency-type: "development"
-        exclude-patterns:
-          - "Sphinx"
-          - "sphinx*"
-          - "myst*"
-          - "torchmetrics"
-          - "lightning"
-          - "rich"
-          - "gwpy"
-          - "jupyter"
+        patterns:
+          - "jaxtyping"
+          - "torch"
+          - "torchaudio"
+          - "numpy"
+          - "scipy"
+      
       documentation:
         patterns:
-          - "Sphinx"
+          - "Sphinx*"
           - "sphinx*"
           - "myst*"
           - "torchmetrics"
@@ -34,4 +27,19 @@ updates:
           - "gwpy"
           - "jupyter"
 
-    versioning-strategy: increase-if-necessary
+      development:
+        patterns: ["*"]
+        exclude-patterns:
+          - "jaxtyping"
+          - "torch"
+          - "torchaudio"
+          - "numpy"
+          - "scipy"
+          - "Sphinx*"
+          - "sphinx*"
+          - "myst*"
+          - "torchmetrics"
+          - "lightning"
+          - "rich"
+          - "gwpy"
+          - "jupyter"
