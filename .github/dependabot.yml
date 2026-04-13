@@ -3,8 +3,36 @@ updates:
   - package-ecosystem: "uv"
     directory: "/"
     schedule:
-      interval: "monthly"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "monthly"
+      interval: "weekly"
+      day: "monday"
+
+    cooldown:
+      default-days: 7
+
+    groups:
+      dependencies:
+        production:
+          dependency-type: "production"
+        development:
+          dependency-type: "development"
+          exclude-patterns:
+            - "Sphinx"
+            - "sphinx*"
+            - "myst*"
+            - "torchmetrics"
+            - "lightning"
+            - "rich"
+            - "gwpy"
+            - "jupyter"
+        documentation:
+          patterns:
+            - "Sphinx"
+            - "sphinx*"
+            - "myst*"
+            - "torchmetrics"
+            - "lightning"
+            - "rich"
+            - "gwpy"
+            - "jupyter"
+
+    versioning-strategy: increase-if-necessary
