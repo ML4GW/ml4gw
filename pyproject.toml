@@ -51,7 +51,7 @@ docs = [
     "sphinx-autodoc-typehints>=2.0.0,<3",
     "torchmetrics~=1.6.0",
     "lightning~=2.4.0",
-    "rich>=10.2.2,<14.0",
+    "rich>=10.2.2,<16.0",
     "gwpy~=3.0",
     "jupyter>=1.0.0,<2",
 ]
