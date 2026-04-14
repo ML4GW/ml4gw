@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import torch
 from lalinference import BurstSineGaussian
+from lalsimulation import SimBurstSineGaussian
 
 from ml4gw.waveforms import SineGaussian
 
@@ -91,6 +92,65 @@ def test_sine_gaussian(
         len(cross) // 2 + n_samples // 2 + 1,
     )
     cross, plus = cross[start:stop], plus[start:stop]
+
+    assert np.allclose(
+        cross, hcross, atol=1e-24
+    )  # factor of 10 smaller than ligo noise floor
+    assert np.allclose(
+        plus, hplus, atol=1e-24
+    )  # factor of 10 smaller than ligo noise floor
+
+
+def test_sine_gaussian_sim(
+    duration,
+    sample_rate,
+    quality,
+    frequency,
+    hrss,
+    phase,
+    eccentricity,
+):
+    sine_gaussian = SineGaussian(sample_rate, duration)
+
+    # calculate waveforms with torch implementation
+    cross, plus = sine_gaussian(quality, frequency, hrss, phase, eccentricity)
+    cross, plus = cross[0].numpy(), plus[0].numpy()
+    ml4gw_samples = len(cross)
+
+    quality = quality.item()
+    frequency = frequency.item()
+    phase = phase.item()
+    eccentricity = eccentricity.item()
+    hrss = hrss.item()
+
+    # calculate waveform with lalsimulation
+    hplus, hcross = SimBurstSineGaussian(
+        Q=quality,
+        centre_frequency=frequency,
+        hrss=hrss,
+        eccentricity=eccentricity,
+        phase=phase,
+        delta_t=1 / sample_rate,
+    )
+    hplus = hplus.data.data
+    hcross = hcross.data.data
+
+    # compare cross and plus polarizations
+    lal_samples = len(hplus)
+
+    if lal_samples < ml4gw_samples:
+
+        start, stop = (
+            len(cross) // 2 - lal_samples // 2,
+            len(cross) // 2 + lal_samples // 2 + 1,
+        )
+        cross, plus = cross[start:stop], plus[start:stop]
+    else:
+        start, stop = (
+            len(hplus) // 2 - ml4gw_samples // 2,
+            len(hplus) // 2 + ml4gw_samples // 2,
+        )
+        hcross, hplus = hcross[start:stop], hplus[start:stop]
 
     assert np.allclose(
         cross, hcross, atol=1e-24
