@@ -17,8 +17,8 @@ from jaxtyping import Float
 from torch import Tensor
 
 from .types import (
+    ASDTensor,
     FrequencySeries1to3d,
-    PSDTensor,
     TimeSeries1to3d,
     WaveformTensor,
 )
@@ -152,7 +152,7 @@ def fast_spectral_density(
             of ``y`` will have its CSD calculated with the corresponding
             channel in ``x`` across _all_ of ``x``'s batch elements.
     Returns:
-        Tensor of power spectral densities of ``x`` or its cross spectral
+        Tensor of amplitude spectral densities of ``x`` or its cross spectral
         density with the timeseries in ``y``.
     """
 
@@ -243,7 +243,8 @@ def fast_spectral_density(
         # if we still haven't expanded the batch dimension
         # back out, do so now
         fft = fft.reshape(batch_size, num_channels, -1)
-    return fft
+    # CSD is complex so don't take sqrt in that case
+    return torch.sqrt(fft).float() if y is None else fft
 
 
 def spectral_density(
@@ -255,7 +256,7 @@ def spectral_density(
     average: str = "median",
 ) -> FrequencySeries1to3d:
     """
-    Compute the power spectral density of a multichannel
+    Compute the amplitude spectral density of a multichannel
     timeseries or a batch of multichannel timeseries.
     This implementation is exact for all frequency bins, but
     slower than the fast implementation.
@@ -340,24 +341,24 @@ def spectral_density(
     fft = fft.reshape(*reshape)
 
     if average == "mean":
-        return fft.mean(axis=-2)
+        return torch.sqrt(fft.mean(axis=-2)).float()
     else:
-        return median(fft, -2)
+        return torch.sqrt(median(fft, -2)).float()
 
 
-def truncate_inverse_power_spectrum(
-    psd: PSDTensor,
+def truncate_inverse_amplitude_spectrum(
+    asd: ASDTensor,
     fduration: Float[Tensor, " time"] | float,
     sample_rate: float,
     highpass: float | None = None,
     lowpass: float | None = None,
-) -> PSDTensor:
+) -> ASDTensor:
     """
     Truncate the length of the time domain response
     of a whitening filter built using the specified
-    ``psd`` so that it has maximum length ``fduration``
+    ``asd`` so that it has maximum length ``fduration``
     seconds. This is meant to mitigate the impact
-    of sharp features in the background PSD causing
+    of sharp features in the background ASD causing
     time domain responses longer than the segments
     to which the whitening filter will be applied.
 
@@ -365,13 +366,13 @@ def truncate_inverse_power_spectrum(
     `here <https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8>`_.
 
     Args:
-        psd:
-            The one-sided power spectral density used
+        asd:
+            The one-sided amplitude spectral density used
             to construct a whitening filter.
         fduration:
             Desired length in seconds of the time domain
             response of a whitening filter built using
-            this PSD, or a window of this length to taper
+            this ASD, or a window of this length to taper
             the edges of the time domain response of the
             filter. If passed as a float, a Hann window
             of this length will be used.
@@ -388,17 +389,17 @@ def truncate_inverse_power_spectrum(
             of all frequencies above this value in Hz. If left
             as ``None``, no lowpass filtering will be applied.
     Returns:
-        The PSD with its time domain response truncated
+        The ASD with its time domain response truncated
             to ``fduration`` and any filtered frequencies
             tapered.
     """  # noqa: E501
 
-    num_freqs = psd.size(-1)
+    num_freqs = asd.size(-1)
     N = (num_freqs - 1) * 2
 
     # use the inverse of the ASD as the
     # impulse response function
-    inv_asd = 1 / psd**0.5
+    inv_asd = 1 / asd
 
     # zero out frequencies if we want the filter
     # to perform highpass/lowpass filtering
@@ -422,8 +423,7 @@ def truncate_inverse_power_spectrum(
         window = fduration
     else:
         pad = int(fduration * sample_rate / 2)
-        window = torch.hann_window(2 * pad, dtype=torch.float64)
-        window = window.to(q.device)
+        window = torch.hann_window(2 * pad, dtype=q.dtype, device=q.device)
 
     # 0 out anything else between the tapering regions
     q[:, :, :pad] *= window[-pad:]
@@ -431,34 +431,30 @@ def truncate_inverse_power_spectrum(
     if 2 * pad < q.size(-1):
         q[:, :, pad : q.size(-1) - pad] = 0
 
-    # convert back to the frequency domain
-    # to build the desired PSD
+    # convert back to the frequency domain to build the truncated ASD
     inv_asd = torch.fft.rfft(q, n=N, norm="forward", dim=-1)
-    inv_psd = inv_asd * inv_asd.conj()
-    psd = 1 / inv_psd.abs()
-    return psd / 2
+    return 1 / (inv_asd.abs() * 2**0.5)
 
 
-def normalize_by_psd(
+def normalize_by_asd(
     X: WaveformTensor,
-    psd: PSDTensor,
+    asd: ASDTensor,
     sample_rate: float,
     pad: int,
     crop: bool = True,
 ):
     # compute the FFT of the section we want to whiten
     # and divide it by the ASD of the background section.
-    # If the ASD of any background bin hit inf, set the
-    # corresponding bin to 0
+    # If any background bin hit inf, set the corresponding bin to 0
     X = X - X.mean(-1, keepdims=True)
-    X_tilde = torch.fft.rfft(X.double(), norm="forward", dim=-1)
-    X_tilde = X_tilde / psd**0.5
+    X_tilde = torch.fft.rfft(X, norm="forward", dim=-1)
+    X_tilde = X_tilde / asd
     X_tilde[torch.isnan(X_tilde)] = 0
 
     # convert back to the time domain and normalize
     # TODO: what's this normalization factor?
     X = torch.fft.irfft(X_tilde, n=X.shape[-1], norm="forward", dim=-1)
-    X = X.float() / sample_rate**0.5
+    X = X / sample_rate**0.5
 
     # slice off corrupted data at edges of kernel
     if crop:
@@ -468,7 +464,7 @@ def normalize_by_psd(
 
 def whiten(
     X: WaveformTensor,
-    psd: PSDTensor,
+    asd: ASDTensor,
     fduration: Float[Tensor, " time"] | float,
     sample_rate: float,
     highpass: float | None = None,
@@ -477,28 +473,28 @@ def whiten(
 ) -> WaveformTensor:
     """
     Whiten a batch of timeseries using the specified
-    background one-sided power spectral densities (PSDs),
+    background one-sided amplitude spectral densities (ASDs),
     modified to have the desired time domain response length
     ``fduration`` and possibly to highpass/lowpass filter.
 
     Args:
         X:
             batch of multichannel timeseries to whiten
-        psd:
-            PSDs use to whiten the data. The frequency
+        asd:
+            ASDs used to whiten the data. The frequency
             response of the whitening filter will be roughly
-            the inverse of the square root of this PSD, ensuring
-            that data from the same distribution will have
-            approximately uniform power after whitening.
+            the inverse of this ASD, ensuring that data from
+            the same distribution will have approximately uniform
+            power after whitening.
             If 2D, each batch element in ``X`` will be whitened
-            using the same PSDs. If 3D, each batch element will
-            be whitened by the PSDs contained along the 0th
-            dimenion of ``psd``, and so the first two dimensions
-            of ``X`` and ``psd`` should match.
+            using the same ASDs. If 3D, each batch element will
+            be whitened by the ASDs contained along the 0th
+            dimension of ``asd``, and so the first two dimensions
+            of ``X`` and ``asd`` should match.
         fduration:
             Desired length in seconds of the time domain
             response of a whitening filter built using
-            this PSD, or a window of this length to taper
+            this ASD, or a window of this length to taper
             the edges of the time domain response of the
             filter. If passed as a float, a Hann window
             of this length will be used. Moreover, half of
@@ -541,28 +537,28 @@ def whiten(
             f"padded samples {2 * pad}"
         )
 
-    # normalize the number of expected dimensions in the PSD
-    while psd.ndim < 3:
-        psd = psd[None]
+    # normalize the number of expected dimensions in the ASD
+    while asd.ndim < 3:
+        asd = asd[None]
 
-    # possibly interpolate our PSD to match the number
+    # possibly interpolate our ASD to match the number
     # of frequency bins we expect to get from X
     num_freqs = N // 2 + 1
-    if psd.size(-1) != num_freqs:
+    if asd.size(-1) != num_freqs:
         # TODO: does there need to be any rescaling to
-        # keep the integral of the PSD constant?
-        psd = torch.nn.functional.interpolate(
-            psd, size=(num_freqs,), mode="linear"
+        # keep the integral of the ASD constant?
+        asd = torch.nn.functional.interpolate(
+            asd, size=(num_freqs,), mode="linear"
         )
 
     # truncate it to have the desired
     # time domain response length
-    psd = truncate_inverse_power_spectrum(
-        psd,
+    asd = truncate_inverse_amplitude_spectrum(
+        asd,
         fduration,
         sample_rate,
         highpass,
         lowpass,
     )
 
-    return normalize_by_psd(X, psd, sample_rate, pad, crop)
+    return normalize_by_asd(X, asd, sample_rate, pad, crop)

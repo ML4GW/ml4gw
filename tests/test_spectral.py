@@ -113,7 +113,7 @@ def test_fast_spectral_density(
     # that components higher than the first two are correct
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    compare_against_numpy(torch_result, scipy_result, num_bad=1)
+    compare_against_numpy(torch_result, np.sqrt(scipy_result), num_bad=1)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -324,7 +324,7 @@ def test_spectral_density(
         window=signal.windows.hann(nperseg, False),
         average=average,
     )
-    compare_against_numpy(torch_result, scipy_result, num_bad=1)
+    compare_against_numpy(torch_result, np.sqrt(scipy_result), num_bad=1)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -402,7 +402,7 @@ def test_whiten(
     background = mean + std * torch.randn(*background_shape)
     nperseg = int(fftlength * sample_rate)
     window = torch.hann_window(nperseg)
-    psd = spectral_density(
+    asd = spectral_density(
         background,
         nperseg=nperseg,
         nstride=int(fftlength * sample_rate / 2),
@@ -413,12 +413,12 @@ def test_whiten(
     with pytest.raises(ValueError, match=r"Not enough timeseries samples*"):
         failure_size = int(fduration * sample_rate)
         X = torch.randn(batch_size, num_channels, failure_size)
-        whiten(X, psd, fduration, sample_rate, highpass, lowpass)
+        whiten(X, asd, fduration, sample_rate, highpass, lowpass)
     size = int(whiten_length * sample_rate)
     filter_size = int(fduration * sample_rate)
     X = mean + std * torch.randn(batch_size, num_channels, size)
 
-    whitened = whiten(X, psd, fduration, sample_rate, highpass, lowpass)
+    whitened = whiten(X, asd, fduration, sample_rate, highpass, lowpass)
     expected_size = size - filter_size
     assert whitened.shape == (batch_size, num_channels, expected_size)
     validate_whitened(
@@ -427,7 +427,7 @@ def test_whiten(
 
     # Check that not cropping produces the expected values and shape
     whitened_uncropped = whiten(
-        X, psd, fduration, sample_rate, highpass, lowpass, crop=False
+        X, asd, fduration, sample_rate, highpass, lowpass, crop=False
     )
     pad = filter_size // 2
     assert torch.all(whitened_uncropped[..., pad:-pad] == whitened)
@@ -440,7 +440,7 @@ def test_whiten(
     glitch = torch.Tensor(signal.gausspulse(t, fc=128, bw=2))
     glitch = 10 * std * glitch
     inj = X + glitch
-    whitened = whiten(inj, psd, fduration, sample_rate, highpass, lowpass)
+    whitened = whiten(inj, asd, fduration, sample_rate, highpass, lowpass)
     maxs = whitened.argmax(-1) / sample_rate + fduration / 2
     target = torch.ones_like(maxs) * whiten_length / 2
     torch.testing.assert_close(maxs, target, rtol=0, atol=0.01)

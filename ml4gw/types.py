@@ -7,7 +7,7 @@ from jaxtyping import Float
 from torch import Tensor
 
 WaveformTensor = Float[Tensor, "batch num_ifos time"]
-PSDTensor = Float[Tensor, "num_ifos frequency"]
+ASDTensor = Float[Tensor, "num_ifos frequency"]
 BatchTensor = Float[Tensor, "batch"]
 VectorGeometry = Float[Tensor, "batch space"]
 TensorGeometry = Float[Tensor, "batch space space"]

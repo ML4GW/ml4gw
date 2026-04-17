@@ -36,20 +36,20 @@ class WhitenModuleTest:
     def lowpass(self, request):
         return request.param
 
-    def get_psds(self, background, fftlength):
+    def get_asds(self, background, fftlength):
         nperseg = int(fftlength * self.sample_rate)
         window = torch.hann_window(nperseg)
-        psds = []
+        asds = []
         for bg in background:
-            psd = spectral_density(
+            asd = spectral_density(
                 bg,
                 nperseg,
                 nperseg // 2,
                 window,
                 scale=1 / (self.sample_rate * (window**2).sum()),
             )
-            psds.append(psd)
-        return psds
+            asds.append(asd)
+        return asds
 
 
 class TestWhiten(WhitenModuleTest):
@@ -65,7 +65,7 @@ class TestWhiten(WhitenModuleTest):
     def test_forward(
         self, transform, X, background, highpass, lowpass, validate_whitened
     ):
-        background = self.get_psds(background, 2)
+        background = self.get_asds(background, 2)
         background = torch.stack(background)
         whitened = transform(X, background)
         filter_size = self.fduration * self.sample_rate
@@ -98,8 +98,8 @@ class TestFixedWhiten(WhitenModuleTest):
         # ensure parameters have been initialized
         # with the right shapes and to 0 valuess
         num_freqs = (8192 * 64) // 2 + 1
-        assert transform.psd.shape == (self.num_channels, num_freqs)
-        assert (transform.psd == 0).all().item()
+        assert transform.asd.shape == (self.num_channels, num_freqs)
+        assert (transform.asd == 0).all().item()
 
         assert transform.fduration.shape == (1,)
         assert (transform.fduration == 0).item()
@@ -125,7 +125,7 @@ class TestFixedWhiten(WhitenModuleTest):
         transform.fit(
             2, *background, fftlength=2, highpass=highpass, lowpass=lowpass
         )
-        assert (transform.psd != 0).all().item()
+        assert (transform.asd != 0).all().item()
         assert (transform.fduration == 2).item()
 
         # Check that an error is raised for an unexpected input shape
@@ -151,26 +151,26 @@ class TestFixedWhiten(WhitenModuleTest):
         self, transform, background, X, highpass, lowpass, validate_whitened
     ):
         # first check if fftlength == self.whiten_length,
-        # the fit psd should match the psds used to fit
+        # the fit asd should match the asds used to fit
         # almost exactly if we don't use inverse spectrum
         # truncation
-        psds = self.get_psds(background, self.whiten_length)
+        asds = self.get_asds(background, self.whiten_length)
         with patch(
-            "ml4gw.transforms.whitening.spectral.truncate_inverse_power_spectrum",
+            "ml4gw.transforms.whitening.spectral.truncate_inverse_amplitude_spectrum",  # noqa: E501
             new=lambda x, _, __, ___, ____: x,
         ):
-            transform.fit(2, *psds)
+            transform.fit(2, *asds)
         assert (transform.fduration == 2).item()
-        for i, psd in enumerate(psds):
+        for i, asd in enumerate(asds):
             torch.testing.assert_close(
-                psd, transform.psd[i], rtol=1e-6, atol=0.0, check_dtype=False
+                asd, transform.asd[i], rtol=1e-6, atol=0.0, check_dtype=False
             )
 
         # now do a fit with a more realistic
         # fftlength, fduration, highpass, and lowpass
-        psds = self.get_psds(background, 2)
-        transform.fit(2, *psds, highpass=highpass, lowpass=lowpass)
-        assert (transform.psd != 0).all().item()
+        asds = self.get_asds(background, 2)
+        transform.fit(2, *asds, highpass=highpass, lowpass=lowpass)
+        assert (transform.asd != 0).all().item()
         assert (transform.fduration == 2).item()
 
         # now whiten a dummy tensor and make sure
@@ -203,4 +203,4 @@ class TestFixedWhiten(WhitenModuleTest):
         assert fresh.built
 
         assert (fresh.fduration == 2).item()
-        assert (fresh.psd == transform.psd).all().item()
+        assert (fresh.asd == transform.asd).all().item()

@@ -316,7 +316,7 @@ def test_compute_ifo_snr(_get_waveforms_from_lalsimulation, highpass, lowpass):
     snr_hc_lal = lalsimulation.MeasureSNR(hc, psd, lal_highpass, lal_lowpass)
 
     backgrounds = psd.data.data[: len(hp.data.data) // 2 + 1]
-    backgrounds = torch.from_numpy(backgrounds)
+    backgrounds = torch.sqrt(torch.from_numpy(backgrounds))
     hp_torch = torch.from_numpy(hp.data.data)
     hc_torch = torch.from_numpy(hc.data.data)
 
@@ -367,7 +367,7 @@ def test_compute_ifo_snr(_get_waveforms_from_lalsimulation, highpass, lowpass):
     psd = _get_O4_psd(sample_rate, hp.data.data.shape[-1] * 2)
     num_freqs = len(psd.data.data) // 2 + 1
     backgrounds = psd.data.data[:num_freqs]
-    backgrounds = torch.from_numpy(backgrounds)
+    backgrounds = torch.sqrt(torch.from_numpy(backgrounds))
 
     snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
         hp_torch,
@@ -417,7 +417,10 @@ def test_compute_network_snr(_get_waveforms_from_lalsimulation):
     background_2 = psd_2.data.data[: len(hp.data.data) // 2 + 1]
 
     backgrounds = torch.stack(
-        (torch.from_numpy(background_1), torch.from_numpy(background_2))
+        (
+            torch.sqrt(torch.from_numpy(background_1)),
+            torch.sqrt(torch.from_numpy(background_2)),
+        )
     )
     hp_torch = torch.from_numpy(hp.data.data)
     # repeat same signal in two backgrounds
@@ -450,7 +453,10 @@ def test_reweight_snrs(_get_waveforms_from_lalsimulation):
     background_2 = psd_2.data.data[: len(hp.data.data) // 2 + 1]
 
     backgrounds = torch.stack(
-        (torch.from_numpy(background_1), torch.from_numpy(background_2))
+        (
+            torch.sqrt(torch.from_numpy(background_1)),
+            torch.sqrt(torch.from_numpy(background_2)),
+        )
     )
     hp_torch = torch.from_numpy(hp.data.data)
     # repeat same signal in two backgrounds
