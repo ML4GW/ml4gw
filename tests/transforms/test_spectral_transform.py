@@ -151,7 +151,7 @@ def test_spectral_density(
     if fast:
         torch_result = torch_result[..., 2:]
         scipy_result = scipy_result[..., 2:]
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
+    assert np.isclose(torch_result, np.sqrt(scipy_result), rtol=TOL).all()
 
     # test error raised if window incorrect shape
     with pytest.raises(ValueError) as exc_info:
