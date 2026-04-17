@@ -53,13 +53,13 @@ class SnrRescaler(FittableSpectralTransform):
             )
 
         num_freqs = self.background.size(1)
-        psds = []
+        asds = []
         for x in background:
-            psd = self.normalize_psd(
+            asd = self.normalize_asd(
                 x, self.sample_rate, num_freqs, fftlength, overlap
             )
-            psds.append(psd)
-        background = torch.stack(psds)
+            asds.append(asd)
+        background = torch.stack(asds)
         super().build(background=background)
 
     def forward(

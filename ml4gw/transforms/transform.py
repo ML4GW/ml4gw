@@ -40,7 +40,7 @@ class FittableTransform(torch.nn.Module):
 
 
 class FittableSpectralTransform(FittableTransform):
-    def normalize_psd(
+    def normalize_asd(
         self,
         x: TimeSeries1to3d,
         sample_rate: float,
