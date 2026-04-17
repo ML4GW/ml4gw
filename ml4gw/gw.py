@@ -15,10 +15,10 @@ from torch import Tensor
 
 from .constants import C
 from .types import (
+    ASDTensor,
     BatchTensor,
     NetworkDetectorTensors,
     NetworkVertices,
-    PSDTensor,
     TensorGeometry,
     VectorGeometry,
     WaveformTensor,
@@ -283,7 +283,7 @@ def get_ifo_geometry(
 
 def compute_ifo_snr(
     responses: WaveformTensor,
-    psd: PSDTensor,
+    asd: ASDTensor,
     sample_rate: float,
     highpass: float | Float[Tensor, " frequency"] | None = None,
     lowpass: float | Float[Tensor, " frequency"] | None = None,
@@ -315,19 +315,19 @@ def compute_ifo_snr(
         responses:
             A batch of interferometer responses to a batch of
             raw gravitational waveforms
-        psd:
-            The one-sided power spectral density of the background
+        asd:
+            The one-sided amplitude spectral density of the background
             noise at each interferometer to which a response
             in ``responses`` has been calculated. If 2D, each row of
-            ``psd`` will be assumed to be the background PSD for each
+            ``asd`` will be assumed to be the background ASD for each
             channel of _every_ batch element in ``responses``. If 3D,
-            this should contain a background PSD for each channel
+            this should contain a background ASD for each channel
             of each element in ``responses``, and therefore the first
-            two dimensions of ``psd`` and ``responses`` should match.
+            two dimensions of ``asd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
-            match the frequency resolution of the provided PSDs.
+            match the frequency resolution of the provided ASDs.
         highpass:
             The minimum frequency above which to compute the SNR.
             If a tensor is provided, it will be assumed to be a
@@ -347,25 +347,18 @@ def compute_ifo_snr(
     """  # noqa E501
 
     # TODO: should we do windowing here?
-    # compute frequency power, upsampling precision so that
-    # computing absolute value doesn't accidentally zero some
-    # values out.
-    fft = torch.fft.rfft(responses, axis=-1).type(torch.complex128)
-    fft = fft.abs() / sample_rate
+    fft = torch.fft.rfft(responses, axis=-1).abs() / sample_rate
 
-    # interpolate the PSD to match the shape of
+    # interpolate the ASD to match the shape of
     # our FFT'd strain
-    while psd.ndim < 3:
-        psd = psd[None]
-    if psd.size(-1) != fft.size(-1):
-        psd = torch.nn.functional.interpolate(
-            psd, size=(fft.size(-1)), mode="linear"
+    while asd.ndim < 3:
+        asd = asd[None]
+    if asd.size(-1) != fft.size(-1):
+        asd = torch.nn.functional.interpolate(
+            asd, size=(fft.size(-1)), mode="linear"
         )
 
-    # divide by background asd, then go back to FP32 precision
-    # and square now that values are back in a reasonable range
-    integrand = fft / (psd**0.5)
-    integrand = integrand.type(torch.float32) ** 2
+    integrand = (fft / asd) ** 2
 
     # mask out frequency components if a critical
     # frequency or frequency mask was provided
@@ -414,7 +407,7 @@ def compute_ifo_snr(
 
 def compute_network_snr(
     responses: WaveformTensor,
-    psd: PSDTensor,
+    asd: ASDTensor,
     sample_rate: float,
     highpass: float | Float[Tensor, " frequency"] | None = None,
     lowpass: float | Float[Tensor, " frequency"] | None = None,
@@ -436,19 +429,19 @@ def compute_network_snr(
         responses:
             A batch of interferometer responses to a batch of
             raw gravitational waveforms
-        backgrounds:
-            The one-sided power spectral density of the background
+        asd:
+            The one-sided amplitude spectral density of the background
             noise at each interferometer to which a response
             in ``responses`` has been calculated. If 2D, each row of
-            ``psd`` will be assumed to be the background PSD for each
+            ``asd`` will be assumed to be the background ASD for each
             channel of **every** batch element in ``responses``. If 3D,
-            this should contain a background PSD for each channel
+            this should contain a background ASD for each channel
             of each element in ``responses``, and therefore the first
-            two dimensions of ``psd`` and ``responses`` should match.
+            two dimensions of ``asd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
-            match the frequency resolution of the provided PSDs.
+            match the frequency resolution of the provided ASDs.
         highpass:
             The minimum frequency above which to compute the SNR.
             If a tensor is provided, it will be assumed to be a
@@ -466,7 +459,7 @@ def compute_network_snr(
     Returns:
         Batch of SNRs for each waveform across the interferometer network
     """
-    snrs = compute_ifo_snr(responses, psd, sample_rate, highpass, lowpass)
+    snrs = compute_ifo_snr(responses, asd, sample_rate, highpass, lowpass)
     snrs = snrs**2
     return snrs.sum(axis=-1) ** 0.5
 
@@ -474,7 +467,7 @@ def compute_network_snr(
 def reweight_snrs(
     responses: WaveformTensor,
     target_snrs: float | BatchTensor,
-    psd: PSDTensor,
+    asd: ASDTensor,
     sample_rate: float,
     highpass: float | Float[Tensor, " frequency"] | None = None,
     lowpass: float | Float[Tensor, " frequency"] | None = None,
@@ -488,19 +481,19 @@ def reweight_snrs(
         target_snrs:
             Either a tensor of desired SNRs for each waveform,
             or a single SNR to which all waveforms should be scaled.
-        psd:
-            The one-sided power spectral density of the background
+        asd:
+            The one-sided amplitude spectral density of the background
             noise at each interferometer to which a response
             in ``responses`` has been calculated. If 2D, each row of
-            ``psd`` will be assumed to be the background PSD for each
+            ``asd`` will be assumed to be the background ASD for each
             channel of **every** batch element in ``responses``. If 3D,
-            this should contain a background PSD for each channel
+            this should contain a background ASD for each channel
             of each element in ``responses``, and therefore the first
-            two dimensions of ``psd`` and ``responses`` should match.
+            two dimensions of ``asd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
-            match the frequency resolution of the provided PSDs.
+            match the frequency resolution of the provided ASDs.
         highpass:
             The minimum frequency above which to compute the SNR.
             If a tensor is provided, it will be assumed to be a
@@ -519,6 +512,6 @@ def reweight_snrs(
         Rescaled interferometer responses
     """
 
-    snrs = compute_network_snr(responses, psd, sample_rate, highpass, lowpass)
+    snrs = compute_network_snr(responses, asd, sample_rate, highpass, lowpass)
     weights = target_snrs / snrs
     return responses * weights[:, None, None]
