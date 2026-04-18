@@ -186,3 +186,17 @@ class TestHdf5TimeSeriesDataset:
         for x in dataset:
             assert x.shape == (128, 2, kernel_size)
         assert len(dataset) == 10
+
+    def test_num_files_per_batch_too_large(
+        self, fnames, channels, kernel_size, batch_size, batches_per_epoch
+    ):
+        with pytest.raises(ValueError, match="Number of files per batch"):
+            Hdf5TimeSeriesDataset(
+                sorted(fnames.keys()),
+                channels,
+                kernel_size,
+                batch_size,
+                batches_per_epoch,
+                coincident=True,
+                num_files_per_batch=len(fnames) + 1,
+            )

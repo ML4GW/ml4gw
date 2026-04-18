@@ -39,6 +39,7 @@ def test_log_normal(seed_everything):
     sampler = distributions.LogNormal(mu, sigma, low=0)
     samples = sampler.sample((10,))
     assert len(samples) == 10
+    assert sampler.support() is not None
     assert (samples > 0).all()
 
     # check that the mean is roughly correct
