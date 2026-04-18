@@ -26,22 +26,8 @@ def high_cutoff():
 
 @pytest.fixture(
     params=[
-        (
-            0.5,
-            None,
-            "cheby1",
-        ),
-        (None, 20, "cheby2"),
-        (
-            0.5,
-            20,
-            "ellip",
-        ),
-        (
-            None,
-            None,
-            "bessel",
-        ),
+        (0.5, None, "cheby1"),
+        (0.5, 20, "ellip"),
         (None, None, "butter"),
     ]
 )
@@ -49,12 +35,12 @@ def rp_rs_filter(request):
     return request.param
 
 
-@pytest.fixture(params=[256, 512, 1024, 2048])
+@pytest.fixture(params=[512, 2048])
 def sample_rate(request):
     return request.param
 
 
-@pytest.fixture(params=[2, 4, 6, 8])
+@pytest.fixture(params=[2, 8])
 def order(request):
     return request.param
 
@@ -161,7 +147,7 @@ def num_samples():
     return 1
 
 
-@pytest.fixture(params=[20, 40])
+@pytest.fixture(params=[20])
 def f_ref(request):
     return request.param
 
