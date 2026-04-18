@@ -358,3 +358,19 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
                 stop = start + kernel_size
 
             assert (channel == np.arange(start, stop)).all()
+
+
+def test_sample_kernels_1d_return_idx():
+    x = torch.arange(100, dtype=torch.float)
+    kernel_size = 10
+    result, idx = slicing.sample_kernels(x, kernel_size, N=5, return_idx=True)
+    assert result.shape == (5, kernel_size)
+    assert idx.shape == (5,)
+
+
+def test_sample_kernels_2d_return_idx():
+    X = torch.randn(3, 100)
+    kernel_size = 10
+    result, idx = slicing.sample_kernels(X, kernel_size, N=5, return_idx=True)
+    assert result.shape == (5, 3, kernel_size)
+    assert idx.shape == (5,)
