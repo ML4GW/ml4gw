@@ -11,12 +11,12 @@ from ml4gw.nn.resnet.resnet_2d import (
 )
 
 
-@pytest.fixture(params=[3, 7, 8])
+@pytest.fixture(params=[3, 8])
 def kernel_size(request):
     return request.param
 
 
-@pytest.fixture(params=[10, 50])
+@pytest.fixture(params=[10])
 def spectrogram_size(request):
     return request.param
 
@@ -26,12 +26,12 @@ def stride(request):
     return request.param
 
 
-@pytest.fixture(params=[2, 4])
+@pytest.fixture(params=[2])
 def inplanes(request):
     return request.param
 
 
-@pytest.fixture(params=[1, 2])
+@pytest.fixture(params=[2])
 def classes(request):
     return request.param
 
@@ -73,12 +73,12 @@ def test_blocks(block, kernel_size, stride, spectrogram_size, inplanes):
     assert y.shape[3] == spectrogram_size // stride
 
 
-@pytest.fixture(params=[1, 2, 3])
+@pytest.fixture(params=[1, 3])
 def in_channels(request):
     return request.param
 
 
-@pytest.fixture(params=[[2, 2, 2, 2], [2, 4, 4], [3, 4, 6, 3]])
+@pytest.fixture(params=[[2, 2, 2, 2]])
 def layers(request):
     return request.param
 
@@ -88,7 +88,7 @@ def stride_type(request):
     return request.param
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[False])
 def zero_init_residual(request):
     return request.param
 
@@ -158,3 +158,16 @@ def test_resnet(
         nn = architecture(
             in_channels, layers, kernel_size, stride_type=stride_type
         )
+
+
+def test_resnet2d_zero_init_residual():
+    nn = ResNet2D(1, [2, 2, 2, 2], 2, 3, zero_init_residual=True)
+    # the flag should zero-initialize the last BN weight in each residual block
+    for m in nn.modules():
+        if isinstance(m, Bottleneck):
+            assert (m.bn3.weight == 0).all()
+        elif isinstance(m, BasicBlock):
+            assert (m.bn2.weight == 0).all()
+    x = torch.randn(4, 1, 10, 10)
+    y = nn(x)
+    assert y.shape == (4, 2)

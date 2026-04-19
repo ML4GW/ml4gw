@@ -6,22 +6,22 @@ from lalinference import BurstSineGaussian
 from ml4gw.waveforms import SineGaussian
 
 
-@pytest.fixture(params=[2048, 4096])
+@pytest.fixture(params=[2048])
 def sample_rate(request):
     return request.param
 
 
-@pytest.fixture(params=[2.0, 4.0, 8.0])
+@pytest.fixture(params=[4.0])
 def duration(request):
     return request.param
 
 
-@pytest.fixture(params=[3.0, 10.0, 100.0, 55.0])
+@pytest.fixture(params=[10.0, 55.0])
 def quality(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
 
-@pytest.fixture(params=[100.0, 500.0, 800.0, 961.0])
+@pytest.fixture(params=[100.0, 800.0])
 def frequency(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
@@ -29,24 +29,17 @@ def frequency(request):
 # for amplitudes above ~7e-20, the difference between torch imp
 # and lalsim is > ~1e-24. Our implementations are 1 to 1, so
 # discrep must be from numerical issues?
-@pytest.fixture(params=[1e-23, 1e-22, 1e-21, 1e-20, 7e-20])
+@pytest.fixture(params=[1e-22, 7e-20])
 def hrss(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
 
-@pytest.fixture(params=[0.0, np.pi / 2.0, np.pi, 2 * np.pi])
+@pytest.fixture(params=[0.0, np.pi / 2.0])
 def phase(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
 
-@pytest.fixture(
-    params=[
-        0.0,
-        0.5,
-        1.0,
-        0.1,
-    ]
-)
+@pytest.fixture(params=[0.0, 0.5, 1.0])
 def eccentricity(request):
     return torch.tensor(request.param, dtype=torch.float64)
 

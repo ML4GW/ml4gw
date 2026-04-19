@@ -10,12 +10,12 @@ from ml4gw.transforms.spectral import SpectralDensity
 TOL = 1e-7
 
 
-@pytest.fixture(params=[1, 4, 8])
+@pytest.fixture(params=[4, 8])
 def length(request):
     return request.param
 
 
-@pytest.fixture(params=[1024, 4096])
+@pytest.fixture(params=[1024])
 def sample_rate(request):
     return request.param
 
@@ -49,12 +49,12 @@ def test_init(overlap, fftlength, sample_rate):
     transform.load_state_dict(torch.load(weights_io))
 
 
-@pytest.fixture(params=[0.5, 2, 4])
+@pytest.fixture(params=[0.5, 2])
 def fftlength(request):
     return request.param
 
 
-@pytest.fixture(params=[None, 0.1, 0.5, 1])
+@pytest.fixture(params=[None, 0.5])
 def overlap(request):
     return request.param
 

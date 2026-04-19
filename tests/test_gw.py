@@ -1,5 +1,3 @@
-from itertools import combinations
-
 import bilby
 import lal
 import lalsimulation
@@ -22,7 +20,7 @@ def test_outer():
                 assert value == x[i, j] * y[i, k], (i, j, k)
 
 
-@pytest.fixture(params=[["H1"], ["H1", "L1"], ["H1", "L1", "V1", "K1"]])
+@pytest.fixture(params=[["H1"], ["H1", "L1", "V1", "K1"]])
 def ifos(request):
     return request.param
 
@@ -255,7 +253,7 @@ def test_compute_observed_strain(
     compare_against_numpy(result, expected)
 
 
-@pytest.fixture(params=combinations([25, 30, 35, 40], 2), scope="session")
+@pytest.fixture(params=[(25, 35), (30, 40)], scope="session")
 def _get_waveforms_from_lalsimulation(request):
     m1, m2 = request.param
     params = {

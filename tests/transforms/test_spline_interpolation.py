@@ -7,155 +7,129 @@ from torch import Tensor
 from ml4gw.transforms import SplineInterpolate1D, SplineInterpolate2D
 
 
-class TestSplineInterpolate1D:
-    @pytest.fixture(params=[50, 100, 200])
-    def x_out_len(self, request):
-        return request.param
+@pytest.mark.parametrize("x_out_len", [50, 100, 200])
+def test_spline_1d_interpolation(x_out_len):
+    x_min, x_max = 0, 10
+    x_in = np.linspace(x_min, x_max, 100)
+    data = np.sin(x_in)
+    x_out = np.linspace(x_min, x_max, x_out_len)
 
-    def test_interpolation(self, x_out_len):
-        x_min = 0
-        x_max = 10
+    scipy_spline = UnivariateSpline(x_in, data, k=3, s=0)
+    expected = scipy_spline(x_out)
 
-        x_in = np.linspace(x_min, x_max, 100)
-        data = np.sin(x_in)
-        x_out = np.linspace(x_min, x_max, x_out_len)
+    data_t = Tensor(data)
+    x_in_t = Tensor(x_in)
+    x_out_t = Tensor(x_out)
 
-        scipy_spline = UnivariateSpline(x_in, data, k=3, s=0)
-        expected = scipy_spline(x_out)
+    torch_spline = SplineInterpolate1D(x_in=x_in_t, x_out=x_out_t, kx=3)
+    actual = torch_spline(data_t).squeeze().numpy()
+    assert np.allclose(actual, expected, rtol=1e-4)
 
-        data = Tensor(data)
-        x_in = Tensor(x_in)
-        x_out = Tensor(x_out)
+    # Check that passing output grid behaves as expected
+    actual = torch_spline(data_t, x_out_t).squeeze().numpy()
+    assert np.allclose(actual, expected, rtol=1e-4)
 
-        torch_spline = SplineInterpolate1D(
-            x_in=x_in,
-            x_out=x_out,
-            kx=3,
-        )
-        actual = torch_spline(data).squeeze().numpy()
-
-        assert np.allclose(actual, expected, rtol=1e-4)
-
-        # Check that passing output grid behaves as expected
-        actual = torch_spline(data, x_out).squeeze().numpy()
-        assert np.allclose(actual, expected, rtol=1e-4)
-
-        # Test data with height dimension
-        height = 5
-        data = Tensor(data).repeat(5, 1)
-        actual = torch_spline(data).squeeze().numpy()
-        for i in range(height):
-            assert np.allclose(actual[i], expected, rtol=1e-4)
-
-    def test_errors(self):
-        x_in = torch.arange(2)
-        with pytest.raises(ValueError) as exc:
-            SplineInterpolate1D(x_in=x_in)
-        assert str(exc.value).startswith("Input x-coordinates must have")
-
-        x_in = torch.arange(10)
-        x_out = x_in
-        torch_spline = SplineInterpolate1D(x_in)
-        data = torch.randn(len(x_in))
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data)
-        assert str(exc.value).startswith("Output x-coordinates were not")
-
-        data = torch.randn((1, 2, 3, 4, 5))
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out)
-        assert str(exc.value).startswith("Input data has more than 4")
-
-        data = torch.randn(len(x_in) - 1)
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out)
-        assert str(exc.value).startswith("The spatial dimensions of the data")
+    # Test data with height dimension
+    height = 5
+    data_batch = Tensor(data).repeat(5, 1)
+    actual = torch_spline(data_batch).squeeze().numpy()
+    for i in range(height):
+        assert np.allclose(actual[i], expected, rtol=1e-4)
 
 
-class TestSplineInterpolate2D:
-    @pytest.fixture(params=[50, 100, 200])
-    def x_out_len(self, request):
-        return request.param
+def test_spline_1d_errors():
+    x_in = torch.arange(2)
+    with pytest.raises(ValueError) as exc:
+        SplineInterpolate1D(x_in=x_in)
+    assert str(exc.value).startswith("Input x-coordinates must have")
 
-    @pytest.fixture(params=[25, 200, 1000])
-    def y_out_len(self, request):
-        return request.param
+    x_in = torch.arange(10)
+    x_out = x_in
+    torch_spline = SplineInterpolate1D(x_in)
+    data = torch.randn(len(x_in))
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data)
+    assert str(exc.value).startswith("Output x-coordinates were not")
 
-    def test_interpolation(self, x_out_len, y_out_len):
-        x_min = 0
-        x_max = 10
-        y_min = 0
-        y_max = 5
+    data = torch.randn((1, 2, 3, 4, 5))
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data, x_out=x_out)
+    assert str(exc.value).startswith("Input data has more than 4")
 
-        x_in = np.linspace(x_min, x_max, 100)
-        y_in = np.linspace(y_min, y_max, 200)
-        x_grid, y_grid = np.meshgrid(x_in, y_in)
-        data = np.sin(x_grid) * np.cos(y_grid)
+    data = torch.randn(len(x_in) - 1)
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data, x_out=x_out)
+    assert str(exc.value).startswith("The spatial dimensions of the data")
 
-        x_out = np.linspace(x_min, x_max, x_out_len)
-        y_out = np.linspace(y_min, y_max, y_out_len)
 
-        scipy_spline = RectBivariateSpline(x_in, y_in, data.T, kx=3, ky=3, s=0)
-        expected = scipy_spline(x_out, y_out).T
+@pytest.mark.parametrize("x_out_len", [50, 100, 200])
+@pytest.mark.parametrize("y_out_len", [25, 200, 1000])
+def test_spline_2d_interpolation(x_out_len, y_out_len):
+    x_min, x_max = 0, 10
+    y_min, y_max = 0, 5
 
-        data = Tensor(data)
-        x_in = Tensor(x_in)
-        x_out = Tensor(x_out)
-        y_in = Tensor(y_in)
-        y_out = Tensor(y_out)
+    x_in = np.linspace(x_min, x_max, 100)
+    y_in = np.linspace(y_min, y_max, 200)
+    x_grid, y_grid = np.meshgrid(x_in, y_in)
+    data = np.sin(x_grid) * np.cos(y_grid)
 
-        torch_spline = SplineInterpolate2D(
-            x_in=x_in,
-            x_out=x_out,
-            y_in=y_in,
-            y_out=y_out,
-            kx=3,
-            ky=3,
-        )
-        actual = torch_spline(data).squeeze().numpy()
+    x_out = np.linspace(x_min, x_max, x_out_len)
+    y_out = np.linspace(y_min, y_max, y_out_len)
 
-        assert np.allclose(actual, expected, rtol=1e-4)
+    scipy_spline = RectBivariateSpline(x_in, y_in, data.T, kx=3, ky=3, s=0)
+    expected = scipy_spline(x_out, y_out).T
 
-        # Check that passing output grid behaves as expected
-        actual = torch_spline(data, x_out, y_out).squeeze().numpy()
-        assert np.allclose(actual, expected, rtol=1e-4)
+    data_t = Tensor(data)
+    x_in_t, x_out_t = Tensor(x_in), Tensor(x_out)
+    y_in_t, y_out_t = Tensor(y_in), Tensor(y_out)
 
-    def test_errors(self):
-        x_in = torch.arange(2)
-        y_in = torch.arange(2)
-        with pytest.raises(ValueError) as exc:
-            SplineInterpolate2D(x_in=x_in, y_in=y_in)
-        assert str(exc.value).startswith("Input x-coordinates must have")
+    torch_spline = SplineInterpolate2D(
+        x_in=x_in_t, x_out=x_out_t, y_in=y_in_t, y_out=y_out_t, kx=3, ky=3
+    )
+    actual = torch_spline(data_t).squeeze().numpy()
+    assert np.allclose(actual, expected, rtol=1e-4)
 
-        with pytest.raises(ValueError) as exc:
-            SplineInterpolate2D(x_in=torch.arange(10), y_in=y_in)
-        assert str(exc.value).startswith("Input y-coordinates must have")
+    # Check that passing output grid behaves as expected
+    actual = torch_spline(data_t, x_out_t, y_out_t).squeeze().numpy()
+    assert np.allclose(actual, expected, rtol=1e-4)
 
-        x_in = torch.arange(10)
-        x_out = x_in
-        y_in = torch.arange(10)
-        y_out = y_in
-        torch_spline = SplineInterpolate2D(x_in=x_in, y_in=y_in)
-        data = torch.randn(len(x_in))
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data)
-        assert str(exc.value).startswith("Output x-coordinates were not")
 
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out)
-        assert str(exc.value).startswith("Output y-coordinates were not")
+def test_spline_2d_errors():
+    x_in = torch.arange(2)
+    y_in = torch.arange(2)
+    with pytest.raises(ValueError) as exc:
+        SplineInterpolate2D(x_in=x_in, y_in=y_in)
+    assert str(exc.value).startswith("Input x-coordinates must have")
 
-        data = torch.randn((1, 2, 3, 4, 5))
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out, y_out=y_out)
-        assert str(exc.value).startswith("Input data has more than 4")
+    with pytest.raises(ValueError) as exc:
+        SplineInterpolate2D(x_in=torch.arange(10), y_in=y_in)
+    assert str(exc.value).startswith("Input y-coordinates must have")
 
-        data = torch.randn(10)
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out, y_out=y_out)
-        assert str(exc.value).startswith("Input data has fewer than 2")
+    x_in = torch.arange(10)
+    x_out = x_in
+    y_in = torch.arange(10)
+    y_out = y_in
+    torch_spline = SplineInterpolate2D(x_in=x_in, y_in=y_in)
+    data = torch.randn(len(x_in))
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data)
+    assert str(exc.value).startswith("Output x-coordinates were not")
 
-        data = torch.randn((len(y_in) - 1, len(x_in) - 1))
-        with pytest.raises(ValueError) as exc:
-            torch_spline(data, x_out=x_out, y_out=y_out)
-        assert str(exc.value).startswith("The spatial dimensions of the data")
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data, x_out=x_out)
+    assert str(exc.value).startswith("Output y-coordinates were not")
+
+    data = torch.randn((1, 2, 3, 4, 5))
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data, x_out=x_out, y_out=y_out)
+    assert str(exc.value).startswith("Input data has more than 4")
+
+    data = torch.randn(10)
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data, x_out=x_out, y_out=y_out)
+    assert str(exc.value).startswith("Input data has fewer than 2")
+
+    data = torch.randn((len(y_in) - 1, len(x_in) - 1))
+    with pytest.raises(ValueError) as exc:
+        torch_spline(data, x_out=x_out, y_out=y_out)
+    assert str(exc.value).startswith("The spatial dimensions of the data")

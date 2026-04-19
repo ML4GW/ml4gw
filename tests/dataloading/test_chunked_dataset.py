@@ -80,3 +80,35 @@ class TestChunkedTimeseriesDataset:
             length += 1
 
         assert length == 42
+
+    def test_len(
+        self,
+        chunk_it,
+        chunks_per_epoch,
+        kernel_length,
+        batch_size,
+        batches_per_chunk,
+        coincident,
+    ):
+        ds = ChunkedTimeSeriesDataset(
+            list(chunk_it()),
+            int(kernel_length * 128),
+            batch_size=batch_size,
+            batches_per_chunk=batches_per_chunk,
+            coincident=coincident,
+            device="cpu",
+        )
+        assert len(ds) == chunks_per_epoch * batches_per_chunk
+
+    def test_chunk_too_small(self, chunk_it, batch_size, batches_per_chunk):
+        with pytest.raises(ValueError, match="Can't sample kernels"):
+            ds = ChunkedTimeSeriesDataset(
+                chunk_it(),
+                kernel_size=99999,
+                batch_size=batch_size,
+                batches_per_chunk=batches_per_chunk,
+                coincident=True,
+                device="cpu",
+            )
+            for _ in ds:
+                pass
