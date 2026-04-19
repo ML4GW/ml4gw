@@ -184,18 +184,10 @@ class IMRPhenomD(TaylorF2):
         Mf_join_ins = 0.014 * torch.ones_like(Mf)
 
         # construct full IMR Amp
-        theta_minus_f1 = torch.heaviside(
-            Mf_join_ins - Mf, torch.tensor(0.0, device=Mf.device)
-        )
-        theta_plus_f1 = torch.heaviside(
-            Mf - Mf_join_ins, torch.tensor(1.0, device=Mf.device)
-        )
-        theta_minus_f2 = torch.heaviside(
-            Mf_peak - Mf, torch.tensor(0.0, device=Mf.device)
-        )
-        theta_plus_f2 = torch.heaviside(
-            Mf - Mf_peak, torch.tensor(1.0, device=Mf.device)
-        )
+        theta_minus_f1 = (Mf <= Mf_join_ins).type_as(Mf)
+        theta_plus_f1 = (Mf > Mf_join_ins).type_as(Mf)
+        theta_minus_f2 = (Mf <= Mf_peak).type_as(Mf)
+        theta_plus_f2 = (Mf > Mf_peak).type_as(Mf)
 
         amp = theta_minus_f1 * ins_amp
         amp += theta_plus_f1 * int_amp * theta_minus_f2
@@ -446,18 +438,10 @@ class IMRPhenomD(TaylorF2):
         mrd_phase += Mf * C2MRD
 
         # construct full IMR phase
-        theta_minus_f1 = torch.heaviside(
-            PHI_fJoin_INS - Mf, torch.tensor(0.0, device=Mf.device)
-        )
-        theta_plus_f1 = torch.heaviside(
-            Mf - PHI_fJoin_INS, torch.tensor(1.0, device=Mf.device)
-        )
-        theta_minus_f2 = torch.heaviside(
-            fRDJoin - Mf, torch.tensor(0.0, device=Mf.device)
-        )
-        theta_plus_f2 = torch.heaviside(
-            Mf - fRDJoin, torch.tensor(1.0, device=Mf.device)
-        )
+        theta_minus_f1 = (Mf <= PHI_fJoin_INS).type_as(Mf)
+        theta_plus_f1 = (Mf > PHI_fJoin_INS).type_as(Mf)
+        theta_minus_f2 = (Mf <= fRDJoin).type_as(Mf)
+        theta_plus_f2 = (Mf > fRDJoin).type_as(Mf)
 
         phasing = theta_minus_f1 * ins_phase
         phasing += theta_plus_f1 * int_phase * theta_minus_f2
@@ -603,32 +587,36 @@ class IMRPhenomD(TaylorF2):
 
     def fmaxCalc(self, fRD, fDM, gamma2, gamma3):
         mask = gamma2 <= 1
-        # calculate result for gamma2 <= 1 case
-        sqrt_term = torch.sqrt(1 - gamma2.pow(2))
-        result_case1 = fRD + (fDM * (-1 + sqrt_term) * gamma3) / gamma2
-
-        # calculate result for gamma2 > 1 case
-        # i.e. don't add sqrt term
-        result_case2 = fRD + (-fDM * gamma3) / gamma2
-
-        # combine results using mask
-        result = torch.where(mask, result_case1, result_case2)
-
+        radicand = torch.where(
+            mask, 1 - gamma2.pow(2), torch.zeros_like(gamma2)
+        )
+        sqrt_term = torch.sqrt(radicand)
+        result = torch.where(
+            mask,
+            fRD + (fDM * (-1 + sqrt_term) * gamma3) / gamma2,
+            fRD + (-fDM * gamma3) / gamma2,
+        )
         return torch.abs(result)
 
     def _linear_interp_finspin(self, finspin):
         # chi is a batch of final spins i.e. torch.Size([n])
-        right_spin_idx = torch.bucketize(finspin, self.qnmdata_a)
+        n = len(self.qnmdata_a)
+        if torch.any(finspin < self.qnmdata_a[0]) or torch.any(
+            finspin > self.qnmdata_a[-1]
+        ):
+            raise RuntimeError(
+                f"Final spin is outside the QNM data grid "
+                f"[{self.qnmdata_a[0]:.4f}, {self.qnmdata_a[-1]:.4f}]. "
+                "Possibly caused by extremal spin values."
+            )
+        # clamp to [1, n-1] so left_spin_idx is always >= 0
+        right_spin_idx = torch.bucketize(finspin, self.qnmdata_a).clamp(
+            1, n - 1
+        )
         right_spin_val = self.qnmdata_a[right_spin_idx]
         # QNMData_a is sorted, hence take the previous index
         left_spin_idx = right_spin_idx - 1
         left_spin_val = self.qnmdata_a[left_spin_idx]
-
-        if not torch.all(left_spin_val < right_spin_val):
-            raise RuntimeError(
-                "Left value in grid should be greater than right. "
-                "Maybe be caused for extremal spin values."
-            )
         left_fring = self.qnmdata_fring[left_spin_idx]
         right_fring = self.qnmdata_fring[right_spin_idx]
         slope_fring = right_fring - left_fring
