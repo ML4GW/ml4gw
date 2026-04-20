@@ -464,3 +464,12 @@ def test_phenom_p(
 
     with pytest.raises(ValueError, match=r"Invalid mode s=-2, l=2, m=3*"):
         waveforms.IMRPhenomPv2().SpinWeightedY(0, 0, -2, 2, 3)
+
+
+@pytest.mark.parametrize("finspin", [-1.1, 1.1])
+def test_phenom_d_finspin_out_of_bounds(finspin):
+    finspin_tensor = torch.tensor([finspin], dtype=torch.float64)
+    with pytest.raises(
+        RuntimeError, match="Final spin is outside the QNM data grid"
+    ):
+        waveforms.IMRPhenomD()._linear_interp_finspin(finspin_tensor)
