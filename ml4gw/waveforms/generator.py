@@ -268,6 +268,54 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
 
         return hc_spectrum, hp_spectrum
 
+    def apply_td_condition_stage2(
+        self,
+        hc: Tensor,
+        hp: Tensor,
+        parameters: dict,
+    ) -> tuple[Tensor, Tensor]:
+        """
+        Apply stage 2 TD conditioning following XLALSimInspiralTDConditionStage2.
+
+        Tapers the first 1/(f_min * dt) samples and the
+        last 1/(f_isco * dt) samples with a cosine window.
+
+        See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py#L90
+        """  # noqa: E501
+        mass_1 = parameters["mass_1"].double() * MSUN
+        mass_2 = parameters["mass_2"].double() * MSUN
+        f_isco = utils.frequency_isco(mass_1, mass_2)
+
+        N = hp.shape[-1]
+        min_taper_samples = 4
+
+        # Taper start of signal
+        ntaper_start = max(
+            round(self.sample_rate / self.f_min), min_taper_samples
+        )
+        t = torch.arange(ntaper_start).type_as(hp)
+        w_start = 0.5 - 0.5 * torch.cos(torch.pi * t / ntaper_start)
+        hp[:, :ntaper_start] *= w_start
+        hc[:, :ntaper_start] *= w_start
+
+        # Taper end of signal, vectorized because f_isco is different
+        # for each waveform in the batch
+        ntaper_end = torch.clamp(
+            torch.round(self.sample_rate / f_isco), min=min_taper_samples
+        )
+        max_ntaper = int(ntaper_end.max().item())
+
+        idx = (max_ntaper - 1) - torch.arange(max_ntaper - 1).type_as(hp)
+        cos_arg = torch.pi * idx[None, :] / ntaper_end[:, None]
+        w_end = 0.5 - 0.5 * torch.cos(cos_arg)
+        in_taper = idx[None, :] < ntaper_end[:, None]
+        w_end = torch.where(in_taper, w_end, torch.ones_like(w_end))
+
+        hp[:, N - max_ntaper + 1 :] *= w_end
+        hc[:, N - max_ntaper + 1 :] *= w_end
+
+        return hc, hp
+
     def forward(
         self,
         **parameters,
@@ -300,12 +348,11 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
 
         hc, hp = self.generate_conditioned_fd_waveform(**parameters)
 
-        # fft to time domain and apply appropiate scaling
+        # fft to time domain and apply appropriate scaling
         hc = torch.fft.irfft(hc) * self.sample_rate
         hp = torch.fft.irfft(hp) * self.sample_rate
 
-        # TODO: some additional tapering in the time
-        # domain is performed in lalsimulation
+        hc, hp = self.apply_td_condition_stage2(hc, hp, parameters)
 
         # pad waveforms on left up to requested duration
         pad = int((self.duration * self.sample_rate) - hp.shape[-1])
