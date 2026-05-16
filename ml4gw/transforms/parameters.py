@@ -7,7 +7,8 @@ def sample_chirp_distance(
     jacobian: bool = False,
 ) -> dict[str, torch.Tensor] | torch.Tensor:
     """
-    Convert between chirp distance and luminosity distance using chirp-mass scaling.
+    Convert between chirp distance and luminosity distance using 
+    chirp-mass scaling.
 
     Parameters
     ----------
