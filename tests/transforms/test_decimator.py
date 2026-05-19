@@ -10,8 +10,6 @@ from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
 
 
 def test_decimator():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-
     # Waveform generation
     param_dict = {
         "chirp_mass": torch.tensor([1.4]),
@@ -28,7 +26,7 @@ def test_decimator():
     f_min = 20
     f_ref = 20
 
-    approximant = IMRPhenomD().to(device)
+    approximant = IMRPhenomD()
     waveform_generator = TimeDomainCBCWaveformGenerator(
         approximant=approximant,
         sample_rate=sample_rate,
@@ -36,7 +34,7 @@ def test_decimator():
         duration=waveform_duration,
         right_pad=0.5,
         f_ref=f_ref,
-    ).to(device)
+    )
 
     param_dict["mass_1"], param_dict["mass_2"] = (
         chirp_mass_and_mass_ratio_to_components(
@@ -55,7 +53,6 @@ def test_decimator():
     schedule = torch.tensor(
         [[0, 40, 256], [40, 58, 512], [58, 60, 2048]],
         dtype=torch.int,
-        device=device,
     )
 
     decimator = Decimator(sample_rate=sample_rate, schedule=schedule)
@@ -65,7 +62,7 @@ def test_decimator():
     dec_hc = decimator(hc)
     dec_hp = decimator(hp)
 
-    time = torch.arange(0, waveform_duration, 1 / sample_rate).to(device)
+    time = torch.arange(0, waveform_duration, 1 / sample_rate)
     time_dec = time[indices]
 
     f_hc = interp1d(time_dec.cpu().numpy(), dec_hc.cpu().numpy(), kind="cubic")
@@ -93,7 +90,6 @@ def test_decimator():
     overlap_schedule = torch.tensor(
         [[0, 40, 256], [32, 58, 512], [52, 60, 2048]],
         dtype=torch.int,
-        device=device,
     )
 
     decimator_ov = Decimator(
