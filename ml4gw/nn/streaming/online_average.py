@@ -69,7 +69,9 @@ class OnlineAverager(torch.nn.Module):
         self.register_buffer("weights", weights)
 
     def get_initial_state(self) -> Float[Tensor, "channel time"]:
-        return torch.zeros((self.num_channels, self.state_size))
+        return torch.zeros(
+            (self.num_channels, self.state_size), device=self.weights.device
+        )
 
     def forward(
         self,

@@ -95,9 +95,14 @@ class QTile(torch.nn.Module):
         """
         Get the index array of relevant frequencies for this row
         """
-        return torch.round(
-            self._get_indices() + 1 + self.frequency * self.duration,
-        ).type(torch.long)
+        n_rfft = int(self.duration * self.sample_rate) // 2
+        return (
+            torch.round(
+                self._get_indices() + 1 + self.frequency * self.duration,
+            )
+            .type(torch.long)
+            .clamp(0, n_rfft)
+        )
 
     def forward(
         self,

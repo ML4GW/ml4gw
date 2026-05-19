@@ -48,6 +48,7 @@ def test_decimator():
         param_dict["chi2"],
     )
 
+    param_dict = {k: v.to(device) for k, v in param_dict.items()}
     hc, hp = waveform_generator(**param_dict)
 
     # Positive Tests
