@@ -392,6 +392,7 @@ class RateEvolution(UniformComovingVolume):
         jacobian = torch.gradient(self.distance_grid, spacing=self.dz)[0]
         return dV_dz / jacobian * self.rate_function(self.z_grid)
 
+
 class ChirpDistribution(dist.Distribution):
     def __init__(
         self,
@@ -415,11 +416,9 @@ class ChirpDistribution(dist.Distribution):
         return the mass scaling factor
         """
 
-        mass_factor = (
-            chirp_mass / self.reference_chirp_mass
-        ) ** (5.0 / 6.0)
+        mass_factor = (chirp_mass / self.reference_chirp_mass) ** (5.0 / 6.0)
 
-        return  mass_factor
+        return mass_factor
 
     def sample(
         self,
@@ -454,9 +453,4 @@ class ChirpDistribution(dist.Distribution):
         logp_distance = self.chirp_distance.log_prob(chirp_distance)
         log_jacobian = -torch.log(mass_factor)
 
-        return (
-            logp_mass
-            + logp_distance
-            + log_jacobian
-        )
-
+        return logp_mass + logp_distance + log_jacobian
