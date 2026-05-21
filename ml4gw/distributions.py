@@ -423,7 +423,7 @@ class ChirpDistribution(dist.Distribution):
 
     def sample(
         self,
-        N: torch.Size = torch.Size(),
+        N: torch.Size,
     ):
 
         chirp_mass = self.chirp_mass.sample(N)
