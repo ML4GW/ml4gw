@@ -41,6 +41,7 @@ dev = [
     "lalsuite~=7.0",
     "bilby~=2.1",
     "pytest-repeat>=0.9.3,<0.10",
+    "pytest-benchmark>=4.0",
     "h5py~=3.12",
 ]
 docs = [
@@ -90,6 +91,11 @@ per-file-ignores =  {"**/__init__.py" = ["F401", "F403"]}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = [
+    "--benchmark-warmup=on",
+    "--benchmark-warmup-iterations=5",
+    "--benchmark-sort=mean",
+]
 
 [tool.coverage.run]
 source = ["ml4gw"]
