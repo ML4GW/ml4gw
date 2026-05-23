@@ -76,6 +76,18 @@ if an automatic fix is not possible.
    usecase.
 4. Please [cite](/CITATION.cff) the repository if you have used `ml4gw` in your work.
 
+## Benchmarks
+
+`ml4gw` maintains a performance benchmark suite under [`benchmarks/`](benchmarks/) using
+[pytest-benchmark](https://pytest-benchmark.readthedocs.io/). See the
+[benchmarks README](benchmarks/README.md) for full instructions on running the suite and
+measuring the impact of a change.
+
+When submitting a PR that modifies a performance-sensitive code path (e.g. a transform,
+waveform model, or spectral function), **run the relevant benchmarks on GPU hardware** and
+paste the `--benchmark-compare` table into your PR description so reviewers can see the
+before/after delta.
+
 ## Documentation
 The documentation page is rendered using [sphinx-autodoc](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html). Please add
 [google style docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
