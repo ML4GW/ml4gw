@@ -1,7 +1,7 @@
 """Benchmarks for ResNet1D and ResNet2D."""
 
 import torch
-from conftest import NUM_CHANNELS, NUM_SAMPLES
+from constants import NUM_CHANNELS, NUM_SAMPLES
 
 from ml4gw.nn.resnet.resnet_1d import ResNet1D
 from ml4gw.nn.resnet.resnet_2d import ResNet2D

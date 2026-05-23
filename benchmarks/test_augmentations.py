@@ -1,7 +1,7 @@
 """Benchmarks for ml4gw/augmentations.py."""
 
 import torch
-from conftest import NUM_CHANNELS, NUM_SAMPLES
+from constants import NUM_CHANNELS, NUM_SAMPLES
 
 from ml4gw.augmentations import SignalInverter, SignalReverser
 

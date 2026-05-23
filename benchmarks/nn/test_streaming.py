@@ -1,7 +1,7 @@
 """Benchmarks for Snapshotter and OnlineAverager."""
 
 import torch
-from conftest import NUM_CHANNELS, NUM_SAMPLES
+from constants import NUM_CHANNELS, NUM_SAMPLES
 
 from ml4gw.nn.streaming import OnlineAverager, Snapshotter
 

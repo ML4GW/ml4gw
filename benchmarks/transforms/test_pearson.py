@@ -1,7 +1,7 @@
 """Benchmarks for ShiftedPearsonCorrelation."""
 
 import torch
-from conftest import NUM_CHANNELS, NUM_SAMPLES
+from constants import NUM_CHANNELS, NUM_SAMPLES
 
 from ml4gw.transforms import ShiftedPearsonCorrelation
 

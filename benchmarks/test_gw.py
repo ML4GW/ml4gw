@@ -2,7 +2,7 @@
 
 import pytest
 import torch
-from conftest import IFOS, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
+from constants import IFOS, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 
 from ml4gw.gw import (
     compute_antenna_responses,

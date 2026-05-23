@@ -1,7 +1,7 @@
 """Benchmarks for SpectralDensity."""
 
 import torch
-from conftest import KERNEL_LEN, NUM_CHANNELS, SAMPLE_RATE
+from constants import KERNEL_LEN, NUM_CHANNELS, SAMPLE_RATE
 
 from ml4gw.transforms import SpectralDensity
 

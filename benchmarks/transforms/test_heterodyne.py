@@ -1,7 +1,7 @@
 """Benchmarks for Heterodyne."""
 
 import torch
-from conftest import KERNEL_LEN, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
+from constants import KERNEL_LEN, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 
 from ml4gw.transforms import Heterodyne
 

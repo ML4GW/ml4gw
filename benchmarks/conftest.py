@@ -1,4 +1,4 @@
-"""Shared fixtures and constants for the benchmark suite."""
+"""Shared fixtures and hooks for the benchmark suite."""
 
 import sys
 from pathlib import Path
@@ -6,16 +6,9 @@ from pathlib import Path
 import pytest
 import torch
 
-# Make this file importable from subdirectory test files
+# Add benchmarks/ to sys.path so test files in
+# subdirectories can import constants.py
 sys.path.insert(0, str(Path(__file__).parent))
-
-# Default signal parameters used across the benchmark suite.
-SAMPLE_RATE = 2048
-KERNEL_LEN = 1.0
-NUM_SAMPLES = int(KERNEL_LEN * SAMPLE_RATE)
-
-IFOS = ["H1", "L1"]
-NUM_CHANNELS = len(IFOS)
 
 
 def _select_device() -> torch.device:

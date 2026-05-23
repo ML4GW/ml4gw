@@ -1,7 +1,7 @@
 """Benchmarks for integrators."""
 
 import torch
-from conftest import NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
+from constants import NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 
 from ml4gw.transforms import LeakyIntegrator, TophatIntegrator
 

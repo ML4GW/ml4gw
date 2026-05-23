@@ -2,7 +2,7 @@
 
 import pytest
 import torch
-from conftest import KERNEL_LEN, NUM_CHANNELS
+from constants import KERNEL_LEN, NUM_CHANNELS
 
 from ml4gw.transforms import QScan, SingleQTransform
 

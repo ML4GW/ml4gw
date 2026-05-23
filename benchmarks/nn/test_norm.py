@@ -1,7 +1,7 @@
 """Benchmarks for GroupNorm1D."""
 
 import torch
-from conftest import NUM_SAMPLES
+from constants import NUM_SAMPLES
 
 from ml4gw.nn.norm import GroupNorm1D
 

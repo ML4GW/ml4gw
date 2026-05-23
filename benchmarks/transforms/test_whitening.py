@@ -1,15 +1,16 @@
 """Benchmarks for Whiten and FixedWhiten."""
 
 import torch
-from conftest import KERNEL_LEN, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
+from constants import KERNEL_LEN, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 
 from ml4gw.transforms import FixedWhiten, Whiten
 
+FDURATION = 0.5
 NUM_SAMPLES_WHITEN = SAMPLE_RATE * 4
 
 
 def test_whiten_forward(benchmark, batch_size, device):
-    whitener = Whiten(fduration=0.5, sample_rate=SAMPLE_RATE).to(device)
+    whitener = Whiten(fduration=FDURATION, sample_rate=SAMPLE_RATE).to(device)
     num_freqs = NUM_SAMPLES_WHITEN // 2 + 1
     x = torch.randn(
         batch_size, NUM_CHANNELS, NUM_SAMPLES_WHITEN, device=device
@@ -28,7 +29,7 @@ def test_fixed_whiten_forward(benchmark, batch_size, device):
         sample_rate=SAMPLE_RATE,
     )
     bg = torch.randn(NUM_CHANNELS, NUM_SAMPLES)
-    whitener.fit(0.5, bg[0], bg[1], fftlength=KERNEL_LEN)
+    whitener.fit(FDURATION, bg[0], bg[1], fftlength=KERNEL_LEN)
     whitener = whitener.to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
     benchmark(whitener, x)

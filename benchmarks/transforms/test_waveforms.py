@@ -1,7 +1,7 @@
 """Benchmarks for WaveformSampler and WaveformProjector."""
 
 import torch
-from conftest import IFOS, NUM_SAMPLES, SAMPLE_RATE
+from constants import IFOS, NUM_SAMPLES, SAMPLE_RATE
 
 from ml4gw.transforms import WaveformProjector, WaveformSampler
 
