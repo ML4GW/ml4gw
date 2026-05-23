@@ -34,6 +34,33 @@ def device():
     return _select_device()
 
 
+@pytest.fixture
+def maybe_sync(device):
+    """Wrap a callable with torch.cuda.synchronize() for accurate GPU timing.
+
+    pytest-benchmark uses time.perf_counter, which on GPU only measures
+    kernel-launch latency, not actual GPU execution time.
+
+    On CPU this returns the callable unchanged.
+    """
+    if device.type == "cuda":
+
+        def wrap(fn):
+            def synced(*args, **kwargs):
+                result = fn(*args, **kwargs)
+                torch.cuda.synchronize()
+                return result
+
+            return synced
+
+    else:
+
+        def wrap(fn):
+            return fn
+
+    return wrap
+
+
 @pytest.fixture(params=[32, 128, 512], ids=lambda x: f"batch_{x}")
 def batch_size(request):
     return request.param

@@ -9,7 +9,7 @@ from ml4gw.waveforms import Ringdown, SineGaussian
 DURATION = 4.0
 
 
-def test_sine_gaussian_forward(benchmark, batch_size, device):
+def test_sine_gaussian_forward(benchmark, batch_size, device, maybe_sync):
     model = SineGaussian(sample_rate=SAMPLE_RATE, duration=DURATION).to(device)
     dtype = torch.float64
 
@@ -24,10 +24,10 @@ def test_sine_gaussian_forward(benchmark, batch_size, device):
     hrss = uniform(1e-23, 1e-21)
     phase = uniform(0, 2 * torch.pi)
     eccentricity = uniform(0, 1)
-    benchmark(model, quality, frequency, hrss, phase, eccentricity)
+    benchmark(maybe_sync(model), quality, frequency, hrss, phase, eccentricity)
 
 
-def test_ringdown_forward(benchmark, batch_size, device):
+def test_ringdown_forward(benchmark, batch_size, device, maybe_sync):
     model = Ringdown(sample_rate=SAMPLE_RATE, duration=DURATION).to(device)
     dtype = torch.float64
 
@@ -43,4 +43,12 @@ def test_ringdown_forward(benchmark, batch_size, device):
     phase = uniform(0, 2 * torch.pi)
     inclination = uniform(0, torch.pi)
     distance = uniform(100, 1000)
-    benchmark(model, frequency, quality, epsilon, phase, inclination, distance)
+    benchmark(
+        maybe_sync(model),
+        frequency,
+        quality,
+        epsilon,
+        phase,
+        inclination,
+        distance,
+    )

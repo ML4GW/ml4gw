@@ -12,7 +12,7 @@ F_REF = 20.0
 RIGHT_PAD = 0.5
 
 
-def test_td_generator_forward(benchmark, cbc_inputs, device):
+def test_td_generator_forward(benchmark, cbc_inputs, device, maybe_sync):
     approximant = IMRPhenomD().to(device)
     model = TimeDomainCBCWaveformGenerator(
         approximant=approximant,
@@ -32,7 +32,7 @@ def test_td_generator_forward(benchmark, cbc_inputs, device):
     chi2 = cbc_inputs["chi2"]
 
     benchmark(
-        model,
+        maybe_sync(model),
         chirp_mass=chirp_mass,
         mass_ratio=mass_ratio,
         mass_1=mass_1,

@@ -6,17 +6,17 @@ from constants import NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 from ml4gw.transforms import LeakyIntegrator, TophatIntegrator
 
 
-def test_tophat_integrator_forward(benchmark, batch_size, device):
+def test_tophat_integrator_forward(benchmark, batch_size, device, maybe_sync):
     tophat = TophatIntegrator(
         sample_rate=SAMPLE_RATE, integration_length=1
     ).to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
-    benchmark(tophat, x)
+    benchmark(maybe_sync(tophat), x)
 
 
-def test_leaky_integrator_forward(benchmark, batch_size, device):
+def test_leaky_integrator_forward(benchmark, batch_size, device, maybe_sync):
     leaky = LeakyIntegrator(
         threshold=0.5, decay=0.1, lower_bound=0.0, integrate_value="score"
     ).to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
-    benchmark(leaky, x)
+    benchmark(maybe_sync(leaky), x)

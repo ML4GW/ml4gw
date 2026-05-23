@@ -6,7 +6,7 @@ from constants import NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 from ml4gw.transforms import IIRFilter
 
 
-def test_iirfilter_forward(benchmark, batch_size, device):
+def test_iirfilter_forward(benchmark, batch_size, device, maybe_sync):
     filter = IIRFilter(N=4, Wn=[32.0, 512.0], btype="band", fs=SAMPLE_RATE).to(
         device
     )
@@ -17,4 +17,4 @@ def test_iirfilter_forward(benchmark, batch_size, device):
         dtype=torch.float64,
         device=device,
     )
-    benchmark(filter, x)
+    benchmark(maybe_sync(filter), x)

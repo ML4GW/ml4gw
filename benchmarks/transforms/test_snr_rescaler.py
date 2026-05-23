@@ -6,7 +6,7 @@ from constants import KERNEL_LEN, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 from ml4gw.transforms import SnrRescaler
 
 
-def test_snr_rescaler_forward(benchmark, batch_size, device):
+def test_snr_rescaler_forward(benchmark, batch_size, device, maybe_sync):
     rescaler = SnrRescaler(
         num_channels=NUM_CHANNELS,
         sample_rate=SAMPLE_RATE,
@@ -18,4 +18,4 @@ def test_snr_rescaler_forward(benchmark, batch_size, device):
     responses = torch.randn(
         batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device
     )
-    benchmark(rescaler, responses)
+    benchmark(maybe_sync(rescaler), responses)

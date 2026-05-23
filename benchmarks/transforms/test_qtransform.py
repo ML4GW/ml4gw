@@ -18,7 +18,7 @@ def qtransform_config(request):
 
 
 def test_single_qtransform_compute_qtiles(
-    benchmark, batch_size, qtransform_config, device
+    benchmark, batch_size, qtransform_config, device, maybe_sync
 ):
     sample_rate, q = qtransform_config
     qtransform = SingleQTransform(
@@ -28,11 +28,11 @@ def test_single_qtransform_compute_qtiles(
         q=q,
     ).to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, sample_rate, device=device)
-    benchmark(qtransform.compute_qtiles, x)
+    benchmark(maybe_sync(qtransform.compute_qtiles), x)
 
 
 def test_single_qtransform_forward(
-    benchmark, batch_size, qtransform_config, device
+    benchmark, batch_size, qtransform_config, device, maybe_sync
 ):
     sample_rate, q = qtransform_config
     qtransform = SingleQTransform(
@@ -42,7 +42,7 @@ def test_single_qtransform_forward(
         q=q,
     ).to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, sample_rate, device=device)
-    benchmark(qtransform, x)
+    benchmark(maybe_sync(qtransform), x)
 
 
 @pytest.fixture(params=[1024, 4096], ids=lambda x: f"sr_{x}")
@@ -50,7 +50,9 @@ def qscan_sample_rate(request):
     return request.param
 
 
-def test_qscan_forward(benchmark, batch_size, qscan_sample_rate, device):
+def test_qscan_forward(
+    benchmark, batch_size, qscan_sample_rate, device, maybe_sync
+):
     qscan = QScan(
         duration=KERNEL_LEN,
         sample_rate=qscan_sample_rate,
@@ -58,4 +60,4 @@ def test_qscan_forward(benchmark, batch_size, qscan_sample_rate, device):
         qrange=[1, 60],
     ).to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, qscan_sample_rate, device=device)
-    benchmark(qscan, x)
+    benchmark(maybe_sync(qscan), x)

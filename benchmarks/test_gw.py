@@ -22,28 +22,44 @@ def ifo_geometry(device):
 
 
 def test_compute_antenna_responses(
-    benchmark, batch_size, ifo_geometry, device
+    benchmark, batch_size, ifo_geometry, device, maybe_sync
 ):
     tensors, _ = ifo_geometry
     theta = torch.rand(batch_size, device=device) * torch.pi
     psi = torch.rand(batch_size, device=device) * torch.pi
     phi = torch.rand(batch_size, device=device) * 2 * torch.pi
     benchmark(
-        compute_antenna_responses, theta, psi, phi, tensors, ["plus", "cross"]
+        maybe_sync(compute_antenna_responses),
+        theta,
+        psi,
+        phi,
+        tensors,
+        ["plus", "cross"],
     )
 
 
-def test_shift_responses(benchmark, batch_size, ifo_geometry, device):
+def test_shift_responses(
+    benchmark, batch_size, ifo_geometry, device, maybe_sync
+):
     _, vertices = ifo_geometry
     responses = torch.randn(
         batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device
     )
     theta = torch.rand(batch_size, device=device) * torch.pi
     phi = torch.rand(batch_size, device=device) * 2 * torch.pi
-    benchmark(shift_responses, responses, theta, phi, vertices, SAMPLE_RATE)
+    benchmark(
+        maybe_sync(shift_responses),
+        responses,
+        theta,
+        phi,
+        vertices,
+        SAMPLE_RATE,
+    )
 
 
-def test_compute_observed_strain(benchmark, batch_size, ifo_geometry, device):
+def test_compute_observed_strain(
+    benchmark, batch_size, ifo_geometry, device, maybe_sync
+):
     tensors, vertices = ifo_geometry
     dec = torch.rand(batch_size, device=device) * torch.pi - torch.pi / 2
     psi = torch.rand(batch_size, device=device) * torch.pi
@@ -51,7 +67,7 @@ def test_compute_observed_strain(benchmark, batch_size, ifo_geometry, device):
     hc = torch.randn(batch_size, NUM_SAMPLES, device=device)
     hp = torch.randn(batch_size, NUM_SAMPLES, device=device)
     benchmark(
-        compute_observed_strain,
+        maybe_sync(compute_observed_strain),
         dec,
         psi,
         phi,
@@ -63,29 +79,31 @@ def test_compute_observed_strain(benchmark, batch_size, ifo_geometry, device):
     )
 
 
-def test_compute_ifo_snr(benchmark, batch_size, device):
+def test_compute_ifo_snr(benchmark, batch_size, device, maybe_sync):
     num_freqs = NUM_SAMPLES // 2 + 1
     responses = torch.randn(
         batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device
     )
     psd = torch.rand(NUM_CHANNELS, num_freqs, device=device) + 1e-20
-    benchmark(compute_ifo_snr, responses, psd, SAMPLE_RATE)
+    benchmark(maybe_sync(compute_ifo_snr), responses, psd, SAMPLE_RATE)
 
 
-def test_compute_network_snr(benchmark, batch_size, device):
+def test_compute_network_snr(benchmark, batch_size, device, maybe_sync):
     num_freqs = NUM_SAMPLES // 2 + 1
     responses = torch.randn(
         batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device
     )
     psd = torch.rand(NUM_CHANNELS, num_freqs, device=device) + 1e-20
-    benchmark(compute_network_snr, responses, psd, SAMPLE_RATE)
+    benchmark(maybe_sync(compute_network_snr), responses, psd, SAMPLE_RATE)
 
 
-def test_reweight_snrs(benchmark, batch_size, device):
+def test_reweight_snrs(benchmark, batch_size, device, maybe_sync):
     num_freqs = NUM_SAMPLES // 2 + 1
     responses = torch.randn(
         batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device
     )
     psd = torch.rand(NUM_CHANNELS, num_freqs, device=device) + 1e-20
     target_snrs = torch.rand(batch_size, device=device) * 20 + 5
-    benchmark(reweight_snrs, responses, target_snrs, psd, SAMPLE_RATE)
+    benchmark(
+        maybe_sync(reweight_snrs), responses, target_snrs, psd, SAMPLE_RATE
+    )

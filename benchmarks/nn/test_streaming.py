@@ -11,7 +11,7 @@ UPDATE_SIZE = 256
 NUM_UPDATES = 8
 
 
-def test_snapshotter_forward(benchmark, device):
+def test_snapshotter_forward(benchmark, device, maybe_sync):
     snapshotter = Snapshotter(
         num_channels=NUM_CHANNELS,
         snapshot_size=NUM_SAMPLES,
@@ -20,10 +20,10 @@ def test_snapshotter_forward(benchmark, device):
     ).to(device)
     update = torch.randn(NUM_CHANNELS, BATCH_SIZE * STRIDE_SIZE, device=device)
     state = torch.zeros(NUM_CHANNELS, NUM_SAMPLES - STRIDE_SIZE, device=device)
-    benchmark(snapshotter, update, state)
+    benchmark(maybe_sync(snapshotter), update, state)
 
 
-def test_online_averager_forward(benchmark, device):
+def test_online_averager_forward(benchmark, device, maybe_sync):
     online_averager = OnlineAverager(
         update_size=UPDATE_SIZE,
         batch_size=BATCH_SIZE,
@@ -34,4 +34,4 @@ def test_online_averager_forward(benchmark, device):
         BATCH_SIZE, NUM_CHANNELS, NUM_UPDATES * UPDATE_SIZE, device=device
     )
     state = online_averager.get_initial_state()
-    benchmark(online_averager, update, state)
+    benchmark(maybe_sync(online_averager), update, state)

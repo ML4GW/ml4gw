@@ -11,21 +11,23 @@ DELTA_F = 1.0 / 4.0  # 4-second duration
 FREQS = torch.arange(F_MIN, F_MAX, DELTA_F, dtype=torch.float64)
 
 
-def test_taylorf2_forward(benchmark, cbc_inputs, device):
+def test_taylorf2_forward(benchmark, cbc_inputs, device, maybe_sync):
     model = TaylorF2().to(device)
-    benchmark(model, FREQS.to(device), **cbc_inputs, f_ref=F_REF)
+    benchmark(maybe_sync(model), FREQS.to(device), **cbc_inputs, f_ref=F_REF)
 
 
-def test_phenomd_forward(benchmark, cbc_inputs, device):
+def test_phenomd_forward(benchmark, cbc_inputs, device, maybe_sync):
     model = IMRPhenomD().to(device)
-    benchmark(model, FREQS.to(device), **cbc_inputs, f_ref=F_REF)
+    benchmark(maybe_sync(model), FREQS.to(device), **cbc_inputs, f_ref=F_REF)
 
 
-def test_phenompv2_forward(benchmark, cbc_inputs, spin_vectors, device):
+def test_phenompv2_forward(
+    benchmark, cbc_inputs, spin_vectors, device, maybe_sync
+):
     model = IMRPhenomPv2().to(device)
     (s1x, s1y, s1z), (s2x, s2y, s2z) = spin_vectors
     benchmark(
-        model,
+        maybe_sync(model),
         FREQS.to(device),
         cbc_inputs["chirp_mass"],
         cbc_inputs["mass_ratio"],

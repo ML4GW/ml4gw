@@ -6,13 +6,13 @@ from constants import NUM_CHANNELS, NUM_SAMPLES
 from ml4gw.augmentations import SignalInverter, SignalReverser
 
 
-def test_signal_inverter_forward(benchmark, batch_size, device):
+def test_signal_inverter_forward(benchmark, batch_size, device, maybe_sync):
     inverter = SignalInverter(prob=0.5).to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
-    benchmark(inverter, x)
+    benchmark(maybe_sync(inverter), x)
 
 
-def test_signal_reverser_forward(benchmark, batch_size, device):
+def test_signal_reverser_forward(benchmark, batch_size, device, maybe_sync):
     reverser = SignalReverser(prob=0.5).to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
-    benchmark(reverser, x)
+    benchmark(maybe_sync(reverser), x)
