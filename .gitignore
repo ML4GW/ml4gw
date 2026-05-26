@@ -1,6 +1,7 @@
 **/__pycache__
 **/.ipynb_checkpoints
 **/.tox
+**/*.json
 ml4gw.egg-info
 docs/_build
 docs/jupyter_execute
