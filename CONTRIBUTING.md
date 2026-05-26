@@ -88,6 +88,24 @@ waveform model, or spectral function), **run the relevant benchmarks on GPU hard
 paste the `--benchmark-compare` table into your PR description so reviewers can see the
 before/after delta.
 
+When submitting a PR that contains a new feature for which performance is important (e.g., 
+a new waveform on transform), create a new benchmark in the `benchmarks/` directory.
+For example, in `benchmarks/transforms/my_transform.py`:
+```python
+"""Benchmarks for MyTransform"""
+
+import torch
+from constants import NUM_CHANNELS, NUM_SAMPLES
+
+def test_my_transform(benchmark, batch_size, device, maybe_sync):
+   transform = MyTransform().to(device)
+   x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
+   benchmark(maybe_sync(transform), x)
+```
+It's recommended to run this benchmark test and ensure that the results are in line
+with expectations; e.g. no $\mathcal{O}(n^3)$ behavior for a feature that should be
+$\mathcal{O}(n^2)$.
+
 ## Documentation
 The documentation page is rendered using [sphinx-autodoc](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html). Please add
 [google style docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
