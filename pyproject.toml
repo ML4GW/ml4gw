@@ -28,7 +28,7 @@ license = "GPL-3.0-or-later"
 dependencies = [
     "jaxtyping>=0.2,<0.4",
     "torch>=2.0,<2.11",
-    "torchaudio>=2.0,<2.11",
+    "torchaudio>=2.0,<2.12",
     "numpy>=1.0.0",
     "scipy>=1.9.0,<1.16",
 ]
