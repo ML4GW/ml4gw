@@ -452,8 +452,8 @@ def normalize_by_psd(
     # corresponding bin to 0
     X = X - X.mean(-1, keepdims=True)
     X_tilde = torch.fft.rfft(X.double(), norm="forward", dim=-1)
-    X_tilde = X_tilde / psd**0.5
-    X_tilde[torch.isnan(X_tilde)] = 0
+    inv_asd = torch.nan_to_num(psd**-0.5)
+    X_tilde = X_tilde * inv_asd
 
     # convert back to the time domain and normalize
     # TODO: what's this normalization factor?
