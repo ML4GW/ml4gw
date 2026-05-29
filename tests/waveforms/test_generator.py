@@ -7,9 +7,12 @@ from lalsimulation.gwsignal.core.waveform import (
     LALCompactBinaryCoalescenceGenerator,
 )
 from scipy.signal import hilbert
+from torch.autograd import gradcheck
 
 from ml4gw.waveforms import IMRPhenomD, conversion
 from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
+
+FLOAT64 = torch.float64
 
 TARGET_OVERLAP = 1 - 1e-6
 
@@ -191,3 +194,46 @@ def test_cbc_waveform_generator(
         compute_match(hc_ml4gw[0], torch.tensor(hc_gws_td), sample_rate, f_min)
         > TARGET_OVERLAP
     )
+
+
+def test_cbc_generator_differentiability():
+    generator = TimeDomainCBCWaveformGenerator(
+        approximant=IMRPhenomD(),
+        sample_rate=64,
+        duration=1.0,
+        f_min=20.0,
+        f_ref=20.0,
+        right_pad=0.5,
+    )
+
+    inputs = (
+        torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+    )
+
+    def h(chirp_mass, mass_ratio, chi1, chi2, distance, phic, inclination):
+        mass_1, mass_2 = conversion.chirp_mass_and_mass_ratio_to_components(
+            chirp_mass, mass_ratio
+        )
+        hc, hp = generator(
+            mass_1=mass_1,
+            mass_2=mass_2,
+            chirp_mass=chirp_mass,
+            mass_ratio=mass_ratio,
+            chi1=chi1,
+            chi2=chi2,
+            s1z=chi1,
+            s2z=chi2,
+            distance=distance,
+            phic=phic,
+            inclination=inclination,
+        )
+        out = torch.cat([hc, hp])
+        return out / out.abs().max()
+
+    assert gradcheck(h, inputs)

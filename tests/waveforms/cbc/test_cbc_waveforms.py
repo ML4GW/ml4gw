@@ -506,7 +506,8 @@ def test_taylorf2_differentiability():
             phic=phic,
             inclination=inclination,
         )
-        return torch.cat([hc.real, hc.imag, hp.real, hp.imag])
+        out = torch.cat([hc.real, hc.imag, hp.real, hp.imag])
+        return out / out.abs().max()
 
     assert gradcheck(h, inputs)
 
@@ -540,7 +541,8 @@ def test_phenom_d_differentiability():
             phic=phic,
             inclination=inclination,
         )
-        return torch.cat([hc.real, hc.imag, hp.real, hp.imag])
+        out = torch.cat([hc.real, hc.imag, hp.real, hp.imag])
+        return out / out.abs().max()
 
     assert gradcheck(h, inputs)
 
@@ -593,6 +595,7 @@ def test_phenom_p_differentiability():
             phic=phic,
             inclination=inclination,
         )
-        return torch.cat([hc.real, hc.imag, hp.real, hp.imag])
+        out = torch.cat([hc.real, hc.imag, hp.real, hp.imag])
+        return out / out.abs().max()
 
     assert gradcheck(h, inputs)
