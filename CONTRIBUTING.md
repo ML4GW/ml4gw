@@ -85,7 +85,7 @@ measuring the impact of a change.
 
 When submitting a PR that modifies a performance-sensitive code path (e.g. a transform,
 waveform model, or spectral function), **run the relevant benchmarks on GPU hardware** and
-paste the `--benchmark-compare` table into your PR description so reviewers can see the
+paste the `compare_benchmarks.py` table into your PR description so reviewers can see the
 before/after delta.
 
 When submitting a PR that contains a new feature for which performance is important (e.g., 
