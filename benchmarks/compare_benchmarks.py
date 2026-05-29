@@ -4,6 +4,7 @@ from typing import Literal
 
 from jsonargparse import CLI
 from rich import box, print
+from rich.markup import escape
 from rich.table import Table
 
 
@@ -84,7 +85,7 @@ def main(
     baseline_stats = _load_json(baseline)
     current_stats = _load_json(current)
 
-    all_keys = sorted(set(baseline_stats.keys()) | set(current_stats.keys()))
+    all_keys = list(dict.fromkeys(list(baseline_stats) + list(current_stats)))
 
     if not all_keys:
         print("No benchmarks found in either file.")
@@ -105,7 +106,7 @@ def main(
     table.add_column("Delta", justify="left")
 
     for _, name, b_s, c_s, ind in results:
-        table.add_row(name, b_s, c_s, ind)
+        table.add_row(escape(name), b_s, c_s, ind)
 
     print(table)
 
