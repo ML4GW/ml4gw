@@ -234,6 +234,6 @@ def test_cbc_generator_differentiability():
             inclination=inclination,
         )
         out = torch.cat([hc, hp])
-        return out / out.abs().max()
+        return out * 1e21
 
     assert gradcheck(h, inputs)
