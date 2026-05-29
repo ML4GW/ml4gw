@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import torch
 from astropy import units as u
+from torch.autograd import gradcheck
 
 import ml4gw.waveforms as waveforms
 from ml4gw.waveforms.conversion import (
@@ -477,91 +478,121 @@ def test_phenom_d_finspin_out_of_bounds(finspin):
 
 
 def test_taylorf2_differentiability():
-    torch_freqs = torch.arange(20, 100, dtype=FLOAT64)
     f_ref = 20.0
+    model = waveforms.TaylorF2()
 
-    params = {
-        "chirp_mass": torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
-        "mass_ratio": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "chi1": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "chi2": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "distance": torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
-        "phic": torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
-        "inclination": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-    }
-
-    hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
-        torch_freqs,
-        f_ref=f_ref,
-        **params,
+    inputs = (
+        torch.arange(20, 50, dtype=FLOAT64, requires_grad=True),
+        torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
     )
 
-    loss = hc_ml4gw.abs().sum() + hp_ml4gw.abs().sum()
-    loss.backward()
+    def h(
+        freqs, chirp_mass, mass_ratio, chi1, chi2, distance, phic, inclination
+    ):
+        hc, hp = model(
+            freqs,
+            f_ref=f_ref,
+            chirp_mass=chirp_mass,
+            mass_ratio=mass_ratio,
+            chi1=chi1,
+            chi2=chi2,
+            distance=distance,
+            phic=phic,
+            inclination=inclination,
+        )
+        return torch.cat([hc.real, hc.imag, hp.real, hp.imag])
 
-    for param_name in params:
-        param = params[param_name]
-        assert param.grad is not None
-        assert not torch.isnan(param.grad).any()
+    assert gradcheck(h, inputs)
 
 
 def test_phenom_d_differentiability():
-    torch_freqs = torch.arange(20, 100, dtype=FLOAT64)
     f_ref = 20.0
+    model = waveforms.IMRPhenomD()
 
-    params = {
-        "chirp_mass": torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
-        "mass_ratio": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "chi1": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "chi2": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "distance": torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
-        "phic": torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
-        "inclination": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-    }
-
-    hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomD()(
-        torch_freqs,
-        f_ref=f_ref,
-        **params,
+    inputs = (
+        torch.arange(20, 50, dtype=FLOAT64, requires_grad=True),
+        torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
     )
 
-    loss = hc_ml4gw.abs().sum() + hp_ml4gw.abs().sum()
-    loss.backward()
+    def h(
+        freqs, chirp_mass, mass_ratio, chi1, chi2, distance, phic, inclination
+    ):
+        hc, hp = model(
+            freqs,
+            f_ref=f_ref,
+            chirp_mass=chirp_mass,
+            mass_ratio=mass_ratio,
+            chi1=chi1,
+            chi2=chi2,
+            distance=distance,
+            phic=phic,
+            inclination=inclination,
+        )
+        return torch.cat([hc.real, hc.imag, hp.real, hp.imag])
 
-    for param_name in params:
-        param = params[param_name]
-        assert param.grad is not None
-        assert not torch.isnan(param.grad).any()
+    assert gradcheck(h, inputs)
 
 
 def test_phenom_p_differentiability():
-    torch_freqs = torch.arange(20, 100, dtype=FLOAT64)
     f_ref = 20.0
+    model = waveforms.IMRPhenomPv2()
 
-    params = {
-        "chirp_mass": torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
-        "mass_ratio": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "s1x": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "s1y": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "s1z": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "s2x": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "s2y": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "s2z": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-        "distance": torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
-        "phic": torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
-        "inclination": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
-    }
-
-    hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
-        torch_freqs,
-        f_ref=f_ref,
-        **params,
+    inputs = (
+        torch.arange(20, 50, dtype=FLOAT64, requires_grad=True),
+        torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
     )
 
-    loss = hc_ml4gw.abs().sum() + hp_ml4gw.abs().sum()
-    loss.backward()
+    def h(
+        freqs,
+        chirp_mass,
+        mass_ratio,
+        s1x,
+        s1y,
+        s1z,
+        s2x,
+        s2y,
+        s2z,
+        distance,
+        phic,
+        inclination,
+    ):
+        hc, hp = model(
+            freqs,
+            f_ref=f_ref,
+            chirp_mass=chirp_mass,
+            mass_ratio=mass_ratio,
+            s1x=s1x,
+            s1y=s1y,
+            s1z=s1z,
+            s2x=s2x,
+            s2y=s2y,
+            s2z=s2z,
+            distance=distance,
+            phic=phic,
+            inclination=inclination,
+        )
+        return torch.cat([hc.real, hc.imag, hp.real, hp.imag])
 
-    for param_name in params:
-        param = params[param_name]
-        assert param.grad is not None
-        assert not torch.isnan(param.grad).any()
+    assert gradcheck(h, inputs)
