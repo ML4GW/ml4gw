@@ -11,6 +11,7 @@ from ml4gw.waveforms.conversion import (
 )
 
 TARGET_OVERLAP = 1 - 1e-7
+FLOAT64 = torch.float64
 
 
 @pytest.fixture(params=[20])
@@ -102,13 +103,13 @@ def test_taylor_f2(
     f_ref,
     sample_rate,
 ):
-    chirp_mass = torch.tensor([chirp_mass], dtype=torch.float64)
-    mass_ratio = torch.tensor([mass_ratio], dtype=torch.float64)
-    chi1 = torch.tensor([chi1], dtype=torch.float64)
-    chi2 = torch.tensor([chi2], dtype=torch.float64)
-    distance = torch.tensor([distance], dtype=torch.float64)
-    phase = torch.tensor([phase], dtype=torch.float64)
-    theta_jn = torch.tensor([theta_jn], dtype=torch.float64)
+    chirp_mass = torch.tensor([chirp_mass], dtype=FLOAT64)
+    mass_ratio = torch.tensor([mass_ratio], dtype=FLOAT64)
+    chi1 = torch.tensor([chi1], dtype=FLOAT64)
+    chi2 = torch.tensor([chi2], dtype=FLOAT64)
+    distance = torch.tensor([distance], dtype=FLOAT64)
+    phase = torch.tensor([phase], dtype=FLOAT64)
+    theta_jn = torch.tensor([theta_jn], dtype=FLOAT64)
 
     # Test that a difference in the length of a
     # parameter tensor raises an error
@@ -164,7 +165,7 @@ def test_taylor_f2(
     lal_mask = (lal_freqs > params["f_min"]) & (lal_freqs < params["f_max"])
 
     lal_freqs = lal_freqs[lal_mask]
-    torch_freqs = torch.tensor(lal_freqs, dtype=torch.float64)
+    torch_freqs = torch.tensor(lal_freqs, dtype=FLOAT64)
 
     # generate waveforms using ml4gw
     hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
@@ -231,13 +232,13 @@ def test_phenom_d(
     sample_rate,
     f_ref,
 ):
-    chirp_mass = torch.tensor([chirp_mass], dtype=torch.float64)
-    mass_ratio = torch.tensor([mass_ratio], dtype=torch.float64)
-    chi1 = torch.tensor([chi1], dtype=torch.float64)
-    chi2 = torch.tensor([chi2], dtype=torch.float64)
-    distance = torch.tensor([distance], dtype=torch.float64)
-    theta_jn = torch.tensor([theta_jn], dtype=torch.float64)
-    phase = torch.tensor([phase], dtype=torch.float64)
+    chirp_mass = torch.tensor([chirp_mass], dtype=FLOAT64)
+    mass_ratio = torch.tensor([mass_ratio], dtype=FLOAT64)
+    chi1 = torch.tensor([chi1], dtype=FLOAT64)
+    chi2 = torch.tensor([chi2], dtype=FLOAT64)
+    distance = torch.tensor([distance], dtype=FLOAT64)
+    theta_jn = torch.tensor([theta_jn], dtype=FLOAT64)
+    phase = torch.tensor([phase], dtype=FLOAT64)
 
     # Test that a difference in the length of a
     # parameter tensor raises an error
@@ -292,7 +293,7 @@ def test_phenom_d(
     lal_mask = (lal_freqs > params["f_min"]) & (lal_freqs < params["f_max"])
 
     lal_freqs = lal_freqs[lal_mask]
-    torch_freqs = torch.tensor(lal_freqs, dtype=torch.float64)
+    torch_freqs = torch.tensor(lal_freqs, dtype=FLOAT64)
 
     # generate waveforms using ml4gw
     hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomD()(
@@ -336,13 +337,13 @@ def test_phenom_p(
     sample_rate,
     f_ref,
 ):
-    chirp_mass = torch.tensor([chirp_mass], dtype=torch.float64)
-    mass_ratio = torch.tensor([mass_ratio], dtype=torch.float64)
-    chi1x, chi1y, chi1z = [torch.tensor(c, dtype=torch.float64) for c in chi1]
-    chi2x, chi2y, chi2z = [torch.tensor(c, dtype=torch.float64) for c in chi2]
-    distance = torch.tensor([distance], dtype=torch.float64)
-    theta_jn = torch.tensor([theta_jn], dtype=torch.float64)
-    phase = torch.tensor([phase], dtype=torch.float64)
+    chirp_mass = torch.tensor([chirp_mass], dtype=FLOAT64)
+    mass_ratio = torch.tensor([mass_ratio], dtype=FLOAT64)
+    chi1x, chi1y, chi1z = [torch.tensor(c, dtype=FLOAT64) for c in chi1]
+    chi2x, chi2y, chi2z = [torch.tensor(c, dtype=FLOAT64) for c in chi2]
+    distance = torch.tensor([distance], dtype=FLOAT64)
+    theta_jn = torch.tensor([theta_jn], dtype=FLOAT64)
+    phase = torch.tensor([phase], dtype=FLOAT64)
 
     mass_1, mass_2 = chirp_mass_and_mass_ratio_to_components(
         chirp_mass, mass_ratio
@@ -403,7 +404,7 @@ def test_phenom_p(
     lal_mask = (lal_freqs > params["f_min"]) & (lal_freqs < params["f_max"])
 
     lal_freqs = lal_freqs[lal_mask]
-    torch_freqs = torch.tensor(lal_freqs, dtype=torch.float64)
+    torch_freqs = torch.tensor(lal_freqs, dtype=FLOAT64)
 
     hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
         torch_freqs,
@@ -468,8 +469,99 @@ def test_phenom_p(
 
 @pytest.mark.parametrize("finspin", [-1.1, 1.1])
 def test_phenom_d_finspin_out_of_bounds(finspin):
-    finspin_tensor = torch.tensor([finspin], dtype=torch.float64)
+    finspin_tensor = torch.tensor([finspin], dtype=FLOAT64)
     with pytest.raises(
         RuntimeError, match="Final spin is outside the QNM data grid"
     ):
         waveforms.IMRPhenomD()._linear_interp_finspin(finspin_tensor)
+
+
+def test_taylorf2_differentiability():
+    torch_freqs = torch.arange(20, 100, dtype=FLOAT64)
+    f_ref = 20.0
+
+    params = {
+        "chirp_mass": torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        "mass_ratio": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "chi1": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "chi2": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "distance": torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        "phic": torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        "inclination": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+    }
+
+    hc_ml4gw, hp_ml4gw = waveforms.TaylorF2()(
+        torch_freqs,
+        f_ref=f_ref,
+        **params,
+    )
+
+    loss = hc_ml4gw.abs().sum() + hp_ml4gw.abs().sum()
+    loss.backward()
+
+    for param_name in params:
+        param = params[param_name]
+        assert param.grad is not None
+        assert not torch.isnan(param.grad).any()
+
+
+def test_phenom_d_differentiability():
+    torch_freqs = torch.arange(20, 100, dtype=FLOAT64)
+    f_ref = 20.0
+
+    params = {
+        "chirp_mass": torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        "mass_ratio": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "chi1": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "chi2": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "distance": torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        "phic": torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        "inclination": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+    }
+
+    hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomD()(
+        torch_freqs,
+        f_ref=f_ref,
+        **params,
+    )
+
+    loss = hc_ml4gw.abs().sum() + hp_ml4gw.abs().sum()
+    loss.backward()
+
+    for param_name in params:
+        param = params[param_name]
+        assert param.grad is not None
+        assert not torch.isnan(param.grad).any()
+
+
+def test_phenom_p_differentiability():
+    torch_freqs = torch.arange(20, 100, dtype=FLOAT64)
+    f_ref = 20.0
+
+    params = {
+        "chirp_mass": torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        "mass_ratio": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "s1x": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "s1y": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "s1z": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "s2x": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "s2y": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "s2z": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        "distance": torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        "phic": torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        "inclination": torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+    }
+
+    hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
+        torch_freqs,
+        f_ref=f_ref,
+        **params,
+    )
+
+    loss = hc_ml4gw.abs().sum() + hp_ml4gw.abs().sum()
+    loss.backward()
+
+    for param_name in params:
+        param = params[param_name]
+        assert param.grad is not None
+        assert not torch.isnan(param.grad).any()
