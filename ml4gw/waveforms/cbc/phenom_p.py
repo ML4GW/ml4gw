@@ -374,9 +374,7 @@ class IMRPhenomPv2(IMRPhenomD):
         x = torch.linspace(0.8, 1.2, n_fixed, device=fRD.device)
         fRDs = torch.outer(fRD, x)
         delta_fRds = (1.2 * fRD - 0.8 * fRD) / (n_fixed - 1)
-        MfRDs = torch.zeros_like(fRDs)
-        for i in range(fRD.shape[0]):
-            MfRDs[i, :] = torch.outer(M_s, fRDs[i, :])[i, :]
+        MfRDs = M_s.unsqueeze(-1) * fRDs
         RD_phase = self.phenom_d_phase(
             MfRDs, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
         )[0]

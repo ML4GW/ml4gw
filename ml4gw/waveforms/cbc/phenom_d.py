@@ -193,8 +193,8 @@ class IMRPhenomD(TaylorF2):
         )
 
         # Geometric peak and joining frequencies
-        Mf_peak = (torch.ones_like(Mf).mT * Mf_peak).mT
-        Mf_join_ins = 0.014 * torch.ones_like(Mf)
+        Mf_peak = Mf_peak.unsqueeze(-1)
+        Mf_join_ins = 0.014
 
         # construct full IMR Amp
         theta_minus_f1 = (Mf <= Mf_join_ins).type_as(Mf)
@@ -233,8 +233,8 @@ class IMRPhenomD(TaylorF2):
         # Geometric frequency definition from PhenomD header file
         AMP_fJoin_INS = 0.014
 
-        Mf1 = AMP_fJoin_INS * torch.ones_like(Mf)
-        Mf3 = (torch.ones_like(Mf).mT * Mf_peak).mT
+        Mf1 = Mf.new_full((Mf.shape[0], 1), AMP_fJoin_INS)
+        Mf3 = Mf_peak.unsqueeze(-1)
         dfx = 0.5 * (Mf3 - Mf1)
         Mf2 = Mf1 + dfx
 
@@ -242,9 +242,7 @@ class IMRPhenomD(TaylorF2):
             Mf1, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
         )
         v3, d2 = self.phenom_d_mrd_amp(Mf3, fRD, fDM, gamma1, gamma2, gamma3)
-        v2 = (
-            torch.ones_like(Mf).mT * self.AmpIntColFitCoeff(eta, eta2, xi)
-        ).mT
+        v2 = self.AmpIntColFitCoeff(eta, eta2, xi).unsqueeze(-1)
 
         delta_0, delta_1, delta_2, delta_3, delta_4 = self.delta_values(
             f1=Mf1, f2=Mf2, f3=Mf3, v1=v1, v2=v2, v3=v3, d1=d1, d2=d2
@@ -262,8 +260,8 @@ class IMRPhenomD(TaylorF2):
 
     def phenom_d_mrd_amp(self, Mf, fRD, fDM, gamma1, gamma2, gamma3):
         fDMgamma3 = fDM * gamma3
-        pow2_fDMgamma3 = (torch.ones_like(Mf).mT * fDMgamma3 * fDMgamma3).mT
-        fminfRD = Mf - (torch.ones_like(Mf).mT * fRD).mT
+        pow2_fDMgamma3 = (fDMgamma3 * fDMgamma3).unsqueeze(-1)
+        fminfRD = Mf - fRD.unsqueeze(-1)
         exp_part = torch.exp(fminfRD.mT * gamma2 / fDMgamma3).mT
         exp_times_lorentzian = exp_part * (fminfRD**2 + pow2_fDMgamma3)
 
@@ -413,7 +411,7 @@ class IMRPhenomD(TaylorF2):
         # definitions in Eq. (35) of arXiv:1508.07253
         # PHI_fJoin_INS in header LALSimIMRPhenomD.h
         # C1 continuity at intermediate region i.e. f_1
-        PHI_fJoin_INS = 0.018 * torch.ones_like(Mf)
+        PHI_fJoin_INS = Mf.new_full((Mf.shape[0], 1), 0.018)
         ins_phase_f1, ins_Dphase_f1 = self.phenom_d_inspiral_phase(
             PHI_fJoin_INS, mass_1, mass_2, eta, eta2, xi, chi1, chi2
         )
@@ -425,7 +423,7 @@ class IMRPhenomD(TaylorF2):
             ins_phase_f1 - (int_phase_f1.mT / eta).mT - C2Int * PHI_fJoin_INS
         )
         # C1 continuity at ringdown
-        fRDJoin = (0.5 * torch.ones_like(Mf).mT * fRD).mT
+        fRDJoin = 0.5 * fRD.unsqueeze(-1)
         int_phase_rd, int_Dphase_rd = self.phenom_d_int_phase(
             fRDJoin, eta, eta2, xi
         )

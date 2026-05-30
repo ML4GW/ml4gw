@@ -97,7 +97,7 @@ class TaylorF2(torch.nn.Module):
         eta = mass1_s * mass2_s / M_s / M_s
 
         Mf = torch.outer(M_s, f)
-        Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
+        Mf_ref = M_s.unsqueeze(-1) * f_ref
 
         Psi, _ = self.taylorf2_phase(Mf, mass1, mass2, chi1, chi2)
         Psi_ref, _ = self.taylorf2_phase(Mf_ref, mass1, mass2, chi1, chi2)
