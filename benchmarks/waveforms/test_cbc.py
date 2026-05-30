@@ -7,28 +7,35 @@ from ml4gw.waveforms import IMRPhenomD, IMRPhenomPv2, TaylorF2
 F_REF = 20.0
 F_MIN = 20.0
 F_MAX = 1024.0
-DELTA_F = 1.0 / 4.0  # 4-second duration
-FREQS = torch.arange(F_MIN, F_MAX, DELTA_F, dtype=torch.float64)
 
 
-def test_taylorf2_forward(benchmark, cbc_inputs, device, maybe_sync):
+def test_taylorf2_forward(benchmark, cbc_inputs, duration, device, maybe_sync):
     model = TaylorF2().to(device)
-    benchmark(maybe_sync(model), FREQS.to(device), **cbc_inputs, f_ref=F_REF)
+    freqs = torch.arange(F_MIN, F_MAX, 1.0 / duration, dtype=torch.float64).to(
+        device
+    )
+    benchmark(maybe_sync(model), freqs, **cbc_inputs, f_ref=F_REF)
 
 
-def test_phenomd_forward(benchmark, cbc_inputs, device, maybe_sync):
+def test_phenomd_forward(benchmark, cbc_inputs, duration, device, maybe_sync):
     model = IMRPhenomD().to(device)
-    benchmark(maybe_sync(model), FREQS.to(device), **cbc_inputs, f_ref=F_REF)
+    freqs = torch.arange(F_MIN, F_MAX, 1.0 / duration, dtype=torch.float64).to(
+        device
+    )
+    benchmark(maybe_sync(model), freqs, **cbc_inputs, f_ref=F_REF)
 
 
 def test_phenompv2_forward(
-    benchmark, cbc_inputs, spin_vectors, device, maybe_sync
+    benchmark, cbc_inputs, spin_vectors, duration, device, maybe_sync
 ):
     model = IMRPhenomPv2().to(device)
     (s1x, s1y, s1z), (s2x, s2y, s2z) = spin_vectors
+    freqs = torch.arange(F_MIN, F_MAX, 1.0 / duration, dtype=torch.float64).to(
+        device
+    )
     benchmark(
         maybe_sync(model),
-        FREQS.to(device),
+        freqs,
         cbc_inputs["chirp_mass"],
         cbc_inputs["mass_ratio"],
         s1x,

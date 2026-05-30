@@ -27,6 +27,11 @@ def cbc_inputs(batch_size, device):
     }
 
 
+@pytest.fixture(params=[2, 4, 8], ids=lambda x: f"dur_{x}")
+def duration(request):
+    return float(request.param)
+
+
 @pytest.fixture
 def spin_vectors(batch_size, device):
     dtype = torch.float64

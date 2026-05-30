@@ -97,7 +97,7 @@ class TaylorF2(torch.nn.Module):
         eta = mass1_s * mass2_s / M_s / M_s
 
         Mf = torch.outer(M_s, f)
-        Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
+        Mf_ref = M_s.unsqueeze(-1) * f_ref
 
         Psi, _ = self.taylorf2_phase(Mf, mass1, mass2, chi1, chi2)
         Psi_ref, _ = self.taylorf2_phase(Mf_ref, mass1, mass2, chi1, chi2)
@@ -154,7 +154,6 @@ class TaylorF2(torch.nn.Module):
         chi1sq = chi1 * chi1
         chi2sq = chi2 * chi2
 
-        v0 = torch.ones_like(Mf)
         v1 = (PI * Mf) ** (1.0 / 3.0)
         v2 = v1 * v1
         v3 = v2 * v1
@@ -169,7 +168,7 @@ class TaylorF2(torch.nn.Module):
         # Phase coeffeciencts from https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c  # noqa E501
         pfaN = 3.0 / (128.0 * eta)
         pfa_v0 = 1.0
-        pfa_v1 = 0.0
+        # pfa_v1 = 0; no need to calculate terms involving it
         pfa_v2 = 5.0 * (74.3 / 8.4 + 11.0 * eta) / 9.0
         pfa_v3 = -16.0 * PI
         # SO contributions at 1.5 PN
@@ -312,8 +311,8 @@ class TaylorF2(torch.nn.Module):
         phasing += (v4.mT * pfa_v4).mT
         phasing += (v3.mT * pfa_v3).mT
         phasing += (v2.mT * pfa_v2).mT
-        phasing += (v1.mT * pfa_v1).mT
-        phasing += (v0.mT * pfa_v0).mT
+        # v0 = v^0 = 1; scalar arithmetic avoids allocating a ones_like(Mf)
+        phasing += pfa_v0
         # Divide by 0PN v-dependence
         phasing /= v5
         # Multiply by 0PN coefficient
@@ -328,8 +327,7 @@ class TaylorF2(torch.nn.Module):
         Dphasing += (-1.0 * v4.mT * pfa_v4).mT
         Dphasing += (-2.0 * v3.mT * pfa_v3).mT
         Dphasing += (-3.0 * v2.mT * pfa_v2).mT
-        Dphasing += (-4.0 * v1.mT * pfa_v1).mT
-        Dphasing += -5.0 * v0
+        Dphasing -= 5.0
         Dphasing /= 3.0 * v1 * v7
         Dphasing *= PI
         Dphasing = (Dphasing.mT * pfaN).mT
