@@ -100,6 +100,7 @@ class IMRPhenomD(TaylorF2):
         xi = -1.0 + chi
         M_s = total_mass * MTSUN_SI
 
+        gamma1 = self.gamma1_fun(eta, eta2, xi)
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
 
@@ -110,7 +111,7 @@ class IMRPhenomD(TaylorF2):
         )
 
         Mf = torch.outer(M_s, f)
-        Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
+        Mf_ref = M_s.unsqueeze(-1) * f_ref
 
         Psi, _ = self.phenom_d_phase(
             Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM
@@ -125,8 +126,6 @@ class IMRPhenomD(TaylorF2):
 
         amp, _ = self.phenom_d_amp(
             Mf,
-            mass_1,
-            mass_2,
             eta,
             eta2,
             Seta,
@@ -135,9 +134,12 @@ class IMRPhenomD(TaylorF2):
             chi12,
             chi22,
             xi,
-            distance,
             fRD,
             fDM,
+            gamma1,
+            gamma2,
+            gamma3,
+            Mf_peak,
         )
 
         amp_0 = self.taylorf2_amplitude(
@@ -151,8 +153,6 @@ class IMRPhenomD(TaylorF2):
     def phenom_d_amp(
         self,
         Mf,
-        mass_1,
-        mass_2,
         eta,
         eta2,
         Seta,
@@ -161,24 +161,37 @@ class IMRPhenomD(TaylorF2):
         chi12,
         chi22,
         xi,
-        distance,
         fRD,
         fDM,
+        gamma1,
+        gamma2,
+        gamma3,
+        Mf_peak,
     ):
         ins_amp, ins_Damp = self.phenom_d_inspiral_amp(
             Mf, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
         )
         int_amp, int_Damp = self.phenom_d_int_amp(
-            Mf, eta, eta2, Seta, chi1, chi2, chi12, chi22, xi, fRD, fDM
+            Mf,
+            eta,
+            eta2,
+            Seta,
+            chi1,
+            chi2,
+            chi12,
+            chi22,
+            xi,
+            fRD,
+            fDM,
+            gamma1,
+            gamma2,
+            gamma3,
+            Mf_peak,
         )
         mrd_amp, mrd_Damp = self.phenom_d_mrd_amp(
-            Mf, eta, eta2, chi1, chi2, xi, fRD, fDM
+            Mf, fRD, fDM, gamma1, gamma2, gamma3
         )
 
-        gamma2 = self.gamma2_fun(eta, eta2, xi)
-        gamma3 = self.gamma3_fun(eta, eta2, xi)
-
-        Mf_peak = self.fmaxCalc(fRD, fDM, gamma2, gamma3)
         # Geometric peak and joining frequencies
         Mf_peak = (torch.ones_like(Mf).mT * Mf_peak).mT
         Mf_join_ins = 0.014 * torch.ones_like(Mf)
@@ -212,25 +225,23 @@ class IMRPhenomD(TaylorF2):
         xi,
         fRD,
         fDM,
+        gamma1,
+        gamma2,
+        gamma3,
+        Mf_peak,
     ):
         # Geometric frequency definition from PhenomD header file
         AMP_fJoin_INS = 0.014
 
         Mf1 = AMP_fJoin_INS * torch.ones_like(Mf)
-        gamma2 = self.gamma2_fun(eta, eta2, xi)
-        gamma3 = self.gamma3_fun(eta, eta2, xi)
-
-        fpeak = self.fmaxCalc(fRD, fDM, gamma2, gamma3)
-        Mf3 = (torch.ones_like(Mf).mT * fpeak).mT
+        Mf3 = (torch.ones_like(Mf).mT * Mf_peak).mT
         dfx = 0.5 * (Mf3 - Mf1)
         Mf2 = Mf1 + dfx
 
         v1, d1 = self.phenom_d_inspiral_amp(
             Mf1, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
         )
-        v3, d2 = self.phenom_d_mrd_amp(
-            Mf3, eta, eta2, chi1, chi2, xi, fRD, fDM
-        )
+        v3, d2 = self.phenom_d_mrd_amp(Mf3, fRD, fDM, gamma1, gamma2, gamma3)
         v2 = (
             torch.ones_like(Mf).mT * self.AmpIntColFitCoeff(eta, eta2, xi)
         ).mT
@@ -249,10 +260,7 @@ class IMRPhenomD(TaylorF2):
         )
         return amp, Damp
 
-    def phenom_d_mrd_amp(self, Mf, eta, eta2, chi1, chi2, xi, fRD, fDM):
-        gamma1 = self.gamma1_fun(eta, eta2, xi)
-        gamma2 = self.gamma2_fun(eta, eta2, xi)
-        gamma3 = self.gamma3_fun(eta, eta2, xi)
+    def phenom_d_mrd_amp(self, Mf, fRD, fDM, gamma1, gamma2, gamma3):
         fDMgamma3 = fDM * gamma3
         pow2_fDMgamma3 = (torch.ones_like(Mf).mT * fDMgamma3 * fDMgamma3).mT
         fminfRD = Mf - (torch.ones_like(Mf).mT * fRD).mT

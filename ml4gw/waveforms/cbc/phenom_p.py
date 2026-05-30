@@ -333,6 +333,11 @@ class IMRPhenomPv2(IMRPhenomD):
         # pass M_s * ringdown and M_s * damping frequency to PhenomD functions
         MfRD, MfDM = M_s * fRD, M_s * fDM
 
+        gamma1 = self.gamma1_fun(eta, eta2, xi)
+        gamma2 = self.gamma2_fun(eta, eta2, xi)
+        gamma3 = self.gamma3_fun(eta, eta2, xi)
+        Mf_peak = self.fmaxCalc(MfRD, MfDM, gamma2, gamma3)
+
         phase, _ = self.phenom_d_phase(
             Mf, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
         )
@@ -342,8 +347,6 @@ class IMRPhenomPv2(IMRPhenomD):
 
         Amp = self.phenom_d_amp(
             Mf,
-            m1,
-            m2,
             eta,
             eta2,
             Seta,
@@ -352,9 +355,12 @@ class IMRPhenomPv2(IMRPhenomD):
             chi12,
             chi22,
             xi,
-            distance,
             MfRD,
             MfDM,
+            gamma1,
+            gamma2,
+            gamma3,
+            Mf_peak,
         )[0]
         Amp0 = self.get_Amp0(Mf, eta)
         dist_s = distance * MPC_SEC
