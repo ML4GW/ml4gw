@@ -1,5 +1,6 @@
 """Benchmarks for TimeDomainCBCWaveformGenerator."""
 
+import pytest
 from constants import SAMPLE_RATE
 
 from ml4gw.waveforms import IMRPhenomD
@@ -7,19 +8,25 @@ from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
 from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
 
 DURATION = 4.0
-F_MIN = 20.0
-F_REF = 20.0
 RIGHT_PAD = 0.5
 
 
-def test_td_generator_forward(benchmark, cbc_inputs, device, maybe_sync):
+# f_min controls chirp length, which controls n_freqs.
+@pytest.fixture(params=[20.0, 30.0, 40.0], ids=lambda x: f"fmin_{int(x)}")
+def f_min(request):
+    return request.param
+
+
+def test_td_generator_forward(
+    benchmark, cbc_inputs, f_min, device, maybe_sync
+):
     approximant = IMRPhenomD().to(device)
     model = TimeDomainCBCWaveformGenerator(
         approximant=approximant,
         sample_rate=SAMPLE_RATE,
         duration=DURATION,
-        f_min=F_MIN,
-        f_ref=F_REF,
+        f_min=f_min,
+        f_ref=f_min,
         right_pad=RIGHT_PAD,
     ).to(device)
 
