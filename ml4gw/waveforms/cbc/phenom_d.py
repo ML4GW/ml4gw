@@ -502,9 +502,8 @@ class IMRPhenomD(TaylorF2):
         int_Dphasing = (int_Dphasing.mT / eta).mT
         return int_phasing, int_Dphasing
 
-    def subtract3PNSS(self, Mf, mass1, mass2, eta, eta2, xi, chi1, chi2):
+    def subtract3PNSS(self, Mf, mass1, mass2, eta, chi1, chi2):
         M = mass1 + mass2
-        eta = mass1 * mass2 / M / M
         m1byM = mass1 / M
         m2byM = mass2 / M
         chi1sq = chi1 * chi1
@@ -559,7 +558,7 @@ class IMRPhenomD(TaylorF2):
         # implementation, but was not available when PhenomD was tuned.
         # refer https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimIMRPhenomD.c#L397-398 # noqa: E501
         pn_ss3, Dpn_ss3 = self.subtract3PNSS(
-            Mf, mass_1, mass_2, eta, eta2, xi, chi1, chi2
+            Mf, mass_1, mass_2, eta, chi1, chi2
         )
         ins_phasing -= pn_ss3
         ins_Dphasing -= Dpn_ss3

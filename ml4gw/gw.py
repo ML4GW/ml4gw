@@ -175,13 +175,7 @@ def shift_responses(
     idx -= dt[:, :, None]
     idx %= idx.shape[-1]
 
-    # unfortunately I can't figure out how to do this
-    # last step without doing looping over the ifos
-    rolled = []
-    for i in range(len(vertices)):
-        ifo = torch.gather(responses[:, i], 1, idx[:, i])
-        rolled.append(ifo)
-    return torch.stack(rolled, axis=1)
+    return torch.gather(responses, 2, idx)
 
 
 def compute_observed_strain(
@@ -278,7 +272,7 @@ def get_ifo_geometry(
 
     tensors = torch.stack(tensors)
     vertices = torch.stack(vertices)
-    return torch.Tensor(tensors), torch.Tensor(vertices)
+    return tensors, vertices
 
 
 def compute_ifo_snr(
