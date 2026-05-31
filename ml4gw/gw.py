@@ -165,15 +165,9 @@ def shift_responses(
 
     # rolling by gathering implementation based on
     # https://stackoverflow.com/a/68641864
-    # start by just creating a big arange along the last axis
-    idx = torch.ones_like(responses).type(torch.int64)
-    idx = torch.cumsum(idx, axis=-1) - 1
-
-    # apply the offset to the indices along the last axis,
-    # then modulo by the waveform size to make all the
-    # specified indices legitimate and unique
-    idx -= dt[:, :, None]
-    idx %= idx.shape[-1]
+    n = responses.shape[-1]
+    idx = torch.arange(n, dtype=torch.int64, device=responses.device)
+    idx = (idx - dt[:, :, None]) % n
 
     return torch.gather(responses, 2, idx)
 
