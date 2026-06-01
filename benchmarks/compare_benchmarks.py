@@ -7,8 +7,28 @@ from rich import box, print
 from rich.markup import escape
 from rich.table import Table
 
+ROOT_DIR = Path(__file__).parent.parent
 
-def _load_json(path: Path) -> dict:
+
+def _find_json(identifier: str) -> Path:
+    if Path(identifier).is_file():
+        return Path(identifier)
+
+    matches = list((ROOT_DIR / ".benchmarks").rglob(f"*{identifier}*.json"))
+    if not matches:
+        raise FileNotFoundError(
+            f"No benchmark JSON file found matching: {identifier}"
+        )
+    if len(matches) > 1:
+        raise ValueError(
+            f"Multiple benchmark JSON files found matching: {identifier}\n"
+            + "\n".join(str(m) for m in matches)
+        )
+    return matches[0]
+
+
+def _load_json(identifier: str) -> dict:
+    path = _find_json(identifier)
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
     with open(path) as f:
@@ -67,8 +87,8 @@ def _compare_key(
 
 
 def main(
-    baseline: Path,
-    current: Path,
+    baseline: str,
+    current: str,
     metric: Literal["min", "max", "mean", "median"] = "median",
     threshold: float = 5.0,
     sort: bool = False,
@@ -76,8 +96,12 @@ def main(
     """Compare benchmarks between two JSON files from pytest-benchmark.
 
     Args:
-        baseline: Path to the baseline JSON file.
-        current: Path to the current JSON file.
+        baseline: Identifier for the baseline JSON file
+            (can be a filename or a substring to search for in .benchmarks
+            in the repository root).
+        current: Identifier for the current JSON file
+            (can be a filename or a substring to search for in .benchmarks
+            in the repository root).
         metric: The metric to compare (min, max, mean, median).
         threshold: Percentage threshold for highlighting differences.
         sort: Whether to sort the output by percent change in the metric.
