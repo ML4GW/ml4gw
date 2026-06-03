@@ -8,7 +8,6 @@ windows.
 import torch
 from jaxtyping import Float, Int64
 from torch import Tensor
-from torch.nn.functional import unfold
 
 from ..types import TimeSeries1d, TimeSeries1to3d, TimeSeries2d, TimeSeries3d
 
@@ -69,22 +68,15 @@ def unfold_windows(
             x, [x.shape[-1] - remainder, remainder], dim=-1
         )
 
-    reshape = list(x.shape[:-1])
-    if x.ndim == 1:
-        x = x[None, None, None, :]
-    elif x.ndim == 2:
-        x = x[None, :, None, :]
+    unfolded = x.unfold(-1, window_size, stride)
+    if x.ndim == 2:
+        unfolded = unfolded.permute(1, 0, 2)
     elif x.ndim == 3:
-        x = x[:, :, None, :]
-
-    x = unfold(x, (1, num_windows), dilation=(1, stride))
-    reshape += [num_windows, -1]
-    x = x.reshape(*reshape)
-    x = x.transpose(1, -2).transpose(0, 1)
+        unfolded = unfolded.permute(2, 0, 1, 3)
 
     if not drop_last:
-        return x, remainder[None]
-    return x
+        return unfolded, remainder[None]
+    return unfolded
 
 
 def slice_kernels(

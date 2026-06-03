@@ -1,9 +1,9 @@
 import torch
+import torch.nn.functional as F
 from jaxtyping import Float
 from torch import Tensor
 
 from ..types import TimeSeries1to3d
-from ..utils.slicing import unfold_windows
 
 
 class ShiftedPearsonCorrelation(torch.nn.Module):
@@ -71,19 +71,35 @@ class ShiftedPearsonCorrelation(torch.nn.Module):
         # pad x along time dimension so that it has shape
         # batch x channels x (time + 2 * max_shift)
         pad = (self.max_shift, self.max_shift)
-        x = torch.nn.functional.pad(x, pad)
-
-        # num_windows x batch x channels x time
-        x = unfold_windows(x, dim, 1)
-
-        # now compute the correlation between each window
-        # of x and the single window of y. Start by de-meaning
-        x = x - x.mean(-1, keepdims=True)
+        x = F.pad(x, pad)
         y = y - y.mean(-1, keepdims=True)
 
-        # apply formula and sum along time dimension to give final shape
-        # num_windows x batch x channels
-        corr = (x * y).sum(axis=-1)
-        norm = (x**2).sum(-1) * (y**2).sum(-1)
+        num_shifts = 2 * self.max_shift + 1
+        n_fft = 2 * (dim + self.max_shift)
 
-        return corr / norm**0.5
+        # Compute correlation via FFT
+        x_fft = torch.fft.rfft(x, n=n_fft, dim=-1)
+        y_fft = torch.fft.rfft(y, n=n_fft, dim=-1)
+
+        corr = torch.fft.irfft(x_fft * y_fft.conj(), n=n_fft, dim=-1)
+        corr = corr[..., :num_shifts]
+        corr = corr.movedim(-1, 0)
+
+        # Compute the variance of x at each shift via cumsum
+        cumsum_x = F.pad(torch.cumsum(x, dim=-1), (1, 0))
+        cumsum_x2 = F.pad(torch.cumsum(x**2, dim=-1), (1, 0))
+        window_sum_x = (
+            cumsum_x[..., dim : dim + num_shifts] - cumsum_x[..., :num_shifts]
+        )
+        window_sum_x2 = (
+            cumsum_x2[..., dim : dim + num_shifts]
+            - cumsum_x2[..., :num_shifts]
+        )
+
+        var_x = window_sum_x2 - (window_sum_x**2) / dim
+        var_y = (y**2).sum(-1)
+
+        norm = (var_x * var_y.unsqueeze(-1)) ** 0.5
+        norm = norm.movedim(-1, 0)
+
+        return corr / norm
