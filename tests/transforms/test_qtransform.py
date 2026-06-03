@@ -113,6 +113,24 @@ def test_singleqtransform(
     assert list(transformed.shape[-2:]) == spectrogram_shape
 
 
+def test_compute_qtiles_invalid_norm():
+    qtransform = SingleQTransform(
+        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+    )
+    X = torch.randn(1024)
+    with pytest.raises(ValueError, match="Invalid normalisation"):
+        qtransform.compute_qtiles(X, norm="invalid")
+
+
+def test_compute_qtiles_2d_input():
+    qtransform = SingleQTransform(
+        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+    )
+    X = torch.randn(2, 1024)
+    qtransform.compute_qtiles(X, norm=None)
+    assert all(t.shape[0] == 1 and t.shape[1] == 2 for t in qtransform.qtiles)
+
+
 def test_get_max_energy_invalid_dimension():
     qtransform = SingleQTransform(
         1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
