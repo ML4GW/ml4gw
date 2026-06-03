@@ -16,8 +16,7 @@ class SplineInterpolateBase(torch.nn.Module):
         basis_matrix = self.bspline_basis_natural(x, k, knots)
         identity = torch.eye(basis_matrix.shape[-1])
         B_T_B = basis_matrix.T @ basis_matrix + s * identity
-        L = torch.linalg.cholesky(B_T_B)
-        return knots, basis_matrix, L
+        return knots, basis_matrix, B_T_B
 
     def generate_fitpack_knots(self, x: Tensor, k: int) -> Tensor:
         """
@@ -223,10 +222,10 @@ class SplineInterpolate1D(SplineInterpolateBase):
         self.register_buffer("x_in", x_in)
         self.register_buffer("x_out", x_out)
 
-        tx, Bx, BxT_Bx_L = self._compute_knots_and_basis_matrices(x_in, kx, sx)
+        tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(x_in, kx, sx)
         self.register_buffer("tx", tx)
         self.register_buffer("Bx", Bx)
-        self.register_buffer("BxT_Bx_L", BxT_Bx_L)
+        self.register_buffer("BxT_Bx_L", torch.linalg.cholesky(BxT_Bx))
 
         if self.x_out is not None:
             x_clamped = torch.clamp(x_out, tx[kx], tx[-kx - 1])
@@ -402,15 +401,15 @@ class SplineInterpolate2D(SplineInterpolateBase):
         self.register_buffer("x_out", x_out)
         self.register_buffer("y_out", y_out)
 
-        tx, Bx, BxT_Bx_L = self._compute_knots_and_basis_matrices(x_in, kx, sx)
+        tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(x_in, kx, sx)
         self.register_buffer("tx", tx)
         self.register_buffer("Bx", Bx)
-        self.register_buffer("BxT_Bx_L", BxT_Bx_L)
+        self.register_buffer("BxT_Bx", BxT_Bx)
 
-        ty, By, ByT_By_L = self._compute_knots_and_basis_matrices(y_in, ky, sy)
+        ty, By, ByT_By = self._compute_knots_and_basis_matrices(y_in, ky, sy)
         self.register_buffer("ty", ty)
         self.register_buffer("By", By)
-        self.register_buffer("ByT_By_L", ByT_By_L)
+        self.register_buffer("ByT_By", ByT_By)
 
         if self.x_out is not None:
             x_clamped = torch.clamp(x_out, tx[kx], tx[-kx - 1])
@@ -425,13 +424,13 @@ class SplineInterpolate2D(SplineInterpolateBase):
         # ByT @ Z @ Bx, handling batch/channel dimensions
         ByT_Z_Bx = torch.einsum("ij,bcik,kl->bcjl", self.By, Z, self.Bx)
         # Solve (ByT @ By) E = ByT @ Z @ Bx  ->  E = By^-1 @ Z @ Bx
-        E = torch.cholesky_solve(ByT_Z_Bx, self.ByT_By_L)
+        E = torch.linalg.solve(self.ByT_By, ByT_Z_Bx)
         # Solve (BxT @ Bx) CT = ET  ->  C = By^-1 @ Z @ Bx^-T
-        # Make E.mT contiguous to avoid an implicit copy
-        # and free E to reduce peak memory.
+        # Make E.mT contiguous to avoid an implicit copy and free E to
+        # reduce peak memory.
         E_T = E.mT.contiguous()
         del E
-        C_T = torch.cholesky_solve(E_T, self.BxT_Bx_L)
+        C_T = torch.linalg.solve(self.BxT_Bx, E_T)
         del E_T
         return C_T.mT
 
