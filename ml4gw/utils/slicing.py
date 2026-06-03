@@ -51,6 +51,14 @@ def unfold_windows(
        If ``drop_last`` is false, returns the remainder of the
        timeseries, shaped to be compatible with the returned
        unfolded tensor
+
+    .. note::
+       The returned tensor is a strided view of the input, not a copy.
+       When ``stride < window_size``, adjacent windows share overlapping
+       memory. In-place operations on the result are unsafe in that case:
+       elements in the overlap region will be written multiple times,
+       producing incorrect values. Use out-of-place operations if the
+       result needs to be modified.
     """
 
     num_windows = (x.shape[-1] - window_size) // stride + 1
