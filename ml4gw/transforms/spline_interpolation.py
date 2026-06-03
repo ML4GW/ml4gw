@@ -16,7 +16,8 @@ class SplineInterpolateBase(torch.nn.Module):
         basis_matrix = self.bspline_basis_natural(x, k, knots)
         identity = torch.eye(basis_matrix.shape[-1])
         B_T_B = basis_matrix.T @ basis_matrix + s * identity
-        return knots, basis_matrix, B_T_B
+        L = torch.linalg.cholesky(B_T_B)
+        return knots, basis_matrix, L
 
     def generate_fitpack_knots(self, x: Tensor, k: int) -> Tensor:
         """
@@ -150,9 +151,7 @@ class SplineInterpolateBase(torch.nn.Module):
         for d in range(1, k + 1):
             L, R = self.compute_L_R(x, t, d, m)
             left = L * b[:, :, d - 1]
-
             temp_b = torch.cat([b[:, 1:, d - 1], zeros_tensor], dim=1)
-
             right = R * temp_b
             b[:, :, d] = left + right
 
@@ -224,10 +223,10 @@ class SplineInterpolate1D(SplineInterpolateBase):
         self.register_buffer("x_in", x_in)
         self.register_buffer("x_out", x_out)
 
-        tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(x_in, kx, sx)
+        tx, Bx, BxT_Bx_L = self._compute_knots_and_basis_matrices(x_in, kx, sx)
         self.register_buffer("tx", tx)
         self.register_buffer("Bx", Bx)
-        self.register_buffer("BxT_Bx", BxT_Bx)
+        self.register_buffer("BxT_Bx_L", BxT_Bx_L)
 
         if self.x_out is not None:
             x_clamped = torch.clamp(x_out, tx[kx], tx[-kx - 1])
@@ -235,11 +234,10 @@ class SplineInterpolate1D(SplineInterpolateBase):
             self.register_buffer("Bx_out", Bx_out)
 
     def spline_fit_natural(self, Z):
-        # Adding batch/channel dimension handling
-        # Bx @ Z
+        # BxT @ Z, handling batch/channel dimensions
         BxT_Z = torch.einsum("ij,bchj->bchi", self.Bx.T, Z)
-        # (BxT @ Bx)^-1 @ (BxT @ Z) = Bx^-1 @ Z
-        C = torch.linalg.solve(self.BxT_Bx, BxT_Z.unsqueeze(-1))
+        # Solve (BxT @ Bx) C = BxT @ Z using the pre-factored Cholesky L
+        C = torch.cholesky_solve(BxT_Z.unsqueeze(-1), self.BxT_Bx_L)
         return C.squeeze(-1)
 
     def evaluate_spline(self, C: Tensor):
@@ -404,15 +402,15 @@ class SplineInterpolate2D(SplineInterpolateBase):
         self.register_buffer("x_out", x_out)
         self.register_buffer("y_out", y_out)
 
-        tx, Bx, BxT_Bx = self._compute_knots_and_basis_matrices(x_in, kx, sx)
+        tx, Bx, BxT_Bx_L = self._compute_knots_and_basis_matrices(x_in, kx, sx)
         self.register_buffer("tx", tx)
         self.register_buffer("Bx", Bx)
-        self.register_buffer("BxT_Bx", BxT_Bx)
+        self.register_buffer("BxT_Bx_L", BxT_Bx_L)
 
-        ty, By, ByT_By = self._compute_knots_and_basis_matrices(y_in, ky, sy)
+        ty, By, ByT_By_L = self._compute_knots_and_basis_matrices(y_in, ky, sy)
         self.register_buffer("ty", ty)
         self.register_buffer("By", By)
-        self.register_buffer("ByT_By", ByT_By)
+        self.register_buffer("ByT_By_L", ByT_By_L)
 
         if self.x_out is not None:
             x_clamped = torch.clamp(x_out, tx[kx], tx[-kx - 1])
@@ -424,13 +422,18 @@ class SplineInterpolate2D(SplineInterpolateBase):
             self.register_buffer("By_out", By_out)
 
     def bivariate_spline_fit_natural(self, Z):
-        # Adding batch/channel dimension handling
-        # ByT @ Z @ BxW
+        # ByT @ Z @ Bx, handling batch/channel dimensions
         ByT_Z_Bx = torch.einsum("ij,bcik,kl->bcjl", self.By, Z, self.Bx)
-        # (ByT @ By)^-1 @ (ByT @ Z @ Bx) = By^-1 @ Z @ Bx
-        E = torch.linalg.solve(self.ByT_By, ByT_Z_Bx)
-        # ((BxT @ Bx)^-1 @ (By^-1 @ Z @ Bx)T)T = By^-1 @ Z @ BxT^-1
-        return torch.linalg.solve(self.BxT_Bx, E.mT).mT
+        # Solve (ByT @ By) E = ByT @ Z @ Bx  ->  E = By^-1 @ Z @ Bx
+        E = torch.cholesky_solve(ByT_Z_Bx, self.ByT_By_L)
+        # Solve (BxT @ Bx) CT = ET  ->  C = By^-1 @ Z @ Bx^-T
+        # Make E.mT contiguous to avoid an implicit copy
+        # and free E to reduce peak memory.
+        E_T = E.mT.contiguous()
+        del E
+        C_T = torch.cholesky_solve(E_T, self.BxT_Bx_L)
+        del E_T
+        return C_T.mT
 
     def evaluate_bivariate_spline(self, C: Tensor):
         """
