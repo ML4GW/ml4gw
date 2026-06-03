@@ -96,6 +96,7 @@ addopts = [
     "--benchmark-warmup=on",
     "--benchmark-warmup-iterations=5",
     "--benchmark-sort=mean",
+    "--benchmark-max-time=2.0",
 ]
 
 [tool.coverage.run]
