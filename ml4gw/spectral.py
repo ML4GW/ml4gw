@@ -12,6 +12,8 @@ and
 https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 """
 
+from functools import lru_cache
+
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -24,6 +26,14 @@ from .types import (
 )
 
 
+@lru_cache(maxsize=64)
+def _median_bias(n: int) -> float:
+    bias = 1.0
+    for k in range(1, (n - 1) // 2 + 1):
+        bias += 1.0 / (2 * k + 1) - 1.0 / (2 * k)
+    return bias
+
+
 def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     """
     Implements a median calculation that matches numpy's
@@ -31,10 +41,7 @@ def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     the same bias correction used by
     `scipy's implementation <https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066>`_.
     """  # noqa: E501
-    n = x.shape[axis]
-    ii_2 = 2 * torch.arange(1.0, (n - 1) // 2 + 1)
-    bias = 1 + torch.sum(1.0 / (ii_2 + 1) - 1.0 / ii_2)
-    return torch.quantile(x, q=0.5, axis=axis) / bias
+    return torch.quantile(x, q=0.5, dim=axis) / _median_bias(x.shape[axis])
 
 
 def _validate_shapes(x: Tensor, nperseg: int, y: Tensor | None = None) -> None:
