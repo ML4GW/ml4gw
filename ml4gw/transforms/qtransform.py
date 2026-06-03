@@ -3,10 +3,10 @@ import warnings
 
 import torch
 import torch.nn.functional as F
-from jaxtyping import Float, Int
+from jaxtyping import Float
 from torch import Tensor
 
-from ..types import FrequencySeries1to3d, TimeSeries1to3d, TimeSeries3d
+from ..types import TimeSeries1to3d, TimeSeries3d
 from .spline_interpolation import SplineInterpolate1D
 
 """
@@ -17,142 +17,98 @@ input on GPU.
 """
 
 
-class QTile(torch.nn.Module):
-    """
-    Compute the row of Q-tiles for a single Q value and a single
-    frequency for a batch of multi-channel frequency series data.
-    Should really be called ``QRow``, but I want to match GWpy.
-    Input data should have three dimensions or fewer.
-    If fewer, dimensions will be added until the input is
-    three-dimensional.
-
-    Args:
-        q:
-            The Q value to use in computing the Q tile
-        frequency:
-            The frequency for which to compute the Q tile in Hz
-        duration:
-            The length of time in seconds that the input frequency
-            series represents
-        sample_rate:
-            The sample rate of the original time series in Hz
-        mismatch:
-            The maximum fractional mismatch between neighboring tiles
-
-    """
+class _TileGroup(torch.nn.Module):
+    """Batched Q-tile computation for one group of QTiles that share the same
+    ntiles() value."""
 
     def __init__(
         self,
-        q: float,
-        frequency: float,
-        duration: float,
-        sample_rate: float,
-        mismatch: float,
+        indices: Tensor,
+        windows: Tensor,
+        scatter: Tensor,
+        ntiles_val: int,
+        tile_indices: list[int],
     ) -> None:
         super().__init__()
-        self.mismatch = mismatch
-        self.q = q
-        self.deltam = torch.tensor(2 * (self.mismatch / 3.0) ** (1 / 2.0))
-        self.qprime = self.q / 11 ** (1 / 2.0)
-        self.frequency = frequency
-        self.duration = duration
-        self.sample_rate = sample_rate
+        self.register_buffer("indices", indices)
+        self.register_buffer("windows", windows)
+        self.register_buffer("scatter", scatter)
+        self.ntiles_val = ntiles_val
+        self.tile_indices = tile_indices
 
-        self.windowsize = (
-            2 * int(self.frequency / self.qprime * self.duration) + 1
-        )
-        pad = self.ntiles() - self.windowsize
-        padding = torch.Tensor((int((pad - 1) / 2.0), int((pad + 1) / 2.0)))
-        self.register_buffer("padding", padding)
-        self.register_buffer("indices", self.get_data_indices())
-        self.register_buffer("window", self.get_window())
-
-    def ntiles(self) -> int:
+    def forward(self, X: Tensor, norm: str | None) -> Tensor:
         """
-        Number of tiles in this frequency row
-        """
-        tcum_mismatch = self.duration * 2 * torch.pi * self.frequency / self.q
-        return int(2 ** torch.ceil(torch.log2(tcum_mismatch / self.deltam)))
-
-    def _get_indices(self) -> Int[Tensor, " windowsize"]:
-        half = int((self.windowsize - 1) / 2)
-        return torch.arange(-half, half + 1)
-
-    def get_window(self) -> Float[Tensor, " windowsize"]:
-        """
-        Generate the bi-square window for this row
-        """
-        wfrequencies = self._get_indices() / self.duration
-        xfrequencies = wfrequencies * self.qprime / self.frequency
-        norm = (
-            self.ntiles()
-            / (self.duration * self.sample_rate)
-            * (315 * self.qprime / (128 * self.frequency)) ** (1 / 2.0)
-        )
-        return torch.Tensor((1 - xfrequencies**2) ** 2 * norm)
-
-    def get_data_indices(self) -> Int[Tensor, " windowsize"]:
-        """
-        Get the index array of relevant frequencies for this row
-        """
-        n_rfft = int(self.duration * self.sample_rate) // 2
-        return (
-            torch.round(
-                self._get_indices() + 1 + self.frequency * self.duration,
-            )
-            .type(torch.long)
-            .clamp(0, n_rfft)
-        )
-
-    def forward(
-        self,
-        fseries: FrequencySeries1to3d,
-        norm: str = "median",
-    ) -> TimeSeries1to3d:
-        """
-        Compute the transform for this row
-
         Args:
-            fseries:
-                Frequency series of data. Should correspond to data with
-                the duration and sample rate used to initialize this object.
-                Expected input shape is ``(B, C, F)``, where F is the number
-                of samples, C is the number of channels, and B is the number
-                of batches. If less than three-dimensional, axes will be
-                added.
-            norm:
-                The method of normalization. Options are "median", "mean", or
-                ``None``.
+            X: rfft output, shape ``(B, C, F)``
+            norm: normalization method ("median", "mean", or ``None``).
 
         Returns:
-            The row of Q-tiles for the given Q and frequency. Output is
-            three-dimensional: ``(B, C, T)``
+            Energy tensor of shape ``(B, C, N, ntiles_val)``.
         """
-        if len(fseries.shape) > 3:
-            raise ValueError("Input data has more than 3 dimensions")
+        N = self.indices.shape[0]
+        gathered = X[..., self.indices] * self.windows  # (B, C, N, max_ws)
 
-        while len(fseries.shape) < 3:
-            fseries = fseries[None]
+        # Scatter into the ntiles-length buffer. scatter_ is needed because
+        # each tile has a different left-padding offset.
+        padded = torch.zeros(
+            *X.shape[:-1], N, self.ntiles_val, dtype=X.dtype, device=X.device
+        )
+        padded.scatter_(
+            dim=-1,
+            index=self.scatter.expand(*X.shape[:-1], -1, -1),
+            src=gathered,
+        )
 
-        windowed = fseries[..., self.indices] * self.window
-        left, right = self.padding
-        padded = F.pad(windowed, (int(left), int(right)), mode="constant")
-        wenergy = torch.fft.ifftshift(padded, dim=-1)
-
-        tdenergy = torch.fft.ifft(wenergy)
+        tdenergy = torch.fft.ifft(torch.fft.ifftshift(padded, dim=-1))
         energy = tdenergy.real**2.0 + tdenergy.imag**2.0
+
         if norm:
-            norm = norm.lower() if isinstance(norm, str) else norm
-            if norm == "median":
-                medians = torch.quantile(energy, q=0.5, dim=-1, keepdim=True)
-                energy /= medians
-            elif norm == "mean":
-                means = torch.mean(energy, dim=-1, keepdim=True)
-                energy /= means
+            norm_lower = norm.lower()
+            if norm_lower == "median":
+                energy = energy / torch.quantile(
+                    energy, q=0.5, dim=-1, keepdim=True
+                )
+            elif norm_lower == "mean":
+                energy = energy / energy.mean(dim=-1, keepdim=True)
             else:
                 raise ValueError(f"Invalid normalisation {norm}")
-            energy = energy.type(torch.float32)
+            energy = energy.float()
         return energy
+
+
+def _qtile_geometry(
+    q: float,
+    frequency: float,
+    duration: float,
+    sample_rate: float,
+    mismatch: float,
+) -> tuple[int, int, Tensor, Tensor, int]:
+    """Compute the geometry for one Q-tile row."""
+    qprime = q / 11**0.5
+    deltam = 2 * (mismatch / 3.0) ** 0.5
+    windowsize = 2 * int(frequency / qprime * duration) + 1
+    tcum_mismatch = duration * 2 * math.pi * frequency / q
+    ntiles = int(2 ** math.ceil(math.log2(tcum_mismatch / deltam)))
+
+    half = (windowsize - 1) // 2
+    indices = torch.arange(-half, half + 1)
+
+    xfrequencies = (indices / duration) * qprime / frequency
+    norm = (
+        ntiles
+        / (duration * sample_rate)
+        * (315 * qprime / (128 * frequency)) ** 0.5
+    )
+    window = torch.tensor((1 - xfrequencies**2) ** 2 * norm)
+
+    n_rfft = int(duration * sample_rate) // 2
+    data_indices = (
+        torch.round(indices + 1 + frequency * duration).long().clamp(0, n_rfft)
+    )
+
+    left_pad = int((ntiles - windowsize - 1) / 2.0)
+
+    return ntiles, windowsize, window, data_indices, left_pad
 
 
 class SingleQTransform(torch.nn.Module):
@@ -206,6 +162,7 @@ class SingleQTransform(torch.nn.Module):
     ) -> None:
         super().__init__()
         self.q = q
+        self.sample_rate = sample_rate
         self.spectrogram_shape = spectrogram_shape
         self.frange = frange or [0, torch.inf]
         self.duration = duration
@@ -234,30 +191,61 @@ class SingleQTransform(torch.nn.Module):
             self.frange[1] = sample_rate / 2 / (1 + 1 / qprime)
 
         self.freqs = self.get_freqs()
-        self.qtile_transforms = torch.nn.ModuleList(
-            [
-                QTile(
-                    q=self.q,
-                    frequency=freq,
-                    duration=self.duration,
-                    sample_rate=sample_rate,
-                    mismatch=self.mismatch,
-                )
-                for freq in self.freqs
-            ]
-        )
         self.qtiles = None
+        self._setup_batched_tile_groups()
 
         if self.interpolation_method == "spline":
             self._set_up_spline_interp()
 
+    def _setup_batched_tile_groups(self):
+        # Group tiles that share the same ntiles value so their IFFTs can be
+        # batched in compute_qtiles rather than called one tile at a time.
+        geometries = [
+            _qtile_geometry(
+                self.q,
+                float(f),
+                self.duration,
+                self.sample_rate,
+                self.mismatch,
+            )
+            for f in self.freqs
+        ]
+        ntiles_list = [g[0] for g in geometries]
+        unique_ntiles = sorted(set(ntiles_list))
+
+        groups = []
+        for ntiles_val in unique_ntiles:
+            tile_indices = [
+                i for i, n in enumerate(ntiles_list) if n == ntiles_val
+            ]
+            N = len(tile_indices)
+            max_ws = max(geometries[i][1] for i in tile_indices)
+
+            indices_padded = torch.zeros(N, max_ws, dtype=torch.long)
+            windows_padded = torch.zeros(N, max_ws, dtype=torch.float32)
+            scatter_idx = torch.zeros(N, max_ws, dtype=torch.long)
+
+            for row, tile_idx in enumerate(tile_indices):
+                _, ws, window, data_indices, left_pad = geometries[tile_idx]
+                indices_padded[row, :ws] = data_indices
+                windows_padded[row, :ws] = window
+                scatter_idx[row, :ws] = left_pad + torch.arange(ws)
+
+            groups.append(
+                _TileGroup(
+                    indices_padded,
+                    windows_padded,
+                    scatter_idx,
+                    ntiles_val,
+                    tile_indices,
+                )
+            )
+
+        self.tile_groups = torch.nn.ModuleList(groups)
+
     def _set_up_spline_interp(self):
-        ntiles = [qtile.ntiles() for qtile in self.qtile_transforms]
-        # For efficiency, we'll stack all qtiles of the same length before
-        # interpolating, so we need to figure out which those are
-        unique_ntiles = sorted(set(ntiles))
-        idx = torch.arange(len(ntiles))
-        self.stack_idx = [idx[Tensor(ntiles) == n] for n in unique_ntiles]
+        # tile_groups is already grouped by ntiles_val, so reuse it directly
+        self.stack_idx = [group.tile_indices for group in self.tile_groups]
 
         t_out = torch.arange(
             0, self.duration, self.duration / self.spectrogram_shape[1]
@@ -266,10 +254,12 @@ class SingleQTransform(torch.nn.Module):
             [
                 SplineInterpolate1D(
                     kx=3,
-                    x_in=torch.arange(0, self.duration, self.duration / tiles),
+                    x_in=torch.arange(
+                        0, self.duration, self.duration / group.ntiles_val
+                    ),
                     x_out=t_out,
                 )
-                for tiles in unique_ntiles
+                for group in self.tile_groups
             ]
         )
 
@@ -361,9 +351,21 @@ class SingleQTransform(torch.nn.Module):
         for each ``QTile``
         """
         # Computing the FFT with the same normalization and scaling as GWpy
+        if X.ndim == 1:
+            X = X[None, None]
+        elif X.ndim == 2:
+            X = X[None]
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
-        self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
+
+        results = [None] * len(self.freqs)
+
+        for group in self.tile_groups:
+            energy = group(X, norm)  # (B, C, N, ntiles_val)
+            for row, tile_idx in enumerate(group.tile_indices):
+                results[tile_idx] = energy[..., row, :]
+
+        self.qtiles = results
 
     def interpolate(self) -> TimeSeries3d:
         if self.qtiles is None:
@@ -387,21 +389,24 @@ class SingleQTransform(torch.nn.Module):
             # Transpose because the final dimension gets interpolated
             return self.interpolator(time_interped.mT).mT
         num_f_bins, num_t_bins = self.spectrogram_shape
-        resampled = [
+        time_interped = torch.stack(
+            [
+                F.interpolate(
+                    qtile.unsqueeze(0),
+                    (qtile.shape[-2], num_t_bins),
+                    mode=self.interpolation_method,
+                ).squeeze(0)
+                for qtile in self.qtiles
+            ],
+            dim=-2,
+        )
+        return torch.squeeze(
             F.interpolate(
-                qtile[None],
-                (qtile.shape[-2], num_t_bins),
+                time_interped,
+                (num_f_bins, num_t_bins),
                 mode=self.interpolation_method,
             )
-            for qtile in self.qtiles
-        ]
-        resampled = torch.stack(resampled, dim=-2)
-        resampled = F.interpolate(
-            resampled[0],
-            (num_f_bins, num_t_bins),
-            mode=self.interpolation_method,
         )
-        return torch.squeeze(resampled)
 
     def forward(
         self,
@@ -551,7 +556,7 @@ class QScan(torch.nn.Module):
         for transform in self.q_transforms:
             transform.compute_qtiles(X, norm)
         idx = torch.argmax(
-            torch.Tensor(
+            torch.stack(
                 [
                     transform.get_max_energy(fsearch_range=fsearch_range)
                     for transform in self.q_transforms

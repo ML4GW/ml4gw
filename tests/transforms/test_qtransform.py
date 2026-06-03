@@ -2,10 +2,8 @@ import numpy as np
 import pytest
 import torch
 from gwpy.signal.qtransform import QPlane, QTiling
-from gwpy.signal.qtransform import QTile as gwpy_QTile
 
 from ml4gw.transforms import QScan, SingleQTransform
-from ml4gw.transforms.qtransform import QTile
 
 
 @pytest.fixture(params=[1])
@@ -38,56 +36,9 @@ def mismatch(request):
     return request.param
 
 
-@pytest.fixture(params=[128])
-def frequency(request):
-    return request.param
-
-
 @pytest.fixture(params=["bilinear", "bicubic", "spline"])
 def interpolation_method(request):
     return request.param
-
-
-def test_qtile(
-    q,
-    frequency,
-    duration,
-    sample_rate,
-    mismatch,
-    norm,
-):
-    X = torch.randn(int(duration * sample_rate))
-    X = torch.fft.rfft(X, norm="forward")
-    X[..., 1:] *= 2
-
-    torch_qtile = QTile(q, frequency, duration, sample_rate, mismatch)
-    gwpy_qtile = gwpy_QTile(q, frequency, duration, sample_rate, mismatch)
-
-    assert torch_qtile.ntiles() == gwpy_qtile.ntiles
-    assert np.allclose(
-        torch_qtile.get_window().numpy(), gwpy_qtile.get_window()
-    )
-    assert (
-        torch_qtile.get_data_indices().numpy() == gwpy_qtile.get_data_indices()
-    ).all()
-    assert np.allclose(
-        torch_qtile(X, norm).numpy(),
-        gwpy_qtile.transform(X, norm, 0),
-        rtol=1e-3,
-    )
-
-    X = torch.randn(2, 2, 2, int(sample_rate * duration))
-    with pytest.raises(ValueError):
-        torch_qtile(X)
-
-
-def test_qtile_invalid_norm():
-    X = torch.randn(1024)
-    X = torch.fft.rfft(X, norm="forward")
-    X[..., 1:] *= 2
-    qtile = QTile(12, 128, 1, 1024, 0.2)
-    with pytest.raises(ValueError, match="Invalid normalisation"):
-        qtile(X, norm="bogus")
 
 
 def test_singleqtransform(
