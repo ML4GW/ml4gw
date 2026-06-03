@@ -115,6 +115,19 @@ class Decimator(torch.nn.Module):
             * self.sample_rate
         )
 
+        # Pre-register per-segment index buffers for split_by_schedule so
+        # forward() doesn't recompute on every call.
+        if split:
+            self._num_segments = len(self.schedule)
+            for i, s in enumerate(self.schedule):
+                start = int(s[0] * self.sample_rate)
+                stop = int(s[1] * self.sample_rate)
+                step = int(self.sample_rate // s[2])
+                self.register_buffer(
+                    f"_seg{i}_idx",
+                    torch.arange(start, stop, step, dtype=torch.long),
+                )
+
     def _validate_inputs(self) -> None:
         r"""
         Validate the schedule and sample_rate. This method also checks
@@ -186,19 +199,9 @@ class Decimator(torch.nn.Module):
         """
         segments = []
 
-        for s in self.schedule:
-            start = int(s[0] * self.sample_rate)
-            stop = int(s[1] * self.sample_rate)
-            step = int(self.sample_rate // s[2])
-            idx = torch.arange(
-                start,
-                stop,
-                step,
-                dtype=torch.long,
-                device=self.schedule.device,
-            )
-            seg = X.index_select(dim=-1, index=idx)
-            segments.append(seg)
+        for i in range(self._num_segments):
+            idx = getattr(self, f"_seg{i}_idx")
+            segments.append(X.index_select(dim=-1, index=idx))
 
         return segments
 
