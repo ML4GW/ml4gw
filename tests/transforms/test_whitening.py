@@ -83,6 +83,28 @@ class TestWhiten(WhitenModuleTest):
         pad = filter_size // 2
         assert torch.all(whitened_uncropped[..., pad:-pad] == whitened)
 
+    def test_forward_override(
+        self, X, background, highpass, lowpass, validate_whitened
+    ):
+        background = self.get_psds(background, 2)
+        background = torch.stack(background)
+
+        transform = Whiten(self.fduration, self.sample_rate)
+        whitened = transform(X, background, highpass=highpass, lowpass=lowpass)
+        filter_size = self.fduration * self.sample_rate
+        assert whitened.shape == (8, 5, X.size(-1) - filter_size)
+        validate_whitened(
+            whitened,
+            highpass,
+            lowpass,
+            self.sample_rate,
+            1 / self.whiten_length,
+        )
+
+        # per-call arguments must not mutate the module's stored values
+        assert transform.highpass is None
+        assert transform.lowpass is None
+
 
 class TestFixedWhiten(WhitenModuleTest):
     def get_transform(self):
