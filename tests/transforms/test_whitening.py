@@ -86,7 +86,7 @@ class TestWhiten(WhitenModuleTest):
     def test_forward_override(
         self, X, background, highpass, lowpass, validate_whitened
     ):
-        background = self.get_psds(background, 2)
+        background = self.get_asds(background, 2)
         background = torch.stack(background)
 
         transform = Whiten(self.fduration, self.sample_rate)
