@@ -8,7 +8,7 @@ from ..types import FrequencySeries1to3d, TimeSeries1to3d
 
 class SpectralDensity(torch.nn.Module):
     """
-    Transform for computing either the power spectral density
+    Transform for computing either the amplitude spectral density
     of a batch of multichannel timeseries, or the cross spectral
     density of two batches of multichannel timeseries.
 
