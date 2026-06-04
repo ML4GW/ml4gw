@@ -73,6 +73,8 @@ class Whiten(torch.nn.Module):
         X: TimeSeries3d,
         psd: FrequencySeries1to3d,
         crop: bool = True,
+        highpass: float | None = None,
+        lowpass: float | None = None,
     ) -> TimeSeries3d:
         """
         Whiten a batch of multichannel timeseries by a
@@ -104,19 +106,29 @@ class Whiten(torch.nn.Module):
                 from both sides of the time dimension to remove the
                 corruption from the filter. If ``False``, return the
                 full timeseries.
+            highpass:
+                Override the highpass cutoff frequency for this call.
+                If ``None``, falls back to the value set at
+                initialization.
+            lowpass:
+                Override the lowpass cutoff frequency for this call.
+                If ``None``, falls back to the value set at
+                initialization.
         Returns:
             Whitened timeseries, with ``fduration * sample_rate / 2``
                 samples cropped from each edge. Output shape will then
                 be ``(B, C, N - fduration * sample_rate)``.
         """
+        highpass = highpass if highpass is not None else self.highpass
+        lowpass = lowpass if lowpass is not None else self.lowpass
 
         return spectral.whiten(
             X,
             psd,
             fduration=self.window,
             sample_rate=self.sample_rate,
-            highpass=self.highpass,
-            lowpass=self.lowpass,
+            highpass=highpass,
+            lowpass=lowpass,
             crop=crop,
         )
 
