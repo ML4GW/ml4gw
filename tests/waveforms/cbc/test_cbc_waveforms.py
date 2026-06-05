@@ -599,3 +599,127 @@ def test_phenom_p_differentiability():
         return out * 1e21
 
     assert gradcheck(h, inputs)
+
+
+def test_taylorf2_batch_consistency():
+    freqs = torch.linspace(20.0, 300.0, 500, dtype=FLOAT64)
+    f_ref = 20.0
+    model = waveforms.TaylorF2()
+
+    _, mcs, qs, chi1s, chi2s, dists, phases, theta_jns = zip(
+        *ALIGNED_TEST_CASES, strict=True
+    )
+    batch_hc, batch_hp = model(
+        freqs,
+        torch.tensor(mcs, dtype=FLOAT64),
+        torch.tensor(qs, dtype=FLOAT64),
+        torch.tensor(chi1s, dtype=FLOAT64),
+        torch.tensor(chi2s, dtype=FLOAT64),
+        torch.tensor(dists, dtype=FLOAT64),
+        torch.tensor(phases, dtype=FLOAT64),
+        torch.tensor(theta_jns, dtype=FLOAT64),
+        f_ref,
+    )
+
+    for i, (_, mc, q, chi1, chi2, dist, phase, theta_jn) in enumerate(
+        ALIGNED_TEST_CASES
+    ):
+        hc, hp = model(
+            freqs,
+            torch.tensor([mc], dtype=FLOAT64),
+            torch.tensor([q], dtype=FLOAT64),
+            torch.tensor([chi1], dtype=FLOAT64),
+            torch.tensor([chi2], dtype=FLOAT64),
+            torch.tensor([dist], dtype=FLOAT64),
+            torch.tensor([phase], dtype=FLOAT64),
+            torch.tensor([theta_jn], dtype=FLOAT64),
+            f_ref,
+        )
+        assert compute_match(batch_hp[i], hp[0]) > TARGET_OVERLAP
+        assert compute_match(batch_hc[i], hc[0]) > TARGET_OVERLAP
+
+
+def test_phenomd_batch_consistency():
+    freqs = torch.linspace(20.0, 300.0, 500, dtype=FLOAT64)
+    f_ref = 20.0
+    model = waveforms.IMRPhenomD()
+
+    _, mcs, qs, chi1s, chi2s, dists, phases, theta_jns = zip(
+        *ALIGNED_TEST_CASES, strict=True
+    )
+    batch_hc, batch_hp = model(
+        freqs,
+        torch.tensor(mcs, dtype=FLOAT64),
+        torch.tensor(qs, dtype=FLOAT64),
+        torch.tensor(chi1s, dtype=FLOAT64),
+        torch.tensor(chi2s, dtype=FLOAT64),
+        torch.tensor(dists, dtype=FLOAT64),
+        torch.tensor(phases, dtype=FLOAT64),
+        torch.tensor(theta_jns, dtype=FLOAT64),
+        f_ref,
+    )
+
+    for i, (_, mc, q, chi1, chi2, dist, phase, theta_jn) in enumerate(
+        ALIGNED_TEST_CASES
+    ):
+        hc, hp = model(
+            freqs,
+            torch.tensor([mc], dtype=FLOAT64),
+            torch.tensor([q], dtype=FLOAT64),
+            torch.tensor([chi1], dtype=FLOAT64),
+            torch.tensor([chi2], dtype=FLOAT64),
+            torch.tensor([dist], dtype=FLOAT64),
+            torch.tensor([phase], dtype=FLOAT64),
+            torch.tensor([theta_jn], dtype=FLOAT64),
+            f_ref,
+        )
+        assert compute_match(batch_hp[i], hp[0]) > TARGET_OVERLAP
+        assert compute_match(batch_hc[i], hc[0]) > TARGET_OVERLAP
+
+
+def test_phenomp_batch_consistency():
+    freqs = torch.linspace(20.0, 300.0, 500, dtype=FLOAT64)
+    f_ref = 20.0
+    model = waveforms.IMRPhenomPv2()
+
+    _, mcs, qs, chi1s, chi2s, dists, phases, theta_jns = zip(
+        *PRECESSING_TEST_CASES, strict=True
+    )
+    chi1x, chi1y, chi1z = zip(*chi1s, strict=True)
+    chi2x, chi2y, chi2z = zip(*chi2s, strict=True)
+    batch_hc, batch_hp = model(
+        freqs,
+        torch.tensor(mcs, dtype=FLOAT64),
+        torch.tensor(qs, dtype=FLOAT64),
+        torch.tensor(chi1x, dtype=FLOAT64),
+        torch.tensor(chi1y, dtype=FLOAT64),
+        torch.tensor(chi1z, dtype=FLOAT64),
+        torch.tensor(chi2x, dtype=FLOAT64),
+        torch.tensor(chi2y, dtype=FLOAT64),
+        torch.tensor(chi2z, dtype=FLOAT64),
+        torch.tensor(dists, dtype=FLOAT64),
+        torch.tensor(phases, dtype=FLOAT64),
+        torch.tensor(theta_jns, dtype=FLOAT64),
+        f_ref,
+    )
+
+    for i, (_, mc, q, chi1, chi2, dist, phase, theta_jn) in enumerate(
+        PRECESSING_TEST_CASES
+    ):
+        hc, hp = model(
+            freqs,
+            torch.tensor([mc], dtype=FLOAT64),
+            torch.tensor([q], dtype=FLOAT64),
+            torch.tensor([chi1[0]], dtype=FLOAT64),
+            torch.tensor([chi1[1]], dtype=FLOAT64),
+            torch.tensor([chi1[2]], dtype=FLOAT64),
+            torch.tensor([chi2[0]], dtype=FLOAT64),
+            torch.tensor([chi2[1]], dtype=FLOAT64),
+            torch.tensor([chi2[2]], dtype=FLOAT64),
+            torch.tensor([dist], dtype=FLOAT64),
+            torch.tensor([phase], dtype=FLOAT64),
+            torch.tensor([theta_jn], dtype=FLOAT64),
+            f_ref,
+        )
+        assert compute_match(batch_hp[i], hp[0]) > TARGET_OVERLAP
+        assert compute_match(batch_hc[i], hc[0]) > TARGET_OVERLAP
