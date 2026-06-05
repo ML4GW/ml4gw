@@ -77,6 +77,11 @@ def unfold_windows(
         )
 
     unfolded = x.unfold(-1, window_size, stride)
+    # The unfold operation makes the targetted dimension the window dimension
+    # and appends a new dimension for the windows at the end of the tensor.
+    # We want the window dimension to be the first dimension, so we permute
+    # so that the second-to-last dimension becomes the first dimension,
+    # and the order of the other dimensions is preserved.
     if x.ndim == 2:
         unfolded = unfolded.permute(1, 0, 2)
     elif x.ndim == 3:
