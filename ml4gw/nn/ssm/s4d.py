@@ -1,13 +1,49 @@
 # Adapted with modifications from https://github.com/state-spaces/s4
 # (models/s4/s4d.py), licensed under Apache-2.0.
+# Detailed description of the S4D model and its parameters:
+# "On the Parameterization and Initialization of Diagonal State Space Models"
+# (https://arxiv.org/abs/2206.11893)
 
 import math
 
 import torch
 import torch.nn as nn
 
+
 class S4DKernel(nn.Module):
-    """Generate convolution kernel from diagonal SSM parameters."""
+    """Build the convolution kernel for one S4D layer.
+
+    Each channel is an independent diagonal linear time-invariant
+    state-space model, defined in continuous time by
+
+        x'(t) = A * x(t) + B * u(t)
+        y(t)  = C * x(t)
+
+    with A diagonal. Linear time invariance means the output equals the
+    input convolved with a single kernel K, so the whole sequence is
+    processed in one convolution instead of stepped through position by
+    position. Discretizing with timestep dt gives the kernel this module
+    returns:
+
+        K_l = 2 * Re(
+            sum_n C_n * ((exp(dt * A_n) - 1) / A_n) * exp(dt * A_n)^l
+        ),
+        l = 0, ..., L-1   (n runs over the N/2 states)
+
+    Args:
+        d_model: Model dimension.
+            Equivalent to the number of channels in CNN nomenclature,
+            i.e. independent SSMs created.
+        N: State size per model dimension.
+            The states are stored as N / 2 conjugate pairs, so N must be even.
+        dt_min: Lower bound of the per-channel timestep, sampled
+            log-uniformly in [dt_min, dt_max]. The timestep sets the
+            timescale each SSM resolves.
+        dt_max: Upper bound of the per-channel timestep.
+        lr: Optional learning rate for `dt` and `A` parameters.
+            If None, these parameters are optimized with the same LR as the
+            rest of the model. If 0.0, these parameters are frozen.
+    """
 
     def __init__(
         self,
@@ -19,15 +55,22 @@ class S4DKernel(nn.Module):
     ):
         super().__init__()
 
-        H = d_model
+        H = d_model  # Number of independent SSMs (one per channel).
+
+        ### SSM parameter initialization ###
+        # For each channel, draw a random timestep `dt`
+        # from a log-uniform distribution.
         log_dt = torch.rand(H) * (
             math.log(dt_max) - math.log(dt_min)
         ) + math.log(dt_min)
-
-        C = torch.randn(H, N // 2, dtype=torch.cfloat)
-        self.C = nn.Parameter(torch.view_as_real(C))
         self.register("log_dt", log_dt, lr)
 
+        # Initialize the SSM output matrix `C` with i.i.d. Gaussian entries.
+        C = torch.randn(H, N // 2, dtype=torch.cfloat)
+        self.C = nn.Parameter(torch.view_as_real(C))
+
+        # Initialize the SSM state matrix `A` with S4D-Lin initialization
+        # (Re(A) = -0.5, Im(A) = pi * n).
         log_A_real = torch.log(0.5 * torch.ones(H, N // 2))
         A_imag = math.pi * torch.arange(N // 2).repeat(H, 1)
         self.register("log_A_real", log_A_real, lr)
@@ -39,6 +82,7 @@ class S4DKernel(nn.Module):
         dt = torch.exp(self.log_dt)  # (H,)
         C = torch.view_as_complex(self.C)  # (H, N//2)
         # torch.complex(...) instead of `1j` for torch.compile safety
+        # Re(A) = -exp(log_A_real) is always < 0, so modes decay (stable)
         A = torch.complex(
             -torch.exp(self.log_A_real), self.A_imag
         )  # (H, N//2)
