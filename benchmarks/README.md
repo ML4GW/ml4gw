@@ -33,11 +33,13 @@ git checkout my-feature-branch
 uv run pytest benchmarks/ --benchmark-save=feature
 
 # 4. Compare
-uv run python benchmarks/compare_benchmarks.py <baseline_file> <feature_file>
+uv run python benchmarks/compare_benchmarks.py baseline feature
 ```
 
 Saved files are written to `.benchmarks/<platform>/NNNN_<name>.json`, where
 `NNNN` is a zero-padded counter that increments with each save.
+Benchmark files can be specified by substrings rather than full paths;
+the script will `rglob` in `.benchmarks/` for any matching `.json` files.
 
 Options for `compare_benchmarks.py`:
 

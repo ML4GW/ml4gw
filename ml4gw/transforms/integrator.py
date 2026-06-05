@@ -39,12 +39,12 @@ class TophatIntegrator(torch.nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         shape = x.shape
-        L = shape[-1]
-
-        x = x.reshape(-1, 1, L)
+        x = x.reshape(-1, 1, shape[-1])
         x = torch.nn.functional.pad(x, (self.window_size - 1, 0))
-        x = torch.nn.functional.conv1d(x, self.window)
-
+        cs = torch.nn.functional.pad(torch.cumsum(x, dim=-1), (1, 0))
+        x = (
+            cs[..., self.window_size :] - cs[..., : -self.window_size]
+        ) / self.window_size
         return x.reshape(shape)
 
 

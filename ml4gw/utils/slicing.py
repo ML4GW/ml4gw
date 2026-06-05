@@ -8,7 +8,6 @@ windows.
 import torch
 from jaxtyping import Float, Int64
 from torch import Tensor
-from torch.nn.functional import unfold
 
 from ..types import TimeSeries1d, TimeSeries1to3d, TimeSeries2d, TimeSeries3d
 
@@ -52,6 +51,14 @@ def unfold_windows(
        If ``drop_last`` is false, returns the remainder of the
        timeseries, shaped to be compatible with the returned
        unfolded tensor
+
+    .. note::
+       The returned tensor is a strided view of the input, not a copy.
+       When ``stride < window_size``, adjacent windows share overlapping
+       memory. In-place operations on the result are unsafe in that case:
+       elements in the overlap region will be written multiple times,
+       producing incorrect values. Use out-of-place operations if the
+       result needs to be modified.
     """
 
     num_windows = (x.shape[-1] - window_size) // stride + 1
@@ -69,22 +76,20 @@ def unfold_windows(
             x, [x.shape[-1] - remainder, remainder], dim=-1
         )
 
-    reshape = list(x.shape[:-1])
-    if x.ndim == 1:
-        x = x[None, None, None, :]
-    elif x.ndim == 2:
-        x = x[None, :, None, :]
+    unfolded = x.unfold(-1, window_size, stride)
+    # The unfold operation makes the targetted dimension the window dimension
+    # and appends a new dimension for the windows at the end of the tensor.
+    # We want the window dimension to be the first dimension, so we permute
+    # so that the second-to-last dimension becomes the first dimension,
+    # and the order of the other dimensions is preserved.
+    if x.ndim == 2:
+        unfolded = unfolded.permute(1, 0, 2)
     elif x.ndim == 3:
-        x = x[:, :, None, :]
-
-    x = unfold(x, (1, num_windows), dilation=(1, stride))
-    reshape += [num_windows, -1]
-    x = x.reshape(*reshape)
-    x = x.transpose(1, -2).transpose(0, 1)
+        unfolded = unfolded.permute(2, 0, 1, 3)
 
     if not drop_last:
-        return x, remainder[None]
-    return x
+        return unfolded, remainder[None]
+    return unfolded
 
 
 def slice_kernels(

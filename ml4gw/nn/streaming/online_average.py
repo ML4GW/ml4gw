@@ -100,8 +100,7 @@ class OnlineAverager(torch.nn.Module):
         # window the existing snapshot into overlapping
         # segments and average them with our new updates
         windowed = unfold_windows(state, x.size(-1), self.update_size)
-        windowed /= self.weights
-        windowed += x
+        windowed = windowed / self.weights + x
 
         # embed these windowed averages into a blank
         # array with offsets so that we can add the
