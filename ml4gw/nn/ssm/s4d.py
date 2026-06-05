@@ -6,8 +6,6 @@ import math
 import torch
 import torch.nn as nn
 
-from ..dropout import DropoutNd
-
 class S4DKernel(nn.Module):
     """Generate convolution kernel from diagonal SSM parameters."""
 
@@ -90,7 +88,9 @@ class S4D(nn.Module):
         )
 
         self.activation = nn.GELU()
-        self.dropout = DropoutNd(dropout) if dropout > 0.0 else nn.Identity()
+        self.dropout = (
+            nn.Dropout1d(dropout) if dropout > 0.0 else nn.Identity()
+        )
 
         self.output_linear = nn.Sequential(
             nn.Conv1d(d_model, 2 * d_model, kernel_size=1),
@@ -163,7 +163,7 @@ class S4Model(nn.Module):
             [nn.LayerNorm(d_model) for _ in range(n_layers)]
         )
         self.dropouts = nn.ModuleList(
-            [DropoutNd(dropout) for _ in range(n_layers)]
+            [nn.Dropout1d(dropout) for _ in range(n_layers)]
         )
 
         self.decoder = nn.Linear(d_model, d_output)
