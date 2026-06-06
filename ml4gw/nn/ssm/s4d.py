@@ -100,14 +100,11 @@ class S4DKernel(nn.Module):
         self, name: str, tensor: torch.Tensor, lr: float | None = None
     ) -> None:
         """Register a tensor with a configurable LR and 0 weight decay."""
-        if lr == 0.0:
-            self.register_buffer(name, tensor)
-        else:
-            self.register_parameter(name, nn.Parameter(tensor))
-            optim = {"weight_decay": 0.0}
-            if lr is not None:
-                optim["lr"] = lr
-            getattr(self, name)._optim = optim
+        self.register_parameter(name, nn.Parameter(tensor))
+        optim = {"weight_decay": 0.0}
+        if lr is not None:
+            optim["lr"] = lr
+        getattr(self, name)._optim = optim
 
 
 class S4D(nn.Module):
