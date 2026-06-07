@@ -64,10 +64,7 @@ class GenerateString(torch.nn.Module):
         if duration > 4.5:
             sim_duration = duration * 2
         temp = (sim_duration / f_low) / dt / 2.0  # float in Python
-        # If you want GPU math, push it to a GPU tensor first:
-        temp_t = torch.tensor(temp, device=device, dtype=torch.float32)
-        half_len = torch.floor(temp_t)  # GPU-based floor
-        half_len_int = int(half_len.cpu().item())  # bring back to Python int
+        half_len_int = math.floor(temp)
         length = 2 * half_len_int + 1
 
         self.length = length
