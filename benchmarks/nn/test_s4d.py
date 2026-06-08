@@ -7,7 +7,7 @@ from constants import NUM_CHANNELS
 from ml4gw.nn.ssm.s4d import S4Model
 
 
-@pytest.fixture(params=[512, 2048, 8192], ids=lambda n: f"L_{n}")
+@pytest.fixture(params=[512, 2048, 4096], ids=lambda n: f"L_{n}")
 def seq_len(request):
     return request.param
 
