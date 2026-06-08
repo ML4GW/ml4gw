@@ -40,9 +40,6 @@ class S4DKernel(nn.Module):
             log-uniformly in [dt_min, dt_max]. The timestep sets the
             timescale each SSM resolves.
         dt_max: Upper bound of the per-channel timestep.
-        lr: Optional learning rate for `dt` and `A` parameters.
-            If None, these parameters are optimized with the same LR as the
-            rest of the model. If 0.0, these parameters are frozen.
     """
 
     def __init__(
@@ -50,8 +47,7 @@ class S4DKernel(nn.Module):
         d_model: int,
         N: int = 64,
         dt_min: float = 0.001,
-        dt_max: float = 0.1,
-        lr: float | None = None,
+        dt_max: float = 0.1
     ):
         super().__init__()
 
@@ -63,7 +59,7 @@ class S4DKernel(nn.Module):
         log_dt = torch.rand(H) * (
             math.log(dt_max) - math.log(dt_min)
         ) + math.log(dt_min)
-        self.register("log_dt", log_dt, lr)
+        self.register_parameter("log_dt", nn.Parameter(log_dt))
 
         # Initialize the SSM output matrix `C` with i.i.d. Gaussian entries.
         C = torch.randn(H, N // 2, dtype=torch.cfloat)
@@ -73,8 +69,8 @@ class S4DKernel(nn.Module):
         # (Re(A) = -0.5, Im(A) = pi * n).
         log_A_real = torch.log(0.5 * torch.ones(H, N // 2))
         A_imag = math.pi * torch.arange(N // 2).repeat(H, 1)
-        self.register("log_A_real", log_A_real, lr)
-        self.register("A_imag", A_imag, lr)
+        self.register_parameter("log_A_real", nn.Parameter(log_A_real))
+        self.register_parameter("A_imag", nn.Parameter(A_imag))
 
     def forward(self, L: int) -> torch.Tensor:
         """Returns: (H, L) convolution kernel."""
@@ -96,16 +92,6 @@ class S4DKernel(nn.Module):
         K = 2 * torch.einsum("hn, hnl -> hl", C, torch.exp(K)).real  # (H, L)
         return K
 
-    def register(
-        self, name: str, tensor: torch.Tensor, lr: float | None = None
-    ) -> None:
-        """Register a tensor with a configurable LR and 0 weight decay."""
-        self.register_parameter(name, nn.Parameter(tensor))
-        optim = {"weight_decay": 0.0}
-        if lr is not None:
-            optim["lr"] = lr
-        getattr(self, name)._optim = optim
-
 
 class S4D(nn.Module):
     """Single S4D layer operating on (B, H, L) sequences."""
@@ -118,14 +104,13 @@ class S4D(nn.Module):
         transposed: bool = True,
         dt_min: float = 0.001,
         dt_max: float = 0.1,
-        lr: float | None = None,
     ):
         super().__init__()
         self.transposed = transposed
         self.D = nn.Parameter(torch.randn(d_model))
 
         self.kernel = S4DKernel(
-            d_model, N=d_state, dt_min=dt_min, dt_max=dt_max, lr=lr
+            d_model, N=d_state, dt_min=dt_min, dt_max=dt_max
         )
 
         self.activation = nn.GELU()
@@ -180,7 +165,6 @@ class S4Model(nn.Module):
         dropout: float = 0.2,
         dt_min: float = 0.001,
         dt_max: float = 0.1,
-        lr: float | None = None,
     ):
         super().__init__()
 
@@ -195,7 +179,6 @@ class S4Model(nn.Module):
                     transposed=True,
                     dt_min=dt_min,
                     dt_max=dt_max,
-                    lr=lr,
                 )
                 for _ in range(n_layers)
             ]
