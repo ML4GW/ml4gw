@@ -81,7 +81,7 @@ class S4DKernel(nn.Module):
         self.register_parameter("A_imag", nn.Parameter(A_imag))
 
     def forward(self, L: int) -> torch.Tensor:
-        """Returns: (H, L) convolution kernel."""
+        """Returns: (d_model, L) convolution kernel."""
 
         dt = torch.exp(self.log_dt)  # (H,)
         C = torch.view_as_complex(self.C)  # (H, N//2)
@@ -102,7 +102,7 @@ class S4DKernel(nn.Module):
 
 
 class S4D(nn.Module):
-    """Single S4D layer operating on (B, H, L) sequences.
+    """Single S4D layer operating on (B, d_model, L) sequences.
 
     Args:
         d_model: Model dimension (number of channels).
@@ -150,10 +150,10 @@ class S4D(nn.Module):
     def forward(self, u: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Args:
-            u: (B, H, L) if transposed else (B, L, H)
+            u: (B, d_model, L) if transposed else (B, L, d_model)
 
         Returns:
-            (B, H, L) output tensor.
+            (B, d_model, L) output tensor.
         """
         if not self.transposed:
             u = u.transpose(-1, -2)
