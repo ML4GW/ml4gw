@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ml4gw.nn.autoencoder &mdash; ml4gw  documentation</title>
+  <title>ml4gw.nn.ssm &mdash; ml4gw  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -17,11 +17,13 @@
       <script src="../_static/documentation_options.js?v=d048f138"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ml4gw.nn.autoencoder.base" href="ml4gw.nn.autoencoder.base.html" />
-    <link rel="prev" title="ml4gw.nn" href="ml4gw.nn.html" /> 
+    <link rel="next" title="ml4gw.nn.ssm.s4d" href="ml4gw.nn.ssm.s4d.html" />
+    <link rel="prev" title="ml4gw.nn.resnet.resnet_2d" href="ml4gw.nn.resnet.resnet_2d.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -59,16 +61,13 @@
 <li class="toctree-l2"><a class="reference internal" href="ml4gw.distributions.html">ml4gw.distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ml4gw.gw.html">ml4gw.gw</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="ml4gw.nn.html">ml4gw.nn</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.nn.autoencoder</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="ml4gw.nn.autoencoder.base.html">ml4gw.nn.autoencoder.base</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ml4gw.nn.autoencoder.convolutional.html">ml4gw.nn.autoencoder.convolutional</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ml4gw.nn.autoencoder.skip_connection.html">ml4gw.nn.autoencoder.skip_connection</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ml4gw.nn.autoencoder.utils.html">ml4gw.nn.autoencoder.utils</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="ml4gw.nn.autoencoder.html">ml4gw.nn.autoencoder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.nn.norm.html">ml4gw.nn.norm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.nn.resnet.html">ml4gw.nn.resnet</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ml4gw.nn.ssm.html">ml4gw.nn.ssm</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.nn.ssm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ml4gw.nn.ssm.s4d.html">ml4gw.nn.ssm.s4d</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.nn.streaming.html">ml4gw.nn.streaming</a></li>
 </ul>
 </li>
@@ -97,9 +96,9 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="ml4gw.html">ml4gw</a></li>
           <li class="breadcrumb-item"><a href="ml4gw.nn.html">ml4gw.nn</a></li>
-      <li class="breadcrumb-item active">ml4gw.nn.autoencoder</li>
+      <li class="breadcrumb-item active">ml4gw.nn.ssm</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/ml4gw.nn.autoencoder.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/ml4gw.nn.ssm.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -107,21 +106,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-ml4gw.nn.autoencoder">
-<span id="ml4gw-nn-autoencoder"></span><h1>ml4gw.nn.autoencoder<a class="headerlink" href="#module-ml4gw.nn.autoencoder" title="Link to this heading"></a></h1>
+  <section id="module-ml4gw.nn.ssm">
+<span id="ml4gw-nn-ssm"></span><h1>ml4gw.nn.ssm<a class="headerlink" href="#module-ml4gw.nn.ssm" title="Link to this heading"></a></h1>
 <p class="rubric">Modules</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="ml4gw.nn.autoencoder.base.html#module-ml4gw.nn.autoencoder.base" title="ml4gw.nn.autoencoder.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ml4gw.nn.autoencoder.convolutional.html#module-ml4gw.nn.autoencoder.convolutional" title="ml4gw.nn.autoencoder.convolutional"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolutional</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ml4gw.nn.autoencoder.skip_connection.html#module-ml4gw.nn.autoencoder.skip_connection" title="ml4gw.nn.autoencoder.skip_connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skip_connection</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ml4gw.nn.autoencoder.utils.html#module-ml4gw.nn.autoencoder.utils" title="ml4gw.nn.autoencoder.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ml4gw.nn.ssm.s4d.html#module-ml4gw.nn.ssm.s4d" title="ml4gw.nn.ssm.s4d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s4d</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -132,8 +122,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ml4gw.nn.html" class="btn btn-neutral float-left" title="ml4gw.nn" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ml4gw.nn.autoencoder.base.html" class="btn btn-neutral float-right" title="ml4gw.nn.autoencoder.base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ml4gw.nn.resnet.resnet_2d.html" class="btn btn-neutral float-left" title="ml4gw.nn.resnet.resnet_2d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ml4gw.nn.ssm.s4d.html" class="btn btn-neutral float-right" title="ml4gw.nn.ssm.s4d" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

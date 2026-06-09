@@ -13,4 +13,5 @@ ml4gw.nn
    autoencoder
    norm
    resnet
+   ssm
    streaming

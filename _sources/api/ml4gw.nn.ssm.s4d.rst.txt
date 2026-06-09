@@ -1,0 +1,14 @@
+ml4gw.nn.ssm.s4d
+================
+
+.. automodule:: ml4gw.nn.ssm.s4d
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      S4D
+      S4DKernel
+      S4Model
+   

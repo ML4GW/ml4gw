@@ -1,0 +1,13 @@
+ml4gw.nn.ssm
+============
+
+.. automodule:: ml4gw.nn.ssm
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   s4d
