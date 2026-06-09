@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from ml4gw.nn.ssm.s4d import S4DKernel, S4D, S4Model
+from ml4gw.nn.ssm.s4d import S4D, S4DKernel, S4Model
 
 
 def test_shape():
@@ -69,7 +69,7 @@ def test_s4d_transposed_false_shape():
     # transposed=False should accept (B, L, H) and return the same shape.
     layer = S4D(d_model=4, d_state=16, transposed=False)
     x = torch.randn(2, 128, 4)
-    y, _ = layer(x)
+    y = layer(x)
     assert y.shape == x.shape
 
 

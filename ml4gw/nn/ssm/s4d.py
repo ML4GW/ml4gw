@@ -147,13 +147,13 @@ class S4D(nn.Module):
             nn.GLU(dim=-2),
         )
 
-    def forward(self, u: torch.Tensor, **kwargs) -> tuple[torch.Tensor, None]:
+    def forward(self, u: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Args:
             u: (B, H, L) if transposed else (B, L, H)
 
         Returns:
-            (B, H, L) output and None (dummy state placeholder).
+            (B, H, L) output tensor.
         """
         if not self.transposed:
             u = u.transpose(-1, -2)
@@ -169,7 +169,7 @@ class S4D(nn.Module):
         y = self.output_linear(y)
         if not self.transposed:
             y = y.transpose(-1, -2)
-        return y, None
+        return y
 
 
 class S4Model(nn.Module):
@@ -254,7 +254,7 @@ class S4Model(nn.Module):
         for layer, norm, dropout in zip(
             self.s4_layers, self.norms, self.dropouts, strict=True
         ):
-            z, _ = layer(x)
+            z = layer(x)
             z = dropout(z)
             x = norm((z + x).transpose(-1, -2)).transpose(-1, -2)  # postnorm
 
