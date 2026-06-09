@@ -16,19 +16,27 @@ class S4DKernel(nn.Module):
     Each channel is an independent diagonal linear time-invariant
     state-space model, defined in continuous time by
 
-        x'(t) = A * x(t) + B * u(t)
-        y(t)  = C * x(t)
+    .. math::
+        :nowrap:
 
-    with A diagonal. Linear time invariance means the output equals the
-    input convolved with a single kernel K, so the whole sequence is
-    processed in one convolution instead of stepped through position by
-    position. Discretizing with timestep dt gives the kernel this module
-    returns:
+        \\begin{align*}
+            x'(t) &= A x(t) + B u(t) \\\\
+            y(t) &= C x(t)
+        \\end{align*}
 
-        K_l = 2 * Re(
-            sum_n C_n * ((exp(dt * A_n) - 1) / A_n) * exp(dt * A_n)^l
-        ),
-        l = 0, ..., L-1   (n runs over the N/2 states)
+    with :math:`A` diagonal. Linear time invariance means the output
+    equals the input convolved with a single kernel, so the whole
+    sequence is produced in one convolution instead of being stepped
+    through position by position. Discretizing with timestep :math:`dt`
+    gives the kernel this module returns:
+
+    .. math::
+
+        K_l = 2 \\mathrm{Re} \\left(
+            \\sum_n C_n \\frac{e^{dt A_n} - 1}{A_n} \\left(e^{dt A_n}\\right)^l
+        \\right), \\qquad l = 0, \\dots, L-1
+
+    where :math:`n` runs over the :math:`N/2` conjugate-pair states.
 
     Args:
         d_model: Model dimension.
@@ -47,7 +55,7 @@ class S4DKernel(nn.Module):
         d_model: int,
         N: int = 64,
         dt_min: float = 0.001,
-        dt_max: float = 0.1
+        dt_max: float = 0.1,
     ):
         super().__init__()
 
@@ -94,7 +102,17 @@ class S4DKernel(nn.Module):
 
 
 class S4D(nn.Module):
-    """Single S4D layer operating on (B, H, L) sequences."""
+    """Single S4D layer operating on (B, H, L) sequences.
+
+    Args:
+        d_model: Model dimension (number of channels).
+        d_state: State size per model dimension.
+        dropout: Dropout probability applied to the S4D layer output.
+        transposed: If True, input/output are (batch, channels, length).
+            If False, input/output are (batch, length, channels).
+        dt_min: Minimum timestep for the S4D kernel.
+        dt_max: Maximum timestep for the S4D kernel.
+    """
 
     def __init__(
         self,
@@ -151,8 +169,31 @@ class S4D(nn.Module):
 class S4Model(nn.Module):
     """Full S4D sequence model for regression / classification.
 
-    Input:  (B, d_input, L)  — channels-first (aframe convention).
+    Input:  (B, d_input, L)
     Output: (B, d_output)
+
+    Args:
+        d_input: Input dimension (number of input features).
+        d_output: Output dimension (number of output classes/predictions).
+        d_model: Hidden model dimension (channels in S4D layers).
+        d_state: State size per model dimension in S4D layers.
+        n_layers: Number of stacked S4D layers.
+        dropout: Dropout probability in S4D layers.
+        dt_min: Minimum timestep for S4D kernels.
+        dt_max: Maximum timestep for S4D kernels.
+
+    Example:
+        >>> model = S4Model(
+        ...     d_input=2,
+        ...     d_output=1,
+        ...     d_model=64,
+        ...     d_state=64,
+        ...     n_layers=4,
+        ... )
+        >>> x = torch.randn(4, 2, 2048)  # x shape: (B, d_input, L)
+        >>> y = model(x)
+        >>> y.shape
+        torch.Size([4, 1])
     """
 
     def __init__(
