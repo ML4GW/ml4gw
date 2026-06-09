@@ -1,6 +1,7 @@
+import pytest
 import torch
 
-from ml4gw.nn.ssm.s4d import S4DKernel, S4Model
+from ml4gw.nn.ssm.s4d import S4DKernel, S4D, S4Model
 
 
 def test_shape():
@@ -32,7 +33,7 @@ def test_eval_determinism():
 
 def test_ssm_kernel_linearity():
     # The kernel is a linear operator: K(a*u + b*v) == a*K(u) + b*K(v).
-    # Superposition must hold — if it doesn't, the convolution is broken.
+    # Superposition must hold; if it doesn't, the convolution is broken.
     kernel = S4DKernel(d_model=4, N=16)
     u, v = torch.randn(4, 128), torch.randn(4, 128)
     a, b = 2.3, -1.7
@@ -62,3 +63,19 @@ def test_skip_connection_contributes():
         out_after = model(x)
 
     assert not torch.allclose(out_before, out_after)
+
+
+def test_s4d_transposed_false_shape():
+    # transposed=False should accept (B, L, H) and return the same shape.
+    layer = S4D(d_model=4, d_state=16, transposed=False)
+    x = torch.randn(2, 128, 4)
+    y, _ = layer(x)
+    assert y.shape == x.shape
+
+
+def test_s4d_invalid_dropout_raises():
+    with pytest.raises(ValueError, match="dropout must be"):
+        S4D(d_model=4, d_state=16, dropout=1.5)
+
+    with pytest.raises(ValueError, match="dropout must be a float"):
+        S4D(d_model=4, d_state=16, dropout=None)

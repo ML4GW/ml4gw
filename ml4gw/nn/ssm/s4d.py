@@ -127,6 +127,12 @@ class S4D(nn.Module):
         self.transposed = transposed
         self.D = nn.Parameter(torch.randn(d_model))
 
+        if dropout is None or not isinstance(dropout, (int, float)):
+            raise ValueError("dropout must be a float between 0.0 and 1.0")
+        dropout = float(dropout)
+        if not 0.0 <= dropout <= 1.0:
+            raise ValueError("dropout must be between 0.0 and 1.0")
+
         self.kernel = S4DKernel(
             d_model, N=d_state, dt_min=dt_min, dt_max=dt_max
         )
