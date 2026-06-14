@@ -248,6 +248,17 @@ class SingleQTransform(torch.nn.Module):
         )
         self.qtiles = None
 
+        # Group rows by number of tiles (i.e. ifft length). Rows in the same
+        # group can have their iffts and time-interpolation batched into a
+        # single call instead of one call per frequency row, which is much
+        # faster on GPU (the per-row loop is kernel-launch bound).
+        ntiles = [qtile.ntiles() for qtile in self.qtile_transforms]
+        idx = torch.arange(len(ntiles))
+        self._ntile_groups = [
+            idx[torch.tensor(ntiles) == n].tolist()
+            for n in sorted(set(ntiles))
+        ]
+
         if self.interpolation_method == "spline":
             self._set_up_spline_interp()
 
@@ -363,7 +374,39 @@ class SingleQTransform(torch.nn.Module):
         # Computing the FFT with the same normalization and scaling as GWpy
         X = torch.fft.rfft(X, norm="forward")
         X[..., 1:] *= 2
-        self.qtiles = [qtile(X, norm) for qtile in self.qtile_transforms]
+        while len(X.shape) < 3:
+            X = X[None]
+        if isinstance(norm, str):
+            norm = norm.lower()
+
+        # Batch the per-row ifft across frequency rows that share an ifft
+        # length (ntiles). This reproduces ``QTile.forward`` exactly, but with
+        # one ifft per group instead of one per row.
+        qtiles = [None] * len(self.qtile_transforms)
+        for group in self._ntile_groups:
+            rows = [self.qtile_transforms[i] for i in group]
+            padded = []
+            for row in rows:
+                windowed = X[..., row.indices] * row.window
+                left, right = row.padding
+                p = F.pad(windowed, (int(left), int(right)), mode="constant")
+                padded.append(torch.fft.ifftshift(p, dim=-1))
+            wenergy = torch.stack(padded, dim=-2)  # (..., n_rows, ntiles)
+            tdenergy = torch.fft.ifft(wenergy)
+            energy = tdenergy.real**2.0 + tdenergy.imag**2.0
+            if norm:
+                if norm == "median":
+                    energy = energy / torch.quantile(
+                        energy, q=0.5, dim=-1, keepdim=True
+                    )
+                elif norm == "mean":
+                    energy = energy / torch.mean(energy, dim=-1, keepdim=True)
+                else:
+                    raise ValueError(f"Invalid normalisation {norm}")
+                energy = energy.type(torch.float32)
+            for j, i in enumerate(group):
+                qtiles[i] = energy[..., j, :]
+        self.qtiles = qtiles
 
     def interpolate(self) -> TimeSeries3d:
         if self.qtiles is None:
@@ -387,17 +430,23 @@ class SingleQTransform(torch.nn.Module):
             # Transpose because the final dimension gets interpolated
             return self.interpolator(time_interped.mT).mT
         num_f_bins, num_t_bins = self.spectrogram_shape
-        resampled = [
-            F.interpolate(
-                qtile[None],
-                (qtile.shape[-2], num_t_bins),
+        # Batch the time-interpolation across rows that share an ntiles length
+        # (one F.interpolate per group instead of one per row). Interpolating
+        # the stacked row dimension to its own size is a no-op, so only the
+        # time axis is resampled -- identical to the per-row interpolation.
+        rows_ti = [None] * len(self.qtiles)
+        for group in self._ntile_groups:
+            stack = torch.stack([self.qtiles[i] for i in group], dim=-2)
+            ti = F.interpolate(
+                stack,
+                (stack.shape[-2], num_t_bins),
                 mode=self.interpolation_method,
             )
-            for qtile in self.qtiles
-        ]
-        resampled = torch.stack(resampled, dim=-2)
+            for j, i in enumerate(group):
+                rows_ti[i] = ti[..., j, :]
+        resampled = torch.stack(rows_ti, dim=-2)
         resampled = F.interpolate(
-            resampled[0],
+            resampled,
             (num_f_bins, num_t_bins),
             mode=self.interpolation_method,
         )
