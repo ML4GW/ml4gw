@@ -112,8 +112,12 @@ class IMRPhenomDECO(IMRPhenomD):
         gamma3 = self.gamma3_fun(eta, eta2, xi)
 
         fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
-        Mf_peak_phase = self.fmaxCalc(fRD, fDM, gamma2, gamma3,0.5)
-        _, t0 = self.phenom_d_mrd_phase(Mf_peak_phase, eta, eta2, chi1, chi2, xi, fRD, fDM )
+
+        # compactness fixed at 0.5, as phase unchanged wrt PhenomD
+        Mf_peak_phase = self.fmaxCalc_deco(fRD, fDM, gamma2, gamma3, 0.5)
+        _, t0 = self.phenom_d_mrd_phase(
+            Mf_peak_phase, eta, eta2, chi1, chi2, xi, fRD, fDM
+        )
 
         Mf = torch.outer(M_s, f)
         Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
