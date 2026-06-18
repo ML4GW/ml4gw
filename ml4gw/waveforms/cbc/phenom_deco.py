@@ -92,7 +92,7 @@ class IMRPhenomDECO(IMRPhenomD):
         phic: BatchTensor,
         f_ref: float,
     ) -> Float[FrequencySeries1d, " batch"]:
-        # PhenomDECO reuses the PhenomD phase model and the amplitude model
+        # PhenomDECO reuses the PhenomD phase model while the amplitude model
         # is parametrized by an effective compactness of the two objects;
         # see Phys. Rev. D 112, 104017 (2025) for details
 
@@ -123,10 +123,10 @@ class IMRPhenomDECO(IMRPhenomD):
         Mf_ref = torch.outer(M_s, f_ref * torch.ones_like(f))
 
         Psi, _ = self.phenom_d_phase(
-            Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM 
+            Mf, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
         Psi_ref, _ = self.phenom_d_phase(
-            Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM 
+            Mf_ref, mass_1, mass_2, eta, eta2, chi1, chi2, xi, fRD, fDM
         )
 
         Psi = (Psi.mT - 2 * phic).mT
