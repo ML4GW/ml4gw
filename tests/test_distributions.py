@@ -284,7 +284,10 @@ def test_chirp_distribution(seed_everything):
     assert len(samples["chirp_mass"]) == 10
     assert len(samples["distance"]) == 10
 
-    assert ((1.0 <= samples["chirp_mass"]) & (samples["chirp_mass"] <= 10.0)).all()
+    assert (
+        (1.0 <= samples["chirp_mass"])
+        & (samples["chirp_mass"] <= 10.0)
+    ).all()
 
     mass_factor = sampler.scale(samples["chirp_mass"])
     chirp_distance_samples = samples["distance"] / mass_factor
