@@ -269,6 +269,7 @@ class TestCosmologyDistributions:
                 minimum=0, maximum=6, distance_type="redshift"
             )
 
+
 def test_chirp_distribution(seed_everything):
     chirp_mass = torch.distributions.Uniform(1.0, 10.0)
     chirp_distance = torch.distributions.Uniform(100.0, 1000.0)
@@ -285,17 +286,16 @@ def test_chirp_distribution(seed_everything):
     assert len(samples["distance"]) == 10
 
     assert (
-        (1.0 <= samples["chirp_mass"])
-        & (samples["chirp_mass"] <= 10.0)
+        (1.0 <= samples["chirp_mass"]) & (samples["chirp_mass"] <= 10.0)
     ).all()
 
     mass_factor = sampler.scale(samples["chirp_mass"])
     chirp_distance_samples = samples["distance"] / mass_factor
 
     assert (
-        (100.0 <= chirp_distance_samples)
-        & (chirp_distance_samples <= 1000.0)
+        (100.0 <= chirp_distance_samples) & (chirp_distance_samples <= 1000.0)
     ).all()
+
 
 def test_chirp_distribution_log_prob():
     chirp_mass = torch.distributions.Uniform(1.0, 10.0)
