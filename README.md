@@ -49,7 +49,7 @@ See [contribution guide](/CONTRIBUTING.md) for more details.
 If you come across errors in the code, have difficulties using this software, or simply find that the current version doesn't cover your use case, please file an issue on our GitHub page, and we'll be happy to offer support.
 If you want to add feature, please refer to the [contribution guide](/CONTRIBUTING.md) for more details.
 We also strongly encourage ML users in the GW physics space to try their hand at working on these issues and joining on as collaborators!
-For more information about how to get involved, feel free to reach out to [ml4gw@ligo.mit.edu](mailto:ml4gw@ligo.mit.edu).
+For more information about how to get involved, feel free to reach out to any of the maintainers listed in the [pyproject.toml](/pyproject.toml).
 By bringing in new users with new use cases, we hope to develop this library into a truly general-purpose tool that makes deep learning more accessible for gravitational wave physicists everywhere.
 
 ## Funding

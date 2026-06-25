@@ -11,9 +11,9 @@ authors = [
     { name = "Bhavya Gupta", email = "bhavya.gupta@ligo.org" },
 ]
 maintainers = [
-    { name = "Ethan Marx", email = "emarx@mit.edu" },
-    { name = "Will Benoit", email = "benoi090@umn.edu" },
+    { name = "Will Benoit", email = "william.benoit@ligo.org" },
     { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
+    { name = "Bhavya Gupta", email = "bhavya.gupta@ligo.org" },
 ]
 requires-python = ">=3.10,<3.13"
 classifiers = [
