@@ -2,9 +2,7 @@ import lal
 import numpy as np
 import pytest
 import torch
-from lalsimulation import (
-    GenerateBandAndTimeLimitedWhiteNoiseBurst as lalWhiteNoiseBursts,
-)
+from lalsimulation import GenerateBandAndTimeLimitedWhiteNoiseBurst as lalWNB
 
 from ml4gw.waveforms import WhiteNoiseBurst
 
@@ -111,10 +109,8 @@ def test_Band_and_Time_Limited_White_Noise_Burst(
     # LAL
     hplus = []
     hcross = []
-    # hplus_ = []
-    # hcross_ = []
     for seed in range(duplication):
-        h_plus, h_cross = lalWhiteNoiseBursts(
+        h_plus, h_cross = lalWNB(
             duration=time_envelope,
             frequency=frequency,
             bandwidth=bandwidth,
