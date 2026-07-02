@@ -13,14 +13,17 @@
 import os
 import sys
 
+from importlib.metadata import distribution
+
 sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "ml4gw"
-copyright = "2024, Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
-author = "Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
+dist = distribution("ml4gw")
+project = dist.metadata['name']
+copyright = f"2025, {dist.metadata['maintainer-email']}"
+author = dist.metadata['author-email']
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,11 +33,36 @@ author = "Alec Gunny, Ethan Marx, William Benoit, Deep Chatterjee"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     "sphinx.ext.githubpages",
+    "myst_nb",
 ]
+autosummary_generate = True
 
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
+
+autodoc_typehints = "description"
+autodoc_inherit_docstrings = False
+nb_execution_mode = "off"
+
+# MyST configuration
+myst_enable_extensions = [
+    "dollarmath",      # Enable $...$ and $$...$$ for math
+    "amsmath",         # Enable advanced math environments
+    "colon_fence",     # Enable ::: fences
+    "deflist",         # Enable definition lists
+    "html_image",      # Enable HTML images
+    "replacements",    # Enable replacements
+    "smartquotes",     # Enable smart quotes
+    "substitution",    # Enable substitutions
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -49,7 +77,7 @@ language = "python"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".pytest_cache", "jupyter_execute"]
 
 
 # -- Options for HTML output -------------------------------------------------

@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from ml4gw.nn.norm import GroupNorm1D
+from ml4gw.nn.norm import GroupNorm1D, GroupNorm1DGetter, GroupNorm2DGetter
 
 
 @pytest.fixture(params=[1, 2, 3, 4])
@@ -16,7 +16,7 @@ def num_groups(request):
 
 def update_weights(norm):
     optim = torch.optim.SGD(norm.parameters(), lr=1e-1)
-    for i in range(10):
+    for _ in range(10):
         optim.zero_grad()
         x, y = [torch.randn(8, norm.num_channels, 128) for _ in range(2)]
         y = 0.2 + 0.5 * y
@@ -73,3 +73,21 @@ def test_group_norm(num_groups, factor):
     close = torch.isclose(x, x_ref, rtol=1e-6)
     num_wrong = (~close).sum()
     assert (num_wrong / x.numel()) < 0.01
+
+
+def test_norm_getters():
+    getter = GroupNorm1DGetter(groups=2)
+    norm = getter(8)
+    assert isinstance(norm, GroupNorm1D)
+
+    getter_none = GroupNorm1DGetter()
+    norm_none = getter_none(4)
+    assert isinstance(norm_none, GroupNorm1D)
+
+    getter2d = GroupNorm2DGetter(groups=2)
+    norm2d = getter2d(8)
+    assert isinstance(norm2d, torch.nn.GroupNorm)
+
+    getter2d_none = GroupNorm2DGetter()
+    norm2d_none = getter2d_none(4)
+    assert isinstance(norm2d_none, torch.nn.GroupNorm)

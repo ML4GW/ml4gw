@@ -70,7 +70,6 @@ def test_multi_resolution_spectrogram(
     win_lengths,
     powers,
 ):
-
     # Creating a MRS without any spectrogram arguments should
     # just create a single default torchaudio histogram with
     # `normalized = True`

@@ -1,5 +1,4 @@
 from collections.abc import Callable, Sequence
-from typing import Optional
 
 import torch
 from torch import Tensor
@@ -19,11 +18,11 @@ class ConvBlock(Autoencoder):
         kernel_size: int,
         stride: int = 1,
         groups: int = 1,
-        activation: torch.nn.Module = torch.nn.ReLU(),
+        activation: torch.nn.Module = torch.nn.ReLU,
         norm: Module = torch.nn.BatchNorm1d,
-        decode_channels: Optional[int] = None,
-        output_activation: Optional[torch.nn.Module] = None,
-        skip_connection: Optional[SkipConnection] = None,
+        decode_channels: int | None = None,
+        output_activation: torch.nn.Module | None = None,
+        skip_connection: SkipConnection | None = None,
     ) -> None:
         super().__init__(skip_connection=None)
 
@@ -56,7 +55,7 @@ class ConvBlock(Autoencoder):
             groups=groups,
         )
 
-        self.activation = activation
+        self.activation = activation()
         if output_activation is not None:
             self.output_activation = output_activation
         else:
@@ -83,11 +82,11 @@ class ConvolutionalAutoencoder(Autoencoder):
     match the shape of the input to its corresponding
     encoder layer, except for the last decoder which
     can have an arbitrary number of channels specified
-    by `decode_channels`.
+    by ``decode_channels``.
 
-    All layers also share the same `activation` except
+    All layers also share the same ``activation`` except
     for the last decoder layer, which can have an
-    arbitrary `output_activation`.
+    arbitrary ``output_activation``.
     """
 
     def __init__(
@@ -97,11 +96,11 @@ class ConvolutionalAutoencoder(Autoencoder):
         kernel_size: int,
         stride: int = 1,
         groups: int = 1,
-        activation: torch.nn.Module = torch.nn.ReLU(),
-        output_activation: Optional[torch.nn.Module] = None,
+        activation: torch.nn.Module = torch.nn.ReLU,
+        output_activation: torch.nn.Module | None = None,
         norm: Module = torch.nn.BatchNorm1d,
-        decode_channels: Optional[int] = None,
-        skip_connection: Optional[SkipConnection] = None,
+        decode_channels: int | None = None,
+        skip_connection: SkipConnection | None = None,
     ) -> None:
         # TODO: how to do this dynamically? Maybe the base
         # architecture looks for overlapping arguments between
@@ -115,7 +114,7 @@ class ConvolutionalAutoencoder(Autoencoder):
             # All intermediate layers should decode to
             # the same number of channels. The last decoder
             # should decode to whatever number of channels
-            # was specified, even if it's `None` (in which
+            # was specified, even if it's ``None`` (in which
             # case it will just be in_channels anyway)
             decode = in_channels if i else decode_channels
 
@@ -145,9 +144,7 @@ class ConvolutionalAutoencoder(Autoencoder):
             self.blocks.append(block)
             in_channels = channels * groups
 
-    def decode(
-        self, *X, states=None, input_size: Optional[int] = None
-    ) -> Tensor:
+    def decode(self, *X, states=None, input_size: int | None = None) -> Tensor:
         X = super().decode(*X, states=states)
         if input_size is not None:
             return match_size(X, input_size)

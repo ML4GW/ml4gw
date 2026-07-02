@@ -1,5 +1,3 @@
-from typing import Optional
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -13,18 +11,18 @@ class ChannelWiseScaler(FittableTransform):
     Scales timeseries channels by the mean and standard
     deviation of the channels of the timeseries used to
     fit the module. To reverse the scaling, provide the
-    `reverse=True` keyword argument at call time.
+    ``reverse=True`` keyword argument at call time.
     By default, the scaling parameters are set to zero mean
     and unit variance, amounting to an identity transform.
 
     Args:
         num_channels:
             The number of channels of the target timeseries.
-            If left as `None`, the timeseries will be assumed
+            If left as ``None``, the timeseries will be assumed
             to be 1D (single channel).
     """
 
-    def __init__(self, num_channels: Optional[int] = None) -> None:
+    def __init__(self, num_channels: int | None = None) -> None:
         super().__init__()
 
         shape = (num_channels or 1,)
@@ -37,13 +35,13 @@ class ChannelWiseScaler(FittableTransform):
         self.register_buffer("std", std)
 
     def fit(
-        self, X: Float[Tensor, "... time"], std_reg: Optional[float] = 0.0
+        self, X: Float[Tensor, "... time"], std_reg: float | None = 0.0
     ) -> None:
         """Fit the scaling parameters to a timeseries
 
         Computes the channel-wise mean and standard deviation
-        of the timeseries `X` and sets these values to the
-        `mean` and `std` parameters of the scaler.
+        of the timeseries ``X`` and sets these values to the
+        ``mean`` and ``std`` parameters of the scaler.
         """
 
         if X.ndim == 1:
@@ -59,7 +57,7 @@ class ChannelWiseScaler(FittableTransform):
         else:
             raise ValueError(
                 "Can't fit channel wise mean and standard deviation "
-                "from tensor of shape {}".format(X.shape)
+                f"from tensor of shape {X.shape}"
             )
         std += std_reg * torch.ones_like(std)
         super().build(mean=mean, std=std)

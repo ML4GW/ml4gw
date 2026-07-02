@@ -1,4 +1,7 @@
 """
+This module provides functions for calculation of spectral densities
+and for whitening.
+
 Several implementation details are derived from the scipy csd and welch
 implementations. For more info, see
 
@@ -8,8 +11,6 @@ and
 
 https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.csd.html
 """
-
-from typing import Optional, Union
 
 import torch
 from jaxtyping import Float
@@ -27,22 +28,20 @@ def median(x: Float[Tensor, "... size"], axis: int) -> Float[Tensor, "..."]:
     """
     Implements a median calculation that matches numpy's
     behavior for an even number of elements and includes
-    the same bias correction used by scipy's implementation.
-    see https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066 # noqa
-    """
+    the same bias correction used by
+    `scipy's implementation <https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066>`_.
+    """  # noqa: E501
     n = x.shape[axis]
     ii_2 = 2 * torch.arange(1.0, (n - 1) // 2 + 1)
     bias = 1 + torch.sum(1.0 / (ii_2 + 1) - 1.0 / ii_2)
     return torch.quantile(x, q=0.5, axis=axis) / bias
 
 
-def _validate_shapes(
-    x: Tensor, nperseg: int, y: Optional[Tensor] = None
-) -> None:
+def _validate_shapes(x: Tensor, nperseg: int, y: Tensor | None = None) -> None:
     if x.shape[-1] < nperseg:
         raise ValueError(
-            "Number of samples {} in input x is insufficient "
-            "for number of fft samples {}".format(x.shape[-1], nperseg)
+            f"Number of samples {x.shape[-1]} in input x is insufficient "
+            f"for number of fft samples {nperseg}"
         )
     elif x.ndim > 3:
         raise ValueError(
@@ -59,30 +58,30 @@ def _validate_shapes(
     if x.shape[-1] != y.shape[-1]:
         raise ValueError(
             "Time dimensions of x and y tensors must "
-            "be the same, found {} and {}".format(x.shape[-1], y.shape[-1])
+            f"be the same, found {x.shape[-1]} and {y.shape[-1]}"
         )
     elif x.ndim == 1 and not y.ndim == 1:
         raise ValueError(
             "Can't compute cross spectral density of "
-            "1D tensor x with {}D tensor y".format(y.ndim)
+            f"1D tensor x with {y.ndim}D tensor y"
         )
     elif x.ndim > 1 and y.ndim == x.ndim:
         if not y.shape == x.shape:
             raise ValueError(
                 "If x and y tensors have the same number "
                 "of dimensions, shapes must fully match. "
-                "Found shapes {} and {}".format(x.shape, y.shape)
+                f"Found shapes {x.shape} and {y.shape}"
             )
     elif x.ndim > 1 and y.ndim != (x.ndim - 1):
         raise ValueError(
             "Can't compute cross spectral density of "
-            "tensors with shapes {} and {}".format(x.shape, y.shape)
+            f"tensors with shapes {x.shape} and {y.shape}"
         )
     elif x.ndim > 2 and y.shape[0] != x.shape[0]:
         raise ValueError(
             "If x is a 3D tensor and y is a 2D tensor, "
             "0th batch dimensions must match, but found "
-            "values {} and {}".format(x.shape[0], y.shape[0])
+            f"values {x.shape[0]} and {y.shape[0]}"
         )
 
 
@@ -93,7 +92,7 @@ def fast_spectral_density(
     window: Float[Tensor, " {nperseg//2+1}"],
     scale: float,
     average: str = "median",
-    y: Optional[TimeSeries1to3d] = None,
+    y: TimeSeries1to3d | None = None,
 ) -> FrequencySeries1to3d:
     """
     Compute the power spectral density of a multichannel
@@ -111,53 +110,57 @@ def fast_spectral_density(
             The timeseries tensor whose power spectral density
             to compute, or for cross spectral density the
             timeseries whose fft will be conjugated. Can have
-            shape `(batch_size, num_channels, length * sample_rate)`,
-            `(num_channels, length * sample_rate)`, or
-            `(length * sample_rate)`.
+            shape ``(batch_size, num_channels, length * sample_rate)``,
+            ``(num_channels, length * sample_rate)``, or
+            ``(length * sample_rate)``.
         nperseg:
             Number of samples included in each FFT window
         nstride:
             Stride between FFT windows
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length `nperseg // 2 + 1`.
+            FFT computation. Should have length ``nperseg // 2 + 1``.
         scale:
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
-            `1 / (sample_rate * (window**2).sum())` will give output
-            units of density, $\\text{Hz}^-1$$.
+            ``1 / (sample_rate * (window**2).sum())`` will give output
+            units of density, :math``\\text{Hz}^-1``.
         average:
             How to aggregate the contributions of each FFT window to
-            the spectral density. Allowed options are `'mean'` and
-            `'median'`.
+            the spectral density. Allowed options are ``'mean'`` and
+            ``'median'``.
         y:
             Timeseries tensor to compute cross spectral density
-            with `x`. If left as `None`, `x`'s power spectral
-            density will be returned. Otherwise, if `x` is 1D,
-            `y` must also be 1D. If `x` is 2D, the assumption
+            with ``x``. If left as ``None``, ``x``'s power spectral
+            density will be returned. Otherwise, if ``x`` is 1D,
+            ``y`` must also be 1D. If ``x`` is 2D, the assumption
             is that this represents a single multi-channel timeseries,
-            and `y` must be either 2D or 1D. In the former case,
+            and ``y`` must be either 2D or 1D. In the former case,
             the cross-spectral densities of each channel will be
-            computed individually, so `y` must have the same shape as `x`.
-            Otherwise, this will compute the CSD of each of `x`'s channels
-            with `y`. If `x` is 3D, this will be assumed to be a batch
-            of multi-channel timeseries. In this case, `y` can either
+            computed individually, so ``y`` must have the same shape as ``x``.
+            Otherwise, this will compute the CSD of each of ``x``'s channels
+            with ``y``. If ``x`` is 3D, this will be assumed to be a batch
+            of multi-channel timeseries. In this case, ``y`` can either
             be 3D, in which case each channel of each batch element will
             have its CSD calculated or 2D, which has two different options.
-            If `y`'s 0th dimension matches `x`'s 0th dimension, it will
-            be assumed that `y` represents a batch of 1D timeseries, and
+            If ``y``'s 0th dimension matches ``x``'s 0th dimension, it will
+            be assumed that ``y`` represents a batch of 1D timeseries, and
             for each batch element this timeseries will have its CSD with
-            each channel of the corresponding batch element of `x`
-            calculated. Otherwise, it sill be assumed that `y` represents
+            each channel of the corresponding batch element of ``x``
+            calculated. Otherwise, it sill be assumed that ``y`` represents
             a single multi-channel timeseries, in which case each channel
-            of `y` will have its CSD calculated with the corresponding
-            channel in `x` across _all_ of `x`'s batch elements.
+            of ``y`` will have its CSD calculated with the corresponding
+            channel in ``x`` across _all_ of ``x``'s batch elements.
     Returns:
-        Tensor of power spectral densities of `x` or its cross spectral
-        density with the timeseries in `y`.
+        Tensor of power spectral densities of ``x`` or its cross spectral
+        density with the timeseries in ``y``.
     """
 
     _validate_shapes(x, nperseg, y)
+
+    # Set data to double precision to avoid values
+    # going to zero
+    x = x.double()
 
     if x.ndim > 2:
         # stft only works on 2D input, so roll the
@@ -262,28 +265,32 @@ def spectral_density(
             The timeseries tensor whose power spectral density
             to compute, or for cross spectral density the
             timeseries whose fft will be conjugated. Can have
-            shape `(batch_size, num_channels, length * sample_rate)`,
-            `(num_channels, length * sample_rate)`, or
-            `(length * sample_rate)`.
+            shape ``(batch_size, num_channels, length * sample_rate)``,
+            ``(num_channels, length * sample_rate)``, or
+            ``(length * sample_rate)``.
         nperseg:
             Number of samples included in each FFT window
         nstride:
             Stride between FFT windows
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length `nperseg // 2 + 1`.
+            FFT computation. Should have length ``nperseg // 2 + 1``.
         scale:
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
-            `1 / (sample_rate * (window**2).sum())` will give output
-            units of density, $\\text{Hz}^-1$$.
+            ``1 / (sample_rate * (window**2).sum())`` will give output
+            units of density, :math:`\\text{Hz}^-1`.
         average:
             How to aggregate the contributions of each FFT window to
-            the spectral density. Allowed options are `'mean'` and
-            `'median'`.
+            the spectral density. Allowed options are ``'mean'`` and
+            ``'median'``.
     """
 
     _validate_shapes(x, nperseg)
+
+    # Set data to double precision to avoid values
+    # going to zero
+    x = x.double()
 
     # for non-fast implementation, we need to unfold
     # the tensor along the time dimension ourselves
@@ -340,26 +347,26 @@ def spectral_density(
 
 def truncate_inverse_power_spectrum(
     psd: PSDTensor,
-    fduration: Union[Float[Tensor, " time"], float],
+    fduration: Float[Tensor, " time"] | float,
     sample_rate: float,
-    highpass: Optional[float] = None,
-    lowpass: Optional[float] = None,
+    highpass: float | None = None,
+    lowpass: float | None = None,
 ) -> PSDTensor:
     """
     Truncate the length of the time domain response
     of a whitening filter built using the specified
-    `psd` so that it has maximum length `fduration`
+    ``psd`` so that it has maximum length ``fduration``
     seconds. This is meant to mitigate the impact
     of sharp features in the background PSD causing
     time domain responses longer than the segments
     to which the whitening filter will be applied.
 
     Implementation details adapted from
-    https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8  # noqa
+    `here <https://github.com/vivinousi/gw-detection-deep-learning/blob/203966cc2ee47c32c292be000fb009a16824b7d9/modules/whiten.py#L8>`_.
 
     Args:
         psd:
-            The one-sided power spectraul density used
+            The one-sided power spectral density used
             to construct a whitening filter.
         fduration:
             Desired length in seconds of the time domain
@@ -375,16 +382,16 @@ def truncate_inverse_power_spectrum(
         highpass:
             If specified, will zero out the frequency response
             of all frequencies below this value in Hz. If left
-            as `None`, no highpass filtering will be applied.
+            as ``None``, no highpass filtering will be applied.
         lowpass:
             If specified, will zero out the frequency response
             of all frequencies above this value in Hz. If left
-            as `None`, no lowpass filtering will be applied.
+            as ``None``, no lowpass filtering will be applied.
     Returns:
         The PSD with its time domain response truncated
-            to `fduration` and any highpassed frequencies
+            to ``fduration`` and any filtered frequencies
             tapered.
-    """
+    """  # noqa: E501
 
     num_freqs = psd.size(-1)
     N = (num_freqs - 1) * 2
@@ -437,6 +444,7 @@ def normalize_by_psd(
     psd: PSDTensor,
     sample_rate: float,
     pad: int,
+    crop: bool = True,
 ):
     # compute the FFT of the section we want to whiten
     # and divide it by the ASD of the background section.
@@ -444,8 +452,8 @@ def normalize_by_psd(
     # corresponding bin to 0
     X = X - X.mean(-1, keepdims=True)
     X_tilde = torch.fft.rfft(X.double(), norm="forward", dim=-1)
-    X_tilde = X_tilde / psd**0.5
-    X_tilde[torch.isnan(X_tilde)] = 0
+    inv_asd = torch.nan_to_num(psd**-0.5)
+    X_tilde = X_tilde * inv_asd
 
     # convert back to the time domain and normalize
     # TODO: what's this normalization factor?
@@ -453,23 +461,25 @@ def normalize_by_psd(
     X = X.float() / sample_rate**0.5
 
     # slice off corrupted data at edges of kernel
-    X = X[:, :, pad:-pad]
+    if crop:
+        X = X[:, :, pad:-pad]
     return X
 
 
 def whiten(
     X: WaveformTensor,
     psd: PSDTensor,
-    fduration: Union[Float[Tensor, " time"], float],
+    fduration: Float[Tensor, " time"] | float,
     sample_rate: float,
-    highpass: Optional[float] = None,
-    lowpass: Optional[float] = None,
+    highpass: float | None = None,
+    lowpass: float | None = None,
+    crop: bool = True,
 ) -> WaveformTensor:
     """
     Whiten a batch of timeseries using the specified
     background one-sided power spectral densities (PSDs),
     modified to have the desired time domain response length
-    `fduration` and possibly to highpass/lowpass filter.
+    ``fduration`` and possibly to highpass/lowpass filter.
 
     Args:
         X:
@@ -480,11 +490,11 @@ def whiten(
             the inverse of the square root of this PSD, ensuring
             that data from the same distribution will have
             approximately uniform power after whitening.
-            If 2D, each batch element in `X` will be whitened
+            If 2D, each batch element in ``X`` will be whitened
             using the same PSDs. If 3D, each batch element will
             be whitened by the PSDs contained along the 0th
-            dimenion of `psd`, and so the first two dimensions
-            of `X` and `psd` should match.
+            dimenion of ``psd``, and so the first two dimensions
+            of ``X`` and ``psd`` should match.
         fduration:
             Desired length in seconds of the time domain
             response of a whitening filter built using
@@ -496,20 +506,25 @@ def whiten(
             the whitened timeseries to account for filter
             settle-in time.
         sample_rate:
-            Rate at which the data in `X` has been sampled
+            Rate at which the data in ``X`` has been sampled
         highpass:
             The frequency in Hz at which to highpass filter
             the data, setting the frequency response in the
-            whitening filter to 0. If left as `None`, no
+            whitening filter to 0. If left as ``None``, no
             highpass filtering will be applied.
         lowpass:
             The frequency in Hz at which to lowpass filter
             the data, setting the frequency response in the
-            whitening filter to 0. If left as `None`, no
+            whitening filter to 0. If left as ``None``, no
             lowpass filtering will be applied.
+        crop:
+            If ``True``, crop ``fduration / 2`` seconds of data
+            from both sides of the time dimension to remove the
+            corruption from the filter. If ``False``, return the
+            full timeseries.
     Returns:
-        Batch of whitened multichannel timeseries with
-            `fduration / 2` seconds trimmed from each side.
+        Batch of whitened multichannel timeseries with ``fduration / 2``
+            seconds optionally trimmed from each side.
     """
 
     # figure out how much data we'll need to slice
@@ -522,8 +537,8 @@ def whiten(
     N = X.size(-1)
     if N <= (2 * pad):
         raise ValueError(
-            "Not enough timeseries samples {} for "
-            "number of padded samples {}".format(N, 2 * pad)
+            f"Not enough timeseries samples {N} for number of "
+            f"padded samples {2 * pad}"
         )
 
     # normalize the number of expected dimensions in the PSD
@@ -550,4 +565,4 @@ def whiten(
         lowpass,
     )
 
-    return normalize_by_psd(X, psd, sample_rate, pad)
+    return normalize_by_psd(X, psd, sample_rate, pad, crop)

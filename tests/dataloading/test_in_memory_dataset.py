@@ -355,3 +355,49 @@ def test_in_memory_dataset_non_coincident_stochastic(
 
     with pytest.raises(StopIteration):
         next(data_it)
+
+
+def test_in_memory_dataset_coincident_shuffle(
+    X, num_kernels, kernel_size, batch_size, stride, validate_shape
+):
+    perm = torch.randperm(num_kernels)
+    dataset = InMemoryDataset(
+        X,
+        kernel_size,
+        batch_size=batch_size,
+        stride=stride,
+        coincident=True,
+        shuffle=True,
+    )
+    with patch("torch.randperm", return_value=perm) as mock:
+        dataset.init_indices()
+    mock.assert_called_once_with(num_kernels, device=dataset.X.device)
+
+    with patch.object(InMemoryDataset, "init_indices", return_value=perm):
+        dataset = InMemoryDataset(
+            X,
+            kernel_size,
+            batch_size=batch_size,
+            stride=stride,
+            coincident=True,
+            shuffle=True,
+        )
+
+        data_it = iter(dataset)
+        idx = perm.cpu().numpy()
+        num_samples = X.shape[-1]
+
+        for i in range(len(dataset)):
+            x = next(data_it)
+            validate_shape(i, x, len(dataset))
+            for j, sample in enumerate(x.cpu().numpy()):
+                sample_idx = i * batch_size + j
+                start_idx = idx[sample_idx]
+                for k, channel in enumerate(sample):
+                    start = start_idx * stride + k * num_samples
+                    stop = start + kernel_size
+                    expected = np.arange(start, stop).astype("float32")
+                    assert (channel == expected).all(), (i, j, k)
+
+    with pytest.raises(StopIteration):
+        next(data_it)

@@ -1,5 +1,3 @@
-from typing import Optional
-
 import torch
 
 from ..spectral import spectral_density
@@ -20,8 +18,8 @@ class FittableTransform(torch.nn.Module):
     def _check_built(self):
         if not self.built:
             raise ValueError(
-                "Must fit parameters of {} transform to data "
-                "before calling forward step".format(self.__class__.__name__)
+                f"Must fit parameters of {self.__class__.__name__} transform "
+                "to data before calling forward step"
             )
 
     def __call__(self, *args, **kwargs):
@@ -47,8 +45,8 @@ class FittableSpectralTransform(FittableTransform):
         x: TimeSeries1to3d,
         sample_rate: float,
         num_freqs: int,
-        fftlength: Optional[float] = None,
-        overlap: Optional[float] = None,
+        fftlength: float | None = None,
+        overlap: float | None = None,
     ) -> FrequencySeries1to3d:
         # if we specified an FFT length, convert
         # the (assumed) time-domain data to the
@@ -70,7 +68,7 @@ class FittableSpectralTransform(FittableTransform):
             )
 
         # add two dummy dimensions in case we need to interpolate
-        # the frequency dimension, since `interpolate` expects
+        # the frequency dimension, since ``interpolate`` expects
         # a (batch, channel, spatial) formatted tensor as input
         x = x.view(1, 1, -1)
         if x.size(-1) != num_freqs:

@@ -1,5 +1,4 @@
 import warnings
-from typing import Dict, List
 
 import torch
 import torch.nn.functional as F
@@ -14,18 +13,18 @@ class MultiResolutionSpectrogram(torch.nn.Module):
     """
     Create a batch of multi-resolution spectrograms
     from a batch of timeseries. Input is expected to
-    have the shape `(B, C, T)`, where `B` is the number
-    of batches, `C` is the number of channels, and `T`
+    have the shape ``(B, C, T)``, where ``B`` is the number
+    of batches, ``C`` is the number of channels, and ``T``
     is the number of time samples.
 
     For each timeseries, calculate multiple normalized
-    spectrograms based on the `Spectrogram` `kwargs` given.
+    spectrograms based on the ``Spectrogram`` ``kwargs`` given.
     Combine the spectrograms by taking the maximum value
     from the nearest time-frequncy bin.
 
     If the largest number of time bins among the spectrograms
-    is `N` and the largest number of frequency bins is `M`,
-    the output will have dimensions `(B, C, M, N)`
+    is ``N`` and the largest number of frequency bins is ``M``,
+    the output will have dimensions ``(B, C, M, N)``
 
     Args:
         kernel_length:
@@ -34,10 +33,11 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             spectrogram
         sample_rate:
             The sample rate of the timeseries in Hz
-        kwargs:
+        **kwargs:
             Arguments passed in kwargs will used to create
-            `torchaudio.transforms.Spectrogram`s. Each
-            argument should be a list of values. Any list
+            ``torchaudio.transforms.Spectrogram`` (see
+            `documentation <https://docs.pytorch.org/audio/main/generated/torchaudio.transforms.Spectrogram.html>`_).
+            Each argument should be a list of values. Any list
             of length greater than 1 should be the same
             length
     """
@@ -103,8 +103,9 @@ class MultiResolutionSpectrogram(torch.nn.Module):
         self.register_buffer("freq_idxs", freq_idxs)
         self.register_buffer("time_idxs", time_idxs)
 
-    def _check_and_format_kwargs(self, kwargs: Dict[str, List]) -> List:
-        lengths = sorted(set([len(v) for v in kwargs.values()]))
+    def _check_and_format_kwargs(self, kwargs: dict[str, list]) -> list:
+        lengths = sorted(len(v) for v in kwargs.values())
+        lengths = list(set(lengths))
 
         if lengths[-1] > 3:
             warnings.warn(
@@ -112,6 +113,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
                 "If performance is slower than desired, try reducing the "
                 "number of spectrograms",
                 RuntimeWarning,
+                stacklevel=2,
             )
 
         if len(lengths) > 2 or (len(lengths) == 2 and lengths[0] != 1):
@@ -124,7 +126,10 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             size = lengths[1]
             kwargs = {k: v * int(size / len(v)) for k, v in kwargs.items()}
 
-        return [dict(zip(kwargs, col)) for col in zip(*kwargs.values())]
+        return [
+            dict(zip(kwargs, col, strict=True))
+            for col in zip(*kwargs.values(), strict=True)
+        ]
 
     def forward(
         self, X: TimeSeries3d
@@ -138,9 +143,9 @@ class MultiResolutionSpectrogram(torch.nn.Module):
                 Batch of multichannel timeseries which will
                 be used to calculate the multi-resolution
                 spectrogram. Should have the shape
-                `(B, C, T)`, where `B` is the number of
-                batches, `C` is the  number of channels,
-                and `T` is the number of time samples.
+                ``(B, C, T)``, where ``B`` is the number of
+                batches, ``C`` is the  number of channels,
+                and ``T`` is the number of time samples.
         """
         if X.shape[-1] != self.kernel_size:
             raise ValueError(
@@ -158,6 +163,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
             self.right_pad,
             self.top_pad,
             self.bottom_pad,
+            strict=True,
         ):
             padded_specs.append(F.pad(spec, (left, right, top, bottom)))
 

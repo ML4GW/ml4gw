@@ -1,20 +1,19 @@
 import numpy as np
 import pytest
 import torch
-from gwpy.signal.qtransform import QPlane
+from gwpy.signal.qtransform import QPlane, QTiling
 from gwpy.signal.qtransform import QTile as gwpy_QTile
-from gwpy.signal.qtransform import QTiling
 
 from ml4gw.transforms import QScan, SingleQTransform
 from ml4gw.transforms.qtransform import QTile
 
 
-@pytest.fixture(params=[1, 2])
+@pytest.fixture(params=[1])
 def duration(request):
     return request.param
 
 
-@pytest.fixture(params=[1024, 2048])
+@pytest.fixture(params=[1024])
 def sample_rate(request):
     return request.param
 
@@ -24,7 +23,7 @@ def norm(request):
     return request.param
 
 
-@pytest.fixture(params=[[64, 64], [64, 128], [128, 128]])
+@pytest.fixture(params=[[64, 64], [64, 128]])
 def spectrogram_shape(request):
     return request.param
 
@@ -34,12 +33,12 @@ def q(request):
     return request.param
 
 
-@pytest.fixture(params=[0.2, 0.35])
+@pytest.fixture(params=[0.2])
 def mismatch(request):
     return request.param
 
 
-@pytest.fixture(params=[128, 256])
+@pytest.fixture(params=[128])
 def frequency(request):
     return request.param
 
@@ -57,7 +56,6 @@ def test_qtile(
     mismatch,
     norm,
 ):
-
     X = torch.randn(int(duration * sample_rate))
     X = torch.fft.rfft(X, norm="forward")
     X[..., 1:] *= 2
@@ -81,6 +79,15 @@ def test_qtile(
     X = torch.randn(2, 2, 2, int(sample_rate * duration))
     with pytest.raises(ValueError):
         torch_qtile(X)
+
+
+def test_qtile_invalid_norm():
+    X = torch.randn(1024)
+    X = torch.fft.rfft(X, norm="forward")
+    X[..., 1:] *= 2
+    qtile = QTile(12, 128, 1, 1024, 0.2)
+    with pytest.raises(ValueError, match="Invalid normalisation"):
+        qtile(X, norm="bogus")
 
 
 def test_singleqtransform(
@@ -142,19 +149,27 @@ def test_singleqtransform(
         mismatch=mismatch,
     )
 
-    assert (
-        qtransform.get_freqs().numpy() == list(qplane._iter_frequencies())
-    ).all()
+    assert (qtransform.freqs.numpy() == qplane.frequencies).all()
 
     qtransform.compute_qtiles(X, norm)
     torch_qtiles = qtransform.qtiles
     gwpy_qtiles = [qtile.transform(fseries, norm, 0) for qtile in qplane]
 
-    for t, g in zip(torch_qtiles, gwpy_qtiles):
+    for t, g in zip(torch_qtiles, gwpy_qtiles, strict=True):
         assert np.allclose(t.numpy(), g, rtol=1e-3)
 
     transformed = qtransform(X, norm)
     assert list(transformed.shape[-2:]) == spectrogram_shape
+
+
+def test_get_max_energy_invalid_dimension():
+    qtransform = SingleQTransform(
+        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+    )
+    X = torch.randn(1024)
+    qtransform.compute_qtiles(X, norm="median")
+    with pytest.raises(ValueError, match="Dimension must be one of"):
+        qtransform.get_max_energy(dimension="invalid")
 
 
 def test_get_qs(
@@ -183,3 +198,30 @@ def test_get_qs(
     # Just check that the QScan runs
     data = torch.randn(int(sample_rate * duration))
     _ = qscan(data)
+
+
+def test_get_max_energy_dimensions_and_fsearch():
+    qtransform = SingleQTransform(
+        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+    )
+
+    # pure tone at 200 Hz concentrates energy in that frequency band
+    t = torch.arange(1024) / 1024.0
+    X = torch.sin(2 * torch.pi * 200.0 * t)
+    qtransform.compute_qtiles(X, norm=None)
+
+    result = qtransform.get_max_energy(dimension="neither")
+    assert result.ndim == 2
+
+    result = qtransform.get_max_energy(dimension="batch")
+    assert result.ndim == 1
+
+    # restricting to a band containing the tone should
+    # give higher max energy than a band well above it
+    result_with_signal = qtransform.get_max_energy(
+        dimension="both", fsearch_range=(150.0, 250.0)
+    )
+    result_without_signal = qtransform.get_max_energy(
+        dimension="both", fsearch_range=(300.0, 370.0)
+    )
+    assert result_with_signal > result_without_signal

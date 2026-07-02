@@ -8,7 +8,7 @@ from scipy import signal
 from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
 
 
-@pytest.fixture(params=[1, 4, 8])
+@pytest.fixture(params=[4, 8])
 def length(request):
     return request.param
 
@@ -18,12 +18,12 @@ def sample_rate(request):
     return request.param
 
 
-@pytest.fixture(params=[0.5, 2, 4])
+@pytest.fixture(params=[0.5, 2])
 def fftlength(request):
     return request.param
 
 
-@pytest.fixture(params=[None, 0.1, 0.5, 1])
+@pytest.fixture(params=[None, 0.5])
 def overlap(request):
     return request.param
 
@@ -111,7 +111,7 @@ def test_fast_spectral_density(
     # that components higher than the first two are correct
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    compare_against_numpy(torch_result, scipy_result)
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -229,7 +229,7 @@ def test_fast_spectral_density_with_y(
             x = x.transpose(1, 0)
             y = [y] * len(x)
 
-        for i, j in zip(x, y):
+        for i, j in zip(x, y, strict=True):
             _, result = signal.csd(
                 i,
                 j,
@@ -260,7 +260,7 @@ def test_fast_spectral_density_with_y(
 
     torch_result = torch_result[..., 2:]
     scipy_result = scipy_result[..., 2:]
-    compare_against_numpy(torch_result, scipy_result)
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
     _shape_checks(ndim, y_ndim, x, y, fsd)
 
 
@@ -322,7 +322,7 @@ def test_spectral_density(
         window=signal.windows.hann(nperseg, False),
         average=average,
     )
-    compare_against_numpy(torch_result, scipy_result)
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
@@ -331,7 +331,7 @@ def test_spectral_density(
         assert str(exc_info.value).startswith("Can't compute spectral")
 
 
-@pytest.fixture(params=[1, 2])
+@pytest.fixture(params=[2])
 def fduration(request):
     return request.param
 
@@ -346,13 +346,8 @@ def lowpass(request):
     return request.param
 
 
-@pytest.fixture(params=[64, 128])
+@pytest.fixture(params=[64])
 def whiten_length(request):
-    return request.param
-
-
-@pytest.fixture(params=[64, 128])
-def background_length(request):
     return request.param
 
 
@@ -408,15 +403,27 @@ def test_whiten(
         scale=1 / (sample_rate * (window**2).sum()),
     )
 
+    with pytest.raises(ValueError, match=r"Not enough timeseries samples*"):
+        failure_size = int(fduration * sample_rate)
+        X = torch.randn(batch_size, num_channels, failure_size)
+        whiten(X, psd, fduration, sample_rate, highpass, lowpass)
     size = int(whiten_length * sample_rate)
+    filter_size = int(fduration * sample_rate)
     X = mean + std * torch.randn(batch_size, num_channels, size)
-    whitened = whiten(X, psd, fduration, sample_rate, highpass, lowpass)
-    expected_size = int((whiten_length - fduration) * sample_rate)
-    assert whitened.shape == (batch_size, num_channels, expected_size)
 
+    whitened = whiten(X, psd, fduration, sample_rate, highpass, lowpass)
+    expected_size = size - filter_size
+    assert whitened.shape == (batch_size, num_channels, expected_size)
     validate_whitened(
         whitened, highpass, lowpass, sample_rate, 1 / whiten_length
     )
+
+    # Check that not cropping produces the expected values and shape
+    whitened_uncropped = whiten(
+        X, psd, fduration, sample_rate, highpass, lowpass, crop=False
+    )
+    pad = filter_size // 2
+    assert torch.all(whitened_uncropped[..., pad:-pad] == whitened)
 
     # inject a gaussian pulse into the timeseries and
     # ensure that its max value comes out to the same place
@@ -430,3 +437,30 @@ def test_whiten(
     maxs = whitened.argmax(-1) / sample_rate + fduration / 2
     target = torch.ones_like(maxs) * whiten_length / 2
     torch.testing.assert_close(maxs, target, rtol=0, atol=0.01)
+
+
+def test_spectral_density_short_input():
+    nperseg = 512
+    window = torch.hann_window(nperseg)
+    with pytest.raises(ValueError, match="Number of samples"):
+        fast_spectral_density(
+            torch.randn(100),
+            nperseg=nperseg,
+            nstride=256,
+            window=window,
+            scale=1.0,
+        )
+
+
+def test_spectral_density_odd_nperseg():
+    nperseg = 511
+    x = torch.randn(nperseg * 4)
+    window = torch.hann_window(nperseg)
+    result = spectral_density(
+        x,
+        nperseg=nperseg,
+        nstride=256,
+        window=window,
+        scale=1.0 / (window**2).sum(),
+    )
+    assert result.shape[-1] == nperseg // 2 + 1

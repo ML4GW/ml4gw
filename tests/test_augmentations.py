@@ -55,13 +55,13 @@ def true_idx(flip_prob):
 def validate_augmenters(X, idx, true, false, prob):
     neg_idx, pos_idx = idx
     if neg_idx:
-        neg0, neg1 = zip(*neg_idx)
+        neg0, neg1 = zip(*neg_idx, strict=True)
         assert (X[neg0, neg1] == true).all()
     elif prob != 0:
         raise ValueError("Missing negative indices")
 
     if pos_idx:
-        pos0, pos1 = zip(*pos_idx)
+        pos0, pos1 = zip(*pos_idx, strict=True)
         assert (X[pos0, pos1] == false).all()
     elif prob != 1:
         raise ValueError("Missing positive indices")

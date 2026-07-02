@@ -1,5 +1,3 @@
-from typing import Union
-
 import torch
 from scipy.signal import iirfilter
 from torchaudio.functional import filtfilt
@@ -9,8 +7,8 @@ class IIRFilter(torch.nn.Module):
     r"""
     IIR digital and analog filter design given order and critical points.
     Design an Nth-order digital or analog filter and apply it to a signal.
-    Uses SciPy's `iirfilter` function to create the filter coefficients.
-    https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirfilter.html # noqa E501
+    Uses SciPy's ``iirfilter`` function to create the filter coefficients.
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirfilter.html
 
     The forward call of this module accepts a batch tensor of shape
     (n_waveforms, n_samples) and returns the filtered waveforms.
@@ -24,8 +22,8 @@ class IIRFilter(torch.nn.Module):
             default, fs is 2 half-cycles/sample, so these are normalized
             from 0 to 1, where 1 is the Nyquist frequency. (Wn is thus in
             half-cycles / sample). For analog filters, Wn is an angular
-            frequency (e.g., rad/s). When Wn is a length-2 sequence,`Wn[0]`
-            must be less than `Wn[1]`.
+            frequency (e.g., rad/s). When Wn is a length-2 sequence,``Wn[0]``
+            must be less than ``Wn[1]``.
         rp:
             For Chebyshev and elliptic filters, provides the maximum ripple in
             the passband. (dB)
@@ -50,14 +48,14 @@ class IIRFilter(torch.nn.Module):
 
     Returns:
         Filtered signal on the forward pass.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
         N: int,
-        Wn: Union[float, torch.Tensor],
-        rs: Union[None, float, torch.Tensor] = None,
-        rp: Union[None, float, torch.Tensor] = None,
+        Wn: float | torch.Tensor,
+        rs: None | float | torch.Tensor = None,
+        rp: None | float | torch.Tensor = None,
         btype="band",
         analog=False,
         ftype="butter",

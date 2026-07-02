@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -13,7 +11,7 @@ from ..types import BatchTensor
 class WaveformSampler(torch.nn.Module):
     def __init__(
         self,
-        parameters: Optional[Float[Tensor, "batch num_params"]] = None,
+        parameters: Float[Tensor, "batch num_params"] | None = None,
         **polarizations: Float[Tensor, "batch time"],
     ):
         super().__init__()
@@ -24,10 +22,8 @@ class WaveformSampler(torch.nn.Module):
         for polarization, tensor in polarizations.items():
             if num_waveforms is not None and len(tensor) != num_waveforms:
                 raise ValueError(
-                    "Polarization {} has {} waveforms "
-                    "associated with it, expected {}".format(
-                        polarization, len(tensor), num_waveforms
-                    )
+                    f"Polarization {polarization} has {len(tensor)} waveforms "
+                    f"associated with it, expected {num_waveforms}"
                 )
             elif num_waveforms is None:
                 num_waveforms = tensor.shape[0]
@@ -36,10 +32,8 @@ class WaveformSampler(torch.nn.Module):
 
         if parameters is not None and len(parameters) != num_waveforms:
             raise ValueError(
-                "Waveform parameters has {} waveforms "
-                "associated with it, expected {}".format(
-                    len(parameters), num_waveforms
-                )
+                f"Waveform parameters has {len(parameters)} waveforms "
+                f"associated with it, expected {num_waveforms}"
             )
         self.num_waveforms = num_waveforms
         self.parameters = parameters
@@ -48,9 +42,8 @@ class WaveformSampler(torch.nn.Module):
         # TODO: should we allow sampling with replacement?
         if N > self.num_waveforms:
             raise ValueError(
-                "Requested {} waveforms, but only {} are available".format(
-                    N, self.num_waveforms
-                )
+                f"Requested {N} waveforms, but only {self.num_waveforms} are "
+                "available"
             )
         # TODO: do we still really want this behavior here when a
         # user can do this without instantiating a WaveformSampler?
@@ -67,7 +60,7 @@ class WaveformSampler(torch.nn.Module):
 
 
 class WaveformProjector(torch.nn.Module):
-    def __init__(self, ifos: List[str], sample_rate: float):
+    def __init__(self, ifos: list[str], sample_rate: float):
         super().__init__()
         tensors, vertices = gw.get_ifo_geometry(*ifos)
         self.sample_rate = sample_rate

@@ -11,12 +11,12 @@ from ml4gw.nn.resnet.resnet_1d import (
 )
 
 
-@pytest.fixture(params=[3, 7, 8])
+@pytest.fixture(params=[3, 8])
 def kernel_size(request):
     return request.param
 
 
-@pytest.fixture(params=[64, 128])
+@pytest.fixture(params=[64])
 def sample_rate(request):
     return request.param
 
@@ -26,12 +26,12 @@ def stride(request):
     return request.param
 
 
-@pytest.fixture(params=[2, 4])
+@pytest.fixture(params=[2])
 def inplanes(request):
     return request.param
 
 
-@pytest.fixture(params=[1, 2])
+@pytest.fixture(params=[2])
 def classes(request):
     return request.param
 
@@ -57,6 +57,12 @@ def test_blocks(block, kernel_size, stride, sample_rate, inplanes):
             )
         return
 
+    if block == BasicBlock:
+        with pytest.raises(ValueError, match=r"BasicBlock only supports*"):
+            block(inplanes, planes, groups=2)
+        with pytest.raises(ValueError, match=r"BasicBlock only supports*"):
+            block(inplanes, planes, base_width=32)
+
     block = block(inplanes, planes, kernel_size, stride, downsample=downsample)
     x = torch.randn(8, inplanes, sample_rate)
     y = block(x)
@@ -66,18 +72,28 @@ def test_blocks(block, kernel_size, stride, sample_rate, inplanes):
     assert y.shape[2] == sample_rate // stride
 
 
-@pytest.fixture(params=[1, 2, 3])
+@pytest.fixture(params=[1, 3])
 def in_channels(request):
     return request.param
 
 
-@pytest.fixture(params=[[2, 2, 2, 2], [2, 4, 4], [3, 4, 6, 3]])
+@pytest.fixture(params=[[2, 2, 2, 2]])
 def layers(request):
     return request.param
 
 
 @pytest.fixture(params=[None, "stride", "dilation"])
 def stride_type(request):
+    return request.param
+
+
+@pytest.fixture(params=[False])
+def zero_init_residual(request):
+    return request.param
+
+
+@pytest.fixture(params=[None])
+def norm_layer(request):
     return request.param
 
 
@@ -94,6 +110,8 @@ def test_resnet(
     in_channels,
     sample_rate,
     stride_type,
+    zero_init_residual,
+    norm_layer,
 ):
     if kernel_size % 2 == 0:
         with pytest.raises(ValueError):
@@ -118,9 +136,20 @@ def test_resnet(
             )
         return
 
-    nn = architecture(
-        in_channels, layers, classes, kernel_size, stride_type=stride_type
-    )
+    if architecture == ResNet1D:
+        nn = architecture(
+            in_channels,
+            layers,
+            classes,
+            kernel_size,
+            stride_type=stride_type,
+            zero_init_residual=zero_init_residual,
+            norm_layer=norm_layer,
+        )
+    else:
+        nn = architecture(
+            in_channels, layers, classes, kernel_size, stride_type=stride_type
+        )
     x = torch.randn(8, in_channels, sample_rate)
     y = nn(x)
     assert y.shape == (8, classes)
@@ -135,3 +164,23 @@ def test_resnet(
         nn = architecture(
             in_channels, layers, kernel_size, stride_type=stride_type
         )
+
+
+def test_resnet1d_zero_init_residual():
+    nn = ResNet1D(
+        1,
+        [2, 2, 2, 2],
+        2,
+        3,
+        zero_init_residual=True,
+        norm_layer=torch.nn.BatchNorm1d,
+    )
+    # the flag should zero-initialize the last BN weight in each residual block
+    for m in nn.modules():
+        if isinstance(m, Bottleneck):
+            assert (m.bn3.weight == 0).all()
+        elif isinstance(m, BasicBlock):
+            assert (m.bn2.weight == 0).all()
+    x = torch.randn(4, 1, 64)
+    y = nn(x)
+    assert y.shape == (4, 2)

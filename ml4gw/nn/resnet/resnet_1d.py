@@ -7,7 +7,8 @@ where training-time statistics are entirely arbitrary due to
 simulations.
 """
 
-from typing import Callable, List, Literal, Optional
+from collections.abc import Callable
+from typing import Literal
 
 import torch
 import torch.nn as nn
@@ -58,13 +59,12 @@ class BasicBlock(nn.Module):
         planes: int,
         kernel_size: int = 3,
         stride: int = 1,
-        downsample: Optional[nn.Module] = None,
+        downsample: nn.Module | None = None,
         groups: int = 1,
         base_width: int = 64,
         dilation: int = 1,
-        norm_layer: Optional[Callable[..., nn.Module]] = None,
+        norm_layer: Callable[..., nn.Module] | None = None,
     ) -> None:
-
         super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm1d
@@ -109,10 +109,10 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     """
     Bottleneck blocks implement one extra convolution
-    compared to basic blocks. In this layers, the `planes`
-    parameter is generally meant to _downsize_ the number
+    compared to basic blocks. In this layers, the ``planes``
+    parameter is generally meant to **downsize** the number
     of feature maps first, which then get expanded out to
-    `planes * Bottleneck.expansion` feature maps at the
+    ``planes * Bottleneck.expansion`` feature maps at the
     output of the layer.
     """
 
@@ -124,11 +124,11 @@ class Bottleneck(nn.Module):
         planes: int,
         kernel_size: int = 3,
         stride: int = 1,
-        downsample: Optional[nn.Module] = None,
+        downsample: nn.Module | None = None,
         groups: int = 1,
         base_width: int = 64,
         dilation: int = 1,
-        norm_layer: Optional[NormLayer] = None,
+        norm_layer: NormLayer | None = None,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -193,9 +193,9 @@ class ResNet1D(nn.Module):
             A list representing the number of residual
             blocks to include in each "layer" of the
             network. Total layers (e.g. 50 in ResNet50)
-            is `2 + sum(layers) * factor`, where factor
-            is `2` for vanilla `ResNet` and `3` for
-            `BottleneckResNet`.
+            is ``2 + sum(layers) * factor``, where factor
+            is ``2`` for vanilla ``ResNet`` and ``3`` for
+            ``BottleneckResNet``.
         kernel_size:
             The size of the convolutional kernel to
             use in all residual layers. _NOT_ the size
@@ -212,19 +212,19 @@ class ResNet1D(nn.Module):
             connections between feature maps at subsequent
             layers rather than global. Generally won't
             need this to be >1, and wil raise an error if
-            >1 when using vanilla `ResNet`.
+            >1 when using vanilla ``ResNet``.
         width_per_group:
             Base width of each of the feature map groups,
             which is scaled up by the typical expansion
             factor at each layer of the network. Meaningless
-            for vanilla `ResNet`.
+            for vanilla ``ResNet``.
         stride_type:
             Whether to achieve downsampling on the time axis
             by strided or dilated convolutions for each layer.
-            If left as `None`, strided convolutions will be
-            used at each layer. Otherwise, `stride_type` should
-            be one element shorter than `layers` and indicate either
-            `stride` or `dilation` for each layer after the first.
+            If left as ``None``, strided convolutions will be
+            used at each layer. Otherwise, ``stride_type`` should
+            be one element shorter than ``layers`` and indicate either
+            ``stride`` or ``dilation`` for each layer after the first.
     """
 
     block = BasicBlock
@@ -232,14 +232,14 @@ class ResNet1D(nn.Module):
     def __init__(
         self,
         in_channels: int,
-        layers: List[int],
+        layers: list[int],
         classes: int,
         kernel_size: int = 3,
         zero_init_residual: bool = False,
         groups: int = 1,
         width_per_group: int = 64,
-        stride_type: Optional[List[Literal["stride", "dilation"]]] = None,
-        norm_layer: Optional[NormLayer] = None,
+        stride_type: list[Literal["stride", "dilation"]] | None = None,
+        norm_layer: NormLayer | None = None,
     ) -> None:
         super().__init__()
 
@@ -258,8 +258,8 @@ class ResNet1D(nn.Module):
             stride_type = ["stride"] * (len(layers) - 1)
         if len(stride_type) != (len(layers) - 1):
             raise ValueError(
-                "'stride_type' should be None or a "
-                "{}-element tuple, got {}".format(len(layers) - 1, stride_type)
+                f"'stride_type' should be None or a {len(layers) - 1}-element "
+                f"tuple, got {stride_type}"
             )
 
         self.groups = groups
@@ -288,7 +288,7 @@ class ResNet1D(nn.Module):
         # striding or dilating depending on the stride_type
         # argument)
         residual_layers = [self._make_layer(64, layers[0], kernel_size)]
-        it = zip(layers[1:], stride_type)
+        it = zip(layers[1:], stride_type, strict=True)
         for i, (num_blocks, stride) in enumerate(it):
             block_size = 64 * 2 ** (i + 1)
             layer = self._make_layer(
@@ -315,7 +315,7 @@ class ResNet1D(nn.Module):
                 nn.init.kaiming_normal_(
                     m.weight, mode="fan_out", nonlinearity="relu"
                 )
-            elif isinstance(m, (nn.BatchNorm1d, nn.GroupNorm)):
+            elif isinstance(m, nn.BatchNorm1d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 

@@ -1,9 +1,7 @@
 """
-    Based on the JAX implementation of IMRPhenomPv2 from
-    https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
+Based on the JAX implementation of IMRPhenomPv2 from
+https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPhenomPv2.py
 """
-
-from typing import Dict, Optional, Tuple
 
 import torch
 from jaxtyping import Float
@@ -38,7 +36,8 @@ class IMRPhenomPv2(IMRPhenomD):
         phic: BatchTensor,
         inclination: BatchTensor,
         f_ref: float,
-        tc: Optional[BatchTensor] = None,
+        tc: BatchTensor | None = None,
+        **kwargs,
     ):
         """
         IMRPhenomPv2 waveform
@@ -206,11 +205,11 @@ class IMRPhenomPv2(IMRPhenomD):
         chi2_l: BatchTensor,
         chip: BatchTensor,
         M: BatchTensor,
-        angcoeffs: Dict[str, BatchTensor],
+        angcoeffs: dict[str, BatchTensor],
         Y2m: BatchTensor,
         alphaoffset: BatchTensor,
         epsilonoffset: BatchTensor,
-    ) -> Tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[BatchTensor, BatchTensor]:
         assert angcoeffs is not None
         assert Y2m is not None
         f = fHz * MTSUN_SI * M.unsqueeze(1)  # Frequency in geometric units
@@ -334,6 +333,11 @@ class IMRPhenomPv2(IMRPhenomD):
         # pass M_s * ringdown and M_s * damping frequency to PhenomD functions
         MfRD, MfDM = M_s * fRD, M_s * fDM
 
+        gamma1 = self.gamma1_fun(eta, eta2, xi)
+        gamma2 = self.gamma2_fun(eta, eta2, xi)
+        gamma3 = self.gamma3_fun(eta, eta2, xi)
+        Mf_peak = self.fmaxCalc(MfRD, MfDM, gamma2, gamma3)
+
         phase, _ = self.phenom_d_phase(
             Mf, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
         )
@@ -343,8 +347,6 @@ class IMRPhenomPv2(IMRPhenomD):
 
         Amp = self.phenom_d_amp(
             Mf,
-            m1,
-            m2,
             eta,
             eta2,
             Seta,
@@ -353,9 +355,12 @@ class IMRPhenomPv2(IMRPhenomD):
             chi12,
             chi22,
             xi,
-            distance,
             MfRD,
             MfDM,
+            gamma1,
+            gamma2,
+            gamma3,
+            Mf_peak,
         )[0]
         Amp0 = self.get_Amp0(Mf, eta)
         dist_s = distance * MPC_SEC
@@ -369,9 +374,7 @@ class IMRPhenomPv2(IMRPhenomD):
         x = torch.linspace(0.8, 1.2, n_fixed, device=fRD.device)
         fRDs = torch.outer(fRD, x)
         delta_fRds = (1.2 * fRD - 0.8 * fRD) / (n_fixed - 1)
-        MfRDs = torch.zeros_like(fRDs)
-        for i in range(fRD.shape[0]):
-            MfRDs[i, :] = torch.outer(M_s, fRDs[i, :])[i, :]
+        MfRDs = M_s.unsqueeze(-1) * fRDs
         RD_phase = self.phenom_d_phase(
             MfRDs, m1, m2, eta, eta2, chi1, chi2, xi, MfRD, MfDM
         )[0]
@@ -379,12 +382,12 @@ class IMRPhenomPv2(IMRPhenomD):
         diffRDphase = (diff[:, 1:] + diff[:, :-1]) / (
             2 * delta_fRds.unsqueeze(1)
         )
-        # reshape x to have same shape as diffRDphase
-        x = x[1:-1].unsqueeze(0).expand(diffRDphase.shape)
-        # interpolate at x = 1, as thats the same as f = fRD
-        diffRDphase = -self.interpolate(
-            torch.tensor([1], device=x.device), x, diffRDphase
-        )
+        # Evaluate diffRDphase at normalized frequency 1.0 (i.e. f = fRD)
+        # for each batch element. With n_fixed=1000, linspace(0.8, 1.2, 1000)
+        # places 1.0 midway between indices 499 and 500; after the x[1:-1]
+        # trim those become columns 498 and 499 of diffRDphase.
+        # Update these indices if n_fixed changes.
+        diffRDphase = -(diffRDphase[:, 498] + diffRDphase[:, 499]) / 2
         return hPhenom, diffRDphase
 
     # Utility functions
@@ -402,13 +405,17 @@ class IMRPhenomPv2(IMRPhenomD):
         with given data points :math:`(xp, fp)`, evaluated at :math:`x`
 
         Args:
-            x: the :math:`x`-coordinates at which to evaluate the interpolated
-                values.
-            xp: the :math:`x`-coordinates of data points, must be increasing.
-            fp: the :math:`y`-coordinates of data points, same length as `xp`.
+            x:
+                the :math:`x`-coordinates at which to evaluate the
+                interpolated values.
+            xp:
+                the :math:`x`-coordinates of data points, must be increasing.
+            fp:
+                the :math:`y`-coordinates of data points, same length as
+                ``xp``.
 
         Returns:
-            the interpolated values, same size as `x`.
+            the interpolated values, same size as ``x``.
         """
         original_shape = x.shape
         x = x.flatten()
@@ -456,7 +463,7 @@ class IMRPhenomPv2(IMRPhenomD):
         s2x: BatchTensor,
         s2y: BatchTensor,
         s2z: BatchTensor,
-    ) -> Tuple[
+    ) -> tuple[
         BatchTensor,
         BatchTensor,
         BatchTensor,
@@ -629,7 +636,7 @@ class IMRPhenomPv2(IMRPhenomD):
         SL: BatchTensor,
         eta: BatchTensor,
         Sp: BatchTensor,
-    ) -> Tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[BatchTensor, BatchTensor]:
         # We define the shorthand s := Sp / (L + SL)
         L = self.L2PNR(v, eta)
         s = (Sp / (L + SL)).mT
@@ -645,7 +652,7 @@ class IMRPhenomPv2(IMRPhenomD):
         q: BatchTensor,
         chil: BatchTensor,
         chip: BatchTensor,
-    ) -> Dict[str, BatchTensor]:
+    ) -> dict[str, BatchTensor]:
         m2 = q / (1.0 + q)
         m1 = 1.0 / (1.0 + q)
         dm = m1 - m2
@@ -791,7 +798,7 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def phP_get_fRD_fdamp(
         self, m1, m2, chi1_l, chi2_l, chip
-    ) -> Tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[BatchTensor, BatchTensor]:
         # m1 > m2 should hold here
         finspin = self.FinalSpin_inplane(m1, m2, chi1_l, chi2_l, chip)
         m1_s = m1 * MTSUN_SI

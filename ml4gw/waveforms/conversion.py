@@ -20,15 +20,15 @@ def XLALSimInspiralLN(
     total_mass: BatchTensor, eta: BatchTensor, v: BatchTensor
 ):
     """
-    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2173 # noqa
-    """
+    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2173
+    """  # noqa: E501
     return total_mass**2 * eta / v
 
 
 def XLALSimInspiralL_2PN(eta: BatchTensor):
     """
-    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2181 # noqa
-    """
+    See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiralPNCoefficients.c#L2181
+    """  # noqa: E501
     return 1.5 + eta / 6.0
 
 
@@ -37,10 +37,11 @@ def chirp_mass_and_mass_ratio_to_components(
 ):
     """
     Compute component masses from chirp mass and mass ratio.
+
     Args:
         chirp_mass: Tensor of chirp mass values
         mass_ratio:
-            Tensor of mass ratio values, `m2 / m1`,
+            Tensor of mass ratio values, ``m2 / m1``,
             where m1 >= m2, so that mass_ratio <= 1
     """
     total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6
@@ -65,8 +66,8 @@ def bilby_spins_to_lalsim(
     """
     Converts between bilby spin and lalsimulation spin conventions.
 
-    See https://github.com/bilby-dev/bilby/blob/cccdf891e82d46319e69dbfdf48c4970b4e9a727/bilby/gw/conversion.py#L105 # noqa
-    and https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiral.c#L3594 # noqa
+    See https://github.com/bilby-dev/bilby/blob/cccdf891e82d46319e69dbfdf48c4970b4e9a727/bilby/gw/conversion.py#L105
+    and https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/lib/LALSimInspiral.c#L3594
 
     Args:
         theta_jn: BatchTensor,
@@ -80,7 +81,7 @@ def bilby_spins_to_lalsim(
         mass_2: BatchTensor,
         f_ref: float,
         phi_ref: BatchTensor,
-    """
+    """  # noqa: E501
 
     # check if f_ref is valid
     if f_ref <= 0.0:

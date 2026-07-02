@@ -1,22 +1,17 @@
 """
-Tools for manipulating raw gravitational waveforms
-and projecting them onto interferometer responses.
+Tools for manipulating raw gravitational waveforms,
+projecting them onto interferometer responses, and
+calculating SNRs.
 Much of the projection code is an extension of the
-implementation made available in bilby:
-
-https://arxiv.org/abs/1811.02042
-
-Specifically the code here:
-https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py
-"""
-
-from typing import List, Tuple, Union
+implementation made available in
+`bilby <https://arxiv.org/abs/1811.02042>`_.
+Specifically code from
+`this module <https://github.com/lscsoft/bilby/blob/master/bilby/gw/detector/interferometer.py>`_.
+"""  # noqa E501
 
 import torch
 from jaxtyping import Float
 from torch import Tensor
-
-from ml4gw.utils.interferometer import InterferometerGeometry
 
 from .constants import C
 from .types import (
@@ -28,6 +23,7 @@ from .types import (
     VectorGeometry,
     WaveformTensor,
 )
+from .utils.interferometer import InterferometerGeometry
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
@@ -61,7 +57,7 @@ def compute_antenna_responses(
     psi: BatchTensor,
     phi: BatchTensor,
     detector_tensors: NetworkDetectorTensors,
-    modes: List[str],
+    modes: list[str],
 ) -> Float[Tensor, "batch polarizations num_ifos"]:
     """
     Compute the antenna pattern factors of a batch of
@@ -126,14 +122,17 @@ def compute_antenna_responses(
     for mode in modes:
         try:
             polarization = polarization_funcs[mode](m, n)
-        except KeyError:
-            raise ValueError(f"No polarization mode {mode}")
+        except KeyError as exc:
+            raise ValueError(f"No polarization mode {mode}") from exc
 
         # add a dummy dimension for concatenating
         polarizations.append(polarization)
 
     # shape: batch x num_polarizations x 3 x 3
     polarization = torch.stack(polarizations, axis=1)
+
+    # Ensure dtype consistency before einsum
+    detector_tensors = detector_tensors.to(polarization.dtype)
 
     # compute the weight of each interferometer's response
     # to each polarization: batch x polarizations x ifos
@@ -166,23 +165,11 @@ def shift_responses(
 
     # rolling by gathering implementation based on
     # https://stackoverflow.com/a/68641864
-    # start by just creating a big arange along the last axis
-    idx = torch.ones_like(responses).type(torch.int64)
-    idx = torch.cumsum(idx, axis=-1) - 1
+    n = responses.shape[-1]
+    idx = torch.arange(n, dtype=torch.int64, device=responses.device)
+    idx = (idx - dt[:, :, None]) % n
 
-    # apply the offset to the indices along the last axis,
-    # then modulo by the waveform size to make all the
-    # specified indices legitimate and unique
-    idx -= dt[:, :, None]
-    idx %= idx.shape[-1]
-
-    # unfortunately I can't figure out how to do this
-    # last step without doing looping over the ifos
-    rolled = []
-    for i in range(len(vertices)):
-        ifo = torch.gather(responses[:, i], 1, idx[:, i])
-        rolled.append(ifo)
-    return torch.stack(rolled, axis=1)
+    return torch.gather(responses, 2, idx)
 
 
 def compute_observed_strain(
@@ -195,7 +182,7 @@ def compute_observed_strain(
     **polarizations: Float[Tensor, "batch time"],
 ) -> WaveformTensor:
     """
-    Compute the strain timeseries $h(t)$ observed by a network
+    Compute the strain timeseries :math:`h(t)` observed by a network
     of interferometers from the given polarization timeseries
     corresponding to gravitational waveforms from sources with
     the indicated sky parameters.
@@ -223,13 +210,13 @@ def compute_observed_strain(
             between the waveform observed at the geocenter and
             the one observed at the detector site. To avoid
             adding any delay between the two, reset your coordinates
-            such that the desired interferometer is at `(0., 0., 0.)`.
+            such that the desired interferometer is at ``(0., 0., 0.)``.
         sample_rate:
             Rate at which the polarization timeseries have been sampled
         polarziations:
             Timeseries for each waveform polarization which
             contributes to the interferometer response. Allowed
-            polarizations are `cross`, `plus`, and `breathing`.
+            polarizations are ``cross``, ``plus``, and ``breathing``.
     Returns:
         Tensor representing the observed strain at each
         interferometer for each waveform.
@@ -237,13 +224,15 @@ def compute_observed_strain(
 
     # TODO: just use theta as the input parameter?
     # note that ** syntax is ordered, so we're safe
-    # to be lazy and use `list` for the keys and values
+    # to be lazy and use ``list`` for the keys and values
     theta = torch.pi / 2 - dec
     antenna_responses = compute_antenna_responses(
         theta, psi, phi, detector_tensors, list(polarizations)
     )
 
     polarizations = torch.stack(list(polarizations.values()), axis=1)
+    # Ensure dtype consistency before einsum
+    antenna_responses = antenna_responses.to(polarizations.dtype)
     waveforms = torch.einsum(
         "...pi,...pt->...it", antenna_responses, polarizations
     )
@@ -255,7 +244,7 @@ def compute_observed_strain(
 
 def get_ifo_geometry(
     *ifos: str,
-) -> Tuple[NetworkDetectorTensors, NetworkVertices]:
+) -> tuple[NetworkDetectorTensors, NetworkVertices]:
     """
     For a given list of interferometer names, retrieve and
     concatenate the associated detector tensors and vertices
@@ -277,34 +266,38 @@ def get_ifo_geometry(
 
     tensors = torch.stack(tensors)
     vertices = torch.stack(vertices)
-    return torch.Tensor(tensors), torch.Tensor(vertices)
+    return tensors, vertices
 
 
 def compute_ifo_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    highpass: float | Float[Tensor, " frequency"] | None = None,
+    lowpass: float | Float[Tensor, " frequency"] | None = None,
 ) -> Float[Tensor, "batch num_ifos"]:
-    r"""Compute the SNRs of a batch of interferometer responses
+    """Compute the SNRs of a batch of interferometer responses
 
     Compute the signal to noise ratio (SNR) of individual
     interferometer responses to gravitational waveforms with
     respect to a background PSD for each interferometer. The
-    SNR of the $i$th waveform at the $j$th interferometer
+    SNR of the :math:`i` th waveform at the :math:`j` th interferometer
     is computed as:
 
-    $$\rho_{ij} =
-        4 \int_{f_{\text{min}}}^{f_{\text{max}}}
-        \frac{\tilde{h_{ij}}(f)\tilde{h_{ij}}^*(f)}
-        {S_n^{(j)}(f)}df$$
+    .. math::
 
-    Where $f_{\text{min}}$ is a minimum frequency denoted
-    by `highpass`, `f_{\text{max}}` is the Nyquist frequency
-    dictated by `sample_rate`; `\tilde{h_{ij}}` and `\tilde{h_{ij}}*`
-    indicate the fourier transform of the $i$th waveform at
-    the $j$th inteferometer and its complex conjugate, respectively;
-    and $S_n^{(j)}$ is the backround PSD at the $j$th interferometer.
+        \\rho_{ij} =
+        4 \\int_{f_{\\text{min}}}^{f_{\\text{max}}}
+        \\frac{\\tilde{h_{ij}}(f)\\tilde{h_{ij}}^*(f)}
+        {S_n^{(j)}(f)}df
+
+    Where :math:`f_{\\text{min}}` is a minimum frequency denoted
+    by ``highpass``, :math:`f_{\\text{max}}` is the maximum frequency
+    denoted by ``lowpass``, which defaults to the Nyquist frequency
+    dictated by ``sample_rate``; :math:`\\tilde{h}_{ij}` and :math:`\\tilde{h}_{ij}^*`
+    indicate the fourier transform of the :math:`i` th waveform at
+    the :math:`j` th inteferometer and its complex conjugate, respectively;
+    and :math:`S_n^{(j)}` is the backround PSD at the :math:`j` th interferometer.
 
     Args:
         responses:
@@ -313,12 +306,12 @@ def compute_ifo_snr(
         psd:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated. If 2D, each row of
-            `psd` will be assumed to be the background PSD for each
-            channel of _every_ batch element in `responses`. If 3D,
+            in ``responses`` has been calculated. If 2D, each row of
+            ``psd`` will be assumed to be the background PSD for each
+            channel of _every_ batch element in ``responses``. If 3D,
             this should contain a background PSD for each channel
-            of each element in `responses`, and therefore the first
-            two dimensions of `psd` and `responses` should match.
+            of each element in ``responses``, and therefore the first
+            two dimensions of ``psd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -328,11 +321,18 @@ def compute_ifo_snr(
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out low frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies up to `sample_rate / 2`
+            left as ``None``, all frequencies up to ``lowpass``
             will contribute to the SNR calculation.
+        lowpass:
+            The maximum frequency below which to compute the SNR.
+            If a tensor is provided, it will be assumed to be a
+            pre-computed mask used to 0-out high frequency components.
+            If a float, it will be used to compute such a mask. If
+            left as ``None``, all frequencies from ``highpass`` up to
+            the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Batch of SNRs computed for each interferometer
-    """
+    """  # noqa E501
 
     # TODO: should we do windowing here?
     # compute frequency power, upsampling precision so that
@@ -341,12 +341,21 @@ def compute_ifo_snr(
     fft = torch.fft.rfft(responses, axis=-1).type(torch.complex128)
     fft = fft.abs() / sample_rate
 
+    # interpolate the PSD to match the shape of
+    # our FFT'd strain
+    while psd.ndim < 3:
+        psd = psd[None]
+    if psd.size(-1) != fft.size(-1):
+        psd = torch.nn.functional.interpolate(
+            psd, size=(fft.size(-1)), mode="linear"
+        )
+
     # divide by background asd, then go back to FP32 precision
     # and square now that values are back in a reasonable range
     integrand = fft / (psd**0.5)
     integrand = integrand.type(torch.float32) ** 2
 
-    # mask out low frequency components if a critical
+    # mask out frequency components if a critical
     # frequency or frequency mask was provided
     if highpass is not None:
         if not isinstance(highpass, torch.Tensor):
@@ -354,12 +363,22 @@ def compute_ifo_snr(
             highpass = freqs >= highpass
         elif len(highpass) != integrand.shape[-1]:
             raise ValueError(
-                "Can't apply highpass filter mask with {} frequecy bins"
-                "to signal fft with {} frequency bins".format(
-                    len(highpass), integrand.shape[-1]
-                )
+                f"Can't apply highpass filter mask with {len(highpass)} "
+                f"frequency bins to signal fft with {integrand.shape[-1]} "
+                "frequency bins"
             )
         integrand *= highpass.to(integrand.device)
+    if lowpass is not None:
+        if not isinstance(lowpass, torch.Tensor):
+            freqs = torch.fft.rfftfreq(responses.shape[-1], 1 / sample_rate)
+            lowpass = freqs < lowpass
+        elif len(lowpass) != integrand.shape[-1]:
+            raise ValueError(
+                f"Can't apply lowpass filter mask with {len(lowpass)} "
+                f"frequency bins to signal fft with {integrand.shape[-1]} "
+                "frequency bins"
+            )
+        integrand *= lowpass.to(integrand.device)
 
     # sum over the desired frequency range and multiply
     # by df to turn it into an integration (and get
@@ -368,10 +387,10 @@ def compute_ifo_snr(
     # that the user specify the sample rate by taking the
     # fft as-is (without dividing by sample rate) and then
     # taking the mean here (or taking the sum and dividing
-    # by the sum of `highpass` if it's a mask). If we want
+    # by the sum of ``highpass`` if it's a mask). If we want
     # to allow the user to pass a float for highpass, we'll
     # need the sample rate to compute the mask, but if we
-    # replace this with a `mask` argument instead we're in
+    # replace this with a ``mask`` argument instead we're in
     # the clear
     df = sample_rate / responses.shape[-1]
     integrated = integrand.sum(axis=-1) * df
@@ -385,17 +404,20 @@ def compute_network_snr(
     responses: WaveformTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    highpass: float | Float[Tensor, " frequency"] | None = None,
+    lowpass: float | Float[Tensor, " frequency"] | None = None,
 ) -> BatchTensor:
-    r"""
+    """
     Compute the total SNR from a gravitational waveform
     from a network of interferometers. The total SNR for
-    the $i$th waveform is computed as
+    the :math:`i` th waveform is computed as
 
-    $$\rho_i = \sqrt{\sum_{j}^{N}\rho_{ij}^2}$$
+    .. math::
 
-    where \rho_{ij} is the SNR for the $i$th waveform at
-    the $j$th interferometer in the network and $N$ is
+        \\rho_i = \\sqrt{\\sum_{j}^{N}\\rho_{ij}^2}
+
+    where :math:`\\rho_{ij}` is the SNR for the :math:`i` th waveform at
+    the :math:`j` th interferometer in the network and :math:`N` is
     the total number of interferometers.
 
     Args:
@@ -405,12 +427,12 @@ def compute_network_snr(
         backgrounds:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated. If 2D, each row of
-            `psd` will be assumed to be the background PSD for each
-            channel of _every_ batch element in `responses`. If 3D,
+            in ``responses`` has been calculated. If 2D, each row of
+            ``psd`` will be assumed to be the background PSD for each
+            channel of **every** batch element in ``responses``. If 3D,
             this should contain a background PSD for each channel
-            of each element in `responses`, and therefore the first
-            two dimensions of `psd` and `responses` should match.
+            of each element in ``responses``, and therefore the first
+            two dimensions of ``psd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -420,22 +442,30 @@ def compute_network_snr(
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out low frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies up to `sample_rate / 2`
+            left as ``None``, all frequencies up to ``sample_rate / 2``
             will contribute to the SNR calculation.
+        lowpass:
+            The maximum frequency below which to compute the SNR.
+            If a tensor is provided, it will be assumed to be a
+            pre-computed mask used to 0-out high frequency components.
+            If a float, it will be used to compute such a mask. If
+            left as ``None``, all frequencies from ``highpass`` up to
+            the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Batch of SNRs for each waveform across the interferometer network
     """
-    snrs = compute_ifo_snr(responses, psd, sample_rate, highpass)
+    snrs = compute_ifo_snr(responses, psd, sample_rate, highpass, lowpass)
     snrs = snrs**2
     return snrs.sum(axis=-1) ** 0.5
 
 
 def reweight_snrs(
     responses: WaveformTensor,
-    target_snrs: Union[float, BatchTensor],
+    target_snrs: float | BatchTensor,
     psd: PSDTensor,
     sample_rate: float,
-    highpass: Union[float, Float[Tensor, " frequency"], None] = None,
+    highpass: float | Float[Tensor, " frequency"] | None = None,
+    lowpass: float | Float[Tensor, " frequency"] | None = None,
 ) -> WaveformTensor:
     """Scale interferometer responses such that they have a desired SNR
 
@@ -449,12 +479,12 @@ def reweight_snrs(
         psd:
             The one-sided power spectral density of the background
             noise at each interferometer to which a response
-            in `responses` has been calculated. If 2D, each row of
-            `psd` will be assumed to be the background PSD for each
-            channel of _every_ batch element in `responses`. If 3D,
+            in ``responses`` has been calculated. If 2D, each row of
+            ``psd`` will be assumed to be the background PSD for each
+            channel of **every** batch element in ``responses``. If 3D,
             this should contain a background PSD for each channel
-            of each element in `responses`, and therefore the first
-            two dimensions of `psd` and `responses` should match.
+            of each element in ``responses``, and therefore the first
+            two dimensions of ``psd`` and ``responses`` should match.
         sample_rate:
             The frequency at which the waveform responses timeseries
             have been sampled. Upon fourier transforming, should
@@ -464,12 +494,19 @@ def reweight_snrs(
             If a tensor is provided, it will be assumed to be a
             pre-computed mask used to 0-out low frequency components.
             If a float, it will be used to compute such a mask. If
-            left as `None`, all frequencies up to `sample_rate / 2`
+            left as ``None``, all frequencies up to ``sample_rate / 2``
             will contribute to the SNR calculation.
+        lowpass:
+            The maximum frequency below which to compute the SNR.
+            If a tensor is provided, it will be assumed to be a
+            pre-computed mask used to 0-out high frequency components.
+            If a float, it will be used to compute such a mask. If
+            left as ``None``, all frequencies from ``highpass`` up to
+            the Nyquist freqyency will contribute to the SNR calculation.
     Returns:
         Rescaled interferometer responses
     """
 
-    snrs = compute_network_snr(responses, psd, sample_rate, highpass)
+    snrs = compute_network_snr(responses, psd, sample_rate, highpass, lowpass)
     weights = target_snrs / snrs
     return responses * weights[:, None, None]

@@ -68,11 +68,8 @@ class TestWhiten(WhitenModuleTest):
         background = self.get_psds(background, 2)
         background = torch.stack(background)
         whitened = transform(X, background)
-        assert whitened.shape == (
-            8,
-            5,
-            X.size(-1) - self.fduration * self.sample_rate,
-        )
+        filter_size = self.fduration * self.sample_rate
+        assert whitened.shape == (8, 5, X.size(-1) - filter_size)
         validate_whitened(
             whitened,
             highpass,
@@ -80,6 +77,11 @@ class TestWhiten(WhitenModuleTest):
             self.sample_rate,
             1 / self.whiten_length,
         )
+
+        # Check that not cropping produces the expected values and shape
+        whitened_uncropped = transform(X, background, crop=False)
+        pad = filter_size // 2
+        assert torch.all(whitened_uncropped[..., pad:-pad] == whitened)
 
 
 class TestFixedWhiten(WhitenModuleTest):
@@ -126,6 +128,9 @@ class TestFixedWhiten(WhitenModuleTest):
         assert (transform.psd != 0).all().item()
         assert (transform.fduration == 2).item()
 
+        # Check that an error is raised for an unexpected input shape
+        with pytest.raises(ValueError, match=r"Whitening transform expected*"):
+            transform(X[..., :-1])
         # now whiten a dummy tensor and make sure
         # that the values come out as expected
         whitened = transform(X)
@@ -137,6 +142,11 @@ class TestFixedWhiten(WhitenModuleTest):
             1 / self.whiten_length,
         )
 
+        # Check that not cropping produces the expected values and shape
+        whitened_uncropped = transform(X, crop=False)
+        pad = int(transform.fduration * transform.sample_rate) // 2
+        assert torch.all(whitened_uncropped[..., pad:-pad] == whitened)
+
     def test_fit_freq_domain(
         self, transform, background, X, highpass, lowpass, validate_whitened
     ):
@@ -146,8 +156,7 @@ class TestFixedWhiten(WhitenModuleTest):
         # truncation
         psds = self.get_psds(background, self.whiten_length)
         with patch(
-            "ml4gw.transforms.whitening"
-            ".spectral.truncate_inverse_power_spectrum",
+            "ml4gw.transforms.whitening.spectral.truncate_inverse_power_spectrum",
             new=lambda x, _, __, ___, ____: x,
         ):
             transform.fit(2, *psds)
@@ -174,6 +183,11 @@ class TestFixedWhiten(WhitenModuleTest):
             self.sample_rate,
             1 / self.whiten_length,
         )
+
+        # Check that not cropping produces the expected values and shape
+        whitened_uncropped = transform(X, crop=False)
+        pad = int(transform.fduration * transform.sample_rate) // 2
+        assert torch.all(whitened_uncropped[..., pad:-pad] == whitened)
 
     def test_io(self, transform, background, tmp_path):
         transform.fit(2, *background, fftlength=4)

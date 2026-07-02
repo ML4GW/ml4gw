@@ -22,7 +22,6 @@ def ifos(request):
 
 
 def test_waveform_sampler(num_waveforms):
-
     # test that instantiating with different numbers of waveforms
     # for each polarization raises an error
     wrong = {str(i): torch.randn(i + 2, 1024) for i in range(2)}
@@ -47,6 +46,10 @@ def test_waveform_sampler(num_waveforms):
     samples = waveform_sampler(num_waveforms)
     for key in ["plus", "cross"]:
         assert samples[key].shape == (num_waveforms, 1024)
+
+    samples = waveform_sampler(-1)
+    for key in ["plus", "cross"]:
+        assert torch.equal(samples[key], waveforms[key])
 
     # test that intrinsic parameters are returned if provided
     num_parameters = 5

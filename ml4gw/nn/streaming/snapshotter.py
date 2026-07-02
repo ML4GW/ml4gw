@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
 
 import torch
 from jaxtyping import Float
@@ -12,24 +12,24 @@ class Snapshotter(torch.nn.Module):
     Model for converting streaming state updates into
     a batch of overlapping snaphots of a multichannel
     timeseries. Can support multiple timeseries in a
-    single state update via the `channels_per_snapshot`
+    single state update via the ``channels_per_snapshot``
     kwarg.
 
     Specifically, maps tensors of shape
-    `(num_channels, batch_size * stride_size)` to a tensor
-    of shape `(batch_size, num_channels, snapshot_size)`.
-    If `channels_per_snapshot` is specified, it will return
-    `len(channels_per_snapshot)` tensors of this shape,
+    ``(num_channels, batch_size * stride_size)`` to a tensor
+    of shape ``(batch_size, num_channels, snapshot_size)``.
+    If ``channels_per_snapshot`` is specified, it will return
+    ``len(channels_per_snapshot)`` tensors of this shape,
     with the channel dimension replaced by the corresponding
-    value of `channels_per_snapshot`. The last tensor returned
+    value of ``channels_per_snapshot``. The last tensor returned
     at call time will be the current state that can be passed
-    to the next `forward` call.
+    to the next ``forward`` call.
 
     Args:
         num_channels:
             Number of channels in the timeseries. If
-            `channels_per_snapshot` is not `None`,
-            this should be equal to `sum(channels_per_snapshot)`.
+            ``channels_per_snapshot`` is not ``None``,
+            this should be equal to ``sum(channels_per_snapshot)``.
         snapshot_size:
             The size of the output snapshot windows in
             number of samples
@@ -39,17 +39,17 @@ class Snapshotter(torch.nn.Module):
         batch_size:
             The number of snapshots to produce at each
             update. The last dimension of the input
-            tensor should have size `batch_size * stride_size`.
+            tensor should have size ``batch_size * stride_size``.
         channels_per_snapshot:
             How to split up the channels in the timeseries
-            for different tensors. If left as `None`, all
+            for different tensors. If left as ``None``, all
             the channels will be returned in a single tensor.
             Otherwise, the channels will be split up into
-            `len(channels_per_snapshot)` tensors, with each
+            ``len(channels_per_snapshot)`` tensors, with each
             tensor's channel dimension being equal to the
-            corresponding value in `channels_per_snapshot`.
+            corresponding value in ``channels_per_snapshot``.
             Therefore, if specified, these values should
-            add up to `num_channels`.
+            add up to ``num_channels``.
     """
 
     def __init__(
@@ -58,15 +58,13 @@ class Snapshotter(torch.nn.Module):
         snapshot_size: int,
         stride_size: int,
         batch_size: int,
-        channels_per_snapshot: Optional[Sequence[int]] = None,
+        channels_per_snapshot: Sequence[int] | None = None,
     ) -> None:
         super().__init__()
         if stride_size >= snapshot_size:
             raise ValueError(
-                "Snapshotter can't accommodate stride {} "
-                "which is greater than snapshot size {}".format(
-                    stride_size, snapshot_size
-                )
+                f"Snapshotter can't accommodate stride {stride_size} "
+                f"which is greater than snapshot size {snapshot_size}"
             )
 
         self.snapshot_size = snapshot_size
@@ -77,9 +75,8 @@ class Snapshotter(torch.nn.Module):
         if channels_per_snapshot is not None:
             if sum(channels_per_snapshot) != num_channels:
                 raise ValueError(
-                    "Can't break {} channels into {}".format(
-                        num_channels, channels_per_snapshot
-                    )
+                    f"Can't break {num_channels} channels into "
+                    f"{channels_per_snapshot}"
                 )
         self.channels_per_snapshot = channels_per_snapshot
         self.num_channels = num_channels
@@ -90,8 +87,8 @@ class Snapshotter(torch.nn.Module):
     def forward(
         self,
         update: Float[Tensor, "channel time1"],
-        snapshot: Optional[Float[Tensor, "channel time2"]] = None,
-    ) -> Tuple[Tensor, ...]:
+        snapshot: Float[Tensor, "channel time2"] | None = None,
+    ) -> tuple[Tensor, ...]:
         if snapshot is None:
             snapshot = self.get_initial_state()
 
@@ -108,9 +105,8 @@ class Snapshotter(torch.nn.Module):
         if self.channels_per_snapshot is not None:
             if snapshots.size(1) != self.num_channels:
                 raise ValueError(
-                    "Expected {} channels, found {}".format(
-                        self.num_channels, snapshots.size(1)
-                    )
+                    f"Expected {self.num_channels} channels, found "
+                    f"{snapshots.size(1)}"
                 )
             snapshots = torch.split(
                 snapshots, self.channels_per_snapshot, dim=1

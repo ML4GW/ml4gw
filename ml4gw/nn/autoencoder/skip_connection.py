@@ -35,13 +35,11 @@ class ConcatSkipConnect(SkipConnection):
         rem = num_channels % self.groups
         if rem:
             raise ValueError(
-                "Number of channels in input tensor {} cannot "
-                "be divided evenly into {} groups".format(
-                    num_channels, self.groups
-                )
+                f"Number of channels in input tensor {num_channels} cannot "
+                f"be divided evenly into {self.groups} groups"
             )
 
         X = torch.split(X, self.groups, dim=1)
         state = torch.split(state, self.groups, dim=1)
-        frags = [i for j in zip(X, state) for i in j]
+        frags = [i for j in zip(X, state, strict=True) for i in j]
         return torch.cat(frags, dim=1)

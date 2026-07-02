@@ -1,0 +1,136 @@
+import numpy as np
+import pytest
+import torch
+from scipy.interpolate import interp1d
+
+from ml4gw.transforms.decimator import Decimator
+from ml4gw.waveforms import IMRPhenomD
+from ml4gw.waveforms.conversion import chirp_mass_and_mass_ratio_to_components
+from ml4gw.waveforms.generator import TimeDomainCBCWaveformGenerator
+
+
+def test_decimator():
+    # Waveform generation
+    param_dict = {
+        "chirp_mass": torch.tensor([1.4]),
+        "mass_ratio": torch.tensor([0.8]),
+        "chi1": torch.tensor([0.0]),
+        "chi2": torch.tensor([0.0]),
+        "distance": torch.tensor([100.0]),
+        "phic": torch.tensor([0.0]),
+        "inclination": torch.tensor([1.0]),
+    }
+
+    sample_rate = 2048
+    waveform_duration = 60
+    f_min = 20
+    f_ref = 20
+
+    approximant = IMRPhenomD()
+    waveform_generator = TimeDomainCBCWaveformGenerator(
+        approximant=approximant,
+        sample_rate=sample_rate,
+        f_min=f_min,
+        duration=waveform_duration,
+        right_pad=0.5,
+        f_ref=f_ref,
+    )
+
+    param_dict["mass_1"], param_dict["mass_2"] = (
+        chirp_mass_and_mass_ratio_to_components(
+            param_dict["chirp_mass"], param_dict["mass_ratio"]
+        )
+    )
+    param_dict["s1z"], param_dict["s2z"] = (
+        param_dict["chi1"],
+        param_dict["chi2"],
+    )
+
+    hc, hp = waveform_generator(**param_dict)
+
+    # Positive Tests
+    # Decimation
+    schedule = torch.tensor(
+        [[0, 40, 256], [40, 58, 512], [58, 60, 2048]],
+        dtype=torch.int,
+    )
+
+    decimator = Decimator(sample_rate=sample_rate, schedule=schedule)
+
+    indices = decimator.idx
+
+    dec_hc = decimator(hc)
+    dec_hp = decimator(hp)
+
+    time = torch.arange(0, waveform_duration, 1 / sample_rate)
+    time_dec = time[indices]
+
+    f_hc = interp1d(time_dec.cpu().numpy(), dec_hc.cpu().numpy(), kind="cubic")
+    f_hp = interp1d(time_dec.cpu().numpy(), dec_hp.cpu().numpy(), kind="cubic")
+
+    up_hc = f_hc(time.cpu().numpy())
+    up_hp = f_hp(time.cpu().numpy())
+
+    assert np.allclose(hc.cpu().numpy() * 1e22, up_hc * 1e22, atol=1e-2)
+    assert np.allclose(hp.cpu().numpy() * 1e22, up_hp * 1e22, atol=1e-2)
+
+    # Testing the split functionality
+    # Each segment length matches schedule * target rate
+    decimator_split = Decimator(
+        sample_rate=sample_rate, schedule=schedule, split=True
+    )
+    seg = decimator_split(hc)
+    exp_len = (
+        ((schedule[:, 1] - schedule[:, 0]) * schedule[:, 2]).long().tolist()
+    )
+    actual_len = [s.shape[-1] for s in seg]
+    assert actual_len == exp_len
+
+    # Testing the split functionality for overlapping schedule
+    overlap_schedule = torch.tensor(
+        [[0, 40, 256], [32, 58, 512], [52, 60, 2048]],
+        dtype=torch.int,
+    )
+
+    decimator_ov = Decimator(
+        sample_rate=sample_rate, schedule=overlap_schedule, split=True
+    )
+    seg_ov = decimator_ov(hc)
+
+    exp_len = (
+        (
+            (overlap_schedule[:, 1] - overlap_schedule[:, 0])
+            * overlap_schedule[:, 2]
+        )
+        .long()
+        .tolist()
+    )
+    actual_len = [s.shape[-1] for s in seg_ov]
+    assert actual_len == exp_len
+
+    # Negative Tests
+    wrong_schedule_shape = torch.tensor([[0, 40]])
+    with pytest.raises(ValueError, match="Schedule must be of shape"):
+        Decimator(sample_rate=2048, schedule=wrong_schedule_shape)
+
+    wrong_schedule_time = torch.tensor([[10, 5, 256]])
+    with pytest.raises(ValueError, match="end_time > start_time"):
+        Decimator(sample_rate=2048, schedule=wrong_schedule_time)
+
+    wrong_target_sr = torch.tensor([[0, 10, 500]])
+    with pytest.raises(ValueError, match="must be divisible"):
+        Decimator(sample_rate=2048, schedule=wrong_target_sr)
+
+    wrong_input_len = torch.randn(1, 1, 100)
+    decimator_valid = Decimator(
+        sample_rate=2048, schedule=torch.tensor([[0, 2, 256]])
+    )
+    with pytest.raises(ValueError, match="expected schedule duration"):
+        decimator_valid(wrong_input_len)
+
+    overlapping_schedule = torch.tensor(
+        [[0, 10, 256], [8, 15, 512]],
+        dtype=torch.int,
+    )
+    with pytest.raises(ValueError, match="overlapping"):
+        Decimator(sample_rate=2048, schedule=overlapping_schedule, split=False)

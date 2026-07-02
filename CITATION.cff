@@ -35,3 +35,37 @@ abstract: >-
 keywords:
   - Gravitational waves
   - Machine learning
+preferred-citation:
+  type: article
+  authors:
+  - given-names: William
+    family-names: Benoit
+    email: benoi090@umn.edu
+    affiliation: University of Minnesota
+    orcid: 'https://orcid.org/0000-0003-4750-9413'
+  - given-names: Ethan
+    family-names: Marx
+    email: emarx@mit.edu
+    affiliation: 'Massachusetts Institute of Technology, MIT LIGO Laboratory'
+    orcid: 'https://orcid.org/0009-0000-4183-7876'
+  - given-names: Deep
+    family-names: Chatterjee
+    email: deep1018@mit.edu
+    affiliation: 'Massachusetts Institute of Technology, MIT LIGO Laboratory'
+    orcid: 'https://orcid.org/0000-0003-0038-5468'
+  - given-names: Ravi
+    family-names: Kumar
+    email: ravi.kr@iitb.ac.in
+    affiliation: Indian Institute of Technology Bombay
+  - given-names: Alec
+    family-names: Gunny
+    affiliation: 'Massachusetts Institute of Technology, MIT LIGO Laboratory'
+  doi: "10.21105/joss.08836"
+  url: "https://doi.org/10.21105/joss.08836"
+  publisher: "The Open Journal"
+  journal: "Journal of Open Source Software"
+  title: "ml4gw: PyTorch utilities for training neural networks in gravitational wave physics applications"
+  volume: 10
+  number: 114
+  pages: 8836
+  year: 2025

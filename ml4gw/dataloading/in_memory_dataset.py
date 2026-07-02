@@ -1,5 +1,4 @@
 import itertools
-from typing import Optional, Tuple, Union
 
 import torch
 from jaxtyping import Float
@@ -20,56 +19,56 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
     Args:
         X:
             Timeseries data to be iterated through. Should have
-            shape `(num_channels, length * sample_rate)`. Windows
+            shape ``(num_channels, length * sample_rate)``. Windows
             will be sampled from the time (1st) dimension for all
             channels along the channel (0th) dimension.
         kernel_size:
-            The length of the windows to sample from `X` in units
+            The length of the windows to sample from ``X`` in units
             of samples.
         y:
             Target timeseries to be iterated through. If specified,
             should be a single channel and have shape
-            `(length * sample_rate,)`. If left as `None`, only windows
-            sampled from `X` will be returned during iteration.
+            ``(length * sample_rate,)``. If left as ``None``, only windows
+            sampled from ``X`` will be returned during iteration.
             Otherwise, windows sampled from both arrays will be
             returned. Note that if sampling is performed non-coincidentally,
             there's no sensible way to align windows sampled from this
-            array with the windows sampled from `X`, so this combination
+            array with the windows sampled from ``X``, so this combination
             of arguments is not permitted.
         batch_size:
             Maximum number of windows to return at each iteration. Will
             be the length of the 0th dimension of the returned array(s).
-            If `batches_per_epoch` is specified, this will be the length
-            of _every_ array returned during iteration. Otherwise, it's
+            If ``batches_per_epoch`` is specified, this will be the length
+            of **every** array returned during iteration. Otherwise, it's
             possible that the last array will be shorter due to the number
             of windows in the timeseries being a non-integer multiple of
-            `batch_size`.
+            ``batch_size``.
         stride:
             The resolution at which windows will be sampled from the
             specified timeseries, in units of samples. E.g. if
-            `stride=2`, the first sample of each window can only be
-            from an index of `X` which is a multiple of 2. Obviously,
+            ``stride=2``, the first sample of each window can only be
+            from an index of ``X`` which is a multiple of 2. Obviously,
             this reduces the number of windows which can be iterated
-            through by a factor of `stride`.
+            through by a factor of ``stride``.
         batches_per_epoch:
             Number of batches of window to produce during iteration
-            before raising a `StopIteration`. Must be specified if
+            before raising a ``StopIteration``. Must be specified if
             performing non-coincident sampling. Otherwise, if left
-            as `None`, windows will be sampled until the entire
+            as ``None``, windows will be sampled until the entire
             timeseries has been exhausted. Note that
-            `batch_size * batches_per_epoch` must be be small
+            ``batch_size * batches_per_epoch`` must be be small
             enough to be able to be fulfilled by the number of
-            windows in the timeseries, otherise a `ValueError`
+            windows in the timeseries, otherise a ``ValueError``
             will be raised.
         coincident:
-            Whether to sample windows from the channels of `X`
+            Whether to sample windows from the channels of ``X``
             using the same indices or independently. Can't be
-            `True` if `batches_per_epoch` is `None` or `y` is
-            _not_ `None`.
+            ``True`` if ``batches_per_epoch`` is ``None`` or ``y`` is
+            **not** ``None``.
         shuffle:
             Whether to sample windows from timeseries randomly
-            or in order along the time axis. If `coincident=False`
-            and `shuffle=False`, channels will be iterated through
+            or in order along the time axis. If ``coincident=False``
+            and ``shuffle=False``, channels will be iterated through
             with the index along the last channel moving fastest.
         device:
             Which device to host the timeseries arrays on
@@ -79,10 +78,10 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
         self,
         X: Float[Tensor, "channels time"],
         kernel_size: int,
-        y: Optional[Float[Tensor, " time"]] = None,
+        y: Float[Tensor, " time"] | None = None,
         batch_size: int = 32,
         stride: int = 1,
-        batches_per_epoch: Optional[int] = None,
+        batches_per_epoch: int | None = None,
         coincident: bool = True,
         shuffle: bool = True,
         device: str = "cpu",
@@ -91,7 +90,7 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
         # make sure if we specified a target array that all other
         # other necessary conditions are met (it has the same
-        # length as `X` and we're sampling coincidentally)
+        # length as ``X`` and we're sampling coincidentally)
         if y is not None and y.shape[-1] != X.shape[-1]:
             raise ValueError(
                 "Target timeseries must have same length as input"
@@ -122,10 +121,9 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             batch_size * batches_per_epoch
         ):
             raise ValueError(
-                "Number of kernels {} in timeseries insufficient "
-                "to generate {} batches of size {}".format(
-                    self.num_kernels, batch_size, batches_per_epoch
-                )
+                f"Number of kernels {self.num_kernels} in timeseries "
+                f"insufficient to generate {batch_size} batches of size "
+                f"{batches_per_epoch}"
             )
 
         self.batch_size = batch_size
@@ -191,7 +189,9 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
             # indices we'll need rather than having to generate
             # everything.
             idx = [range(self.num_kernels) for _ in range(len(self.X))]
-            idx = zip(range(num_kernels), itertools.product(*idx))
+            idx = zip(
+                range(num_kernels), itertools.product(*idx), strict=False
+            )
             idx = torch.stack([torch.Tensor(i[1]) for i in idx])
             idx = idx.type(torch.int64).to(device)
         elif self.shuffle:
@@ -208,11 +208,10 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
     def __iter__(
         self,
-    ) -> Union[
-        Float[Tensor, "batch channel time"],
-        Tuple[Float[Tensor, "batch channel time"], Float[Tensor, " batch"]],
-    ]:
-
+    ) -> (
+        Float[Tensor, "batch channel time"]
+        | tuple[Float[Tensor, "batch channel time"], Float[Tensor, " batch"]]
+    ):
         indices = self.init_indices()
         for i in range(len(self)):
             # slice the array of _indices_ we'll be using to

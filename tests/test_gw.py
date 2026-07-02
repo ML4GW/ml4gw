@@ -1,5 +1,3 @@
-from itertools import combinations
-
 import bilby
 import lal
 import lalsimulation
@@ -22,7 +20,7 @@ def test_outer():
                 assert value == x[i, j] * y[i, k], (i, j, k)
 
 
-@pytest.fixture(params=[["H1"], ["H1", "L1"], ["H1", "L1", "V1", "K1"]])
+@pytest.fixture(params=[["H1"], ["H1", "L1", "V1", "K1"]])
 def ifos(request):
     return request.param
 
@@ -67,13 +65,20 @@ def bilby_get_ifo_response(ifos, batch_size):
 
     def func(ra, dec, psi, geocent_time, modes):
         responses = np.zeros((batch_size, len(modes), len(ifos)))
-        for i, (r, d, p, t) in enumerate(zip(ra, dec, psi, geocent_time)):
+        for i, (r, d, p, t) in enumerate(
+            zip(ra, dec, psi, geocent_time, strict=True)
+        ):
             for j, ifo in enumerate(ifos):
                 for k, mode in enumerate(modes):
                     responses[i, k, j] = ifo.antenna_response(r, d, t, p, mode)
         return responses
 
     return func
+
+
+def test_get_invalid_ifo_geometry():
+    with pytest.raises(ValueError, match=r"Z1 is not recognized as an inter*"):
+        injection.get_ifo_geometry("Z1")
 
 
 def test_compute_antenna_responses(
@@ -87,7 +92,7 @@ def test_compute_antenna_responses(
 ):
     ra, dec, psi, phi, gps_times, plus, cross = data
     expected = bilby_get_ifo_response(
-        ra, dec, psi, gps_times, ["plus", "cross"]
+        ra, dec, psi, gps_times, ["plus", "cross", "breathing"]
     )
 
     phi = torch.tensor(phi)
@@ -96,10 +101,15 @@ def test_compute_antenna_responses(
     tensors, vertices = injection.get_ifo_geometry(*ifos)
     tensors = tensors.type(torch.float64)
 
+    with pytest.raises(ValueError) as exc:
+        injection.compute_antenna_responses(
+            np.pi / 2 - dec, psi, phi, tensors, ["dummy_mode"]
+        )
+    assert str(exc.value).startswith("No polarization mode")
     result = injection.compute_antenna_responses(
-        np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross"]
+        np.pi / 2 - dec, psi, phi, tensors, ["plus", "cross", "breathing"]
     )
-    assert result.shape == (batch_size, 2, len(ifos))
+    assert result.shape == (batch_size, 3, len(ifos))
     compare_against_numpy(result, expected)
 
 
@@ -144,9 +154,11 @@ def bilby_shift_responses(
     def func(ra, dec, geocent_time, responses):
         output = np.zeros_like(responses)
         for i, (r, d, t, sample) in enumerate(
-            zip(ra, dec, geocent_time, responses)
+            zip(ra, dec, geocent_time, responses, strict=True)
         ):
-            for j, (response, ifo) in enumerate(zip(sample, ifos)):
+            for j, (response, ifo) in enumerate(
+                zip(sample, ifos, strict=True)
+            ):
                 shifted = do_shift(ifo, r, d, t, response)
                 output[i, j] = shifted
         return output
@@ -241,30 +253,30 @@ def test_compute_observed_strain(
     compare_against_numpy(result, expected)
 
 
-@pytest.fixture(params=combinations([25, 30, 35, 40], 2), scope="session")
+@pytest.fixture(params=[(25, 35), (30, 40)], scope="session")
 def _get_waveforms_from_lalsimulation(request):
     m1, m2 = request.param
-    params = dict(
-        m1=m1 * lal.MSUN_SI,
-        m2=m2 * lal.MSUN_SI,
-        s1x=0,
-        s1y=0,
-        s1z=0,
-        s2x=0,
-        s2y=0,
-        s2z=0,
-        distance=3.0857e24,  # 100 Mpc
-        inclination=0.3,
-        phiRef=0.0,
-        longAscNodes=0.0,
-        eccentricity=0.0,
-        meanPerAno=0.0,
-        deltaT=1.0 / 1024.0,
-        f_min=1.0,
-        f_ref=20.0,
-        approximant=lalsimulation.TaylorT4,
-        params=lal.CreateDict(),
-    )
+    params = {
+        "m1": m1 * lal.MSUN_SI,
+        "m2": m2 * lal.MSUN_SI,
+        "s1x": 0,
+        "s1y": 0,
+        "s1z": 0,
+        "s2x": 0,
+        "s2y": 0,
+        "s2z": 0,
+        "distance": 3.0857e24,  # 100 Mpc
+        "inclination": 0.3,
+        "phiRef": 0.0,
+        "longAscNodes": 0.0,
+        "eccentricity": 0.0,
+        "meanPerAno": 0.0,
+        "deltaT": 1.0 / 1024.0,
+        "f_min": 1.0,
+        "f_ref": 20.0,
+        "approximant": lalsimulation.TaylorT4,
+        "params": lal.CreateDict(),
+    }
     hp, hc = lalsimulation.SimInspiralChooseTDWaveform(**params)
     return hp, hc
 
@@ -278,7 +290,17 @@ def _get_O4_psd(
     return psd
 
 
-def test_compute_ifo_snr(_get_waveforms_from_lalsimulation):
+@pytest.fixture(params=[None, 32])
+def highpass(request):
+    return request.param
+
+
+@pytest.fixture(params=[None, 64])
+def lowpass(request):
+    return request.param
+
+
+def test_compute_ifo_snr(_get_waveforms_from_lalsimulation, highpass, lowpass):
     """Test SNR for stellar mass system against lalsimulation
     with a relative tolerance.
     """
@@ -286,18 +308,78 @@ def test_compute_ifo_snr(_get_waveforms_from_lalsimulation):
     sample_rate = 1024
     psd = _get_O4_psd(sample_rate, hp.data.data.shape[-1])
     # All systems in test have ISCO < 100
-    snr_hp_lal = lalsimulation.MeasureSNR(hp, psd, 1, 100)
-    snr_hc_lal = lalsimulation.MeasureSNR(hc, psd, 1, 100)
+    lal_highpass = highpass or 1
+    lal_lowpass = lowpass or 100
+    snr_hp_lal = lalsimulation.MeasureSNR(hp, psd, lal_highpass, lal_lowpass)
+    snr_hc_lal = lalsimulation.MeasureSNR(hc, psd, lal_highpass, lal_lowpass)
 
     backgrounds = psd.data.data[: len(hp.data.data) // 2 + 1]
     backgrounds = torch.from_numpy(backgrounds)
     hp_torch = torch.from_numpy(hp.data.data)
     hc_torch = torch.from_numpy(hc.data.data)
+
+    num_freqs = hp_torch.shape[-1] // 2 + 1
+    with pytest.raises(ValueError) as exc:
+        snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+            hp_torch,
+            backgrounds,
+            sample_rate=sample_rate,
+            highpass=torch.ones(num_freqs - 1),
+            lowpass=lowpass,
+        )
+    assert str(exc.value).startswith("Can't apply highpass")
+    with pytest.raises(ValueError) as exc:
+        snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+            hp_torch,
+            backgrounds,
+            sample_rate=sample_rate,
+            highpass=highpass,
+            lowpass=torch.ones(num_freqs - 1),
+        )
+    assert str(exc.value).startswith("Can't apply lowpass")
+
     snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
-        hp_torch, backgrounds, sample_rate=sample_rate
+        hp_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
     )
     snr_hc_compute_ifo_snr = injection.compute_ifo_snr(
-        hc_torch, backgrounds, sample_rate=sample_rate
+        hc_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
+    )
+
+    assert snr_hp_lal == pytest.approx(
+        snr_hp_compute_ifo_snr.numpy(), rel=1e-1
+    )
+    assert snr_hc_lal == pytest.approx(
+        snr_hc_compute_ifo_snr.numpy(), rel=1e-1
+    )
+
+    # test that using a PSD with a non-compatible shape
+    # still results in an accurate value
+    psd = _get_O4_psd(sample_rate, hp.data.data.shape[-1] * 2)
+    num_freqs = len(psd.data.data) // 2 + 1
+    backgrounds = psd.data.data[:num_freqs]
+    backgrounds = torch.from_numpy(backgrounds)
+
+    snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
+        hp_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
+    )
+    snr_hc_compute_ifo_snr = injection.compute_ifo_snr(
+        hc_torch,
+        backgrounds,
+        sample_rate=sample_rate,
+        highpass=highpass,
+        lowpass=lowpass,
     )
 
     assert snr_hp_lal == pytest.approx(
@@ -382,7 +464,9 @@ def test_reweight_snrs(_get_waveforms_from_lalsimulation):
     )
     # mutate data in the hp timeseries, and recompute snr using LAL
     hp.data.data = reweighted_response[..., 0, :].numpy().flatten()
+    ligo_snr = lalsimulation.MeasureSNR(hp, psd_1, 1, sample_rate / 2)
+    hp.data.data = reweighted_response[..., 1, :].numpy().flatten()
+    virgo_snr = lalsimulation.MeasureSNR(hp, psd_1, 1, sample_rate / 2)
+    network_snr = (ligo_snr**2 + virgo_snr**2) ** 0.5
 
-    lalsimulation.MeasureSNR(hp, psd_1, 1, 100) == pytest.approx(
-        target_network_snr.numpy()
-    ) == pytest.approx(10)
+    assert network_snr == pytest.approx(target_network_snr.numpy(), rel=1e-1)

@@ -1,5 +1,3 @@
-from typing import Optional
-
 import torch
 from jaxtyping import Float
 from torch import Tensor
@@ -14,58 +12,55 @@ class SpectralDensity(torch.nn.Module):
     of a batch of multichannel timeseries, or the cross spectral
     density of two batches of multichannel timeseries.
 
-    On `SpectralDensity.forward` call, if only one tensor is provided,
+    On ``SpectralDensity.forward`` call, if only one tensor is provided,
     this transform will compute its power spectral density. If a second
     tensor is provided, the cross spectral density between the two
     timeseries will be computed. For information about the allowed
     relationships between these two tensors, see the documentation to
-    `ml4gw.spectral.fast_spectral_density`.
+    :meth:`~ml4gw.spectral.fast_spectral_density`.
 
     Note that the cross spectral density computation is currently
-    only available for the `fast_spectral_density` option. If
-    `fast=False` and a second tensor is passed to `SpectralDensity.forward`,
-    a `NotImplementedError` will be raised.
+    only available for :meth:`~ml4gw.spectral.fast_spectral_density`. If
+    ``fast=False`` and a second tensor is passed to ``SpectralDensity.forward``,  # noqa E501
+    a ``NotImplementedError`` will be raised.
 
     Args:
         sample_rate:
-            Rate at which tensors passed to `forward` will be sampled
+            Rate at which tensors passed to ``forward`` will be sampled
         fftlength:
             Length of the window, in seconds, to use for FFT estimates
         overlap:
             Overlap between windows used for FFT calculation. If left
-            as `None`, this will be set to `fftlength / 2`.
+            as ``None``, this will be set to ``fftlength / 2``.
         average:
             Aggregation method to use for combining windowed FFTs.
-            Allowed values are `"mean"` and `"median"`.
+            Allowed values are ``"mean"`` and ``"median"``.
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length `nperseg`.
+            FFT computation. Should have length ``nperseg``.
             Defaults to a hanning window.
         fast:
             Whether to use a faster spectral density computation that
             support cross spectral density, or a slower one which does
             not. The cost of the fast implementation is that it is not
             exact for the two lowest frequency bins.
-    """
+    """  # noqa E501
 
     def __init__(
         self,
         sample_rate: float,
         fftlength: float,
-        overlap: Optional[float] = None,
+        overlap: float | None = None,
         average: str = "mean",
-        window: Optional[
-            Float[Tensor, " {int(fftlength*sample_rate)}"]
-        ] = None,
+        window: Float[Tensor, " {int(fftlength*sample_rate)}"] | None = None,
         fast: bool = False,
     ) -> None:
         if overlap is None:
             overlap = fftlength / 2
         elif overlap >= fftlength:
             raise ValueError(
-                "Can't have overlap {} longer than fftlength {}".format(
-                    overlap, fftlength
-                )
+                f"Can't have overlap {overlap} longer than fftlength "
+                f"{fftlength}"
             )
 
         super().__init__()
@@ -80,9 +75,7 @@ class SpectralDensity(torch.nn.Module):
 
         if window.size(0) != self.nperseg:
             raise ValueError(
-                "Window must have length {} got {}".format(
-                    self.nperseg, window.size(0)
-                )
+                f"Window must have length {self.nperseg} got {window.size(0)}"
             )
         self.register_buffer("window", window)
 
@@ -99,7 +92,7 @@ class SpectralDensity(torch.nn.Module):
         self.fast = fast
 
     def forward(
-        self, x: TimeSeries1to3d, y: Optional[TimeSeries1to3d] = None
+        self, x: TimeSeries1to3d, y: TimeSeries1to3d | None = None
     ) -> FrequencySeries1to3d:
         if self.fast:
             return fast_spectral_density(

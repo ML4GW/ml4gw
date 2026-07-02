@@ -9,72 +9,43 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
 
     # set up our environment
-    - 
-      name: Install Python
-      uses: actions/setup-python@v2
+    - name: Install Python
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-    -
-      name: Install tox
-      run: |
-        python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
+
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+
+    - name: Install dependencies
+      run: uv sync --group dev
 
     # run the library's tests
-    -
-      name: run tests
+    - name: Run tests with coverage
       env:
-        pyver: ${{ matrix.python-version }}
         COVERAGE_FILE: .coverage.${{ matrix.python-version }}
-      run: |
-        tox -e py${pyver//./}
+      run: uv run coverage run -m pytest
 
-    - name: Store coverage file
-      uses: actions/upload-artifact@v4
+    - name: Generate XML coverage report
+      env:
+        COVERAGE_FILE: .coverage.${{ matrix.python-version }}
+      run: uv run coverage xml -o coverage.xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v6
       with:
-        name: coverage-${{ matrix.python-version }}
-        path: .coverage.${{ matrix.python-version }}
-        include-hidden-files: true
-
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    needs: test
-    permissions:
-      # Gives the action the necessary permissions for publishing new
-      # comments in pull requests.
-      pull-requests: write
-      # Gives the action the necessary permissions for pushing data to the
-      # python-coverage-comment-action branch, and for editing existing
-      # comments (to avoid publishing multiple comments in the same PR)
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        id: download
-        with:
-          pattern: coverage-*
-          merge-multiple: true
-
-      - name: Coverage comment
-        id: coverage_comment
-        uses: py-cov-action/python-coverage-comment-action@v3
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MERGE_COVERAGE_FILES: true
-
-      - name: Store Pull Request comment to be posted
-        uses: actions/upload-artifact@v4
-        if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
-        with:
-          name: python-coverage-comment-action
-          path: python-coverage-comment-action.txt
+        files: ./coverage.xml
+        flags: py${{ matrix.python-version }}
+        use_oidc: true
+        fail_ci_if_error: true
