@@ -132,7 +132,6 @@ def test_sine_gaussian_sim(
     lal_samples = len(hplus)
 
     if lal_samples < ml4gw_samples:
-
         start, stop = (
             len(cross) // 2 - lal_samples // 2,
             len(cross) // 2 + lal_samples // 2 + 1,
