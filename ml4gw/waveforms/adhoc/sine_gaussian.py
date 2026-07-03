@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import torch
 from torch import Tensor
 
@@ -159,7 +157,7 @@ class MultiSineGaussian(torch.nn.Module):
         return x.gather(1, idx)
 
     # ------------------------------------------------------------------
-    def forward(self, **kwargs) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, **kwargs) -> tuple[torch.Tensor, torch.Tensor]:
         device = self.times.device
         batch = kwargs["n_components"].shape[0]
         dtype = kwargs["quality_1"].dtype
@@ -185,9 +183,7 @@ class MultiSineGaussian(torch.nn.Module):
         # ---------- 2) mask for active components ----------------------
         mask = (
             torch.arange(self.n_max, device=device).unsqueeze(0) < n_comp
-        ).unsqueeze(
-            -1
-        )  # (B, n_max, 1)
+        ).unsqueeze(-1)  # (B, n_max, 1)
 
         # ---------- 3) flatten active params --------------------------
         active = mask.squeeze(-1)  # (B, n_max) boolean

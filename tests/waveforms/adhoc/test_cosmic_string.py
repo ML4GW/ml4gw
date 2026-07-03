@@ -76,7 +76,6 @@ def test_strings(sample_rate, duration, power, amplitude, f_high):
     lal_samples = len(hplus)
 
     if lal_samples < ml4gw_samples:
-
         start, stop = (
             ml4gw_samples // 2 - lal_samples // 2,
             ml4gw_samples // 2 + lal_samples // 2 + 1,
