@@ -662,6 +662,51 @@ def test_phenom_d_differentiability():
     assert gradcheck(h, inputs)
 
 
+def test_phenom_deco_differentiability():
+    f_ref = 20.0
+    model = waveforms.IMRPhenomDECO()
+
+    inputs = (
+        torch.arange(20, 50, dtype=FLOAT64, requires_grad=True),
+        torch.tensor([30.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.35], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([100.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.0], dtype=FLOAT64, requires_grad=True),
+        torch.tensor([0.5], dtype=FLOAT64, requires_grad=True),
+    )
+
+    def h(
+        freqs,
+        chirp_mass,
+        mass_ratio,
+        chi1,
+        chi2,
+        compactness,
+        distance,
+        phic,
+        inclination,
+    ):
+        hc, hp = model(
+            freqs,
+            f_ref=f_ref,
+            chirp_mass=chirp_mass,
+            mass_ratio=mass_ratio,
+            chi1=chi1,
+            chi2=chi2,
+            compactness=compactness,
+            distance=distance,
+            phic=phic,
+            inclination=inclination,
+        )
+        out = torch.cat([hc.real, hc.imag, hp.real, hp.imag])
+        return out * 1e21
+
+    assert gradcheck(h, inputs)
+
+
 def test_phenom_p_differentiability():
     f_ref = 20.0
     model = waveforms.IMRPhenomPv2()
