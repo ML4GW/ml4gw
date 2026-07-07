@@ -215,18 +215,10 @@ class IMRPhenomDECO(IMRPhenomD):
             * (torch.ones_like(Mf).mT * (2 * compactness) ** (3 / 2.0)).mT
         )
         # construct full IMR Amp
-        theta_minus_f1 = torch.heaviside(
-            Mf_join_ins - Mf, torch.tensor(0.0, device=Mf.device)
-        )
-        theta_plus_f1 = torch.heaviside(
-            Mf - Mf_join_ins, torch.tensor(1.0, device=Mf.device)
-        )
-        theta_minus_f2 = torch.heaviside(
-            Mf_peak - Mf, torch.tensor(1.0, device=Mf.device)
-        )
-        theta_plus_f2 = torch.heaviside(
-            Mf - Mf_peak, torch.tensor(0.0, device=Mf.device)
-        )
+        theta_minus_f1 = (Mf <= Mf_join_ins).type_as(Mf)
+        theta_plus_f1 = (Mf > Mf_join_ins).type_as(Mf)
+        theta_minus_f2 = (Mf <= Mf_peak).type_as(Mf)
+        theta_plus_f2 = (Mf > Mf_peak).type_as(Mf)
 
         amp = theta_minus_f1 * ins_amp
         amp += theta_plus_f1 * int_amp * theta_minus_f2
