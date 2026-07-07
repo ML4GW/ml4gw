@@ -14,7 +14,7 @@ class IMRPhenomDECO(IMRPhenomD):
         mass_ratio: BatchTensor,
         chi1: BatchTensor,
         chi2: BatchTensor,
-        compactness: BatchTensor,
+        c_eff: BatchTensor,
         distance: BatchTensor,
         phic: BatchTensor,
         inclination: BatchTensor,
@@ -23,6 +23,19 @@ class IMRPhenomDECO(IMRPhenomD):
     ):
         """
         IMRPhenomDECO waveform
+
+        IMRPhenomDECO is a phenomenological extension of the standard BBH
+        IMRPhenomD waveform model. It modifies the merger morphology to mimic
+        broad features expected from exotic compact-object binaries by
+        introdcuing an effective compactness parameter (c_eff) in the
+        amplitude model, as described in Ghosh and Hannam
+        (Phys. Rev. D 112, 104017 (2025)).
+
+        This model is **not calibrated** to any specific exotic compact-object
+        scenario. Users should refer to Ghosh et al. (arxiv:2606.31350) for
+        guidance on the interpretation of effective compactness inferred with
+        this model and for the scalability of this test to a population refer
+        to Ghosh et al. (arxiv:2606.31364) .
 
         Args:
             f:
@@ -35,7 +48,7 @@ class IMRPhenomDECO(IMRPhenomD):
                 Spin of m1
             chi2:
                 Spin of m2
-            compactness:
+            c_eff:
                 effective compactness of binary at contact
             distance:
                 Distance to source in Mpc
@@ -63,13 +76,13 @@ class IMRPhenomDECO(IMRPhenomD):
         cfac = torch.cos(inclination)
         pfac = 0.5 * (1.0 + cfac * cfac)
 
-        htilde = self.phenom_d_htilde(
+        htilde = self.phenom_deco_htilde(
             f,
             chirp_mass,
             mass_ratio,
             chi1,
             chi2,
-            compactness,
+            c_eff,
             distance,
             phic,
             f_ref,
@@ -80,21 +93,18 @@ class IMRPhenomDECO(IMRPhenomD):
 
         return hc, hp
 
-    def phenom_d_htilde(
+    def phenom_deco_htilde(
         self,
         f: FrequencySeries1d,
         chirp_mass: BatchTensor,
         mass_ratio: BatchTensor,
         chi1: BatchTensor,
         chi2: BatchTensor,
-        compactness: BatchTensor,
+        c_eff: BatchTensor,
         distance: BatchTensor,
         phic: BatchTensor,
         f_ref: float,
     ) -> Float[FrequencySeries1d, " batch"]:
-        # PhenomDECO reuses the PhenomD phase model while the amplitude model
-        # is parametrized by an effective compactness of the two objects;
-        # see Phys. Rev. D 112, 104017 (2025) for details
 
         total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6
         mass_1 = total_mass / (1 + mass_ratio)
@@ -113,7 +123,7 @@ class IMRPhenomDECO(IMRPhenomD):
 
         fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
-        # compactness fixed at 0.5, as phase unchanged wrt PhenomD
+        # effective compactness fixed at 0.5, as phase unchanged wrt PhenomD
         Mf_peak_phase = self.fmaxCalc_deco(fRD, fDM, gamma2, gamma3, 0.5)
         _, t0 = self.phenom_d_mrd_phase(
             Mf_peak_phase, eta, eta2, chi1, chi2, xi, fRD, fDM
@@ -146,7 +156,7 @@ class IMRPhenomDECO(IMRPhenomD):
             chi22,
             xi,
             distance,
-            compactness,
+            c_eff,
         )
 
         amp_0 = self.taylorf2_amplitude(
@@ -170,7 +180,7 @@ class IMRPhenomDECO(IMRPhenomD):
         chi22,
         xi,
         distance,
-        compactness,
+        c_eff,
         fRD=None,  # used for passing ringdown frequency from phenom_p
         fDM=None,  # used for passing damping frequency from phenom_p
     ):
@@ -187,12 +197,12 @@ class IMRPhenomDECO(IMRPhenomD):
             chi12,
             chi22,
             xi,
-            compactness,
+            c_eff,
             fRD,
             fDM,
         )
         mrd_amp, mrd_Damp = self.phenom_deco_mrd_amp(
-            Mf, eta, eta2, chi1, chi2, xi, compactness, fRD, fDM
+            Mf, eta, eta2, chi1, chi2, xi, c_eff, fRD, fDM
         )
 
         gamma2 = self.gamma2_fun(eta, eta2, xi)
@@ -206,13 +216,12 @@ class IMRPhenomDECO(IMRPhenomD):
         if (fRD is None) and (fDM is None):
             fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
-        Mf_peak = self.fmaxCalc_deco(fRD, fDM, gamma2, gamma3, compactness)
+        Mf_peak = self.fmaxCalc_deco(fRD, fDM, gamma2, gamma3, c_eff)
 
         # Geometric peak and joining frequencies
         Mf_peak = (torch.ones_like(Mf).mT * Mf_peak).mT
         Mf_join_ins = (
-            0.014
-            * (torch.ones_like(Mf).mT * (2 * compactness) ** (3 / 2.0)).mT
+            0.014 * (torch.ones_like(Mf).mT * (2 * c_eff) ** (3 / 2.0)).mT
         )
         # construct full IMR Amp
         theta_minus_f1 = (Mf <= Mf_join_ins).type_as(Mf)
@@ -240,7 +249,7 @@ class IMRPhenomDECO(IMRPhenomD):
         chi12,
         chi22,
         xi,
-        compactness,
+        c_eff,
         fRD=None,  # used for passing ringdown frequency from phenom_p
         fDM=None,  # used for passing damping frequency from phenom_p
     ):
@@ -253,13 +262,13 @@ class IMRPhenomDECO(IMRPhenomD):
             fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
         # Geometric frequency definition from PhenomD header file
-        AMP_fJoin_INS = 0.014 * (2 * compactness) ** (3 / 2.0)
+        AMP_fJoin_INS = 0.014 * (2 * c_eff) ** (3 / 2.0)
 
         Mf1 = (AMP_fJoin_INS * torch.ones_like(Mf).mT).mT
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
 
-        fpeak = self.fmaxCalc_deco(fRD, fDM, gamma2, gamma3, compactness)
+        fpeak = self.fmaxCalc_deco(fRD, fDM, gamma2, gamma3, c_eff)
         Mf3 = (torch.ones_like(Mf).mT * fpeak).mT
         dfx = 0.5 * (Mf3 - Mf1)
         Mf2 = Mf1 + dfx
@@ -274,7 +283,7 @@ class IMRPhenomDECO(IMRPhenomD):
             chi1,
             chi2,
             xi,
-            compactness,
+            c_eff,
             fRD,
             fDM,
         )
@@ -304,7 +313,7 @@ class IMRPhenomDECO(IMRPhenomD):
         chi1,
         chi2,
         xi,
-        compactness,
+        c_eff,
         fRD=None,
         fDM=None,
     ):
@@ -316,7 +325,7 @@ class IMRPhenomDECO(IMRPhenomD):
         if (fRD is None) and (fDM is None):
             fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
-        fRD_deco = fRD * (2 * compactness) ** (3 / 2.0)
+        fRD_deco = fRD * (2 * c_eff) ** (3 / 2.0)
 
         gamma1 = self.gamma1_fun(eta, eta2, xi)
         gamma2 = self.gamma2_fun(eta, eta2, xi)
@@ -334,11 +343,11 @@ class IMRPhenomDECO(IMRPhenomD):
         Damp = Damp.mT / exp_times_lorentzian
         return amp, Damp
 
-    def fmaxCalc_deco(self, fRD, fDM, gamma2, gamma3, compactness):
+    def fmaxCalc_deco(self, fRD, fDM, gamma2, gamma3, c_eff):
         mask = gamma2 <= 1
         # calculate result for gamma2 <= 1 case
         sqrt_term = torch.sqrt(1 - gamma2.pow(2))
-        fRD_deco = fRD * (2 * compactness) ** (3 / 2.0)
+        fRD_deco = fRD * (2 * c_eff) ** (3 / 2.0)
         result_case1 = fRD_deco + (fDM * (-1 + sqrt_term) * gamma3) / gamma2
 
         # calculate result for gamma2 > 1 case
