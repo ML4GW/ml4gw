@@ -322,10 +322,10 @@ class IMRPhenomDECO(IMRPhenomD):
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
         fDMgamma3 = fDM * gamma3
-        pow2_fDMgamma3 = (torch.ones_like(Mf).mT * fDMgamma3 * fDMgamma3).mT
-        fminfRD = Mf - (torch.ones_like(Mf).mT * fRD_deco).mT
-        exp_times_lorentzian = torch.exp(fminfRD.mT * gamma2 / fDMgamma3).mT
-        exp_times_lorentzian *= fminfRD**2 + pow2_fDMgamma3
+        pow2_fDMgamma3 = (fDMgamma3 * fDMgamma3).unsqueeze(-1)
+        fminfRD = Mf - fRD_deco.unsqueeze(-1)
+        exp_part = torch.exp(fminfRD.mT * gamma2 / fDMgamma3).mT
+        exp_times_lorentzian = exp_part * (fminfRD**2 + pow2_fDMgamma3)
 
         amp = (1 / exp_times_lorentzian.mT * gamma1 * gamma3 * fDM).mT
         Damp = (fminfRD.mT * -2 * fDM * gamma1 * gamma3) / (
