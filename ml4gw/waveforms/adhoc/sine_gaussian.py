@@ -158,6 +158,26 @@ class MultiSineGaussian(torch.nn.Module):
 
     # ------------------------------------------------------------------
     def forward(self, **kwargs) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Generate a batch of multi-component sine-Gaussian waveforms.
+        Expected keyword arguments:
+            n_components: Tensor of shape ``(batch,)`` containing the
+                number of sine-Gaussian components in each waveform.
+                Values must not exceed ``self.n_max``.
+            hrss_{i}: Tensor of shape ``(batch,)`` containing the
+                root-sum-square amplitude of component ``i``.
+            quality_{i}: Tensor of shape ``(batch,)`` containing the
+                quality factor of component ``i``.
+            frequency_{i}: Tensor of shape ``(batch,)`` containing the
+                frequency of component ``i``.
+            phase_{i}: Tensor of shape ``(batch,)`` containing the
+                phase of component ``i``.
+            eccentricity_{i}: Tensor of shape ``(batch,)`` containing the
+                eccentricity of component ``i``.
+        Returns:
+            A tuple containing the plus and cross polarizations.
+            Each tensor has shape ``(batch, waveform_size)``.
+        """
         device = self.times.device
         batch = kwargs["n_components"].shape[0]
         dtype = kwargs["quality_1"].dtype
