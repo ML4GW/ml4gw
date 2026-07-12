@@ -112,9 +112,7 @@ def test_multi_sine_gaussian_forward_matches_active_component_sum(
     expected_cross = torch.zeros(
         batch_size, waveform_size, dtype=torch.float64
     )
-    expected_plus = torch.zeros(
-        batch_size, waveform_size, dtype=torch.float64
-    )
+    expected_plus = torch.zeros(batch_size, waveform_size, dtype=torch.float64)
 
     for batch_idx in range(batch_size):
         n_components = init_parameters["n_components"][batch_idx].item()
@@ -126,9 +124,9 @@ def test_multi_sine_gaussian_forward_matches_active_component_sum(
                 frequency=init_parameters[f"frequency_{component_idx}"][
                     batch_idx
                 ].reshape(1),
-                hrss=init_parameters[f"hrss_{component_idx}"][batch_idx].reshape(
-                    1
-                ),
+                hrss=init_parameters[f"hrss_{component_idx}"][
+                    batch_idx
+                ].reshape(1),
                 phase=init_parameters[f"phase_{component_idx}"][
                     batch_idx
                 ].reshape(1),
