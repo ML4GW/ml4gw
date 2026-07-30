@@ -122,12 +122,10 @@ class Heterodyne(torch.nn.Module):
                 - If ``return_type="both"`` → `(time, freq)`
         """
 
-        X_fft = torch.fft.rfft(X, dim=-1)
-        X_fft /= self.sample_rate
+        X_fft = torch.fft.rfft(X, dim=-1, norm="forward")
         X_heterodyned = X_fft[:, :, None] * self.heterodyning_phase[None, :, :]
         X_heterodyned[..., 0] = 0
-        X_ifft = torch.fft.irfft(X_heterodyned, dim=-1)
-        X_ifft *= self.sample_rate
+        X_ifft = torch.fft.irfft(X_heterodyned, dim=-1, norm="forward")
 
         if self.return_type == "time":
             return X_ifft
