@@ -74,7 +74,20 @@ if an automatic fix is not possible.
    motivated for gravitational-wave data analysis. For example, if you have used your 
    personal fork of `ml4gw` and performed an analysis that is published, it can be a strong
    usecase.
-4. Please [cite](/CITATION.cff) the repository if you have used `ml4gw` in your work.
+4. Please adhere to the [AI-policy](#ai-policy) below. 
+5. Please [cite](/CITATION.cff) the repository if you have used `ml4gw` in your work.
+
+## AI policy
+
+We don't restrict the use of open-source or commercial LLM tools to generate code
+or to help propose patches. However, contributions should be easy to understand, well
+tested, and well explained before proposing a patch. We would like to respect each
+others' time. Blind use of AI tools may apparently save time for the contributor,
+but adds significantly more review time for the maintainers. Broadly, we follow the 
+[AI policy for Scipy](https://docs.scipy.org/doc/scipy/dev/conduct/ai_policy.html),
+which is a short read. Please disclose if you have made significant use of AI tools
+in proposing a patch. Also note that any patch that seems AI generated without
+proper validation will not be considered.
 
 ## Benchmarks
 
