@@ -26,12 +26,13 @@ def test_phenomd_forward(benchmark, cbc_inputs, duration, device, maybe_sync):
 
 
 def test_phenomdeco_forward(
-    benchmark, cbc_inputs, duration, device, maybe_sync
+    benchmark, cbc_inputs, compactness_inputs, duration, device, maybe_sync
 ):
     model = IMRPhenomDECO().to(device)
     freqs = torch.arange(F_MIN, F_MAX, 1.0 / duration, dtype=torch.float64).to(
         device
     )
+    cbc_inputs.update(compactness_inputs)
     benchmark(maybe_sync(model), freqs, **cbc_inputs, f_ref=F_REF)
 
 
