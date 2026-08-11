@@ -29,13 +29,15 @@ class IMRPhenomDECO(IMRPhenomD):
         broad features expected from exotic compact-object binaries by
         introdcuing an effective compactness parameter (c_eff) in the
         amplitude model, as described in Ghosh and Hannam
-        (Phys. Rev. D 112, 104017 (2025)).
+        `Phys. Rev. D 112, 104017 (2025) <https://doi.org/10.1103/76dz-vs8j>`_.
 
         This model is **not calibrated** to any specific exotic compact-object
-        scenario. Users should refer to Ghosh et al. (arxiv:2606.31350) for
+        scenario. Users should refer to Ghosh et al. (`arXiv:2606.31350
+        <https://arxiv.org/abs/2606.31350>`_) for
         guidance on the interpretation of effective compactness inferred with
         this model and for the scalability of this test to a population refer
-        to Ghosh et al. (arxiv:2606.31364) .
+        to Ghosh et al. (`arXiv:2606.31364
+        <https://arxiv.org/abs/2606.31364>`_).
 
         Args:
             f:
