@@ -294,7 +294,7 @@ def test_phenom_d(
     lal_mask = (lal_freqs > params["f_min"]) & (lal_freqs < params["f_max"])
 
     lal_freqs = lal_freqs[lal_mask]
-    torch_freqs = torch.tensor(lal_freqs, dtype=torch.float32)
+    torch_freqs = torch.tensor(lal_freqs, dtype=FLOAT64)
 
     # generate waveforms using ml4gw
     hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomD()(
@@ -405,7 +405,7 @@ def test_phenom_deco_bbh_limit(
     lal_mask = (lal_freqs > params["f_min"]) & (lal_freqs < params["f_max"])
 
     lal_freqs = lal_freqs[lal_mask]
-    torch_freqs = torch.tensor(lal_freqs, dtype=torch.float32)
+    torch_freqs = torch.tensor(lal_freqs, dtype=FLOAT64)
 
     # pin c_eff to 0.5 for producing BBH waveforms
     c_eff = 0.5 * torch.ones_like(chirp_mass)

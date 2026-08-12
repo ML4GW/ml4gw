@@ -67,14 +67,15 @@ class IMRPhenomDECO(IMRPhenomD):
         """
         # shape assumed (n_batch, params)
         if (
-            chirp_mass.shape[0] != mass_ratio.shape[0]
-            or mass_ratio.shape[0] != chi1.shape[0]
-            or chi1.shape[0] != chi2.shape[0]
-            or chi2.shape[0] != distance.shape[0]
-            or distance.shape[0] != phic.shape[0]
-            or phic.shape[0] != inclination.shape[0]
+            not chirp_mass.shape[0]
+            == mass_ratio.shape[0]
+            == chi1.shape[0]
+            == chi2.shape[0]
+            == distance.shape[0]
+            == phic.shape[0]
+            == inclination.shape[0]
         ):
-            raise RuntimeError("Tensors should have same batch size")
+            raise ValueError("Tensors must have same batch size")
         cfac = torch.cos(inclination)
         pfac = 0.5 * (1.0 + cfac * cfac)
 
@@ -159,6 +160,8 @@ class IMRPhenomDECO(IMRPhenomD):
             xi,
             distance,
             c_eff,
+            fRD,
+            fDM,
         )
 
         amp_0 = self.taylorf2_amplitude(
@@ -183,8 +186,8 @@ class IMRPhenomDECO(IMRPhenomD):
         xi,
         distance,
         c_eff,
-        fRD=None,  # used for passing ringdown frequency from phenom_p
-        fDM=None,  # used for passing damping frequency from phenom_p
+        fRD,
+        fDM,
     ):
         ins_amp, ins_Damp = self.phenom_d_inspiral_amp(
             Mf, eta, eta2, Seta, xi, chi1, chi2, chi12, chi22
@@ -209,14 +212,6 @@ class IMRPhenomDECO(IMRPhenomD):
 
         gamma2 = self.gamma2_fun(eta, eta2, xi)
         gamma3 = self.gamma3_fun(eta, eta2, xi)
-
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
 
         Mf_peak = self.fmaxCalc_deco(fRD, fDM, gamma2, gamma3, c_eff)
 
@@ -252,17 +247,9 @@ class IMRPhenomDECO(IMRPhenomD):
         chi22,
         xi,
         c_eff,
-        fRD=None,  # used for passing ringdown frequency from phenom_p
-        fDM=None,  # used for passing damping frequency from phenom_p
+        fRD,
+        fDM,
     ):
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
-
         # Geometric frequency definition from PhenomD header file
         AMP_fJoin_INS = 0.014 * (2 * c_eff) ** (3 / 2.0)
 
@@ -316,17 +303,9 @@ class IMRPhenomDECO(IMRPhenomD):
         chi2,
         xi,
         c_eff,
-        fRD=None,
-        fDM=None,
+        fRD,
+        fDM,
     ):
-        # merger ringdown
-        if (fRD is None) != (fDM is None):
-            raise ValueError(
-                "Both fRD and fDM must either be provided or both be None"
-            )
-        if (fRD is None) and (fDM is None):
-            fRD, fDM = self.fring_fdamp(eta, eta2, chi1, chi2)
-
         fRD_deco = fRD * (2 * c_eff) ** (3 / 2.0)
 
         gamma1 = self.gamma1_fun(eta, eta2, xi)
