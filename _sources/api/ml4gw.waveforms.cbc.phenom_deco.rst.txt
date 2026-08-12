@@ -1,0 +1,12 @@
+ml4gw.waveforms.cbc.phenom\_deco
+================================
+
+.. automodule:: ml4gw.waveforms.cbc.phenom_deco
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      IMRPhenomDECO
+   

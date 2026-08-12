@@ -13,6 +13,7 @@ ml4gw.waveforms.cbc
    coefficients
    phenom_d
    phenom_d_data
+   phenom_deco
    phenom_p
    taylorf2
    utils

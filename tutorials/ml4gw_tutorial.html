@@ -51,6 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#waveform-generation">Waveform Generation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#generating-a-single-waveform">Generating a single waveform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generating-imrphenomdeco">Generating IMRPhenomDECO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parameter-sampling">Parameter sampling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#batch-waveforms-generation">Batch waveforms generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#time-domain-waveforms">Time-domain waveforms</a></li>
@@ -223,7 +224,67 @@ which makes BBH detection a good test case.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/fd892a2cf71d1b303732e8f2f7fab272d75f0f9df024677027333dcc6d6ad4dc.png" src="../_images/fd892a2cf71d1b303732e8f2f7fab272d75f0f9df024677027333dcc6d6ad4dc.png" />
+<img alt="../_images/6d49869251dd29a1629f5e7c259f6bd15935a358f339de5cc10754b6964af7fd.png" src="../_images/6d49869251dd29a1629f5e7c259f6bd15935a358f339de5cc10754b6964af7fd.png" />
+</div>
+</div>
+</section>
+<section id="generating-imrphenomdeco">
+<h3>Generating IMRPhenomDECO<a class="headerlink" href="#generating-imrphenomdeco" title="Link to this heading"></a></h3>
+<p>This release adds IMRPhenomDECO, a phenomenological extension of the standard BBH IMRPhenomD waveform model. IMRPhenomDECO modifies the merger morphology using the physical intuition that less compact objects are larger and therefore come into contact, or “merge” at lower frequencies. IMRPhenomDECO is not calibrated to any particular exotic compact-object model and does not include matter effects or finite-size effects beyond this phenomenological modification. Results obtained with IMRPhenomDECO should therefore be interpreted cautiously.</p>
+<p>The model was previously not publicly available and is included here through an external contribution to make it accessible within the ml4gw waveform-generation framework. Please cite <a class="reference external" href="https://journals.aps.org/prd/abstract/10.1103/76dz-vs8j">Ghosh and Hannam Phys. Rev. D (2025)</a> and <a class="reference external" href="https://arxiv.org/abs/2606.31350">Ghosh et al., arxiv:2606.31350</a>, if you use PhenomDECO in your work. Please also consider citing <a class="reference internal" href="#arxiv:2606.31364"><span class="xref myst">Ghosh et al.,arxiv:2606.31364</span></a> if your analysis uses PhenomDECO for a population of binaries.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.waveforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">IMRPhenomDECO</span>
+
+<span class="c1"># define parameters</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;chirp_mass&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">30</span><span class="p">]),</span>
+    <span class="s2">&quot;mass_ratio&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.9</span><span class="p">]),</span>
+    <span class="s2">&quot;chi1&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="s2">&quot;chi2&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">500</span><span class="p">]),</span>
+    <span class="s2">&quot;phic&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="s2">&quot;inclination&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span>
+<span class="p">}</span>
+
+<span class="n">approximant_deco</span> <span class="o">=</span> <span class="n">IMRPhenomDECO</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="c1"># generate PhenomDECO waveforms for a range of compactness</span>
+<span class="n">h_dict</span><span class="o">=</span><span class="p">{}</span>
+
+<span class="c1">#  only values C_eff&lt;=0.5 are considered physical; refer to arxiv:2606.31350 for interpreting C_eff&gt;0.5</span>
+
+<span class="n">compactness_parameter</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.33</span><span class="p">,</span><span class="mf">0.45</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]</span> 
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">cc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">compactness_parameter</span><span class="p">):</span>
+    <span class="n">params_deco</span> <span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1">#add compactness to params for phenomDECO</span>
+    <span class="n">params_deco</span><span class="p">[</span><span class="s2">&quot;c_eff&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">cc</span><span class="p">])</span> 
+    <span class="n">hc1_f</span><span class="p">,</span> <span class="n">hp1_f</span> <span class="o">=</span> <span class="n">approximant_deco</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">f_ref</span><span class="o">=</span><span class="n">f_ref</span><span class="p">,</span> <span class="o">**</span><span class="n">params_deco</span><span class="p">)</span> 
+    <span class="n">h_dict</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">hc1_f</span><span class="p">,</span> <span class="n">hp1_f</span><span class="p">]</span>
+
+<span class="c1"># generate PhenomD waveform for comparision</span>
+<span class="n">hc2_f</span><span class="p">,</span> <span class="n">hp2_f</span> <span class="o">=</span> <span class="n">approximant</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">f_ref</span><span class="o">=</span><span class="n">f_ref</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="mf">0.1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;C_eff=0.1&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="mf">0.25</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;C_eff=0.25&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="mf">0.33</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;C_eff=0.33&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="mf">0.45</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;C_eff=0.45&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="mf">0.5</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;C_eff=0.5&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hp2_f</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="s1">&#39;k--&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;PhenomD&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1e-28</span><span class="p">,</span><span class="mf">1e-22</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Strain&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/99201988c5845cd24084909b6fdfd199c2c8f2b0e9b34b097b8a333e858877dd.png" src="../_images/99201988c5845cd24084909b6fdfd199c2c8f2b0e9b34b097b8a333e858877dd.png" />
 </div>
 </div>
 </section>
