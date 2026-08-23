@@ -55,11 +55,19 @@ class ConvBlock(Autoencoder):
             groups=groups,
         )
 
-        self.activation = activation()
+        self.activation = (
+            activation() if isinstance(activation, type) else activation
+        )
         if output_activation is not None:
-            self.output_activation = output_activation
+            self.output_activation = (
+                output_activation()
+                if isinstance(output_activation, type)
+                else output_activation
+            )
         else:
-            self.output_activation = activation
+            self.output_activation = (
+                activation() if isinstance(activation, type) else activation
+            )
 
         self.encode_norm = norm(out_channels)
         self.decode_norm = norm(decode_channels)
@@ -118,11 +126,10 @@ class ConvolutionalAutoencoder(Autoencoder):
             # case it will just be in_channels anyway)
             decode = in_channels if i else decode_channels
 
-            # don't have the middle layer skip to itself
-            # TODO: wait I don't think this makes sense.
-            # j = len(encode_channels) - 1 - i
-            # connect = skip_connection if j else None
-            connect = skip_connection
+            # Deepest block receives bottleneck encoding
+            # directly without skip connection
+            j = len(encode_channels) - 1 - i
+            connect = skip_connection if j else None
 
             # all intermediate layers should use the same
             # activation. Only the last decoder should have

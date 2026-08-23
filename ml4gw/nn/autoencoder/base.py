@@ -43,6 +43,9 @@ class Autoencoder(torch.nn.Module):
                 X = block.encode(X)
             states.append(X)
 
+        if len(self.blocks) == 0 and isinstance(X, tuple) and len(X) == 1:
+            X = X[0]
+
         # don't need to return the last
         # state, since that's just equal
         # to the output of this layer
@@ -72,9 +75,13 @@ class Autoencoder(torch.nn.Module):
             else:
                 X = block.decode(X)
 
-            state = states[-i - 1]
-            if state is not None:
-                X = self.skip_connection(X, state)
+            if states is not None:
+                state = states[i]
+                if state is not None:
+                    X = self.skip_connection(X, state)
+
+        if len(self.blocks) == 0 and isinstance(X, tuple) and len(X) == 1:
+            return X[0]
         return X
 
     def forward(self, *X: Tensor) -> Tensor:
