@@ -22,7 +22,10 @@ def test_base_skip_connection(in_channels):
 
 
 @pytest.mark.parametrize("in_channels", [1, 2, 4])
-@pytest.mark.parametrize("length_x,length_state", [(32, 32), (32, 28), (28, 32)])
+@pytest.mark.parametrize(
+    "length_x,length_state",
+    [(32, 32), (32, 28), (28, 32)],
+)
 def test_add_skip_connect(in_channels, length_x, length_state):
     sc = AddSkipConnect()
     assert sc.get_out_channels(in_channels) == in_channels
@@ -39,7 +42,10 @@ def test_add_skip_connect(in_channels, length_x, length_state):
 
 
 @pytest.mark.parametrize("in_channels", [1, 2, 4])
-@pytest.mark.parametrize("length_x,length_state", [(32, 32), (32, 28), (28, 32)])
+@pytest.mark.parametrize(
+    "length_x,length_state",
+    [(32, 32), (32, 28), (28, 32)],
+)
 def test_concat_skip_connect_single_group(in_channels, length_x, length_state):
     sc = ConcatSkipConnect(groups=1)
     assert sc.get_out_channels(in_channels) == 2 * in_channels
@@ -69,14 +75,17 @@ def test_concat_skip_connect_multiple_groups(groups):
     # Verify channel interleaving
     x_splits = torch.split(x, groups, dim=1)
     state_splits = torch.split(state, groups, dim=1)
-    expected_frags = [i for j in zip(x_splits, state_splits, strict=True) for i in j]
+    expected_frags = [
+        i for j in zip(x_splits, state_splits, strict=True) for i in j
+    ]
     expected_out = torch.cat(expected_frags, dim=1)
     assert torch.equal(out, expected_out)
 
 
 def test_concat_skip_connect_invalid_channels_error():
     sc = ConcatSkipConnect(groups=3)
-    x = torch.randn(2, 4, 16)  # 4 channels cannot be divided by 3 groups
+    x = torch.randn(2, 4, 16)  # 4 channels not divisible by 3
     state = torch.randn(2, 4, 16)
-    with pytest.raises(ValueError, match="cannot be divided evenly into 3 groups"):
+    msg = "cannot be divided evenly into 3 groups"
+    with pytest.raises(ValueError, match=msg):
         sc(x, state)

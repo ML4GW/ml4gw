@@ -85,7 +85,8 @@ def test_multi_block_autoencoder_without_skip():
 def test_autoencoder_with_skip_connection():
     skip = AddSkipConnect()
     ae = Autoencoder(skip_connection=skip)
-    # Using blocks with equal in/out channels so AddSkipConnect can add x + state
+    # Using blocks with equal in/out channels
+    # so AddSkipConnect can add x + state
     ae.blocks.append(DummyBlock(4, 4))
     ae.blocks.append(DummyBlock(4, 4))
     ae.blocks.append(DummyBlock(4, 4))
@@ -98,7 +99,8 @@ def test_autoencoder_with_skip_connection():
         ae.decode(enc, states=None)
 
     # Decode with wrong number of states should raise
-    with pytest.raises(ValueError, match="Passed 1 intermediate states, expected 2"):
+    msg = "Passed 1 intermediate states, expected 2"
+    with pytest.raises(ValueError, match=msg):
         ae.decode(enc, states=[states[0]])
 
     # Decode with correct states

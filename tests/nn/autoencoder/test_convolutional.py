@@ -2,8 +2,14 @@ import pytest
 import torch
 from torch import nn
 
-from ml4gw.nn.autoencoder.convolutional import ConvBlock, ConvolutionalAutoencoder
-from ml4gw.nn.autoencoder.skip_connection import AddSkipConnect, ConcatSkipConnect
+from ml4gw.nn.autoencoder.convolutional import (
+    ConvBlock,
+    ConvolutionalAutoencoder,
+)
+from ml4gw.nn.autoencoder.skip_connection import (
+    AddSkipConnect,
+    ConcatSkipConnect,
+)
 
 
 @pytest.mark.parametrize("in_channels", [1, 2])
@@ -47,10 +53,9 @@ def test_convolutional_autoencoder_shapes(
     decode_channels,
     skip_connection,
 ):
-    # When using AddSkipConnect with ConvolutionalAutoencoder, intermediate blocks
-    # receive skip states of size in_channels, so encode_channels must match or skip handled appropriately.
-    # We test AddSkipConnect when layers have equal intermediate channels if needed,
-    # or general autoencoder with matching channels.
+    # When using AddSkipConnect with ConvolutionalAutoencoder,
+    # intermediate blocks receive skip states of size in_channels.
+    # We test AddSkipConnect when layers have equal channels.
     if isinstance(skip_connection, AddSkipConnect):
         encode_channels = [in_channels] * len(encode_channels)
 
@@ -131,8 +136,9 @@ def test_convolutional_autoencoder_gradient_backward(skip_connection):
     loss = ((out - target) ** 2).mean()
     loss.backward()
 
-    # Verify gradients exist, are finite, and not NaN for all trainable weights
+    # Verify gradients exist, are finite, and not NaN
     for name, param in ae.named_parameters():
         if param.requires_grad:
             assert param.grad is not None, f"Gradient is None for {name}"
-            assert torch.isfinite(param.grad).all(), f"Gradient has NaN/Inf for {name}"
+            msg = f"Gradient has NaN/Inf for {name}"
+            assert torch.isfinite(param.grad).all(), msg
