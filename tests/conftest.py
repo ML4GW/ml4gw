@@ -33,14 +33,15 @@ def compare_against_numpy():
         N = np.prod(expected.shape)
         tol = sigma * erfinv(prob ** (1 / N)) * 2**0.5
 
-        isclose = np.isclose(value, expected, rtol=tol)
+        isclose = np.isclose(value, expected, rtol=tol, atol=1e-14)
 
-        # at most one point can differ by more than tolerance
+        # at most num_bad points can differ by more than tolerance
         # this happens occasionally and typically for very low values
 
         # TODO: eventually we should track down
         # and address the underlying cause
-        assert isclose.sum() - np.prod(isclose.shape) <= num_bad
+        num_differing = np.prod(isclose.shape) - isclose.sum()
+        assert num_differing <= num_bad
 
     return compare
 

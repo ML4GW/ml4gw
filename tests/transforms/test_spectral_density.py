@@ -100,7 +100,15 @@ def test_average_error():
 
 
 def test_spectral_density(
-    length, sample_rate, fftlength, overlap, fast, average, ndim, window
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    fast,
+    average,
+    ndim,
+    window,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -151,7 +159,7 @@ def test_spectral_density(
     if fast:
         torch_result = torch_result[..., 2:]
         scipy_result = scipy_result[..., 2:]
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all()
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
 
     # test error raised if window incorrect shape
     with pytest.raises(ValueError) as exc_info:
@@ -207,7 +215,15 @@ def _shape_checks(ndim, y_ndim, x, y, transform):
 
 
 def test_transform_with_csd(
-    y_ndim, length, sample_rate, fftlength, overlap, average, ndim, fast
+    y_ndim,
+    length,
+    sample_rate,
+    fftlength,
+    overlap,
+    average,
+    ndim,
+    fast,
+    compare_against_numpy,
 ):
     batch_size = 8
     num_channels = 5
@@ -294,7 +310,6 @@ def test_transform_with_csd(
         torch_result = torch_result[..., 2:]
         scipy_result = scipy_result[..., 2:]
 
-    ratio = torch_result / scipy_result
-    assert np.isclose(torch_result, scipy_result, rtol=TOL).all(), ratio
+    compare_against_numpy(torch_result, scipy_result, num_bad=1)
 
     _shape_checks(ndim, y_ndim, x, y, transform)
