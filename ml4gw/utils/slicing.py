@@ -313,7 +313,11 @@ def sample_kernels(
         )
 
     if X.ndim == 1:
-        idx = torch.randint(len(X) - kernel_size, size=(N,))
+        max_idx = len(X) - kernel_size
+        if max_idx == 0:
+            idx = torch.zeros(N, dtype=torch.long)
+        else:
+            idx = torch.randint(max_idx, size=(N,))
         if return_idx:
             return slice_kernels(X, idx, kernel_size), idx
         return slice_kernels(X, idx, kernel_size)
@@ -364,7 +368,10 @@ def sample_kernels(
         # will require its own sampling index
         shape = (N, len(X))
 
-    idx = torch.randint(min_val, max_val, size=shape).to(X.device)
+    if min_val == max_val:
+        idx = torch.full(shape, min_val, dtype=torch.long, device=X.device)
+    else:
+        idx = torch.randint(min_val, max_val, size=shape).to(X.device)
     if return_idx:
         return slice_kernels(X, idx, kernel_size), idx
     return slice_kernels(X, idx, kernel_size)

@@ -374,3 +374,38 @@ def test_sample_kernels_2d_return_idx():
     result, idx = slicing.sample_kernels(X, kernel_size, N=5, return_idx=True)
     assert result.shape == (5, 3, kernel_size)
     assert idx.shape == (5,)
+
+
+@pytest.mark.parametrize(
+    "shape,N,coincident,expected_shape,expected_idx_shape",
+    [
+        ((10,), 3, True, (3, 10), (3,)),
+        ((2, 10), 3, True, (3, 2, 10), (3,)),
+        ((2, 10), 3, False, (3, 2, 10), (3, 2)),
+        ((3, 2, 10), None, True, (3, 2, 10), (3,)),
+    ],
+)
+def test_sample_kernels_full_length(
+    shape, N, coincident, expected_shape, expected_idx_shape
+):
+    X = torch.arange(np.prod(shape)).reshape(shape)
+
+    result, idx = slicing.sample_kernels(
+        X,
+        kernel_size=shape[-1],
+        N=N,
+        coincident=coincident,
+        return_idx=True,
+    )
+
+    assert result.shape == expected_shape
+    assert idx.shape == expected_idx_shape
+    assert torch.count_nonzero(idx) == 0
+
+    if X.ndim == 1:
+        expected = X.repeat(N, 1)
+    elif X.ndim == 2:
+        expected = X.repeat(N, 1, 1)
+    else:
+        expected = X
+    assert torch.equal(result, expected)
