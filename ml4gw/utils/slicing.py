@@ -313,11 +313,7 @@ def sample_kernels(
         )
 
     if X.ndim == 1:
-        max_idx = len(X) - kernel_size
-        if max_idx == 0:
-            idx = torch.zeros(N, dtype=torch.long)
-        else:
-            idx = torch.randint(max_idx, size=(N,))
+        idx = torch.randint(len(X) - kernel_size + 1, size=(N,))
         if return_idx:
             return slice_kernels(X, idx, kernel_size), idx
         return slice_kernels(X, idx, kernel_size)
@@ -326,7 +322,7 @@ def sample_kernels(
 
     if max_center_offset is None:
         # sample uniformly from all of X's time dimension
-        min_val, max_val = 0, X.shape[-1] - kernel_size
+        min_val, max_val = 0, X.shape[-1] - kernel_size + 1
     elif max_center_offset >= 0:
         # a positive max_center_offset means we're allowed
         # to put some space between the center of the timeseries
@@ -368,10 +364,7 @@ def sample_kernels(
         # will require its own sampling index
         shape = (N, len(X))
 
-    if min_val == max_val:
-        idx = torch.full(shape, min_val, dtype=torch.long, device=X.device)
-    else:
-        idx = torch.randint(min_val, max_val, size=shape).to(X.device)
+    idx = torch.randint(min_val, max_val, size=shape).to(X.device)
     if return_idx:
         return slice_kernels(X, idx, kernel_size), idx
     return slice_kernels(X, idx, kernel_size)

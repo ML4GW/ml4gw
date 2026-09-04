@@ -172,7 +172,7 @@ def test_sample_kernels_1D(kernel_size, num_channels):
     return_value = 7 * torch.arange(N)
     with patch("torch.randint", return_value=return_value) as mock:
         result = slicing.sample_kernels(x, kernel_size, N)
-    mock.assert_called_once_with(100 - kernel_size, size=(N,))
+    mock.assert_called_once_with(100 - kernel_size + 1, size=(N,))
 
     assert result.shape == (N, kernel_size)
     for i, y in enumerate(result.cpu().numpy()):
@@ -258,7 +258,7 @@ def test_sample_kernels_2D(
     result = result.cpu().numpy()
 
     if max_center_offset is None:
-        min_val, max_val = 0, 100 - kernel_size
+        min_val, max_val = 0, 100 - kernel_size + 1
     elif max_center_offset == 0:
         min_val, max_val = 50 - kernel_size, 50
     elif max_center_offset == -4:
@@ -339,7 +339,7 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
     result = result.cpu().numpy()
 
     if max_center_offset is None:
-        min_val, max_val = 0, 100 - kernel_size
+        min_val, max_val = 0, 100 - kernel_size + 1
     elif max_center_offset == 0:
         min_val, max_val = 50 - kernel_size, 50
     elif max_center_offset == -4:
