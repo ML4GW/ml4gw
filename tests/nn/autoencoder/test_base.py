@@ -85,13 +85,11 @@ def test_multi_block_autoencoder_without_skip():
 def test_autoencoder_with_skip_connection():
     skip = AddSkipConnect()
     ae = Autoencoder(skip_connection=skip)
-    # Using blocks with equal in/out channels
-    # so AddSkipConnect can add x + state
-    ae.blocks.append(DummyBlock(4, 4))
-    ae.blocks.append(DummyBlock(4, 4))
-    ae.blocks.append(DummyBlock(4, 4))
+    ae.blocks.append(DummyBlock(2, 4))
+    ae.blocks.append(DummyBlock(4, 8))
+    ae.blocks.append(DummyBlock(8, 16))
 
-    x = torch.randn(4, 4, 32)
+    x = torch.randn(4, 2, 32)
 
     # Decode without states when skip_connection is set should raise
     enc, states = ae.encode(x, return_states=True)
@@ -105,8 +103,20 @@ def test_autoencoder_with_skip_connection():
 
     # Decode with correct states
     decoded = ae.decode(enc, states=states)
-    assert decoded.shape == (4, 4, 32)
+    assert decoded.shape == x.shape
 
     # Forward works automatically
     out = ae(x)
     assert out.shape == x.shape
+
+
+def test_autoencoder_without_skip_connection_rejects_states():
+    ae = Autoencoder()
+    ae.blocks.append(DummyBlock(2, 4))
+    ae.blocks.append(DummyBlock(4, 8))
+
+    x = torch.randn(4, 2, 32)
+    enc, states = ae.encode(x, return_states=True)
+    msg = "Cannot pass intermediate states"
+    with pytest.raises(ValueError, match=msg):
+        ae.decode(enc, states=states)

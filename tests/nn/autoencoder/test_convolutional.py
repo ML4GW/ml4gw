@@ -53,12 +53,6 @@ def test_convolutional_autoencoder_shapes(
     decode_channels,
     skip_connection,
 ):
-    # When using AddSkipConnect with ConvolutionalAutoencoder,
-    # intermediate blocks receive skip states of size in_channels.
-    # We test AddSkipConnect when layers have equal channels.
-    if isinstance(skip_connection, AddSkipConnect):
-        encode_channels = [in_channels] * len(encode_channels)
-
     ae = ConvolutionalAutoencoder(
         in_channels=in_channels,
         encode_channels=encode_channels,
@@ -106,7 +100,7 @@ def test_convolutional_autoencoder_custom_activations():
         encode_channels=[8, 16],
         kernel_size=3,
         activation=nn.ELU,
-        output_activation=nn.Tanh(),
+        output_activation=nn.Tanh,
     )
     x = torch.randn(4, 2, 32)
     out = ae(x)

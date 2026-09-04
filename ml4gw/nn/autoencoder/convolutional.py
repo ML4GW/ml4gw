@@ -11,6 +11,23 @@ Module = Callable[[...], torch.nn.Module]
 
 
 class ConvBlock(Autoencoder):
+    """Convolutional encoder-decoder block.
+
+    Args:
+        in_channels: Number of input channels.
+        encode_channels: Number of channels produced by the encoder per
+            group.
+        kernel_size: Size of the convolution kernels.
+        stride: Stride used by the encoder and decoder.
+        groups: Number of blocked channel connections.
+        activation: Module constructor used after intermediate layers.
+        norm: Normalization module constructor.
+        decode_channels: Number of channels produced by the decoder.
+        output_activation: Module constructor used after the decoder. Uses
+            ``activation`` when omitted.
+        skip_connection: Skip connection applied before decoding.
+    """
+
     def __init__(
         self,
         in_channels: int,
@@ -18,10 +35,10 @@ class ConvBlock(Autoencoder):
         kernel_size: int,
         stride: int = 1,
         groups: int = 1,
-        activation: torch.nn.Module = torch.nn.ReLU,
+        activation: Module = torch.nn.ReLU,
         norm: Module = torch.nn.BatchNorm1d,
         decode_channels: int | None = None,
-        output_activation: torch.nn.Module | None = None,
+        output_activation: Module | None = None,
         skip_connection: SkipConnection | None = None,
     ) -> None:
         super().__init__(skip_connection=None)
@@ -55,19 +72,8 @@ class ConvBlock(Autoencoder):
             groups=groups,
         )
 
-        self.activation = (
-            activation() if isinstance(activation, type) else activation
-        )
-        if output_activation is not None:
-            self.output_activation = (
-                output_activation()
-                if isinstance(output_activation, type)
-                else output_activation
-            )
-        else:
-            self.output_activation = (
-                activation() if isinstance(activation, type) else activation
-            )
+        self.activation = activation()
+        self.output_activation = (output_activation or activation)()
 
         self.encode_norm = norm(out_channels)
         self.decode_norm = norm(decode_channels)
@@ -104,8 +110,8 @@ class ConvolutionalAutoencoder(Autoencoder):
         kernel_size: int,
         stride: int = 1,
         groups: int = 1,
-        activation: torch.nn.Module = torch.nn.ReLU,
-        output_activation: torch.nn.Module | None = None,
+        activation: Module = torch.nn.ReLU,
+        output_activation: Module | None = None,
         norm: Module = torch.nn.BatchNorm1d,
         decode_channels: int | None = None,
         skip_connection: SkipConnection | None = None,

@@ -54,7 +54,12 @@ class Autoencoder(torch.nn.Module):
         return X
 
     def decode(self, *X, states: Sequence[Tensor] | None = None) -> Tensor:
-        if self.skip_connection is not None and states is None:
+        if self.skip_connection is None and states is not None:
+            raise ValueError(
+                "Cannot pass intermediate states when autoencoder "
+                "has no skip connection function specified"
+            )
+        elif self.skip_connection is not None and states is None:
             raise ValueError(
                 "Must pass intermediate states when autoencoder "
                 "has a skip connection function specified"
