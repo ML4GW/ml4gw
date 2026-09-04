@@ -33,7 +33,7 @@ def compare_against_numpy():
         N = np.prod(expected.shape)
         tol = sigma * erfinv(prob ** (1 / N)) * 2**0.5
 
-        isclose = np.isclose(value, expected, rtol=tol, atol=1e-14)
+        isclose = np.isclose(value, expected, rtol=tol)
 
         # at most num_bad points can differ by more than tolerance
         # this happens occasionally and typically for very low values
