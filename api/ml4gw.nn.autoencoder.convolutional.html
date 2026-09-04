@@ -114,7 +114,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.nn.autoencoder.convolutional.ConvBlock" title="ml4gw.nn.autoencoder.convolutional.ConvBlock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvBlock</span></code></a>(in_channels, encode_channels, ...)</p></td>
-<td><p></p></td>
+<td><p>Convolutional encoder-decoder block.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.nn.autoencoder.convolutional.ConvolutionalAutoencoder" title="ml4gw.nn.autoencoder.convolutional.ConvolutionalAutoencoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvolutionalAutoencoder</span></code></a>(in_channels, ...[, ...])</p></td>
 <td><p>Build a stack of convolutional autoencoder layer blocks.</p></td>
@@ -125,19 +125,22 @@
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.convolutional.ConvBlock">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.autoencoder.convolutional.</span></span><span class="sig-name descname"><span class="pre">ConvBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation=&lt;class</span> <span class="pre">'torch.nn.modules.activation.ReLU'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm=&lt;class</span> <span class="pre">'torch.nn.modules.batchnorm.BatchNorm1d'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decode_channels=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_activation=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_connection=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.convolutional.ConvBlock" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ml4gw.nn.autoencoder.base.html#ml4gw.nn.autoencoder.base.Autoencoder" title="ml4gw.nn.autoencoder.base.Autoencoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Autoencoder</span></code></a></p>
+<p>Convolutional encoder-decoder block.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>in_channels</strong> (<em>int</em>)</p></li>
-<li><p><strong>encode_channels</strong> (<em>int</em>)</p></li>
-<li><p><strong>kernel_size</strong> (<em>int</em>)</p></li>
-<li><p><strong>stride</strong> (<em>int</em>)</p></li>
-<li><p><strong>groups</strong> (<em>int</em>)</p></li>
-<li><p><strong>activation</strong> (<em>Module</em>)</p></li>
-<li><p><strong>norm</strong> (<em>Callable</em><em>[</em><em>[</em><em>...</em><em>]</em><em>, </em><em>Module</em><em>]</em>)</p></li>
-<li><p><strong>decode_channels</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>output_activation</strong> (<em>Module</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>skip_connection</strong> (<a class="reference internal" href="ml4gw.nn.autoencoder.skip_connection.html#ml4gw.nn.autoencoder.skip_connection.SkipConnection" title="ml4gw.nn.autoencoder.skip_connection.SkipConnection"><em>SkipConnection</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>in_channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of input channels.</p></li>
+<li><p><strong>encode_channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of channels produced by the encoder per
+group.</p></li>
+<li><p><strong>kernel_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Size of the convolution kernels.</p></li>
+<li><p><strong>stride</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Stride used by the encoder and decoder.</p></li>
+<li><p><strong>groups</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of blocked channel connections.</p></li>
+<li><p><strong>activation</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code>]</span>) -- Module constructor used after intermediate layers.</p></li>
+<li><p><strong>norm</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code>]</span>) -- Normalization module constructor.</p></li>
+<li><p><strong>decode_channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Number of channels produced by the decoder.</p></li>
+<li><p><strong>output_activation</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Module constructor used after the decoder. Uses
+<code class="docutils literal notranslate"><span class="pre">activation</span></code> when omitted.</p></li>
+<li><p><strong>skip_connection</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ml4gw.nn.autoencoder.skip_connection.html#ml4gw.nn.autoencoder.skip_connection.SkipConnection" title="ml4gw.nn.autoencoder.skip_connection.SkipConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkipConnection</span></code></a> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Skip connection applied before decoding.</p></li>
 </ul>
 </dd>
 </dl>
@@ -190,8 +193,8 @@ arbitrary <code class="docutils literal notranslate"><span class="pre">output_ac
 <li><p><strong>kernel_size</strong> (<em>int</em>)</p></li>
 <li><p><strong>stride</strong> (<em>int</em>)</p></li>
 <li><p><strong>groups</strong> (<em>int</em>)</p></li>
-<li><p><strong>activation</strong> (<em>Module</em>)</p></li>
-<li><p><strong>output_activation</strong> (<em>Module</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>activation</strong> (<em>Callable</em><em>[</em><em>[</em><em>...</em><em>]</em><em>, </em><em>Module</em><em>]</em>)</p></li>
+<li><p><strong>output_activation</strong> (<em>Callable</em><em>[</em><em>[</em><em>...</em><em>]</em><em>, </em><em>Module</em><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>norm</strong> (<em>Callable</em><em>[</em><em>[</em><em>...</em><em>]</em><em>, </em><em>Module</em><em>]</em>)</p></li>
 <li><p><strong>decode_channels</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
 <li><p><strong>skip_connection</strong> (<a class="reference internal" href="ml4gw.nn.autoencoder.skip_connection.html#ml4gw.nn.autoencoder.skip_connection.SkipConnection" title="ml4gw.nn.autoencoder.skip_connection.SkipConnection"><em>SkipConnection</em></a><em> | </em><em>None</em>)</p></li>

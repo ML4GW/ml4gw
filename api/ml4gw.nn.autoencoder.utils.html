@@ -114,22 +114,26 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.nn.autoencoder.utils.match_size" title="ml4gw.nn.autoencoder.utils.match_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_size</span></code></a>(X, target_size)</p></td>
-<td><p></p></td>
+<td><p>Symmetrically pad or crop a tensor to a target length.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="ml4gw.nn.autoencoder.utils.match_size">
 <span class="sig-prename descclassname"><span class="pre">ml4gw.nn.autoencoder.utils.</span></span><span class="sig-name descname"><span class="pre">match_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.autoencoder.utils.match_size" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>X</strong> (<em>Tensor</em>)</p></li>
-<li><p><strong>target_size</strong> (<em>int</em>)</p></li>
+<dd><p>Symmetrically pad or crop a tensor to a target length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span>) -- Tensor to resize along its final dimension.</p></li>
+<li><p><strong>target_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Desired size of the final dimension.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A centered view or padded tensor with the requested final dimension.</p>
 </dd>
 </dl>
 </dd></dl>
