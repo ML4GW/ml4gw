@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 
 from ml4gw.constants import PI, C, G, m_per_Mpc
@@ -79,8 +78,7 @@ class Ringdown(torch.nn.Module):
         F_Q = 1 + ((7 / 24) / quality**2)
         g_a = 1 - 0.63 * (1 - spin) ** (3 / 10)
         amplitude = (
-            np.sqrt(5 / 2)
-            * epsilon
+            torch.sqrt(5 * epsilon / 2)
             * (G * mass / (C) ** 2)
             * quality ** (-0.5)
             * F_Q ** (-0.5)
@@ -90,14 +88,13 @@ class Ringdown(torch.nn.Module):
         # calculate cosines with inclination
         cos_i = torch.cos(inclination)
         cos_i2 = cos_i**2
-        sin_i = torch.sin(inclination)
 
         # Precompute exponent and phase terms
         exp_term = torch.exp(-pi * frequency * self.times / quality)
         phase_term = 2 * pi * frequency * self.times + phase
 
         a_plus = (amplitude / distance) * (1 + cos_i2) * exp_term
-        a_cross = (amplitude / distance) * (2 * sin_i) * exp_term
+        a_cross = (amplitude / distance) * (2 * cos_i) * exp_term
 
         h_plus = a_plus * torch.cos(phase_term)
         h_cross = a_cross * torch.sin(phase_term)
