@@ -1,21 +1,33 @@
 import lal
 import lalsimulation
 import numpy as np
+import pytest
 import torch
 
 from ml4gw.waveforms import Ringdown
 
 
-def test_ringdown_matches_lalsimulation():
-    sample_rate = 4096
-    duration = 1
-    mass = 100
+@pytest.mark.parametrize(
+    ("sample_rate, duration, mass, epsilon, phase, inclination, distance"),
+    [
+        pytest.param(
+            2048, 0.5, 50.0, 0.01, 0.0, 0.7, 100.0, id="short-low-mass"
+        ),
+        pytest.param(
+            4096, 1.0, 100.0, 0.04, 0.3, 0.9, 200.0, id="long-high-mass"
+        ),
+    ],
+)
+def test_ringdown_matches_lalsimulation(
+    sample_rate,
+    duration,
+    mass,
+    epsilon,
+    phase,
+    inclination,
+    distance,
+):
     spins = [0.0, 0.5, 0.9]
-    epsilon = 0.01
-    phase = 0.3
-    inclination = 0.7
-    distance = 100
-
     frequency, quality = zip(
         *[
             lalsimulation.SimBlackHoleRingdownMode(
@@ -62,7 +74,7 @@ def test_ringdown_matches_lalsimulation():
 
         # Ringdown uses closed-form fits for the mass, spin, and angular
         # dependence rather than LALSuite's numerical Kerr solution. The
-        # approximation stays within 7% of LALSuite over this spin range.
+        # approximation stays within 7% of LALSuite over this parameter range.
         for actual, expected in (
             (plus[i, :n_samples].numpy(), expected_plus),
             (cross[i, :n_samples].numpy(), expected_cross),
