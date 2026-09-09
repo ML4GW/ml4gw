@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from ml4gw.spectral import spectral_density
-from ml4gw.transforms import FixedWhiten, Whiten
+from ml4gw.transforms import FixedWhiten, MinimumPhaseWhiten, Whiten
 
 
 class WhitenModuleTest:
@@ -204,3 +204,80 @@ class TestFixedWhiten(WhitenModuleTest):
 
         assert (fresh.fduration == 2).item()
         assert (fresh.psd == transform.psd).all().item()
+
+
+class TestMinimumPhaseWhiten:
+    sample_rate = 256
+    kernel_length = 1
+    num_channels = 2
+
+    def get_transform(self):
+        return MinimumPhaseWhiten(
+            self.num_channels,
+            self.kernel_length,
+            self.sample_rate,
+        )
+
+    def test_flat_psd_is_identity(self):
+        transform = self.get_transform()
+        num_freqs = self.sample_rate // 2 + 1
+        psd = torch.full((num_freqs,), 2 / self.sample_rate)
+        transform.fit(psd, psd)
+
+        X = torch.randn(4, self.num_channels, 1024)
+        whitened = transform(X)
+
+        assert whitened.shape == X.shape
+        torch.testing.assert_close(whitened, X, rtol=1e-6, atol=1e-6)
+
+    def test_filter_is_causal(self):
+        transform = self.get_transform()
+        frequencies = torch.linspace(0, 1, self.sample_rate // 2 + 1)
+        psd = 1 + frequencies**2
+        transform.fit(psd, psd)
+
+        impulse_index = 512
+        X = torch.zeros(1, self.num_channels, 1024)
+        X[..., impulse_index] = 1
+        whitened = transform(X)
+
+        assert torch.count_nonzero(whitened[..., :impulse_index]) == 0
+        assert torch.count_nonzero(whitened[..., impulse_index:]) > 0
+
+    def test_whitens_first_order_colored_noise(self):
+        transform = self.get_transform()
+        coefficient = 0.8
+        n_fft = int(self.kernel_length * self.sample_rate)
+        omega = 2 * torch.pi * torch.arange(n_fft // 2 + 1) / n_fft
+        response = 1 - coefficient * torch.exp(-1j * omega)
+        psd = (2 / self.sample_rate) / response.abs().square()
+        transform.fit(psd, psd)
+
+        noise = torch.randn(4, self.num_channels, 1024)
+        X = torch.zeros_like(noise)
+        X[..., 0] = noise[..., 0]
+        for i in range(1, X.size(-1)):
+            X[..., i] = coefficient * X[..., i - 1] + noise[..., i]
+
+        whitened = transform(X)
+        torch.testing.assert_close(whitened, noise, rtol=1e-5, atol=1e-5)
+
+    def test_validation_and_io(self, tmp_path):
+        transform = self.get_transform()
+        X = torch.randn(4, self.num_channels, 1024)
+
+        with pytest.raises(ValueError, match="Must fit parameters"):
+            transform(X)
+        with pytest.raises(ValueError, match="Expected to fit whitening"):
+            transform.fit(torch.ones(129))
+
+        psd = torch.ones(129)
+        transform.fit(psd, psd)
+        with pytest.raises(ValueError, match="expected input with shape"):
+            transform(X[:, :1])
+
+        path = tmp_path / "minimum-phase-whiten.pt"
+        torch.save(transform.state_dict(), path)
+        fresh = self.get_transform()
+        fresh.load_state_dict(torch.load(path))
+        torch.testing.assert_close(fresh(X), transform(X))

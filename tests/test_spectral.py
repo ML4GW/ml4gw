@@ -5,7 +5,81 @@ import pytest
 import torch
 from scipy import signal
 
-from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
+from ml4gw.spectral import (
+    fast_spectral_density,
+    minimum_phase_whitening_filter,
+    spectral_density,
+    whiten,
+)
+
+
+class TestMinimumPhaseWhiteningFilter:
+    def test_flat_psd_is_impulse(self):
+        psd = torch.ones(33, dtype=torch.float64)
+        kernel = minimum_phase_whitening_filter(psd)
+
+        expected = torch.zeros(64, dtype=torch.float64)
+        expected[0] = 1
+        torch.testing.assert_close(kernel, expected, rtol=0, atol=1e-12)
+
+    def test_response_has_inverse_asd_magnitude(self):
+        psd = torch.linspace(0.5, 4, 33, dtype=torch.float64).repeat(2, 1)
+        kernel = minimum_phase_whitening_filter(psd)
+        response = torch.fft.rfft(kernel, dim=-1)
+
+        torch.testing.assert_close(
+            response.abs(), psd.rsqrt(), rtol=1e-12, atol=1e-12
+        )
+
+    def test_odd_length_response(self):
+        psd = torch.linspace(0.5, 4, 33, dtype=torch.float64)
+        kernel = minimum_phase_whitening_filter(psd, n_fft=65)
+
+        assert kernel.size(-1) == 65
+        torch.testing.assert_close(
+            torch.fft.rfft(kernel).abs(),
+            psd.rsqrt(),
+            rtol=1e-12,
+            atol=1e-12,
+        )
+
+    def test_first_order_filter_matches_analytic_response(self):
+        n_fft = 256
+        coefficient = 0.8
+        omega = (
+            2
+            * torch.pi
+            * torch.arange(n_fft // 2 + 1, dtype=torch.float64)
+            / n_fft
+        )
+        expected = 1 - coefficient * torch.exp(-1j * omega)
+        psd = expected.abs().square().reciprocal()
+
+        kernel = minimum_phase_whitening_filter(psd)
+
+        expected_kernel = torch.zeros(n_fft, dtype=torch.float64)
+        expected_kernel[:2] = torch.tensor(
+            [1, -coefficient], dtype=torch.float64
+        )
+        torch.testing.assert_close(kernel, expected_kernel, rtol=0, atol=3e-15)
+
+    @pytest.mark.parametrize(
+        "psd",
+        [
+            torch.tensor(1.0),
+            torch.tensor([1.0]),
+            torch.tensor([1.0, 0.0]),
+            torch.tensor([1.0, torch.inf]),
+            torch.tensor([1, 2]),
+        ],
+    )
+    def test_invalid_psd(self, psd):
+        with pytest.raises(ValueError):
+            minimum_phase_whitening_filter(psd)
+
+    def test_inconsistent_fft_length(self):
+        with pytest.raises(ValueError, match="PSD length"):
+            minimum_phase_whitening_filter(torch.ones(3), n_fft=8)
 
 
 @pytest.fixture(params=[4, 8])
