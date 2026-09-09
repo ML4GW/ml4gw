@@ -266,6 +266,9 @@ class TestMinimumPhaseWhiten:
         transform = self.get_transform()
         X = torch.randn(4, self.num_channels, 1024)
 
+        with pytest.raises(ValueError, match="at least two samples"):
+            MinimumPhaseWhiten(1, 1 / self.sample_rate, self.sample_rate)
+
         with pytest.raises(ValueError, match="Must fit parameters"):
             transform(X)
         with pytest.raises(ValueError, match="Expected to fit whitening"):
