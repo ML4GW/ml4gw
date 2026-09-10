@@ -8,6 +8,14 @@ class Ringdown(torch.nn.Module):
     """
     Callable class for generating ringdown waveforms.
 
+    This model applies the supplied frequency and quality factor directly to a
+    damped sinusoid. For the amplitude, it infers the remnant mass and spin
+    with closed-form fits and uses quadrupolar spherical-harmonic inclination
+    factors.
+    Its amplitude and angular dependence are therefore not expected to match
+    ``lalsimulation.SimBlackHoleRingdown``, which evaluates spin-weighted
+    spheroidal harmonics numerically.
+
     Args:
         sample_rate: Sample rate of waveform
         duration: Duration of waveform
