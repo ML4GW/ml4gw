@@ -268,3 +268,57 @@ class TestCosmologyDistributions:
             distributions.UniformComovingVolume(
                 minimum=0, maximum=6, distance_type="redshift"
             )
+
+
+def test_chirp_distribution(seed_everything):
+    chirp_mass = torch.distributions.Uniform(1.0, 10.0)
+    chirp_distance = torch.distributions.Uniform(100.0, 1000.0)
+
+    sampler = distributions.ChirpDistribution(
+        chirp_mass=chirp_mass,
+        chirp_distance=chirp_distance,
+        reference_chirp_mass=1.0,
+    )
+
+    samples = sampler.sample((10,))
+
+    assert len(samples["chirp_mass"]) == 10
+    assert len(samples["distance"]) == 10
+
+    assert (
+        (1.0 <= samples["chirp_mass"]) & (samples["chirp_mass"] <= 10.0)
+    ).all()
+
+    mass_factor = sampler.scale(samples["chirp_mass"])
+    chirp_distance_samples = samples["distance"] / mass_factor
+
+    assert (
+        (100.0 <= chirp_distance_samples) & (chirp_distance_samples <= 1000.0)
+    ).all()
+
+
+def test_chirp_distribution_log_prob():
+    chirp_mass = torch.distributions.Uniform(1.0, 10.0)
+    chirp_distance = torch.distributions.Uniform(100.0, 1000.0)
+
+    sampler = distributions.ChirpDistribution(
+        chirp_mass=chirp_mass,
+        chirp_distance=chirp_distance,
+        reference_chirp_mass=1.0,
+    )
+
+    mc = torch.tensor([8.0])
+    dc = torch.tensor([500.0])
+
+    mass_factor = sampler.scale(mc)
+    dl = dc * mass_factor
+
+    log_prob = sampler.log_prob(mc, dl)
+
+    expected = (
+        chirp_mass.log_prob(mc)
+        + chirp_distance.log_prob(dc)
+        - torch.log(mass_factor)
+    )
+
+    assert torch.allclose(log_prob, expected)
