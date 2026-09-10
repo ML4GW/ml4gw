@@ -291,9 +291,10 @@ class MinimumPhaseWhiten(FittableSpectralTransform):
     Unlike :class:`Whiten`, this transform never uses future samples to
     compute an output. The filter is fit once from a background PSD and then
     applied with left padding, which represents zero-valued history. Callers
-    processing consecutive chunks should prepend real input history and
-    discard the corresponding warm-up outputs. The transform does not remove
-    a running mean, since doing so would introduce a future-sample dependency.
+    processing consecutive chunks should prepend
+    ``int(kernel_length * sample_rate) - 1`` real input samples and discard
+    the same number of warm-up outputs. The transform does not remove a
+    running mean, since doing so would introduce a future-sample dependency.
 
     Args:
         num_channels:
@@ -342,7 +343,9 @@ class MinimumPhaseWhiten(FittableSpectralTransform):
             *background:
                 One time- or frequency-domain tensor per channel. Inputs are
                 interpreted as one-sided PSDs when ``fftlength`` is ``None``;
-                otherwise Welch PSDs are estimated from the timeseries.
+                otherwise Welch PSDs are estimated from the timeseries. Use
+                double precision for unscaled physical PSDs whose values may
+                fall below the representable range of ``torch.float32``.
             fftlength:
                 Length in seconds of Welch frames used for time-domain input.
             overlap:

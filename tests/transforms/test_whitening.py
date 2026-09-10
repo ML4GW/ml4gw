@@ -262,6 +262,63 @@ class TestMinimumPhaseWhiten:
         whitened = transform(X)
         torch.testing.assert_close(whitened, noise, rtol=1e-5, atol=1e-5)
 
+    def test_fit_from_timeseries(self):
+        transform = self.get_transform()
+        generator = torch.Generator().manual_seed(1234)
+        backgrounds = [
+            torch.randn(
+                4 * self.sample_rate,
+                generator=generator,
+                dtype=torch.float64,
+            )
+            for _ in range(self.num_channels)
+        ]
+
+        transform.fit(*backgrounds, fftlength=0.5)
+        X = torch.randn(
+            2,
+            self.num_channels,
+            127,
+            generator=generator,
+            dtype=torch.float64,
+        )
+        whitened = transform(X)
+
+        assert transform.built
+        assert whitened.shape == X.shape
+        assert torch.isfinite(transform.kernel).all()
+        assert torch.isfinite(whitened).all()
+
+    def test_streaming_matches_continuous_input(self):
+        transform = self.get_transform()
+        n_fft = int(self.kernel_length * self.sample_rate)
+        omega = 2 * torch.pi * torch.arange(n_fft // 2 + 1) / n_fft
+        psds = []
+        for coefficient in (0.2, 0.8):
+            response = 1 - coefficient * torch.exp(-1j * omega)
+            psds.append((2 / self.sample_rate) / response.abs().square())
+        transform.fit(*psds)
+
+        generator = torch.Generator().manual_seed(1234)
+        X = torch.randn(
+            1,
+            self.num_channels,
+            1024,
+            generator=generator,
+            dtype=torch.float64,
+        )
+        expected = transform(X)
+
+        split = 600
+        history = transform.kernel.size(-1) - 1
+        first = transform(X[..., :split])
+        second_input = X[..., split - history :]
+        second = transform(second_input)[..., history:]
+        actual = torch.cat((first, second), dim=-1)
+
+        assert not torch.allclose(transform.kernel[0], transform.kernel[1])
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
     def test_validation_and_io(self, tmp_path):
         transform = self.get_transform()
         X = torch.randn(4, self.num_channels, 1024)

@@ -50,6 +50,7 @@ PSD per channel, then apply it to tensors of any duration:
    X_whitened = whitener(X)
 
 The output has the same shape as the input. The first
-``kernel_length * sample_rate - 1`` samples use zero-valued history; when
+``int(kernel_length * sample_rate) - 1`` samples use zero-valued history; when
 processing consecutive chunks, prepend that many real historical samples and
-discard their outputs.
+discard their outputs. Directly supplied PSDs at physical strain scale should
+use double precision to avoid underflow in ``torch.float32``.

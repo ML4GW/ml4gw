@@ -453,6 +453,8 @@ def minimum_phase_whitening_filter(
         psd:
             A strictly positive, finite one-sided power spectral density.
             Any leading dimensions are treated as batch dimensions.
+            Use double precision for unscaled physical PSDs whose values may
+            fall below the representable range of ``torch.float32``.
         n_fft:
             Length of the desired impulse response. If omitted, an even
             length of ``2 * (psd.size(-1) - 1)`` is inferred.
@@ -465,6 +467,13 @@ def minimum_phase_whitening_filter(
         ValueError:
             If the PSD shape is inconsistent with ``n_fft``, or if it
             contains a non-finite or non-positive value.
+
+    Notes:
+        The folded-cepstrum construction follows the
+        `zlw MPWhiteningFilter implementation`_ at commit ``b81871cd``.
+
+        .. _zlw MPWhiteningFilter implementation:
+            https://git.ligo.org/james.kennington/zlw/-/blob/b81871cdea5769bfb0a3b4ea57debbf6170d0c64/src/zlw/kernels.py
     """
     if psd.ndim == 0:
         raise ValueError("PSD must have a frequency dimension")
