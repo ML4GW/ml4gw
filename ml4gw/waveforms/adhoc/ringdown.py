@@ -12,9 +12,10 @@ class Ringdown(torch.nn.Module):
     damped sinusoid. For the amplitude, it infers the remnant mass and spin
     with closed-form fits and uses quadrupolar spherical-harmonic inclination
     factors.
-    Its amplitude and angular dependence are therefore not expected to match
+    Its spherical angular dependence is therefore not expected to match
     ``lalsimulation.SimBlackHoleRingdown``, which evaluates spin-weighted
-    spheroidal harmonics numerically.
+    spheroidal harmonics numerically. After factoring out the angular response,
+    the absolute amplitudes can still differ by a spin-dependent normalization.
 
     Args:
         sample_rate: Sample rate of waveform

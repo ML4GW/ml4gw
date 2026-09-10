@@ -7,26 +7,9 @@ import torch
 from ml4gw.waveforms import Ringdown
 
 
-def get_expected_amplitude(frequency, quality, epsilon, distance):
-    spin = 1 - (2 / quality) ** (20 / 9)
-    mass = (
-        (1 / (2 * np.pi))
-        * (lal.C_SI**3 / (lal.G_SI * frequency))
-        * (1 - 0.63 * (2 / quality) ** (2 / 3))
-    )
-    f_quality = 1 + (7 / 24) / quality**2
-    g_spin = 1 - 0.63 * (1 - spin) ** (3 / 10)
-    amplitude = (
-        np.sqrt(5 * epsilon / 2)
-        * (lal.G_SI * mass / lal.C_SI**2)
-        * quality ** (-0.5)
-        * f_quality ** (-0.5)
-        * g_spin ** (-0.5)
-    )
-    return amplitude / (distance * 1e6 * lal.PC_SI)
-
-
-def get_lal_time_evolution(sample_rate, mass, spin, epsilon, phase, distance):
+def get_lal_waveform_without_angular_response(
+    sample_rate, mass, spin, epsilon, phase, distance
+):
     # At zero inclination only the positive-m component remains. LAL uses an
     # azimuthal phase for its (2, 2) mode, while Ringdown accepts the phase of
     # the damped sinusoid directly, so this maps between the two conventions.
@@ -44,80 +27,107 @@ def get_lal_time_evolution(sample_rate, mass, spin, epsilon, phase, distance):
         2,
     )
     waveform = np.asarray(hplus.data.data) + 1j * np.asarray(hcross.data.data)
-    # Dividing by the initial complex value removes LALSuite's numerical
-    # amplitude and spheroidal-harmonic phase while retaining its evolution.
-    return waveform / waveform[0] * np.exp(1j * phase)
+    angular_component = np.conj(
+        lalsimulation.SimBlackHoleRingdownSpheroidalWaveFunction(
+            0, spin, 2, 2, -2
+        )
+    )
+    # LAL defines hcross = -Im(h), so hplus + 1j * hcross contains the
+    # conjugate angular response. Remove only that response; the physical
+    # strain amplitude and time evolution remain unchanged.
+    return waveform / angular_component
 
 
-@pytest.mark.parametrize(
-    ("sample_rate, duration, mass, epsilon, phase, distance"),
-    [
-        pytest.param(2048, 0.5, 50.0, 0.01, 0.0, 100.0, id="short-low-mass"),
-        pytest.param(4096, 1.0, 100.0, 0.04, 0.3, 200.0, id="long-high-mass"),
-    ],
-)
-def test_ringdown_matches_lal_evolution_with_closed_form_factors(
-    sample_rate,
-    duration,
-    mass,
-    epsilon,
-    phase,
-    distance,
-):
-    spins = np.array([0.0, 0.5, 0.9, 0.99])
+@pytest.mark.parametrize("spin", [0.0, 0.5, 0.9, 0.99])
+def test_ringdown_matches_lal_scaling_after_angular_correction(spin):
+    configurations = [
+        (2048, 0.5, 50.0, 0.01, 0.0, 100.0),
+        (4096, 1.0, 100.0, 0.04, 0.3, 200.0),
+    ]
     inclinations = np.linspace(0, np.pi, 7)
-    spins, inclinations = np.meshgrid(spins, inclinations, indexing="ij")
-    spins = spins.ravel()
-    inclinations = inclinations.ravel()
+    scale_factors = []
 
-    modes = [
-        lalsimulation.SimBlackHoleRingdownMode(
+    for (
+        sample_rate,
+        duration,
+        mass,
+        epsilon,
+        phase,
+        distance,
+    ) in configurations:
+        frequency, quality = lalsimulation.SimBlackHoleRingdownMode(
             mass * lal.MTSUN_SI, spin, 2, 2, -2
         )
-        for spin in spins
-    ]
-    frequency, quality = zip(*modes, strict=True)
-    parameters = [
-        frequency,
-        quality,
-        [epsilon] * len(spins),
-        [phase] * len(spins),
-        inclinations,
-        [distance] * len(spins),
-    ]
-    parameters = [torch.tensor(x, dtype=torch.float64) for x in parameters]
+        parameters = [
+            [frequency] * len(inclinations),
+            [quality] * len(inclinations),
+            [epsilon] * len(inclinations),
+            [phase] * len(inclinations),
+            inclinations,
+            [distance] * len(inclinations),
+        ]
+        parameters = [torch.tensor(x, dtype=torch.float64) for x in parameters]
 
-    ringdown = Ringdown(sample_rate, duration)
-    cross, plus = ringdown(*parameters)
-
-    for i, (spin, inclination) in enumerate(
-        zip(spins, inclinations, strict=True)
-    ):
-        evolution = get_lal_time_evolution(
+        ringdown = Ringdown(sample_rate, duration)
+        cross, plus = ringdown(*parameters)
+        intrinsic = get_lal_waveform_without_angular_response(
             sample_rate, mass, spin, epsilon, phase, distance
         )
-        amplitude = get_expected_amplitude(
-            frequency[i], quality[i], epsilon, distance
-        )
-        cos_inclination = np.cos(inclination)
-        expected_plus = amplitude * (1 + cos_inclination**2) * evolution.real
-        expected_cross = amplitude * (2 * cos_inclination) * evolution.imag
-        n_samples = len(evolution)
+        n_samples = min(len(intrinsic), plus.shape[1])
+        intrinsic = intrinsic[:n_samples]
+        intrinsic_norm = np.linalg.norm(intrinsic)
 
-        # Normalize away the physical strain scale so that the absolute
-        # tolerance only covers numerical differences in the dimensionless
-        # time evolution and closed-form angular factors.
-        for polarization, actual, expected in (
-            ("plus", plus[i, :n_samples].numpy(), expected_plus),
-            ("cross", cross[i, :n_samples].numpy(), expected_cross),
-        ):
-            np.testing.assert_allclose(
-                actual / amplitude,
-                expected / amplitude,
-                rtol=0,
-                atol=1e-6,
-                err_msg=(
-                    f"{polarization} polarization differs for spin={spin} "
-                    f"and inclination={inclination}"
+        for i, inclination in enumerate(inclinations):
+            cos_inclination = np.cos(inclination)
+            comparisons = (
+                (
+                    "plus",
+                    plus[i, :n_samples].numpy(),
+                    1 + cos_inclination**2,
+                    intrinsic.real,
+                ),
+                (
+                    "cross",
+                    cross[i, :n_samples].numpy(),
+                    2 * cos_inclination,
+                    intrinsic.imag,
                 ),
             )
+
+            for polarization, actual, angular_factor, waveform in comparisons:
+                if np.isclose(angular_factor, 0, atol=1e-15):
+                    np.testing.assert_allclose(
+                        actual / intrinsic_norm,
+                        0,
+                        rtol=0,
+                        atol=1e-12,
+                        err_msg=(
+                            f"{polarization} polarization is nonzero for "
+                            f"spin={spin} and inclination={inclination}"
+                        ),
+                    )
+                    continue
+
+                expected = angular_factor * waveform
+                scale = (
+                    np.vdot(expected, actual).real
+                    / np.vdot(expected, expected).real
+                )
+                assert scale > 0
+                residual = np.linalg.norm(actual - scale * expected)
+                residual /= np.linalg.norm(expected)
+                assert residual < 1e-6, (
+                    f"{polarization} polarization shape differs for "
+                    f"spin={spin} and inclination={inclination}"
+                )
+                scale_factors.append(scale)
+
+    # The closed-form amplitude has a spin-dependent normalization relative to
+    # LALSuite, but its scaling must be independent of all other parameters,
+    # inclination, and polarization.
+    np.testing.assert_allclose(
+        scale_factors,
+        scale_factors[0],
+        rtol=1e-6,
+        atol=0,
+    )
