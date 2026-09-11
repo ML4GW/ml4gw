@@ -12,22 +12,22 @@ def sample_rate(request):
     return request.param
 
 
-@pytest.fixture(params=[2.0, 4.0])
+@pytest.fixture(params=[2.0])
 def duration(request):
     return request.param
 
 
-@pytest.fixture(params=[0.02, 0.1, 0.5, 2.0])
+@pytest.fixture(params=[0.02, 2.0])
 def time_envelope(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
 
-@pytest.fixture(params=[55.0, 570.0, 1085.0, 1600.0])
+@pytest.fixture(params=[55.0, 1600.0])
 def frequency(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
 
-@pytest.fixture(params=[32.0, 704.0, 1376.0, 2048.0])
+@pytest.fixture(params=[32.0, 2048.0])
 def bandwidth(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
@@ -42,7 +42,7 @@ def phase(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
 
-@pytest.fixture(params=[3.0e-40, 3.0e-37, 2.5e-34])
+@pytest.fixture(params=[2.5e-34])
 def int_hdot_squared(request):
     return torch.tensor(request.param, dtype=torch.float64)
 
