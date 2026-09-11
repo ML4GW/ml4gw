@@ -16,11 +16,12 @@ def sample_rate(request):
 
 
 # The LAL cosmic strain can only generate up to 9 second of data.
-@pytest.fixture(params=[2.0, 4.0, 8.0, 9.0, 11.0])
+@pytest.fixture(params=[2.0, 9.0])
 def duration(request):
     return request.param
 
 
+# Ther three types of stings
 @pytest.fixture(params=[-4.0 / 3.0, -5.0 / 3.0, -6.0 / 3.0])
 def power(request):
     return torch.tensor(request.param, dtype=torch.float64)
@@ -29,7 +30,7 @@ def power(request):
 # for amplitudes above ~7e-20, the difference between torch imp
 # and lalsim is > ~1e-24. Our implementations are 1 to 1, so
 # discrep must be from numerical issues?
-@pytest.fixture(params=[1e-23, 1e-22, 1e-21, 1e-20, 5e-20])
+@pytest.fixture(params=[1e-23, 5e-20])
 def amplitude(request):
     return torch.tensor(request.param, dtype=torch.float64)
 

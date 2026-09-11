@@ -1,4 +1,5 @@
 import torch
+from scipy.signal.windows import tukey
 
 from ml4gw.types import BatchTensor
 
@@ -27,15 +28,9 @@ class Gaussian(torch.nn.Module):
         self.win_end = half_num_samples + half_win_len
 
         # Tukey window with α = 0.5
-        alpha = 0.5
-        n = num_samples
-        tukey = torch.ones(n, dtype=torch.float64)
-        k = int(alpha * (n - 1) / 2)
-        if k > 0:
-            tau = torch.linspace(0, torch.pi, k + 1)[:-1]
-            tukey[:k] = 0.5 * (1 - torch.cos(tau))
-            tukey[-k:] = tukey[:k].flip(0)
-        self.register_buffer("tukey", tukey)
+        tukey_window = tukey(M=num_samples, alpha=0.5)
+        tukey_window = torch.tensor(tukey_window, dtype=torch.float64)
+        self.register_buffer("tukey", tukey_window)
 
     def forward(
         self,

@@ -1,37 +1,10 @@
 import math
 
 import torch
+from scipy.signal.windows import tukey
 from torch import Tensor
 
 from ml4gw.types import BatchTensor
-
-
-def tukey_window(
-    n: int, alpha: float = 0.5, device=None, dtype=None
-) -> torch.Tensor:
-    """
-    Generate a length-n Tukey window with
-    fraction alpha of the window tapered.
-    alpha=0.5 => 25% of the samples on each end are tapered,
-    50% are flat in the middle.
-    """
-    w = torch.ones(n, device=device, dtype=dtype)
-    if alpha <= 0:
-        return w  # no taper
-    if alpha >= 1:
-        # Entire window is a Hann window
-        t = torch.linspace(0, math.pi, n, device=device, dtype=dtype)
-        return 0.5 * (1.0 - torch.cos(t))
-
-    # Taper fraction
-    taper_len = int(alpha * (n - 1) / 2.0)
-    # first taper
-    t = torch.linspace(0, math.pi / 2, taper_len, device=device, dtype=dtype)
-    w[:taper_len] = 0.5 * (1 - torch.cos(t))
-    # last taper
-    t = torch.linspace(math.pi / 2, 0, taper_len, device=device, dtype=dtype)
-    w[-taper_len:] = 0.5 * (1 - torch.cos(t))
-    return w
 
 
 class GenerateString(torch.nn.Module):
@@ -96,10 +69,9 @@ class GenerateString(torch.nn.Module):
         )  # shape (freq_bins,)
 
         # Build final Tukey(0.5) window for time domain
-        tw = tukey_window(
-            length, alpha=0.5, device=device, dtype=torch.float64
-        )
-        self.register_buffer("tukey", tw)  # shape (length,)
+        tukey_window = tukey(M=length, alpha=0.5)
+        tukey_window = torch.tensor(tukey_window, dtype=torch.float64)
+        self.register_buffer("tukey", tukey_window)
 
     def forward(
         self, power: float, amplitude: BatchTensor, f_high: float

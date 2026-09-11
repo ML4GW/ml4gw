@@ -62,6 +62,22 @@ rng_list = [
 torch.manual_seed(42)
 
 
+def test_WNB_invalid_time_envelope_bandwidth_(
+    sample_rate,
+    duration,
+):
+    with pytest.raises(ValueError):
+        wnb = WhiteNoiseBurst(sample_rate=sample_rate, duration=duration)
+        wnb(
+            time_envelope=torch.tensor(0.001, dtype=torch.float64),
+            frequency=torch.tensor(32, dtype=torch.float64),
+            bandwidth=torch.tensor(1, dtype=torch.float64),
+            eccentricity=torch.tensor(0, dtype=torch.float64),
+            phase=torch.tensor(0, dtype=torch.float64),
+            int_hdot_squared=torch.tensor(1, dtype=torch.float64),
+        )
+
+
 def test_Band_and_Time_Limited_White_Noise_Burst(
     sample_rate,
     duration,

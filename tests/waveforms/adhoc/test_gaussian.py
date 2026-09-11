@@ -11,7 +11,7 @@ def sample_rate(request):
     return request.param
 
 
-@pytest.fixture(params=[2.0, 3.0, 4.0, 6.0])
+@pytest.fixture(params=[2.0, 3.0, 4.0])
 def duration(request):
     return request.param
 

@@ -1,6 +1,7 @@
 import math
 
 import torch
+from scipy.signal.windows import tukey
 from torch import nn
 
 from ml4gw.types import BatchTensor  # typically an alias for torch.Tensor
@@ -13,21 +14,6 @@ def semi_major_minor_from_e(eccentricity):
     a = 1.0 / torch.sqrt(2.0 - e2)
     b = a * torch.sqrt(1.0 - e2)
     return a, b
-
-
-def tukey_window(n, alpha=0.5, device="cpu", dtype=torch.float64):
-    w = torch.ones(n, device=device, dtype=dtype)
-    if alpha <= 0:
-        return w
-    if alpha >= 1:
-        t_lin = torch.linspace(0, torch.pi, n, device=device, dtype=dtype)
-        return 0.5 * (1.0 - torch.cos(t_lin))
-    taper_len = int(alpha * (n - 1) / 2)
-    t1 = torch.linspace(0, torch.pi / 2, taper_len, device=device, dtype=dtype)
-    w[:taper_len] = 0.5 * (1.0 - torch.cos(t1))
-    t2 = torch.linspace(torch.pi / 2, 0, taper_len, device=device, dtype=dtype)
-    w[-taper_len:] = 0.5 * (1.0 - torch.cos(t2))
-    return w
 
 
 class WhiteNoiseBurst(nn.Module):
@@ -83,6 +69,10 @@ class WhiteNoiseBurst(nn.Module):
         times = torch.arange(self.length, dtype=torch.float64) * self.dt
         times = times - 0.5 * self.dt * (self.length - 1)
         self.register_buffer("times", times)
+
+        tukey_window = tukey(M=self.length, alpha=0.5)
+        tukey_window = torch.tensor(tukey_window, dtype=torch.float64)
+        self.register_buffer("tukey", tukey_window)
 
     def forward(
         self,
@@ -218,10 +208,7 @@ class WhiteNoiseBurst(nn.Module):
         hcross_time = (
             torch.fft.irfft(Hcross, n=length, dim=-1) * self.sample_rate
         )
-
-        tw = tukey_window(
-            length, alpha=0.5, device=device, dtype=dtype
-        ).unsqueeze(0)
+        tw = self.tukey.unsqueeze(0).to(dtype=hplus_time.dtype)
         hplus_time = hplus_time * tw
         hcross_time = hcross_time * tw
 
