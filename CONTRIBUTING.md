@@ -60,6 +60,48 @@ uvx prek run --all-files
 which will apply the necessary formatting, or indicate the issue for you to fix
 if an automatic fix is not possible.
 
+## Test coverage
+
+Every pull request runs the unit tests on Python 3.10, 3.11, and 3.12 and uploads a
+coverage report to [Codecov](https://app.codecov.io/gh/ML4GW/ml4gw). Two checks are
+performed:
+
+- **project**: coverage of the whole repository, compared against the base coverage. A
+  patch may not drop overall coverage by more than 3%.
+- **patch**: coverage of the lines your PR changes, which must be at least 80%.
+
+In practice this means new code needs tests. If a check fails, the Codecov comment on
+the PR lists the files and lines that are not covered. The thresholds live in 
+[`codecov.yml`](/codecov.yml) at the root of the repository and can be adjusted there 
+if the current levels turn out to be impractical.
+
+### Measuring coverage locally
+
+Coverage is configured under `[tool.coverage.run]` in `pyproject.toml`, so no extra
+flags are needed. Run the test suite under `coverage` and then generate a report:
+```bash
+uv run coverage run -m pytest
+uv run coverage report
+```
+`coverage report` prints a per-file table with the number of missed statements. To see
+exactly which lines are missing, add `-m`:
+```bash
+uv run coverage report -m
+```
+For a browsable, line-by-line view, generate the HTML report and open
+`htmlcov/index.html`:
+```bash
+uv run coverage html
+```
+To check only the part of the library you are working on, restrict the test run and the
+report to the relevant paths:
+```bash
+uv run coverage run -m pytest tests/waveforms
+uv run coverage report -m --include="ml4gw/waveforms/*"
+```
+Note that a local run covers a single Python version, while CI combines the matrix, so
+small differences between your local number and the one Codecov reports are expected.
+
 ## Good practices
 
 1. Please ensure that code patches are modular and preferably small. If the proposed
