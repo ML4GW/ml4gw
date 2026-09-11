@@ -283,3 +283,114 @@ class FixedWhiten(FittableSpectralTransform):
         return spectral.normalize_by_psd(
             X, self.psd, self.sample_rate, pad, crop
         )
+
+
+class MinimumPhaseWhiten(FittableSpectralTransform):
+    """Whiten timeseries with a causal minimum-phase FIR filter.
+
+    Unlike :class:`Whiten`, this transform never uses future samples to
+    compute an output. The filter is fit once from a background PSD and then
+    applied with left padding, which represents zero-valued history. Callers
+    processing consecutive chunks should prepend
+    ``int(kernel_length * sample_rate) - 1`` real input samples and discard
+    the same number of warm-up outputs. The transform does not remove a
+    running mean, since doing so would introduce a future-sample dependency.
+
+    Args:
+        num_channels:
+            Number of channels to whiten.
+        kernel_length:
+            Length of the whitening filter in seconds.
+        sample_rate:
+            Sampling rate of input timeseries in Hz.
+        dtype:
+            Datatype used to store the fitted filter.
+
+    Shape:
+        - Input: ``(B, C, T)``
+        - Output: ``(B, C, T)``
+    """
+
+    def __init__(
+        self,
+        num_channels: int,
+        kernel_length: float,
+        sample_rate: float,
+        dtype: torch.dtype = torch.float64,
+    ) -> None:
+        super().__init__()
+        self.num_channels = num_channels
+        self.kernel_length = kernel_length
+        self.sample_rate = sample_rate
+
+        size = int(kernel_length * sample_rate)
+        if size < 2:
+            raise ValueError(
+                "Whitening filter must contain at least two samples"
+            )
+        kernel = torch.zeros((num_channels, 1, size), dtype=dtype)
+        self.register_buffer("kernel", kernel)
+
+    def fit(
+        self,
+        *background: TimeSeries1d | FrequencySeries1d,
+        fftlength: float | None = None,
+        overlap: float | None = None,
+    ) -> None:
+        """Fit a minimum-phase whitening filter to background data.
+
+        Args:
+            *background:
+                One time- or frequency-domain tensor per channel. Inputs are
+                interpreted as one-sided PSDs when ``fftlength`` is ``None``;
+                otherwise Welch PSDs are estimated from the timeseries. Use
+                double precision for unscaled physical PSDs whose values may
+                fall below the representable range of ``torch.float32``.
+            fftlength:
+                Length in seconds of Welch frames used for time-domain input.
+            overlap:
+                Overlap in seconds between Welch frames. Defaults to half of
+                ``fftlength``.
+        """
+        if len(background) != self.num_channels:
+            raise ValueError(
+                f"Expected to fit whitening transform on {self.num_channels} "
+                f"background timeseries, but was passed {len(background)}"
+            )
+
+        num_freqs = self.kernel.size(-1) // 2 + 1
+        psds = [
+            self.normalize_psd(
+                x,
+                self.sample_rate,
+                num_freqs,
+                fftlength,
+                overlap,
+            )
+            for x in background
+        ]
+        psd = torch.stack(psds)
+        kernel = spectral.minimum_phase_whitening_filter(
+            psd, n_fft=self.kernel.size(-1)
+        )
+
+        # ML4GW PSDs are one-sided, so account for folded negative-frequency
+        # power and retain the unit-variance convention used by ``Whiten``.
+        kernel = kernel * (2 / self.sample_rate) ** 0.5
+        self.build(kernel=kernel[:, None])
+
+    def forward(self, X: TimeSeries3d) -> TimeSeries3d:
+        """Apply the fitted causal filter using zero-valued initial history."""
+        if X.ndim != 3 or X.size(1) != self.num_channels:
+            raise ValueError(
+                "Whitening transform expected input with shape "
+                f"(batch, {self.num_channels}, time), but found {X.shape}"
+            )
+
+        kernel = self.kernel.to(X)
+        X = torch.nn.functional.pad(X, (kernel.size(-1) - 1, 0))
+        return torch.nn.functional.conv1d(
+            X,
+            torch.flip(kernel, dims=(-1,)),
+            groups=self.num_channels,
+        )

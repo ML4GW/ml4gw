@@ -439,6 +439,91 @@ def truncate_inverse_power_spectrum(
     return psd / 2
 
 
+def minimum_phase_whitening_filter(
+    psd: PSDTensor, n_fft: int | None = None
+) -> Tensor:
+    """Construct a causal, minimum-phase whitening filter.
+
+    The filter is obtained by spectral factorization of the inverse power
+    spectral density using a folded real cepstrum. Its one-sided frequency
+    response has magnitude ``1 / sqrt(psd)``, while its phase minimizes the
+    delay of the corresponding impulse response.
+
+    Args:
+        psd:
+            A strictly positive, finite one-sided power spectral density.
+            Any leading dimensions are treated as batch dimensions.
+            Use double precision for unscaled physical PSDs whose values may
+            fall below the representable range of ``torch.float32``.
+        n_fft:
+            Length of the desired impulse response. If omitted, an even
+            length of ``2 * (psd.size(-1) - 1)`` is inferred.
+
+    Returns:
+        A real-valued impulse response with the same leading dimensions as
+            ``psd`` and length ``n_fft``.
+
+    Raises:
+        ValueError:
+            If the PSD shape is inconsistent with ``n_fft``, or if it
+            contains a non-finite or non-positive value.
+
+    Notes:
+        The folded-cepstrum construction follows the
+        `zlw MPWhiteningFilter implementation`_ at commit ``b81871cd``.
+
+        .. _zlw MPWhiteningFilter implementation:
+            https://git.ligo.org/james.kennington/zlw/-/blob/b81871cdea5769bfb0a3b4ea57debbf6170d0c64/src/zlw/kernels.py
+    """
+    if psd.ndim == 0:
+        raise ValueError("PSD must have a frequency dimension")
+    if psd.size(-1) < 2:
+        raise ValueError("PSD must contain at least two frequency bins")
+    if n_fft is None:
+        n_fft = 2 * (psd.size(-1) - 1)
+    if n_fft < 2 or psd.size(-1) != n_fft // 2 + 1:
+        raise ValueError(
+            "PSD length must equal n_fft // 2 + 1, but found "
+            f"{psd.size(-1)} bins for n_fft={n_fft}"
+        )
+    if not torch.is_floating_point(psd):
+        raise ValueError("PSD must be a floating-point tensor")
+    if not bool(torch.isfinite(psd).all()):
+        raise ValueError("PSD must contain only finite values")
+    if not bool((psd > 0).all()):
+        raise ValueError("PSD must contain only positive values")
+
+    log_amplitude = -0.5 * torch.log(psd)
+    reflection_end = -1 if n_fft % 2 == 0 else None
+    reflected = torch.flip(log_amplitude[..., 1:reflection_end], dims=(-1,))
+    log_amplitude = torch.cat((log_amplitude, reflected), dim=-1)
+
+    cepstrum = torch.fft.ifft(log_amplitude, dim=-1)
+    midpoint = n_fft // 2
+    if n_fft % 2 == 0:
+        folded = torch.cat(
+            (
+                cepstrum[..., :1],
+                2 * cepstrum[..., 1:midpoint],
+                cepstrum[..., midpoint : midpoint + 1],
+                torch.zeros_like(cepstrum[..., midpoint + 1 :]),
+            ),
+            dim=-1,
+        )
+    else:
+        folded = torch.cat(
+            (
+                cepstrum[..., :1],
+                2 * cepstrum[..., 1 : midpoint + 1],
+                torch.zeros_like(cepstrum[..., midpoint + 1 :]),
+            ),
+            dim=-1,
+        )
+
+    response = torch.exp(torch.fft.fft(folded, dim=-1))
+    return torch.fft.irfft(response[..., : psd.size(-1)], n=n_fft, dim=-1)
+
+
 def normalize_by_psd(
     X: WaveformTensor,
     psd: PSDTensor,
