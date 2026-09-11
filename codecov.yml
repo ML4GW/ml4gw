@@ -1,0 +1,18 @@
+coverage:
+  status:
+    # Coverage of the whole repository, compared against the base commit
+    project:
+      default:
+        threshold: 3%
+
+    # Coverage of the lines changed by the PR.
+    patch:
+      default:
+        target: 80%
+
+# Wait for all three matrix jobs (Python 3.10/3.11/3.12) to upload before
+# computing the statuses, so they aren't decided from a partial report.
+# Update this if the test matrix in unit-tests.yaml changes.
+codecov:
+  notify:
+    after_n_builds: 3
