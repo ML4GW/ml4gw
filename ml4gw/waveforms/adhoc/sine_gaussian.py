@@ -109,3 +109,147 @@ class SineGaussian(torch.nn.Module):
         plus = plus.to(dtype)
 
         return cross, plus
+
+
+class MultiSineGaussian(torch.nn.Module):
+    """
+    Generate a sum of ≤10 sine-Gaussians with small time offsets so they
+    don't pile up at exactly t=0.
+
+    Parameters
+    ----------
+    sample_rate : float
+    duration    : float
+    n_max       : int   (fixed at 10 here)
+    max_shift   : float (seconds)  maximum absolute time-offset per burst
+    """
+
+    def __init__(
+        self,
+        sample_rate: float,
+        duration: float,
+        n_max: int = 10,
+        max_shift: float = 100e-3,  # 100 ms
+    ):
+        super().__init__()
+        self.sg = SineGaussian(sample_rate, duration)
+        self.n_max = n_max
+        self.max_shift = max_shift
+        self.sample_rate = sample_rate
+
+        # expose sample times if needed
+        self.register_buffer("times", self.sg.times, persistent=False)
+
+    # ------------------------------------------------------------------
+    def _roll_batch(
+        self, x: torch.Tensor, shifts: torch.Tensor
+    ) -> torch.Tensor:
+        """
+        Vectorised row-wise circular shift.
+        x      : (M, N)
+        shifts : (M,)  integer samples; positive → shift right
+        """
+        M, N = x.shape
+        # Indices matrix: (M, N)
+        idx = (
+            torch.arange(N, device=x.device).view(1, N) - shifts.view(-1, 1)
+        ) % N
+        return x.gather(1, idx)
+
+    # ------------------------------------------------------------------
+    def forward(self, **kwargs) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Generate a batch of multi-component sine-Gaussian waveforms.
+        Expected keyword arguments:
+            n_components: Tensor of shape ``(batch,)`` containing the
+                number of sine-Gaussian components in each waveform.
+                Values must not exceed ``self.n_max``.
+            hrss_{i}: Tensor of shape ``(batch,)`` containing the
+                root-sum-square amplitude of component ``i``.
+            quality_{i}: Tensor of shape ``(batch,)`` containing the
+                quality factor of component ``i``.
+            frequency_{i}: Tensor of shape ``(batch,)`` containing the
+                frequency of component ``i``.
+            phase_{i}: Tensor of shape ``(batch,)`` containing the
+                phase of component ``i``.
+            eccentricity_{i}: Tensor of shape ``(batch,)`` containing the
+                eccentricity of component ``i``.
+        Returns:
+            A tuple containing the plus and cross polarizations.
+            Each tensor has shape ``(batch, waveform_size)``.
+        """
+        device = self.times.device
+        batch = kwargs["n_components"].shape[0]
+        dtype = kwargs["quality_1"].dtype
+
+        # ---------- 1) stack parameters  -------------------------------
+        def stack(name):
+            return torch.stack(
+                [
+                    kwargs[f"{name}_{i}"].to(device)
+                    for i in range(1, self.n_max + 1)
+                ],
+                dim=1,
+            )
+
+        quality = stack("quality")  # (B, n_max)
+        frequency = stack("frequency")
+        hrss = stack("hrss")
+        phase = stack("phase")
+        eccentricity = stack("eccentricity")
+
+        n_comp = kwargs["n_components"].to(device).unsqueeze(-1)  # (B,1)
+
+        # ---------- 2) mask for active components ----------------------
+        mask = (
+            torch.arange(self.n_max, device=device).unsqueeze(0) < n_comp
+        ).unsqueeze(-1)  # (B, n_max, 1)
+
+        # ---------- 3) flatten active params --------------------------
+        active = mask.squeeze(-1)  # (B, n_max) boolean
+        quality_f = quality[active]
+        frequency_f = frequency[active]
+        hrss_f = hrss[active]
+        phase_f = phase[active]
+        eccentricity_f = eccentricity[active]
+
+        if quality_f.numel() == 0:  # safety net
+            zeros = torch.zeros(
+                batch, self.times.numel(), dtype=dtype, device=device
+            )
+            return zeros, zeros
+
+        # ---------- 4) generate raw bursts ----------------------------
+        cross_f, plus_f = self.sg(
+            quality=quality_f,
+            frequency=frequency_f,
+            hrss=hrss_f,
+            phase=phase_f,
+            eccentricity=eccentricity_f,
+        )  # (M, N)
+
+        # ---------- 5) time-offset each burst -------------------------
+        if self.max_shift > 0.0:
+            max_samp = int(round(self.max_shift * self.sample_rate))
+            if max_samp > 0:
+                shifts = torch.randint(
+                    -max_samp,
+                    max_samp + 1,  # inclusive
+                    (cross_f.shape[0],),
+                    device=device,
+                )
+                cross_f = self._roll_batch(cross_f, shifts)
+                plus_f = self._roll_batch(plus_f, shifts)
+
+        # ---------- 6) reshape back and sum ---------------------------
+        N = cross_f.shape[-1]
+        cross = torch.zeros(batch, self.n_max, N, dtype=dtype, device=device)
+        plus = torch.zeros_like(cross)
+
+        cross[active] = cross_f  # boolean indexing keeps it 1-D
+        plus[active] = plus_f
+
+        cross = cross.sum(dim=1)  # (batch, N)
+        plus = plus.sum(dim=1)
+
+        return cross, plus
