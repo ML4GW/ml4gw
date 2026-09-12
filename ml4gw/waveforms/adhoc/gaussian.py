@@ -1,51 +1,65 @@
 import torch
-from torch import Tensor
+from scipy.signal.windows import tukey
+
 from ml4gw.types import BatchTensor
+
 
 class Gaussian(torch.nn.Module):
     def __init__(self, sample_rate: float, duration: float):
         super().__init__()
         self.sample_rate = sample_rate
-        self.duration = duration                      # = Δt in the LAL docs
+        self.duration = duration
 
-        # 21 Δt samples, centred on zero
-        k_len = 7 # At LAL the klen is 21, but it's kainda overkill so here we scale down to 7
-        num_samples = int(round(k_len * duration * sample_rate))
-        t = (torch.arange(num_samples, dtype=torch.float64) -
-             (num_samples - 1) / 2) / sample_rate
+        # 2 Δt samples, centred on zero
+        k_len: float = 2.0
+        num_samples = int(round(k_len * duration * sample_rate)) + 1
+        half_num_samples = int(num_samples / 2)
+        t = (
+            torch.arange(num_samples, dtype=torch.float64)
+            - (num_samples - 1) / 2
+        ) / sample_rate
         self.register_buffer("times", t)
 
-        # Tukey window with α = 0.5
-        alpha = 0.5
-        n = num_samples
-        tukey = torch.ones(n, dtype=torch.float64)
-        k = int(alpha * (n - 1) / 2)
-        if k > 0:
-            tau = torch.linspace(0, torch.pi, k + 1)[:-1]
-            tukey[:k] = 0.5 * (1 - torch.cos(tau))
-            tukey[-k:] = tukey[:k].flip(0)
-        self.register_buffer("tukey", tukey)
+        # Calculate time window length
+        win_len = int(sample_rate * duration)
+        half_win_len = int(win_len / 2)
 
-    def forward(self, hrss: Tensor, polarization: Tensor, eccentricity: Tensor, duration: Tensor):
-        hrss       = hrss.view(-1, 1)
-        psi        = polarization.view(-1, 1)
-        duration = duration.view(-1, 1)
+        self.win_start = half_num_samples - half_win_len
+        self.win_end = half_num_samples + half_win_len
+
+        # Tukey window with α = 0.5
+        tukey_window = tukey(M=num_samples, alpha=0.5)
+        tukey_window = torch.tensor(tukey_window, dtype=torch.float64)
+        self.register_buffer("tukey", tukey_window)
+
+    def forward(
+        self,
+        hrss: BatchTensor,
+        gaussian_width: BatchTensor,
+    ):
+        # The gaussian_width should be smaller than self.duration
+        hrss = hrss.view(-1, 1)
+        gaussian_width = gaussian_width.view(-1, 1)
 
         # correct LAL normalisation
-        h0 = hrss / torch.sqrt(torch.sqrt(torch.tensor(torch.pi,
-                                   dtype=hrss.dtype, device=hrss.device))
-                               * self.duration)
+        h0 = hrss / torch.sqrt(
+            torch.sqrt(
+                torch.tensor(torch.pi, dtype=hrss.dtype, device=hrss.device)
+            )
+            * gaussian_width
+        )
 
-        h0_plus  = h0 * torch.cos(psi)
-        h0_cross = h0 * torch.sin(psi)
+        h0_plus = h0
+        h0_cross = h0 * 0
 
         t = self.times.to(hrss.device, hrss.dtype)
-        #env = torch.exp(-0.5 * t.pow(2) / self.duration**2)[None, :]
-        env = torch.exp(-0.5 * t.pow(2).view(1,-1) / duration**2)
+        env = torch.exp(-0.5 * t.pow(2).view(1, -1) / gaussian_width**2)
 
         win = self.tukey.to(hrss.device, hrss.dtype)[None, :]
 
-        #print("Gaussian \t env",env.shape, "win", win.shape, "h0_plus", h0_plus.shape, "h0_cross", h0_cross.shape)
-        plus  = (h0_plus  * env) * win
+        plus = (h0_plus * env) * win
         cross = (h0_cross * env) * win
+
+        cross = cross[..., self.win_start : self.win_end]
+        plus = plus[..., self.win_start : self.win_end]
         return cross, plus
