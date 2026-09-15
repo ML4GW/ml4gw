@@ -27,6 +27,13 @@ def cbc_inputs(batch_size, device):
     }
 
 
+@pytest.fixture
+def compactness_inputs(batch_size, device):
+    dtype = torch.float64
+    u = lambda low, high: _uniform(batch_size, low, high, dtype, device)  # noqa: E731
+    return {"c_eff": u(0.1, 0.49)}
+
+
 @pytest.fixture(params=[2, 4, 8], ids=lambda x: f"dur_{x}")
 def duration(request):
     return float(request.param)

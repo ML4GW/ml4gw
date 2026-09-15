@@ -1,0 +1,118 @@
+name: sync-dev
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: sync-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+env:
+  SYNC_BRANCH: sync/main-into-dev
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        ref: dev
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+
+    - name: Configure git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+    - name: Merge main into dev
+      id: merge
+      run: |
+        git checkout -B "$SYNC_BRANCH" origin/dev
+
+        if git merge --no-edit origin/main; then
+          echo "clean=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # A lock file is generated output, so resolving it by hand is
+        # meaningless. Take dev's side and regenerate from the merged
+        # pyproject.toml.
+        conflicts=$(git diff --name-only --diff-filter=U)
+        if [ "$conflicts" = "uv.lock" ]; then
+          git checkout --ours uv.lock
+          uv lock
+          git add uv.lock
+          git commit --no-edit
+          echo "clean=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # Anything else is a real conflict that needs a human.
+        {
+          echo "conflicts<<EOF"
+          echo "$conflicts"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+        echo "clean=false" >> "$GITHUB_OUTPUT"
+        git merge --abort
+
+    - name: Push sync branch
+      if: steps.merge.outputs.clean == 'true'
+      run: git push --force-with-lease origin "$SYNC_BRANCH"
+
+    - name: Open or update sync PR
+      if: steps.merge.outputs.clean == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if gh pr view "$SYNC_BRANCH" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+          echo "Existing sync PR updated by the push."
+          exit 0
+        fi
+        gh pr create \
+          --base dev \
+          --head "$SYNC_BRANCH" \
+          --title "Sync dev with main" \
+          --body "Automated merge of \`main\` into \`dev\`.
+
+        Keeps \`dev\` mergeable so the eventual release merge stays small.
+        Review the diff, then use a **merge commit**; do not squash or rebase,
+        or the next sync will replay the same commits."
+
+    - name: Report unresolved conflicts
+      if: steps.merge.outputs.clean == 'false'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CONFLICTS: ${{ steps.merge.outputs.conflicts }}
+      run: |
+        title="dev sync blocked by merge conflicts"
+        if gh issue list --state open --search "$title in:title" --json title --jq '.[].title' | grep -qxF "$title"; then
+          echo "Conflict issue already open."
+        else
+          gh issue create --title "$title" --body "Automated \`main\` -> \`dev\` sync hit conflicts in:
+
+        \`\`\`
+        $CONFLICTS
+        \`\`\`
+
+        Resolve locally:
+
+        \`\`\`bash
+        git checkout dev
+        git merge origin/main
+        # resolve, then
+        git push origin dev
+        \`\`\`"
+        fi
+        exit 1

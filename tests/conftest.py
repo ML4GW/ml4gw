@@ -35,12 +35,13 @@ def compare_against_numpy():
 
         isclose = np.isclose(value, expected, rtol=tol)
 
-        # at most one point can differ by more than tolerance
+        # at most num_bad points can differ by more than tolerance
         # this happens occasionally and typically for very low values
 
         # TODO: eventually we should track down
         # and address the underlying cause
-        assert isclose.sum() - np.prod(isclose.shape) <= num_bad
+        num_differing = np.prod(isclose.shape) - isclose.sum()
+        assert num_differing <= num_bad
 
     return compare
 

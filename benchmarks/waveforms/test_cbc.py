@@ -2,7 +2,7 @@
 
 import torch
 
-from ml4gw.waveforms import IMRPhenomD, IMRPhenomPv2, TaylorF2
+from ml4gw.waveforms import IMRPhenomD, IMRPhenomDECO, IMRPhenomPv2, TaylorF2
 
 F_REF = 20.0
 F_MIN = 20.0
@@ -22,6 +22,17 @@ def test_phenomd_forward(benchmark, cbc_inputs, duration, device, maybe_sync):
     freqs = torch.arange(F_MIN, F_MAX, 1.0 / duration, dtype=torch.float64).to(
         device
     )
+    benchmark(maybe_sync(model), freqs, **cbc_inputs, f_ref=F_REF)
+
+
+def test_phenomdeco_forward(
+    benchmark, cbc_inputs, compactness_inputs, duration, device, maybe_sync
+):
+    model = IMRPhenomDECO().to(device)
+    freqs = torch.arange(F_MIN, F_MAX, 1.0 / duration, dtype=torch.float64).to(
+        device
+    )
+    cbc_inputs.update(compactness_inputs)
     benchmark(maybe_sync(model), freqs, **cbc_inputs, f_ref=F_REF)
 
 
