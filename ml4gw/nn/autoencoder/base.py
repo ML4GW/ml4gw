@@ -43,6 +43,9 @@ class Autoencoder(torch.nn.Module):
                 X = block.encode(X)
             states.append(X)
 
+        if len(self.blocks) == 0 and isinstance(X, tuple) and len(X) == 1:
+            X = X[0]
+
         # don't need to return the last
         # state, since that's just equal
         # to the output of this layer
@@ -51,7 +54,12 @@ class Autoencoder(torch.nn.Module):
         return X
 
     def decode(self, *X, states: Sequence[Tensor] | None = None) -> Tensor:
-        if self.skip_connection is not None and states is None:
+        if self.skip_connection is None and states is not None:
+            raise ValueError(
+                "Cannot pass intermediate states when autoencoder "
+                "has no skip connection function specified"
+            )
+        elif self.skip_connection is not None and states is None:
             raise ValueError(
                 "Must pass intermediate states when autoencoder "
                 "has a skip connection function specified"
@@ -72,9 +80,13 @@ class Autoencoder(torch.nn.Module):
             else:
                 X = block.decode(X)
 
-            state = states[-i - 1]
-            if state is not None:
-                X = self.skip_connection(X, state)
+            if states is not None:
+                state = states[i]
+                if state is not None:
+                    X = self.skip_connection(X, state)
+
+        if len(self.blocks) == 0 and isinstance(X, tuple) and len(X) == 1:
+            return X[0]
         return X
 
     def forward(self, *X: Tensor) -> Tensor:

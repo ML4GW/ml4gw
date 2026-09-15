@@ -382,12 +382,12 @@ class IMRPhenomPv2(IMRPhenomD):
         diffRDphase = (diff[:, 1:] + diff[:, :-1]) / (
             2 * delta_fRds.unsqueeze(1)
         )
-        # reshape x to have same shape as diffRDphase
-        x = x[1:-1].unsqueeze(0).expand(diffRDphase.shape)
-        # interpolate at x = 1, as thats the same as f = fRD
-        diffRDphase = -self.interpolate(
-            torch.tensor([1], device=x.device), x, diffRDphase
-        )
+        # Evaluate diffRDphase at normalized frequency 1.0 (i.e. f = fRD)
+        # for each batch element. With n_fixed=1000, linspace(0.8, 1.2, 1000)
+        # places 1.0 midway between indices 499 and 500; after the x[1:-1]
+        # trim those become columns 498 and 499 of diffRDphase.
+        # Update these indices if n_fixed changes.
+        diffRDphase = -(diffRDphase[:, 498] + diffRDphase[:, 499]) / 2
         return hPhenom, diffRDphase
 
     # Utility functions

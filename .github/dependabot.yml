@@ -9,14 +9,16 @@ updates:
       default-days: 7
     groups:
       production:
+        applies-to: version-updates
         patterns:
           - "jaxtyping"
           - "torch"
           - "torchaudio"
           - "numpy"
           - "scipy"
-      
+
       documentation:
+        applies-to: version-updates
         patterns:
           - "Sphinx*"
           - "sphinx*"
@@ -28,6 +30,7 @@ updates:
           - "jupyter"
 
       development:
+        applies-to: version-updates
         patterns: ["*"]
         exclude-patterns:
           - "jaxtyping"
@@ -43,3 +46,7 @@ updates:
           - "rich"
           - "gwpy"
           - "jupyter"
+
+      security:
+        applies-to: security-updates
+        patterns: ["*"]

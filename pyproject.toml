@@ -9,11 +9,12 @@ authors = [
     { name = "Alec Gunny", email = "alec.gunny@ligo.org" },
     { name = "Ravi Kumar", email = "ravi.kumar@ligo.org" },
     { name = "Bhavya Gupta", email = "bhavya.gupta@ligo.org" },
+    { name = "Shrobana Ghosh", email = "shrobana.ghosh@ligo.org" },
 ]
 maintainers = [
-    { name = "Ethan Marx", email = "emarx@mit.edu" },
-    { name = "Will Benoit", email = "benoi090@umn.edu" },
+    { name = "Will Benoit", email = "william.benoit@ligo.org" },
     { name = "Deep Chatterjee", email = "deep1018@mit.edu" },
+    { name = "Bhavya Gupta", email = "bhavya.gupta@ligo.org" },
 ]
 requires-python = ">=3.11,<3.15"
 classifiers = [
