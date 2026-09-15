@@ -13,7 +13,6 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
-  issues: write
 
 env:
   SYNC_BRANCH: sync/main-into-dev
@@ -26,6 +25,8 @@ jobs:
       with:
         fetch-depth: 0
         ref: dev
+        # Use a token with write access to the repo so we can push the sync branch and open a PR.
+        token: ${{ secrets.SYNC_TOKEN || secrets.GITHUB_TOKEN }}
 
     - name: Install uv
       uses: astral-sh/setup-uv@v7
@@ -74,7 +75,7 @@ jobs:
     - name: Open or update sync PR
       if: steps.merge.outputs.clean == 'true'
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
       run: |
         if gh pr view "$SYNC_BRANCH" --json state --jq .state 2>/dev/null | grep -q OPEN; then
           echo "Existing sync PR updated by the push."
@@ -93,26 +94,7 @@ jobs:
     - name: Report unresolved conflicts
       if: steps.merge.outputs.clean == 'false'
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CONFLICTS: ${{ steps.merge.outputs.conflicts }}
       run: |
-        title="dev sync blocked by merge conflicts"
-        if gh issue list --state open --search "$title in:title" --json title --jq '.[].title' | grep -qxF "$title"; then
-          echo "Conflict issue already open."
-        else
-          gh issue create --title "$title" --body "Automated \`main\` -> \`dev\` sync hit conflicts in:
-
-        \`\`\`
-        $CONFLICTS
-        \`\`\`
-
-        Resolve locally:
-
-        \`\`\`bash
-        git checkout dev
-        git merge origin/main
-        # resolve, then
-        git push origin dev
-        \`\`\`"
-        fi
+        echo "::error::main -> dev sync hit conflicts in: ${CONFLICTS//$'\n'/, }"
         exit 1
