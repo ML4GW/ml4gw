@@ -5,3 +5,7 @@
 ml4gw.egg-info
 docs/_build
 docs/jupyter_execute
+.coverage
+.coverage.*
+coverage.xml
+htmlcov
