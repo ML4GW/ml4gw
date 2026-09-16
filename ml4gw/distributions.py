@@ -391,3 +391,152 @@ class RateEvolution(UniformComovingVolume):
         # This is a tensor of ones if the distance type is redshift
         jacobian = torch.gradient(self.distance_grid, spacing=self.dz)[0]
         return dV_dz / jacobian * self.rate_function(self.z_grid)
+
+
+class ChirpDistribution(dist.Distribution):
+    def __init__(
+        self,
+        chirp_mass: torch.distributions.Distribution,
+        chirp_distance: torch.distributions.Distribution,
+        reference_chirp_mass: float = 1.0,
+    ):
+        super().__init__()
+
+        self.chirp_mass = chirp_mass
+        self.chirp_distance = chirp_distance
+        self.ref_mass = ref_mass
+
+    def scale(
+        self,
+        chirp_mass: torch.Tensor,
+    ):
+        """
+        return the mass scaling factor
+        """
+
+        power = (5.0 / 6.0)
+        mass_factor = (chirp_mass / self.ref_mass)
+
+        return mass_factor ** power
+
+    def sample(
+        self,
+        N: torch.Size,
+    ):
+
+        chirp_mass = self.chirp_mass.sample(N)
+        chirp_distance = self.chirp_distance.sample(N)
+
+        mass_factor = self.scale(chirp_mass)
+        distance = chirp_distance * mass_factor
+
+        return {
+            "chirp_mass": chirp_mass,
+            "distance": distance,
+        }
+
+    def log_prob(
+        self,
+        chirp_mass: torch.Tensor,
+        distance: torch.Tensor,
+        **kwargs,
+    ):
+        """
+        Evaluate prior in transformed coordinates.
+        """
+
+        mass_factor = self.scale(chirp_mass)
+        chirp_distance = distance / mass_factor
+
+        # log_probs
+        logp_mass = self.chirp_mass.log_prob(chirp_mass)
+        logp_distance = self.chirp_distance.log_prob(chirp_distance)
+        log_jacobian = -torch.log(mass_factor)
+
+        return logp_mass + logp_distance + log_jacobian
+
+
+class ChirpDistanceUniform(dist.Distribution):
+    def __init__(
+        self,
+        chirp_distance: torch.distributions.Distribution,
+        reference_chirp_mass: float = 1.0,
+    ):
+        super().__init__()
+
+        self.chirp_distance = chirp_distance
+        self.reference_chirp_mass = reference_chirp_mass
+
+        self.joint_parameters = ["chirp_mass", "chirp_distance"]
+
+    def scale(
+        self,
+        chirp_mass: torch.Tensor,
+    ):
+        """
+        return the mass scaling factor
+        """
+        
+        power = (5.0 / 6.0)
+        mass_factor = (chirp_mass / self.reference_chirp_mass)
+
+        return mass_factor ** power
+
+    def get_distance(
+        self,
+        chirp_mass: torch.Tensor,
+        chirp_distance: torch.Tensor,
+        **kwrags,
+    ):
+
+        mass_factor = self.scale(chirp_mass)
+        distance = chirp_distance * mass_factor
+        return distance
+
+    def sample(
+        self,
+        N: torch.Size,
+        chirp_mass: torch.Tensor|None = None,
+        **kwargs,
+    ):
+        """
+        if chirp mass is passes, the sampled uniform chirp distance 
+        is converted to luminosity distance
+        """
+
+        chirp_distance = self.chirp_distance.sample(N)
+
+        if chirp_mass is not None:
+            distance = self.get_distance(
+                chirp_mass,
+                chirp_distance,
+            )
+
+            param_name = "distance"
+            param = distance
+
+        else:
+            param_name = "chirp_distance"
+            param = chirp_distance
+
+        return {param_name: param}
+
+    def log_prob(
+        self,
+        chirp_mass: torch.Tensor,
+        distance: torch.Tensor,
+        **kwargs,
+    ):
+        """
+        Evaluate prior in transformed coordinates.
+        """
+
+        mass_factor = self.scale(chirp_mass)
+        chirp_distance = distance / mass_factor
+
+        # log_probs
+        logp_mass = self.chirp_mass.log_prob(chirp_mass)
+        logp_distance = self.chirp_distance.log_prob(chirp_distance)
+        log_jacobian = -torch.log(mass_factor)
+
+        return logp_mass + logp_distance + log_jacobian
