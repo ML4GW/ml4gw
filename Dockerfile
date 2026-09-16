@@ -1,7 +1,6 @@
 # ml4gw + ml4gw-buoy runtime image; the OSG plugin bridge drives the search.
-# torch's CUDA-12 wheels bundle the CUDA userspace libs, so no nvidia/cuda base
-# is needed — the GPU host supplies the driver. Override TORCH_INDEX for CPU.
-# Build: docker build -t ml4gw:latest .
+# torch's CUDA-12 wheels bundle the CUDA libs, so no nvidia base is needed.
+# Override TORCH_INDEX for a CPU-only build. Build: docker build -t ml4gw .
 
 ARG PYTHON_VERSION=3.11
 
@@ -23,15 +22,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends git build-essen
 RUN pip install uv
 
 WORKDIR /src
-# .git is required for versioning; keep it out of .dockerignore.
-COPY . /src
-
-# Install ml4gw + runtime deps only, non-editable, exactly per uv.lock.
+# Deps only, keyed on the lock so this layer survives ordinary source changes.
+COPY pyproject.toml uv.lock README.md ./
 RUN if [ -n "${TORCH_INDEX}" ]; then export UV_INDEX="${TORCH_INDEX}"; fi \
-    && uv sync --frozen --no-default-groups --no-editable
+    && uv sync --frozen --no-default-groups --no-install-project
 
-# Add ml4gw-buoy (pulls amplfi, gwpy, ligo-skymap, ...); ml4gw already present.
+# ml4gw-buoy + its compiled deps (bilby-cython): the slow step, now cache-stable.
 RUN uv pip install --python /opt/venv/bin/python "ml4gw-buoy==${BUOY_VERSION}"
+
+# Project layer: build the git-versioned local ml4gw over buoy's pulled-in copy.
+# The only step that re-runs on a source change; .git supplies the version.
+COPY . /src
+RUN uv pip install --python /opt/venv/bin/python --no-deps --reinstall-package ml4gw .
 
 # ---- runtime: just the venv on a clean base ----
 FROM python:${PYTHON_VERSION}-slim AS runtime
