@@ -3,8 +3,14 @@ from unittest.mock import patch
 import pytest
 import torch
 
+from ml4gw import spectral
 from ml4gw.spectral import spectral_density
-from ml4gw.transforms import FixedWhiten, MinimumPhaseWhiten, Whiten
+from ml4gw.transforms import (
+    FixedMinimumPhaseWhiten,
+    FixedWhiten,
+    MinimumPhaseWhiten,
+    Whiten,
+)
 
 
 class WhitenModuleTest:
@@ -206,61 +212,227 @@ class TestFixedWhiten(WhitenModuleTest):
         assert (fresh.psd == transform.psd).all().item()
 
 
-class TestMinimumPhaseWhiten:
+class MinimumPhaseWhitenTest:
     sample_rate = 256
-    kernel_length = 1
+    fduration = 1
     num_channels = 2
 
+    @property
+    def size(self):
+        return int(self.fduration * self.sample_rate)
+
+    def get_psds(self):
+        n_fft = 4 * self.size
+        omega = 2 * torch.pi * torch.arange(n_fft // 2 + 1) / n_fft
+        psds = []
+        for coefficient in (0.2, 0.8):
+            response = 1 - coefficient * torch.exp(-1j * omega)
+            psds.append((2 / self.sample_rate) / response.abs().square())
+        return psds
+
+
+class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
     def get_transform(self):
-        return MinimumPhaseWhiten(
-            self.num_channels,
-            self.kernel_length,
-            self.sample_rate,
-        )
+        return MinimumPhaseWhiten(self.fduration, self.sample_rate)
 
-    def test_flat_psd_is_identity(self):
+    def test_crop_is_causal(self):
         transform = self.get_transform()
-        num_freqs = self.sample_rate // 2 + 1
+        num_freqs = 2 * self.size + 1
         psd = torch.full((num_freqs,), 2 / self.sample_rate)
-        transform.fit(psd, psd)
-
         X = torch.randn(4, self.num_channels, 1024)
-        whitened = transform(X)
 
-        assert whitened.shape == X.shape
-        torch.testing.assert_close(whitened, X, rtol=1e-6, atol=1e-6)
+        uncropped = transform(X, psd, crop=False)
+        whitened = transform(X, psd)
+
+        assert uncropped.shape == X.shape
+        assert whitened.shape == (4, self.num_channels, 1024 - self.size + 1)
+        torch.testing.assert_close(whitened, uncropped[..., self.size - 1 :])
+
+    @pytest.mark.parametrize("psd_ndim", [2, 3])
+    def test_psd_broadcasting(self, psd_ndim):
+        transform = self.get_transform()
+        X = torch.randn(4, self.num_channels, 1024)
+        psd = torch.full((2 * self.size + 1,), 2 / self.sample_rate)
+        expected = transform(X, psd, crop=False)
+
+        psd = psd.repeat(self.num_channels, 1)
+        if psd_ndim == 3:
+            psd = psd.repeat(X.size(0), 1, 1)
+
+        whitened = transform(X, psd, crop=False)
+
+        torch.testing.assert_close(whitened, expected)
+
+    @pytest.mark.parametrize(
+        ("highpass", "lowpass"),
+        [(None, None), (32, None), (None, 100), (32, 100)],
+    )
+    def test_matches_standard_frequency_response(self, highpass, lowpass):
+        n_fft = 16 * self.size
+        psd = torch.full(
+            (n_fft // 2 + 1,),
+            2 / self.sample_rate,
+            dtype=torch.float64,
+        )
+        transform = MinimumPhaseWhiten(
+            self.fduration,
+            self.sample_rate,
+            highpass,
+            lowpass,
+        )
+        impulse = torch.zeros(1, 1, n_fft, dtype=torch.float64)
+        impulse[..., 0] = 1
+
+        kernel = transform(impulse, psd, crop=False)[0, 0]
+        response = torch.fft.rfft(kernel).abs()
+        truncated_psd = spectral.truncate_inverse_power_spectrum(
+            psd[None, None],
+            self.fduration,
+            self.sample_rate,
+            highpass,
+            lowpass,
+        )[0, 0]
+        expected = truncated_psd.rsqrt() / self.sample_rate**0.5
+
+        torch.testing.assert_close(response, expected, rtol=0, atol=3e-3)
+
+        if highpass is not None or lowpass is not None:
+            frequencies = torch.fft.rfftfreq(
+                n_fft, 1 / self.sample_rate, dtype=torch.float64
+            )
+            passband = frequencies >= (highpass or 0) + 5
+            passband &= frequencies <= (lowpass or self.sample_rate / 2) - 5
+            stopband = torch.zeros_like(passband)
+            if highpass is not None:
+                stopband |= frequencies <= highpass - 5
+            if lowpass is not None:
+                stopband |= frequencies >= lowpass + 5
+
+            assert torch.quantile((response[passband] - 1).abs(), 0.95) < 0.01
+            assert response[stopband].max() < 1e-3
 
     def test_filter_is_causal(self):
         transform = self.get_transform()
-        frequencies = torch.linspace(0, 1, self.sample_rate // 2 + 1)
-        psd = 1 + frequencies**2
-        transform.fit(psd, psd)
+        psd = self.get_psds()[0]
 
         impulse_index = 512
         X = torch.zeros(1, self.num_channels, 1024)
         X[..., impulse_index] = 1
+        whitened = transform(X, psd, crop=False)
+
+        torch.testing.assert_close(
+            whitened[..., :impulse_index],
+            torch.zeros_like(whitened[..., :impulse_index]),
+            rtol=0,
+            atol=1e-7,
+        )
+        assert torch.count_nonzero(whitened[..., impulse_index:]) > 0
+
+    def test_validation(self):
+        with pytest.raises(ValueError, match="at least two samples"):
+            MinimumPhaseWhiten(1 / self.sample_rate, self.sample_rate)
+
+        transform = self.get_transform()
+        X = torch.randn(4, self.num_channels, 1024)
+        psd = torch.ones(2 * self.size + 1)
+        with pytest.raises(ValueError, match="expected input with shape"):
+            transform(X[0], psd)
+        with pytest.raises(ValueError, match="one, two, or three dimensions"):
+            transform(X, psd.repeat(2, 2, 2, 1))
+        with pytest.raises(ValueError, match="channels"):
+            transform(X, psd.repeat(self.num_channels + 1, 1))
+        with pytest.raises(ValueError, match="batch size"):
+            transform(X, psd.repeat(X.size(0) + 1, self.num_channels, 1))
+        with pytest.raises(ValueError, match="Not enough timeseries"):
+            transform(X[..., : self.size - 1], psd)
+        with pytest.raises(ValueError, match="at least two frequency bins"):
+            transform(X, torch.ones(1))
+        with pytest.raises(ValueError, match="floating-point tensor"):
+            transform(X, torch.ones(2 * self.size + 1, dtype=torch.int64))
+        psd[0] = torch.nan
+        with pytest.raises(ValueError, match="finite values"):
+            transform(X, psd)
+
+    def test_upsamples_short_psd_before_factorization(self):
+        transform = self.get_transform()
+        psd = torch.full((self.size // 2 + 1,), 2 / self.sample_rate)
+        X = torch.randn(2, self.num_channels, 1024)
+
+        whitened = transform(X, psd, crop=False)
+
+        assert whitened.shape == X.shape
+        with pytest.raises(ValueError, match="positive values"):
+            transform(X, torch.zeros(2 * self.size + 1))
+
+
+class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
+    def get_transform(self, dtype=torch.float64):
+        return FixedMinimumPhaseWhiten(
+            self.num_channels,
+            self.fduration,
+            self.sample_rate,
+            dtype=dtype,
+        )
+
+    def test_crop_and_dynamic_equivalence(self):
+        transform = self.get_transform()
+        num_freqs = 2 * self.size + 1
+        psd = torch.full((num_freqs,), 2 / self.sample_rate)
+        transform.fit(psd, psd)
+
+        X = torch.randn(4, self.num_channels, 1024)
+        uncropped = transform(X, crop=False)
         whitened = transform(X)
 
-        assert torch.count_nonzero(whitened[..., :impulse_index]) == 0
+        assert uncropped.shape == X.shape
+        assert whitened.shape == (4, self.num_channels, 1024 - self.size + 1)
+        torch.testing.assert_close(whitened, uncropped[..., self.size - 1 :])
+        dynamic = MinimumPhaseWhiten(self.fduration, self.sample_rate)
+        expected = dynamic(X, psd, crop=False)
+        torch.testing.assert_close(uncropped, expected, check_dtype=False)
+
+    def test_filter_is_causal(self):
+        transform = self.get_transform()
+        transform.fit(*self.get_psds())
+
+        impulse_index = 512
+        X = torch.zeros(1, self.num_channels, 1024)
+        X[..., impulse_index] = 1
+        whitened = transform(X, crop=False)
+
+        torch.testing.assert_close(
+            whitened[..., :impulse_index],
+            torch.zeros_like(whitened[..., :impulse_index]),
+            rtol=0,
+            atol=1e-14,
+        )
         assert torch.count_nonzero(whitened[..., impulse_index:]) > 0
 
     def test_whitens_first_order_colored_noise(self):
         transform = self.get_transform()
         coefficient = 0.8
-        n_fft = int(self.kernel_length * self.sample_rate)
+        n_fft = 4 * self.size
         omega = 2 * torch.pi * torch.arange(n_fft // 2 + 1) / n_fft
         response = 1 - coefficient * torch.exp(-1j * omega)
         psd = (2 / self.sample_rate) / response.abs().square()
         transform.fit(psd, psd)
 
-        noise = torch.randn(4, self.num_channels, 1024)
+        generator = torch.Generator().manual_seed(1234)
+        noise = torch.randn(4, self.num_channels, 1024, generator=generator)
         X = torch.zeros_like(noise)
         X[..., 0] = noise[..., 0]
         for i in range(1, X.size(-1)):
             X[..., i] = coefficient * X[..., i - 1] + noise[..., i]
 
-        whitened = transform(X)
-        torch.testing.assert_close(whitened, noise, rtol=1e-5, atol=1e-5)
+        whitened = transform(X, crop=False)
+        frequencies = torch.fft.rfftfreq(X.size(-1), 1 / self.sample_rate)
+        band = frequencies <= 0.8 * (self.sample_rate / 2)
+        actual = torch.fft.rfft(whitened)[..., band]
+        expected = torch.fft.rfft(noise)[..., band]
+        relative_error = torch.linalg.vector_norm(actual - expected)
+        relative_error /= torch.linalg.vector_norm(expected)
+
+        assert relative_error < 5e-3
 
     def test_fit_from_timeseries(self):
         transform = self.get_transform()
@@ -274,7 +446,7 @@ class TestMinimumPhaseWhiten:
             for _ in range(self.num_channels)
         ]
 
-        transform.fit(*backgrounds, fftlength=0.5)
+        transform.fit(*backgrounds, fftlength=2)
         X = torch.randn(
             2,
             self.num_channels,
@@ -282,7 +454,7 @@ class TestMinimumPhaseWhiten:
             generator=generator,
             dtype=torch.float64,
         )
-        whitened = transform(X)
+        whitened = transform(X, crop=False)
 
         assert transform.built
         assert whitened.shape == X.shape
@@ -291,13 +463,7 @@ class TestMinimumPhaseWhiten:
 
     def test_streaming_matches_continuous_input(self):
         transform = self.get_transform()
-        n_fft = int(self.kernel_length * self.sample_rate)
-        omega = 2 * torch.pi * torch.arange(n_fft // 2 + 1) / n_fft
-        psds = []
-        for coefficient in (0.2, 0.8):
-            response = 1 - coefficient * torch.exp(-1j * omega)
-            psds.append((2 / self.sample_rate) / response.abs().square())
-        transform.fit(*psds)
+        transform.fit(*self.get_psds())
 
         generator = torch.Generator().manual_seed(1234)
         X = torch.randn(
@@ -307,31 +473,126 @@ class TestMinimumPhaseWhiten:
             generator=generator,
             dtype=torch.float64,
         )
-        expected = transform(X)
+        expected = transform(X, crop=False)
 
         split = 600
         history = transform.kernel.size(-1) - 1
-        first = transform(X[..., :split])
+        first = transform(X[..., :split], crop=False)
         second_input = X[..., split - history :]
-        second = transform(second_input)[..., history:]
+        second = transform(second_input)
         actual = torch.cat((first, second), dim=-1)
 
         assert not torch.allclose(transform.kernel[0], transform.kernel[1])
-        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+        torch.testing.assert_close(actual, expected, rtol=0, atol=2e-14)
+
+    def test_fft_filter_matches_direct_convolution(self):
+        transform = self.get_transform()
+        transform.fit(*self.get_psds())
+        X = torch.randn(3, self.num_channels, 521, dtype=torch.float64)
+
+        actual = transform(X, crop=False)
+        padded = torch.nn.functional.pad(X, (self.size - 1, 0))
+        expected = torch.nn.functional.conv1d(
+            padded,
+            torch.flip(transform.kernel[:, None], dims=(-1,)),
+            groups=self.num_channels,
+        )
+
+        torch.testing.assert_close(actual, expected, rtol=0, atol=2e-14)
+
+    def test_fit_preserves_resolved_psd_grid(self):
+        transform = self.get_transform()
+        psd = torch.ones(8 * self.size + 1, dtype=torch.float64)
+        psd[257:265] = 100
+
+        with patch(
+            "ml4gw.transforms.whitening."
+            "spectral.minimum_phase_whitening_filter",
+            wraps=spectral.minimum_phase_whitening_filter,
+        ) as factorize:
+            transform.fit(psd, psd)
+
+        fitted_psd = factorize.call_args.args[0]
+        assert fitted_psd.size(-1) == psd.size(-1)
+
+    def test_truncated_filter_matches_standard_resolved_line(self):
+        transform = self.get_transform()
+        n_fft = 16 * self.size
+        frequencies = torch.fft.rfftfreq(
+            n_fft, 1 / self.sample_rate, dtype=torch.float64
+        )
+        psd = (2 / self.sample_rate) * (
+            1 + 100 * torch.exp(-0.5 * ((frequencies - 60) / 2) ** 2)
+        )
+        transform.fit(psd, psd)
+
+        response = torch.fft.rfft(transform.kernel[0], n=n_fft)
+        whitened_psd = response.abs().square() * psd * self.sample_rate / 2
+        truncated_psd = spectral.truncate_inverse_power_spectrum(
+            psd[None, None],
+            self.fduration,
+            self.sample_rate,
+        )[0, 0]
+        expected = psd / (2 * truncated_psd)
+        band = (frequencies >= 5) & (frequencies <= 120)
+        log_error = whitened_psd[band].log().abs()
+
+        torch.testing.assert_close(
+            whitened_psd,
+            expected,
+            rtol=1e-8,
+            atol=1e-10,
+        )
+        assert log_error.median() < 1e-3
+
+    def test_fit_bandpass_matches_dynamic_transform(self):
+        highpass = 32
+        lowpass = 100
+        n_fft = 16 * self.size
+        psd = torch.full(
+            (n_fft // 2 + 1,),
+            2 / self.sample_rate,
+            dtype=torch.float64,
+        )
+        transform = self.get_transform()
+        transform.fit(psd, psd, highpass=highpass, lowpass=lowpass)
+        dynamic = MinimumPhaseWhiten(
+            self.fduration,
+            self.sample_rate,
+            highpass,
+            lowpass,
+        )
+        X = torch.randn(2, self.num_channels, 1024, dtype=torch.float64)
+
+        actual = transform(X, crop=False)
+        expected = dynamic(X, psd, crop=False)
+
+        torch.testing.assert_close(actual, expected)
+
+    def test_preserves_fitted_precision(self):
+        transform = self.get_transform(dtype=torch.float64)
+        psd = torch.ones(2 * self.size + 1, dtype=torch.float64)
+        transform.fit(psd, psd)
+
+        X = torch.randn(2, self.num_channels, 512, dtype=torch.float32)
+        whitened = transform(X, crop=False)
+
+        assert transform.kernel.dtype == torch.float64
+        assert whitened.dtype == torch.float64
 
     def test_validation_and_io(self, tmp_path):
         transform = self.get_transform()
         X = torch.randn(4, self.num_channels, 1024)
 
         with pytest.raises(ValueError, match="at least two samples"):
-            MinimumPhaseWhiten(1, 1 / self.sample_rate, self.sample_rate)
+            FixedMinimumPhaseWhiten(1, 1 / self.sample_rate, self.sample_rate)
 
         with pytest.raises(ValueError, match="Must fit parameters"):
             transform(X)
         with pytest.raises(ValueError, match="Expected to fit whitening"):
             transform.fit(torch.ones(129))
 
-        psd = torch.ones(129)
+        psd = torch.ones(2 * self.size + 1)
         transform.fit(psd, psd)
         with pytest.raises(ValueError, match="expected input with shape"):
             transform(X[:, :1])

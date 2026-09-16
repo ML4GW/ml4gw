@@ -32,25 +32,51 @@ Minimum-phase whitening
 -----------------------
 
 For online applications, a minimum-phase filter can whiten data without
-depending on future samples. Fit the filter from one background timeseries or
-PSD per channel, then apply it to tensors of any duration:
+depending on future samples. The dynamic transform accepts a PSD at call time:
 
 .. code-block:: python
 
    from ml4gw.transforms import MinimumPhaseWhiten
 
    whitener = MinimumPhaseWhiten(
+      fduration=2,
+      sample_rate=2048,
+      highpass=20,
+   )
+   X_whitened = whitener(X, psd)
+
+For a fixed background, fit one PSD per channel once and reuse the stored
+filter:
+
+.. code-block:: python
+
+   from ml4gw.transforms import FixedMinimumPhaseWhiten
+
+   whitener = FixedMinimumPhaseWhiten(
       num_channels=2,
-      kernel_length=2,
+      fduration=2,
       sample_rate=2048,
    )
 
    # Passing fftlength means the inputs are interpreted as timeseries.
-   whitener.fit(background_h1, background_l1, fftlength=2)
+   whitener.fit(
+      background_h1,
+      background_l1,
+      fftlength=2,
+      highpass=20,
+   )
    X_whitened = whitener(X)
 
-The output has the same shape as the input. The first
-``int(kernel_length * sample_rate) - 1`` samples use zero-valued history; when
-processing consecutive chunks, prepend that many real historical samples and
-discard their outputs. Directly supplied PSDs at physical strain scale should
-use double precision to avoid underflow in ``torch.float32``.
+The highpass and lowpass responses use the same inverse-spectrum truncation
+as the standard whitening transforms before the response is converted to a
+causal minimum-phase filter.
+
+By default, both transforms crop
+``int(fduration * sample_rate) - 1`` warm-up samples from the left edge. Pass
+``crop=False`` to keep the input length and retain samples computed from
+zero-valued initial history. For consecutive chunks, prepend that many real
+historical samples before calling the transform. Directly supplied PSDs at
+physical strain scale should use double precision to avoid underflow in
+``torch.float32``. The minimum-phase transforms do not subtract a mean over
+the complete input segment, since that operation would depend on future
+samples.

@@ -494,11 +494,7 @@ def minimum_phase_whitening_filter(
         raise ValueError("PSD must contain only positive values")
 
     log_amplitude = -0.5 * torch.log(psd)
-    reflection_end = -1 if n_fft % 2 == 0 else None
-    reflected = torch.flip(log_amplitude[..., 1:reflection_end], dims=(-1,))
-    log_amplitude = torch.cat((log_amplitude, reflected), dim=-1)
-
-    cepstrum = torch.fft.ifft(log_amplitude, dim=-1)
+    cepstrum = torch.fft.irfft(log_amplitude, n=n_fft, dim=-1)
     midpoint = n_fft // 2
     if n_fft % 2 == 0:
         folded = torch.cat(
@@ -520,8 +516,8 @@ def minimum_phase_whitening_filter(
             dim=-1,
         )
 
-    response = torch.exp(torch.fft.fft(folded, dim=-1))
-    return torch.fft.irfft(response[..., : psd.size(-1)], n=n_fft, dim=-1)
+    response = torch.exp(torch.fft.rfft(folded, n=n_fft, dim=-1))
+    return torch.fft.irfft(response, n=n_fft, dim=-1)
 
 
 def normalize_by_psd(

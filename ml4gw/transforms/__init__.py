@@ -16,4 +16,9 @@ from .spectral import SpectralDensity
 from .spectrogram import MultiResolutionSpectrogram
 from .spline_interpolation import SplineInterpolate1D, SplineInterpolate2D
 from .waveforms import WaveformProjector, WaveformSampler
-from .whitening import FixedWhiten, MinimumPhaseWhiten, Whiten
+from .whitening import (
+    FixedMinimumPhaseWhiten,
+    FixedWhiten,
+    MinimumPhaseWhiten,
+    Whiten,
+)
