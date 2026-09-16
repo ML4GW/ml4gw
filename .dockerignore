@@ -1,0 +1,12 @@
+# NOTE: .git is intentionally NOT ignored — setuptools-git-versioning needs it.
+**/__pycache__
+**/.ipynb_checkpoints
+.venv
+/opt/venv
+docs/_build
+docs/jupyter_execute
+.coverage
+.coverage.*
+coverage.xml
+htmlcov
+*.egg-info
