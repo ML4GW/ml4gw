@@ -69,14 +69,25 @@ filter:
 
 The highpass and lowpass responses use the same inverse-spectrum truncation
 as the standard whitening transforms before the response is converted to a
-causal minimum-phase filter.
+causal minimum-phase filter. A causal minimum-phase response has
+frequency-dependent group delay, and changing the target magnitude with a
+highpass or lowpass cutoff also changes that delay, particularly near the
+transition frequencies. Cropping removes the initial filter warm-up but does
+not compensate for this frequency-dependent delay.
 
 By default, both transforms crop
-``int(fduration * sample_rate) - 1`` warm-up samples from the left edge. Pass
-``crop=False`` to keep the input length and retain samples computed from
-zero-valued initial history. For consecutive chunks, prepend that many real
-historical samples before calling the transform. Directly supplied PSDs at
-physical strain scale should use double precision to avoid underflow in
-``torch.float32``. The minimum-phase transforms do not subtract a mean over
-the complete input segment, since that operation would depend on future
-samples.
+``int(fduration * sample_rate)`` samples from the left edge. This matches the
+output length of :class:`~ml4gw.transforms.Whiten` for the even filter lengths
+used by the existing transforms, but the alignment is different: standard whitening removes
+half the filter duration from each edge, whereas minimum-phase whitening
+removes the full duration from the left. Outputs from the two transforms
+therefore should not be treated as sample-aligned.
+
+Pass ``crop=False`` to keep the input length and retain samples computed from
+zero-valued initial history. For consecutive chunks, prepend
+``int(fduration * sample_rate)`` real historical samples before calling the
+transform. Directly supplied PSDs at physical strain scale should use double
+precision to avoid underflow during filter construction. Both transforms
+return ``torch.float32`` outputs, matching the existing whitening transforms.
+The minimum-phase transforms do not subtract a mean over the complete input
+segment, since that operation would depend on future samples.

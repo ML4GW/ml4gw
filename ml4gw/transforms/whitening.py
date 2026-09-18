@@ -332,10 +332,6 @@ def _minimum_phase_kernel(
         raise ValueError("PSD must contain at least two frequency bins")
     if not torch.is_floating_point(psd):
         raise ValueError("PSD must be a floating-point tensor")
-    if not bool(torch.isfinite(psd).all()):
-        raise ValueError("PSD must contain only finite values")
-    if not bool((psd > 0).all()):
-        raise ValueError("PSD must contain only positive values")
 
     n_fft = 2 * (psd.size(-1) - 1)
 
@@ -361,7 +357,9 @@ def _minimum_phase_kernel(
         highpass,
         lowpass,
     )
-    kernel = spectral.minimum_phase_whitening_filter(psd)[..., :size]
+    kernel = spectral.minimum_phase_whitening_filter(psd, validate=False)[
+        ..., :size
+    ]
     while kernel.ndim > input_ndim:
         kernel = kernel[0]
 
@@ -381,7 +379,7 @@ def _minimum_phase_filter(
     if crop and input_size < size:
         raise ValueError(
             f"Not enough timeseries samples {X.size(-1)} for number of "
-            f"warm-up samples {size - 1}"
+            f"cropped samples {size}"
         )
 
     dtype = torch.promote_types(X.dtype, kernel.dtype)
@@ -397,8 +395,8 @@ def _minimum_phase_filter(
     X = torch.fft.irfft(X_tilde * kernel_tilde, n=n_fft, dim=-1)
     X = X[..., :input_size]
     if crop:
-        X = X[..., size - 1 :]
-    return X
+        X = X[..., size:]
+    return X.float()
 
 
 class MinimumPhaseWhiten(torch.nn.Module):
@@ -406,7 +404,8 @@ class MinimumPhaseWhiten(torch.nn.Module):
 
     A whitening kernel is constructed from the PSD provided at call time. It
     uses only current and previous samples. By default, the initial warm-up
-    samples that depend on zero-valued history are removed from the output.
+    samples that depend on zero-valued history are removed from the output,
+    along with one additional sample to match :class:`Whiten` output lengths.
     Unlike :class:`Whiten`, it does not subtract the mean of the complete
     input segment because that operation depends on future samples.
 
@@ -459,13 +458,14 @@ class MinimumPhaseWhiten(torch.nn.Module):
                 ``(B, C, F)``. Unscaled physical PSDs may require double
                 precision to avoid underflow.
             crop:
-                If ``True``, remove ``fduration * sample_rate - 1`` samples
-                from the left edge. If ``False``, return the full timeseries,
+                If ``True``, remove ``fduration * sample_rate`` samples from
+                the left edge. If ``False``, return the full timeseries,
                 including samples computed from zero-valued initial history.
 
         Returns:
-            A tensor with shape ``(B, C, T - L + 1)`` when cropped, where
-            ``L = int(fduration * sample_rate)``, or ``(B, C, T)`` otherwise.
+            A ``torch.float32`` tensor with shape ``(B, C, T - L)`` when
+            cropped, where ``L = int(fduration * sample_rate)``, or
+            ``(B, C, T)`` otherwise.
         """
         _validate_minimum_phase_input(X, psd)
         kernel = _minimum_phase_kernel(
@@ -584,12 +584,13 @@ class FixedMinimumPhaseWhiten(FittableSpectralTransform):
             X:
                 Batch of multichannel timeseries with shape ``(B, C, T)``.
             crop:
-                If ``True``, remove the corrupted causal warm-up from the left
-                edge. If ``False``, return the full timeseries.
+                If ``True``, remove ``fduration * sample_rate`` samples from
+                the left edge. If ``False``, return the full timeseries.
 
         Returns:
-            A tensor with shape ``(B, C, T - L + 1)`` when cropped, where
-            ``L = int(fduration * sample_rate)``, or ``(B, C, T)`` otherwise.
+            A ``torch.float32`` tensor with shape ``(B, C, T - L)`` when
+            cropped, where ``L = int(fduration * sample_rate)``, or
+            ``(B, C, T)`` otherwise.
         """
         _validate_minimum_phase_input(X, num_channels=self.num_channels)
         return _minimum_phase_filter(X, self.kernel, crop)

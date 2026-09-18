@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+import lal
+import lalsimulation
 import pytest
 import torch
 
@@ -245,8 +247,8 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
         whitened = transform(X, psd)
 
         assert uncropped.shape == X.shape
-        assert whitened.shape == (4, self.num_channels, 1024 - self.size + 1)
-        torch.testing.assert_close(whitened, uncropped[..., self.size - 1 :])
+        assert whitened.shape == (4, self.num_channels, 1024 - self.size)
+        torch.testing.assert_close(whitened, uncropped[..., self.size :])
 
     @pytest.mark.parametrize("psd_ndim", [2, 3])
     def test_psd_broadcasting(self, psd_ndim):
@@ -294,7 +296,9 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
         )[0, 0]
         expected = truncated_psd.rsqrt() / self.sample_rate**0.5
 
-        torch.testing.assert_close(response, expected, rtol=0, atol=3e-3)
+        torch.testing.assert_close(
+            response, expected, rtol=0, atol=3e-3, check_dtype=False
+        )
 
         if highpass is not None or lowpass is not None:
             frequencies = torch.fft.rfftfreq(
@@ -310,6 +314,48 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
 
             assert torch.quantile((response[passband] - 1).abs(), 0.95) < 0.01
             assert response[stopband].max() < 1e-3
+
+    def test_realistic_aligo_psd_at_2048_hz(self):
+        sample_rate = 2048
+        fduration = 2
+        n_fft = 8 * sample_rate
+        num_freqs = n_fft // 2 + 1
+        df = sample_rate / n_fft
+        psd = lal.CreateREAL8FrequencySeries(
+            "psd", 0, 0, df, "s^-1", num_freqs
+        )
+        lalsimulation.SimNoisePSDaLIGOaLIGO140MpcT1800545(psd, 1)
+        psd = torch.from_numpy(psd.data.data.copy())
+        transform = MinimumPhaseWhiten(
+            fduration,
+            sample_rate,
+            highpass=20,
+            lowpass=896,
+        )
+        impulse = torch.zeros(1, 1, n_fft, dtype=torch.float64)
+        impulse[..., 0] = 1
+
+        kernel = transform(impulse, psd, crop=False)[0, 0]
+        response = torch.fft.rfft(kernel, n=n_fft).abs().double()
+        truncated_psd = spectral.truncate_inverse_power_spectrum(
+            psd[None, None],
+            fduration,
+            sample_rate,
+            highpass=20,
+            lowpass=896,
+        )[0, 0]
+        expected = truncated_psd.rsqrt() / sample_rate**0.5
+        frequencies = torch.fft.rfftfreq(n_fft, 1 / sample_rate)
+        passband = (frequencies >= 40) & (frequencies <= 876)
+        relative_error = (
+            response[passband] - expected[passband]
+        ).abs() / expected[passband]
+
+        assert kernel.dtype == torch.float32
+        assert torch.isfinite(kernel).all()
+        assert relative_error.median() < 2e-4
+        assert torch.quantile(relative_error, 0.95) < 2e-3
+        assert relative_error.max() < 5e-3
 
     def test_filter_is_causal(self):
         transform = self.get_transform()
@@ -349,9 +395,6 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
             transform(X, torch.ones(1))
         with pytest.raises(ValueError, match="floating-point tensor"):
             transform(X, torch.ones(2 * self.size + 1, dtype=torch.int64))
-        psd[0] = torch.nan
-        with pytest.raises(ValueError, match="finite values"):
-            transform(X, psd)
 
     def test_upsamples_short_psd_before_factorization(self):
         transform = self.get_transform()
@@ -361,8 +404,6 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
         whitened = transform(X, psd, crop=False)
 
         assert whitened.shape == X.shape
-        with pytest.raises(ValueError, match="positive values"):
-            transform(X, torch.zeros(2 * self.size + 1))
 
 
 class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
@@ -385,8 +426,8 @@ class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
         whitened = transform(X)
 
         assert uncropped.shape == X.shape
-        assert whitened.shape == (4, self.num_channels, 1024 - self.size + 1)
-        torch.testing.assert_close(whitened, uncropped[..., self.size - 1 :])
+        assert whitened.shape == (4, self.num_channels, 1024 - self.size)
+        torch.testing.assert_close(whitened, uncropped[..., self.size :])
         dynamic = MinimumPhaseWhiten(self.fduration, self.sample_rate)
         expected = dynamic(X, psd, crop=False)
         torch.testing.assert_close(uncropped, expected, check_dtype=False)
@@ -404,7 +445,7 @@ class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
             whitened[..., :impulse_index],
             torch.zeros_like(whitened[..., :impulse_index]),
             rtol=0,
-            atol=1e-14,
+            atol=1e-7,
         )
         assert torch.count_nonzero(whitened[..., impulse_index:]) > 0
 
@@ -476,14 +517,14 @@ class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
         expected = transform(X, crop=False)
 
         split = 600
-        history = transform.kernel.size(-1) - 1
+        history = transform.kernel.size(-1)
         first = transform(X[..., :split], crop=False)
         second_input = X[..., split - history :]
         second = transform(second_input)
         actual = torch.cat((first, second), dim=-1)
 
         assert not torch.allclose(transform.kernel[0], transform.kernel[1])
-        torch.testing.assert_close(actual, expected, rtol=0, atol=2e-14)
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
 
     def test_fft_filter_matches_direct_convolution(self):
         transform = self.get_transform()
@@ -496,9 +537,9 @@ class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
             padded,
             torch.flip(transform.kernel[:, None], dims=(-1,)),
             groups=self.num_channels,
-        )
+        ).float()
 
-        torch.testing.assert_close(actual, expected, rtol=0, atol=2e-14)
+        torch.testing.assert_close(actual, expected)
 
     def test_fit_preserves_resolved_psd_grid(self):
         transform = self.get_transform()
@@ -569,16 +610,20 @@ class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
 
         torch.testing.assert_close(actual, expected)
 
-    def test_preserves_fitted_precision(self):
+    def test_preserves_fitted_precision_internally(self):
         transform = self.get_transform(dtype=torch.float64)
         psd = torch.ones(2 * self.size + 1, dtype=torch.float64)
         transform.fit(psd, psd)
 
         X = torch.randn(2, self.num_channels, 512, dtype=torch.float32)
-        whitened = transform(X, crop=False)
+        with patch("torch.fft.rfft", wraps=torch.fft.rfft) as rfft:
+            whitened = transform(X, crop=False)
 
         assert transform.kernel.dtype == torch.float64
-        assert whitened.dtype == torch.float64
+        assert all(
+            call.args[0].dtype == torch.float64 for call in rfft.call_args_list
+        )
+        assert whitened.dtype == torch.float32
 
     def test_validation_and_io(self, tmp_path):
         transform = self.get_transform()

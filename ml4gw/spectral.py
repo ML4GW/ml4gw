@@ -440,7 +440,9 @@ def truncate_inverse_power_spectrum(
 
 
 def minimum_phase_whitening_filter(
-    psd: PSDTensor, n_fft: int | None = None
+    psd: PSDTensor,
+    n_fft: int | None = None,
+    validate: bool = True,
 ) -> Tensor:
     """Construct a causal, minimum-phase whitening filter.
 
@@ -458,6 +460,10 @@ def minimum_phase_whitening_filter(
         n_fft:
             Length of the desired impulse response. If omitted, an even
             length of ``2 * (psd.size(-1) - 1)`` is inferred.
+        validate:
+            If ``True``, verify that all PSD values are finite and positive.
+            Disable only when these properties are guaranteed by the caller,
+            since validating a GPU tensor synchronizes with the host.
 
     Returns:
         A real-valued impulse response with the same leading dimensions as
@@ -465,8 +471,9 @@ def minimum_phase_whitening_filter(
 
     Raises:
         ValueError:
-            If the PSD shape is inconsistent with ``n_fft``, or if it
-            contains a non-finite or non-positive value.
+            If the PSD shape is inconsistent with ``n_fft``, or, when
+            ``validate`` is ``True``, if it contains a non-finite or
+            non-positive value.
 
     Notes:
         The folded-cepstrum construction follows the
@@ -488,10 +495,11 @@ def minimum_phase_whitening_filter(
         )
     if not torch.is_floating_point(psd):
         raise ValueError("PSD must be a floating-point tensor")
-    if not bool(torch.isfinite(psd).all()):
-        raise ValueError("PSD must contain only finite values")
-    if not bool((psd > 0).all()):
-        raise ValueError("PSD must contain only positive values")
+    if validate:
+        if not bool(torch.isfinite(psd).all()):
+            raise ValueError("PSD must contain only finite values")
+        if not bool((psd > 0).all()):
+            raise ValueError("PSD must contain only positive values")
 
     log_amplitude = -0.5 * torch.log(psd)
     cepstrum = torch.fft.irfft(log_amplitude, n=n_fft, dim=-1)

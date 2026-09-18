@@ -44,10 +44,15 @@ def test_minimum_phase_whiten_forward(
     benchmark, batch_size, device, maybe_sync
 ):
     whitener = MinimumPhaseWhiten(FDURATION, SAMPLE_RATE).to(device)
-    num_freqs = NUM_SAMPLES // 2 + 1
-    psd = torch.ones(NUM_CHANNELS, num_freqs, device=device)
-    x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
-    benchmark(maybe_sync(whitener), x, psd)
+    num_freqs = NUM_SAMPLES_WHITEN // 2 + 1
+    x = torch.randn(
+        batch_size, NUM_CHANNELS, NUM_SAMPLES_WHITEN, device=device
+    )
+    psds = (
+        torch.rand(batch_size, NUM_CHANNELS, num_freqs, device=device).abs()
+        + 1e-20
+    )
+    benchmark(maybe_sync(whitener), x, psds)
 
 
 def test_fixed_minimum_phase_whiten_forward(
@@ -58,9 +63,8 @@ def test_fixed_minimum_phase_whiten_forward(
         fduration=FDURATION,
         sample_rate=SAMPLE_RATE,
     )
-    num_freqs = NUM_SAMPLES // 2 + 1
-    psd = torch.ones(num_freqs)
-    whitener.fit(*(psd for _ in range(NUM_CHANNELS)))
-    whitener = whitener.float().to(device)
+    bg = torch.randn(NUM_CHANNELS, NUM_SAMPLES)
+    whitener.fit(bg[0], bg[1], fftlength=KERNEL_LEN)
+    whitener = whitener.to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
     benchmark(maybe_sync(whitener), x)
