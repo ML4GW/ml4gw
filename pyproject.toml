@@ -33,6 +33,7 @@ dependencies = [
     "torchaudio>=2.0,<2.11",
     "numpy>=1.0.0",
     "scipy>=1.9.0",
+    "h5py~=3.12",
 ]
 
 [dependency-groups]
@@ -45,7 +46,6 @@ dev = [
     "pytest-repeat>=0.9.3,<0.10",
     "pytest-benchmark>=4.0",
     "jsonargparse[signatures]>=4.0",
-    "h5py~=3.12",
 ]
 docs = [
     "Sphinx>5.0",
