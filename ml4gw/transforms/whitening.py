@@ -320,6 +320,7 @@ def _minimum_phase_kernel(
     sample_rate: float,
     highpass: float | None = None,
     lowpass: float | None = None,
+    validate: bool = False,
 ) -> torch.Tensor:
     """Build a minimum-phase kernel from the standard truncated PSD.
 
@@ -357,7 +358,7 @@ def _minimum_phase_kernel(
         highpass,
         lowpass,
     )
-    kernel = spectral.minimum_phase_whitening_filter(psd, validate=False)[
+    kernel = spectral.minimum_phase_whitening_filter(psd, validate=validate)[
         ..., :size
     ]
     while kernel.ndim > input_ndim:
@@ -376,7 +377,7 @@ def _minimum_phase_filter(
     """Apply a causal FIR as a linear convolution in the frequency domain."""
     size = kernel.size(-1)
     input_size = X.size(-1)
-    if crop and input_size < size:
+    if crop and input_size <= size:
         raise ValueError(
             f"Not enough timeseries samples {X.size(-1)} for number of "
             f"cropped samples {size}"
@@ -574,6 +575,7 @@ class FixedMinimumPhaseWhiten(FittableSpectralTransform):
             self.sample_rate,
             highpass,
             lowpass,
+            validate=True,
         )
         self.build(kernel=kernel)
 

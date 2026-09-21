@@ -1,5 +1,4 @@
 from functools import partial
-from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -83,14 +82,11 @@ class TestMinimumPhaseWhiteningFilter:
             minimum_phase_whitening_filter(torch.ones(3), n_fft=8)
 
     def test_skip_value_validation(self):
-        psd = torch.linspace(0.5, 4, 33, dtype=torch.float64)
+        psd = torch.tensor([1, 0, 2], dtype=torch.float64)
 
-        with patch("ml4gw.spectral.torch.isfinite") as isfinite:
-            actual = minimum_phase_whitening_filter(psd, validate=False)
-        expected = minimum_phase_whitening_filter(psd)
+        kernel = minimum_phase_whitening_filter(psd, validate=False)
 
-        isfinite.assert_not_called()
-        torch.testing.assert_close(actual, expected)
+        assert kernel.shape == (4,)
 
 
 @pytest.fixture(params=[4, 8])

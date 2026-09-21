@@ -237,7 +237,7 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
     def get_transform(self):
         return MinimumPhaseWhiten(self.fduration, self.sample_rate)
 
-    def test_crop_is_causal(self):
+    def test_crop_removes_settle_in(self):
         transform = self.get_transform()
         num_freqs = 2 * self.size + 1
         psd = torch.full((num_freqs,), 2 / self.sample_rate)
@@ -254,12 +254,30 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
     def test_psd_broadcasting(self, psd_ndim):
         transform = self.get_transform()
         X = torch.randn(4, self.num_channels, 1024)
-        psd = torch.full((2 * self.size + 1,), 2 / self.sample_rate)
-        expected = transform(X, psd, crop=False)
-
-        psd = psd.repeat(self.num_channels, 1)
+        psd = torch.stack(self.get_psds())
         if psd_ndim == 3:
-            psd = psd.repeat(X.size(0), 1, 1)
+            scales = torch.arange(1, X.size(0) + 1)[:, None, None]
+            psd = psd[None] * scales
+
+        expected = torch.cat(
+            [
+                torch.cat(
+                    [
+                        transform(
+                            X[batch : batch + 1, channel : channel + 1],
+                            psd[channel]
+                            if psd_ndim == 2
+                            else psd[batch, channel],
+                            crop=False,
+                        )
+                        for channel in range(self.num_channels)
+                    ],
+                    dim=1,
+                )
+                for batch in range(X.size(0))
+            ],
+            dim=0,
+        )
 
         whitened = transform(X, psd, crop=False)
 
@@ -391,6 +409,8 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
             transform(X, psd.repeat(X.size(0) + 1, self.num_channels, 1))
         with pytest.raises(ValueError, match="Not enough timeseries"):
             transform(X[..., : self.size - 1], psd)
+        with pytest.raises(ValueError, match="Not enough timeseries"):
+            transform(X[..., : self.size], psd)
         with pytest.raises(ValueError, match="at least two frequency bins"):
             transform(X, torch.ones(1))
         with pytest.raises(ValueError, match="floating-point tensor"):
@@ -401,9 +421,17 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
         psd = torch.full((self.size // 2 + 1,), 2 / self.sample_rate)
         X = torch.randn(2, self.num_channels, 1024)
 
-        whitened = transform(X, psd, crop=False)
+        with patch(
+            "ml4gw.transforms.whitening."
+            "spectral.minimum_phase_whitening_filter",
+            wraps=spectral.minimum_phase_whitening_filter,
+        ) as factorize:
+            whitened = transform(X, psd, crop=False)
 
         assert whitened.shape == X.shape
+        factorized_psd = factorize.call_args.args[0]
+        assert factorized_psd.size(-1) == self.size + 1
+        assert factorize.call_args.kwargs["validate"] is False
 
 
 class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
@@ -555,6 +583,7 @@ class TestFixedMinimumPhaseWhiten(MinimumPhaseWhitenTest):
 
         fitted_psd = factorize.call_args.args[0]
         assert fitted_psd.size(-1) == psd.size(-1)
+        assert factorize.call_args.kwargs["validate"] is True
 
     def test_truncated_filter_matches_standard_resolved_line(self):
         transform = self.get_transform()
