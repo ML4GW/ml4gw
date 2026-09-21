@@ -8,6 +8,8 @@ ml4gw.transforms.whitening
 
    .. autosummary::
    
+      FixedMinimumPhaseWhiten
       FixedWhiten
+      MinimumPhaseWhiten
       Whiten
    

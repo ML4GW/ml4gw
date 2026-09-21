@@ -10,6 +10,7 @@ ml4gw.spectral
    
       fast_spectral_density
       median
+      minimum_phase_whitening_filter
       normalize_by_psd
       spectral_density
       truncate_inverse_power_spectrum

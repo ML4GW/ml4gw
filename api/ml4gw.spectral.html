@@ -64,6 +64,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">ml4gw.spectral</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.fast_spectral_density"><code class="docutils literal notranslate"><span class="pre">fast_spectral_density()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.median"><code class="docutils literal notranslate"><span class="pre">median()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.minimum_phase_whitening_filter"><code class="docutils literal notranslate"><span class="pre">minimum_phase_whitening_filter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd"><code class="docutils literal notranslate"><span class="pre">normalize_by_psd()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.spectral_density"><code class="docutils literal notranslate"><span class="pre">spectral_density()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.spectral.truncate_inverse_power_spectrum"><code class="docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum()</span></code></a></li>
@@ -121,16 +122,19 @@ implementations. For more info, see</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.median" title="ml4gw.spectral.median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">median</span></code></a>(x, axis)</p></td>
 <td><p>Implements a median calculation that matches numpy's behavior for an even number of elements and includes the same bias correction used by <a class="reference external" href="https://github.com/scipy/scipy/blob/main/scipy/signal/_spectral_py.py#L2066">scipy's implementation</a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd" title="ml4gw.spectral.normalize_by_psd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_by_psd</span></code></a>(X, psd, sample_rate, pad[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.minimum_phase_whitening_filter" title="ml4gw.spectral.minimum_phase_whitening_filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimum_phase_whitening_filter</span></code></a>(psd[, n_fft, ...])</p></td>
+<td><p>Construct a causal, minimum-phase whitening filter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.normalize_by_psd" title="ml4gw.spectral.normalize_by_psd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_by_psd</span></code></a>(X, psd, sample_rate, pad[, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.spectral_density" title="ml4gw.spectral.spectral_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spectral_density</span></code></a>(x, nperseg, nstride, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.spectral_density" title="ml4gw.spectral.spectral_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spectral_density</span></code></a>(x, nperseg, nstride, ...[, ...])</p></td>
 <td><p>Compute the power spectral density of a multichannel timeseries or a batch of multichannel timeseries.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.truncate_inverse_power_spectrum" title="ml4gw.spectral.truncate_inverse_power_spectrum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum</span></code></a>(psd, ...[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.truncate_inverse_power_spectrum" title="ml4gw.spectral.truncate_inverse_power_spectrum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum</span></code></a>(psd, ...[, ...])</p></td>
 <td><p>Truncate the length of the time domain response of a whitening filter built using the specified <code class="docutils literal notranslate"><span class="pre">psd</span></code> so that it has maximum length <code class="docutils literal notranslate"><span class="pre">fduration</span></code> seconds.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.spectral.whiten" title="ml4gw.spectral.whiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whiten</span></code></a>(X, psd, fduration, sample_rate[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.spectral.whiten" title="ml4gw.spectral.whiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whiten</span></code></a>(X, psd, fduration, sample_rate[, ...])</p></td>
 <td><p>Whiten a batch of timeseries using the specified background one-sided power spectral densities (PSDs), modified to have the desired time domain response length <code class="docutils literal notranslate"><span class="pre">fduration</span></code> and possibly to highpass/lowpass filter.</p></td>
 </tr>
 </tbody>
@@ -218,6 +222,49 @@ the same bias correction used by
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ml4gw.spectral.minimum_phase_whitening_filter">
+<span class="sig-prename descclassname"><span class="pre">ml4gw.spectral.</span></span><span class="sig-name descname"><span class="pre">minimum_phase_whitening_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.spectral.minimum_phase_whitening_filter" title="Link to this definition"></a></dt>
+<dd><p>Construct a causal, minimum-phase whitening filter.</p>
+<p>The filter is obtained by spectral factorization of the inverse power
+spectral density using a folded real cepstrum. Its one-sided frequency
+response has magnitude <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">sqrt(psd)</span></code>, while its phase minimizes the
+delay of the corresponding impulse response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'num_ifos</span> <span class="pre">frequency']</span></code></span>) -- A strictly positive, finite one-sided power spectral density.
+Any leading dimensions are treated as batch dimensions.
+Use double precision for unscaled physical PSDs whose values may
+fall below the representable range of <code class="docutils literal notranslate"><span class="pre">torch.float32</span></code>.</p></li>
+<li><p><strong>n_fft</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Length of the desired impulse response. If omitted, an even
+length of <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">(psd.size(-1)</span> <span class="pre">-</span> <span class="pre">1)</span></code> is inferred.</p></li>
+<li><p><strong>validate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, verify that all PSD values are finite and positive.
+Disable only when these properties are guaranteed by the caller,
+since validating a GPU tensor synchronizes with the host.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>A real-valued impulse response with the same leading dimensions as</dt><dd><p><code class="docutils literal notranslate"><span class="pre">psd</span></code> and length <code class="docutils literal notranslate"><span class="pre">n_fft</span></code>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> -- If the PSD shape is inconsistent with <code class="docutils literal notranslate"><span class="pre">n_fft</span></code>, or, when
+    <code class="docutils literal notranslate"><span class="pre">validate</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, if it contains a non-finite or
+    non-positive value.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The folded-cepstrum construction follows the
+<a class="reference external" href="https://git.ligo.org/james.kennington/zlw/-/blob/b81871cdea5769bfb0a3b4ea57debbf6170d0c64/src/zlw/kernels.py">zlw MPWhiteningFilter implementation</a> at commit <code class="docutils literal notranslate"><span class="pre">b81871cd</span></code>.</p>
 </dd></dl>
 
 <dl class="py function">

@@ -52,7 +52,10 @@
 <li class="toctree-l2"><a class="reference internal" href="gw.html">Gravitational-wave projection and SNR calculation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transforms.qtransform.html">Q-transform</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transforms.spectral.html">Spectral Density</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Whitening</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Whitening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#minimum-phase-whitening">Minimum-phase whitening</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/ml4gw_tutorial.html">Tutorial on the basics of <code class="docutils literal notranslate"><span class="pre">ml4gw</span></code></a></li>
@@ -117,6 +120,63 @@
 <span class="n">X_whitened</span> <span class="o">=</span> <span class="n">whitener</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">psd</span><span class="p">)</span>
 </pre></div>
 </div>
+<section id="minimum-phase-whitening">
+<h2>Minimum-phase whitening<a class="headerlink" href="#minimum-phase-whitening" title="Link to this heading"></a></h2>
+<p>For online applications, a minimum-phase filter can whiten data without
+depending on future samples. The dynamic transform accepts a PSD at call time:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">MinimumPhaseWhiten</span>
+
+<span class="n">whitener</span> <span class="o">=</span> <span class="n">MinimumPhaseWhiten</span><span class="p">(</span>
+   <span class="n">fduration</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+   <span class="n">sample_rate</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
+   <span class="n">highpass</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">X_whitened</span> <span class="o">=</span> <span class="n">whitener</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">psd</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a fixed background, fit one PSD per channel once and reuse the stored
+filter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ml4gw.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedMinimumPhaseWhiten</span>
+
+<span class="n">whitener</span> <span class="o">=</span> <span class="n">FixedMinimumPhaseWhiten</span><span class="p">(</span>
+   <span class="n">num_channels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+   <span class="n">fduration</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+   <span class="n">sample_rate</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Passing fftlength means the inputs are interpreted as timeseries.</span>
+<span class="n">whitener</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+   <span class="n">background_h1</span><span class="p">,</span>
+   <span class="n">background_l1</span><span class="p">,</span>
+   <span class="n">fftlength</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+   <span class="n">highpass</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">X_whitened</span> <span class="o">=</span> <span class="n">whitener</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The highpass and lowpass responses use the same inverse-spectrum truncation
+as the standard whitening transforms before the response is converted to a
+causal minimum-phase filter. A causal minimum-phase response has
+frequency-dependent group delay, and changing the target magnitude with a
+highpass or lowpass cutoff also changes that delay, particularly near the
+transition frequencies. Cropping removes the initial filter warm-up but does
+not compensate for this frequency-dependent delay.</p>
+<p>By default, both transforms crop
+<code class="docutils literal notranslate"><span class="pre">int(fduration</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code> samples from the left edge. This matches the
+output length of <code class="xref py py-class docutils literal notranslate"><span class="pre">Whiten</span></code> for the even filter lengths
+used by the existing transforms, but the alignment is different: standard whitening removes
+half the filter duration from each edge, whereas minimum-phase whitening
+removes the full duration from the left. Outputs from the two transforms
+therefore should not be treated as sample-aligned.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">crop=False</span></code> to keep the input length and retain samples computed from
+zero-valued initial history. For consecutive chunks, prepend
+<code class="docutils literal notranslate"><span class="pre">int(fduration</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code> real historical samples before calling the
+transform. Directly supplied PSDs at physical strain scale should use double
+precision to avoid underflow during filter construction. Both transforms
+return <code class="docutils literal notranslate"><span class="pre">torch.float32</span></code> outputs, matching the existing whitening transforms.
+The minimum-phase transforms do not subtract a mean over the complete input
+segment, since that operation would depend on future samples.</p>
+</section>
 </section>
 
 

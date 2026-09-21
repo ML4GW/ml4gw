@@ -75,7 +75,9 @@
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.transform.html">ml4gw.transforms.transform</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ml4gw.transforms.waveforms.html">ml4gw.transforms.waveforms</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.transforms.whitening</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.whitening.FixedMinimumPhaseWhiten"><code class="docutils literal notranslate"><span class="pre">FixedMinimumPhaseWhiten</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.whitening.FixedWhiten"><code class="docutils literal notranslate"><span class="pre">FixedWhiten</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.whitening.MinimumPhaseWhiten"><code class="docutils literal notranslate"><span class="pre">MinimumPhaseWhiten</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ml4gw.transforms.whitening.Whiten"><code class="docutils literal notranslate"><span class="pre">Whiten</span></code></a></li>
 </ul>
 </li>
@@ -119,14 +121,91 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.whitening.FixedWhiten" title="ml4gw.transforms.whitening.FixedWhiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FixedWhiten</span></code></a>(num_channels, kernel_length, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.whitening.FixedMinimumPhaseWhiten" title="ml4gw.transforms.whitening.FixedMinimumPhaseWhiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FixedMinimumPhaseWhiten</span></code></a>(num_channels, ...[, ...])</p></td>
+<td><p>Whiten timeseries with a fitted causal minimum-phase FIR filter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.transforms.whitening.FixedWhiten" title="ml4gw.transforms.whitening.FixedWhiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FixedWhiten</span></code></a>(num_channels, kernel_length, ...)</p></td>
 <td><p>Transform that whitens timeseries by a fixed power spectral density that's determined by calling the <code class="docutils literal notranslate"><span class="pre">.fit</span></code> method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.transforms.whitening.MinimumPhaseWhiten" title="ml4gw.transforms.whitening.MinimumPhaseWhiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MinimumPhaseWhiten</span></code></a>(fduration, sample_rate[, ...])</p></td>
+<td><p>Whiten timeseries with a dynamic causal minimum-phase FIR filter.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.transforms.whitening.Whiten" title="ml4gw.transforms.whitening.Whiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Whiten</span></code></a>(fduration, sample_rate[, highpass, ...])</p></td>
 <td><p>Normalize the frequency content of timeseries data by a provided power spectral density, such that if the timeseries are sampled from the same distribution as the PSD the normalized power will be approximately unity across all frequency bins.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedMinimumPhaseWhiten">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">FixedMinimumPhaseWhiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float64</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedMinimumPhaseWhiten" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ml4gw.transforms.transform.html#ml4gw.transforms.transform.FittableSpectralTransform" title="ml4gw.transforms.transform.FittableSpectralTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">FittableSpectralTransform</span></code></a></p>
+<p>Whiten timeseries with a fitted causal minimum-phase FIR filter.</p>
+<p>This transform does not subtract the mean of the complete input segment
+because that operation depends on future samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_channels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) -- Number of channels to whiten.</p></li>
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Length of the causal whitening filter in seconds.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Sampling rate of input timeseries in Hz.</p></li>
+<li><p><strong>dtype</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code></span>) -- Datatype used to store the fitted filter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedMinimumPhaseWhiten.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">background</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fftlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedMinimumPhaseWhiten.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit a minimum-phase whitening filter to background data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*background</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'time']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code></span>) -- One time- or frequency-domain tensor per channel. Inputs are
+interpreted as one-sided PSDs when <code class="docutils literal notranslate"><span class="pre">fftlength</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>;
+otherwise Welch PSDs are estimated from the timeseries.
+Unscaled physical PSDs may require double precision to avoid
+underflow.</p></li>
+<li><p><strong>fftlength</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Length in seconds of Welch frames used for time-domain input.</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Optional highpass frequency in Hz. Applied by
+<a class="reference internal" href="ml4gw.spectral.html#ml4gw.spectral.truncate_inverse_power_spectrum" title="ml4gw.spectral.truncate_inverse_power_spectrum"><code class="xref py py-func docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum()</span></code></a> before
+minimum-phase factorization.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Optional lowpass frequency in Hz. Applied by
+<a class="reference internal" href="ml4gw.spectral.html#ml4gw.spectral.truncate_inverse_power_spectrum" title="ml4gw.spectral.truncate_inverse_power_spectrum"><code class="xref py py-func docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum()</span></code></a> before
+minimum-phase factorization.</p></li>
+<li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Overlap in seconds between Welch frames. Defaults to half of
+<code class="docutils literal notranslate"><span class="pre">fftlength</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedMinimumPhaseWhiten.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedMinimumPhaseWhiten.forward" title="Link to this definition"></a></dt>
+<dd><p>Apply the fitted causal filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span>) -- Batch of multichannel timeseries with shape <code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T)</span></code>.</p></li>
+<li><p><strong>crop</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, remove <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">*</span> <span class="pre">sample_rate</span></code> samples from
+the left edge. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, return the full timeseries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">torch.float32</span></code> tensor with shape <code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T</span> <span class="pre">-</span> <span class="pre">L)</span></code> when
+cropped, where <code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">=</span> <span class="pre">int(fduration</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T)</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="ml4gw.transforms.whitening.FixedWhiten">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">FixedWhiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float64</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.FixedWhiten" title="Link to this definition"></a></dt>
@@ -232,6 +311,60 @@ full timeseries.</p></li>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.transforms.whitening.MinimumPhaseWhiten">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.transforms.whitening.</span></span><span class="sig-name descname"><span class="pre">MinimumPhaseWhiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fduration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.MinimumPhaseWhiten" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Whiten timeseries with a dynamic causal minimum-phase FIR filter.</p>
+<p>A whitening kernel is constructed from the PSD provided at call time. It
+uses only current and previous samples. By default, the initial warm-up
+samples that depend on zero-valued history are removed from the output,
+along with one additional sample to match <a class="reference internal" href="#ml4gw.transforms.whitening.Whiten" title="ml4gw.transforms.whitening.Whiten"><code class="xref py py-class docutils literal notranslate"><span class="pre">Whiten</span></code></a> output lengths.
+Unlike <a class="reference internal" href="#ml4gw.transforms.whitening.Whiten" title="ml4gw.transforms.whitening.Whiten"><code class="xref py py-class docutils literal notranslate"><span class="pre">Whiten</span></code></a>, it does not subtract the mean of the complete
+input segment because that operation depends on future samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fduration</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Length of the causal whitening filter in seconds.</p></li>
+<li><p><strong>sample_rate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Sampling rate of input timeseries in Hz.</p></li>
+<li><p><strong>highpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Optional highpass frequency in Hz. The response is constructed by
+<a class="reference internal" href="ml4gw.spectral.html#ml4gw.spectral.truncate_inverse_power_spectrum" title="ml4gw.spectral.truncate_inverse_power_spectrum"><code class="xref py py-func docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum()</span></code></a>, as in
+<a class="reference internal" href="#ml4gw.transforms.whitening.Whiten" title="ml4gw.transforms.whitening.Whiten"><code class="xref py py-class docutils literal notranslate"><span class="pre">Whiten</span></code></a>.</p></li>
+<li><p><strong>lowpass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) -- Optional lowpass frequency in Hz. The response is constructed by
+<a class="reference internal" href="ml4gw.spectral.html#ml4gw.spectral.truncate_inverse_power_spectrum" title="ml4gw.spectral.truncate_inverse_power_spectrum"><code class="xref py py-func docutils literal notranslate"><span class="pre">truncate_inverse_power_spectrum()</span></code></a>, as in
+<a class="reference internal" href="#ml4gw.transforms.whitening.Whiten" title="ml4gw.transforms.whitening.Whiten"><code class="xref py py-class docutils literal notranslate"><span class="pre">Whiten</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.transforms.whitening.MinimumPhaseWhiten.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.transforms.whitening.MinimumPhaseWhiten.forward" title="Link to this definition"></a></dt>
+<dd><p>Whiten input using a PSD supplied at call time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span>) -- Batch of multichannel timeseries with shape <code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T)</span></code>.</p></li>
+<li><p><strong>psd</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'frequency']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'channel</span> <span class="pre">frequency']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">frequency']</span></code></span>) -- One-sided PSD with shape <code class="docutils literal notranslate"><span class="pre">(F,)</span></code>, <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">F)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">F)</span></code>. Unscaled physical PSDs may require double
+precision to avoid underflow.</p></li>
+<li><p><strong>crop</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) -- If <code class="docutils literal notranslate"><span class="pre">True</span></code>, remove <code class="docutils literal notranslate"><span class="pre">fduration</span> <span class="pre">*</span> <span class="pre">sample_rate</span></code> samples from
+the left edge. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, return the full timeseries,
+including samples computed from zero-valued initial history.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'batch</span> <span class="pre">channel</span> <span class="pre">time']</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">torch.float32</span></code> tensor with shape <code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T</span> <span class="pre">-</span> <span class="pre">L)</span></code> when
+cropped, where <code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">=</span> <span class="pre">int(fduration</span> <span class="pre">*</span> <span class="pre">sample_rate)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(B,</span> <span class="pre">C,</span> <span class="pre">T)</span></code> otherwise.</p>
 </dd>
 </dl>
 </dd></dl>
