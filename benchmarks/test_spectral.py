@@ -49,24 +49,24 @@ def test_spectral_density(
     )
 
 
-def test_truncate_inverse_power_spectrum(benchmark, device, maybe_sync):
+def test_truncate_inverse_amplitude_spectrum(benchmark, device, maybe_sync):
     num_freqs = NUM_SAMPLES // 2 + 1
-    psd = torch.rand(1, NUM_CHANNELS, num_freqs, device=device) + 1e-20
+    asd = torch.rand(1, NUM_CHANNELS, num_freqs, device=device) + 1e-20
     benchmark(
-        maybe_sync(spectral.truncate_inverse_power_spectrum),
-        psd,
+        maybe_sync(spectral.truncate_inverse_amplitude_spectrum),
+        asd,
         FDURATION,
         SAMPLE_RATE,
     )
 
 
-def test_normalize_by_psd(benchmark, batch_size, device, maybe_sync):
+def test_normalize_by_asd(benchmark, batch_size, device, maybe_sync):
     n = NUM_SAMPLES * 4
     x = torch.randn(batch_size, NUM_CHANNELS, n, device=device)
     num_freqs = n // 2 + 1
-    psd = torch.rand(NUM_CHANNELS, num_freqs, device=device) + 1e-20
+    asd = torch.rand(NUM_CHANNELS, num_freqs, device=device) + 1e-20
     pad = int(FDURATION * SAMPLE_RATE) // 2
-    benchmark(maybe_sync(spectral.normalize_by_psd), x, psd, SAMPLE_RATE, pad)
+    benchmark(maybe_sync(spectral.normalize_by_asd), x, asd, SAMPLE_RATE, pad)
 
 
 def test_whiten(benchmark, batch_size, device, maybe_sync):

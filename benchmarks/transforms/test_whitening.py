@@ -3,7 +3,12 @@
 import torch
 from constants import KERNEL_LEN, NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE
 
-from ml4gw.transforms import FixedWhiten, Whiten
+from ml4gw.transforms import (
+    FixedMinimumPhaseWhiten,
+    FixedWhiten,
+    MinimumPhaseWhiten,
+    Whiten,
+)
 
 FDURATION = 0.5
 NUM_SAMPLES_WHITEN = SAMPLE_RATE * 4
@@ -30,6 +35,36 @@ def test_fixed_whiten_forward(benchmark, batch_size, device, maybe_sync):
     )
     bg = torch.randn(NUM_CHANNELS, NUM_SAMPLES)
     whitener.fit(FDURATION, bg[0], bg[1], fftlength=KERNEL_LEN)
+    whitener = whitener.to(device)
+    x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
+    benchmark(maybe_sync(whitener), x)
+
+
+def test_minimum_phase_whiten_forward(
+    benchmark, batch_size, device, maybe_sync
+):
+    whitener = MinimumPhaseWhiten(FDURATION, SAMPLE_RATE).to(device)
+    num_freqs = NUM_SAMPLES_WHITEN // 2 + 1
+    x = torch.randn(
+        batch_size, NUM_CHANNELS, NUM_SAMPLES_WHITEN, device=device
+    )
+    asds = (
+        torch.rand(batch_size, NUM_CHANNELS, num_freqs, device=device).abs()
+        + 1e-20
+    )
+    benchmark(maybe_sync(whitener), x, asds)
+
+
+def test_fixed_minimum_phase_whiten_forward(
+    benchmark, batch_size, device, maybe_sync
+):
+    whitener = FixedMinimumPhaseWhiten(
+        num_channels=NUM_CHANNELS,
+        fduration=FDURATION,
+        sample_rate=SAMPLE_RATE,
+    )
+    bg = torch.randn(NUM_CHANNELS, NUM_SAMPLES)
+    whitener.fit(bg[0], bg[1], fftlength=KERNEL_LEN)
     whitener = whitener.to(device)
     x = torch.randn(batch_size, NUM_CHANNELS, NUM_SAMPLES, device=device)
     benchmark(maybe_sync(whitener), x)
