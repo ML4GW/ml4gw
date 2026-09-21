@@ -283,3 +283,316 @@ class FixedWhiten(FittableSpectralTransform):
         return spectral.normalize_by_psd(
             X, self.psd, self.sample_rate, pad, crop
         )
+
+
+def _validate_minimum_phase_input(
+    X: TimeSeries3d,
+    psd: FrequencySeries1to3d | None = None,
+    num_channels: int | None = None,
+) -> None:
+    if X.ndim != 3:
+        raise ValueError(
+            "Whitening transform expected input with shape "
+            f"(batch, channels, time), but found {X.shape}"
+        )
+    if num_channels is not None and X.size(1) != num_channels:
+        raise ValueError(
+            "Whitening transform expected input with shape "
+            f"(batch, {num_channels}, time), but found {X.shape}"
+        )
+    if psd is None:
+        return
+    if psd.ndim < 1 or psd.ndim > 3:
+        raise ValueError("PSD must have one, two, or three dimensions")
+    if psd.ndim >= 2 and psd.size(-2) != X.size(1):
+        raise ValueError(
+            f"PSD has {psd.size(-2)} channels, but input has {X.size(1)}"
+        )
+    if psd.ndim == 3 and psd.size(0) != X.size(0):
+        raise ValueError(
+            f"PSD has batch size {psd.size(0)}, but input has {X.size(0)}"
+        )
+
+
+def _minimum_phase_kernel(
+    psd: FrequencySeries1to3d,
+    size: int,
+    sample_rate: float,
+    highpass: float | None = None,
+    lowpass: float | None = None,
+    validate: bool = False,
+) -> torch.Tensor:
+    """Build a minimum-phase kernel from the standard truncated PSD.
+
+    The PSD is first processed by
+    :func:`~ml4gw.spectral.truncate_inverse_power_spectrum`, including any
+    requested highpass or lowpass response, then spectrally factorized into a
+    causal FIR filter.
+    """
+    if psd.size(-1) < 2:
+        raise ValueError("PSD must contain at least two frequency bins")
+    if not torch.is_floating_point(psd):
+        raise ValueError("PSD must be a floating-point tensor")
+
+    n_fft = 2 * (psd.size(-1) - 1)
+
+    # Construct the response at no less than twice the final FIR duration.
+    # This preserves resolved spectral structure during factorization instead
+    # of first downsampling the PSD to the final number of filter taps.
+    if n_fft < 2 * size:
+        shape = psd.shape[:-1]
+        psd = torch.nn.functional.interpolate(
+            psd.reshape(-1, 1, psd.size(-1)),
+            size=size + 1,
+            mode="linear",
+            align_corners=True,
+        ).reshape(*shape, size + 1)
+
+    input_ndim = psd.ndim
+    while psd.ndim < 3:
+        psd = psd[None]
+    psd = spectral.truncate_inverse_power_spectrum(
+        psd,
+        size / sample_rate,
+        sample_rate,
+        highpass,
+        lowpass,
+    )
+    kernel = spectral.minimum_phase_whitening_filter(psd, validate=validate)[
+        ..., :size
+    ]
+    while kernel.ndim > input_ndim:
+        kernel = kernel[0]
+
+    # ``truncate_inverse_power_spectrum`` accounts for the one-sided PSD
+    # convention. Retain the unit-variance normalization used by ``Whiten``.
+    return kernel / sample_rate**0.5
+
+
+def _minimum_phase_filter(
+    X: TimeSeries3d,
+    kernel: torch.Tensor,
+    crop: bool,
+) -> TimeSeries3d:
+    """Apply a causal FIR as a linear convolution in the frequency domain."""
+    size = kernel.size(-1)
+    input_size = X.size(-1)
+    if crop and input_size <= size:
+        raise ValueError(
+            f"Not enough timeseries samples {X.size(-1)} for number of "
+            f"cropped samples {size}"
+        )
+
+    dtype = torch.promote_types(X.dtype, kernel.dtype)
+    X = X.to(dtype=dtype)
+    kernel = kernel.to(device=X.device, dtype=dtype)
+    while kernel.ndim < X.ndim:
+        kernel = kernel.unsqueeze(0)
+
+    convolution_size = input_size + size - 1
+    n_fft = 1 << (convolution_size - 1).bit_length()
+    X_tilde = torch.fft.rfft(X, n=n_fft, dim=-1)
+    kernel_tilde = torch.fft.rfft(kernel, n=n_fft, dim=-1)
+    X = torch.fft.irfft(X_tilde * kernel_tilde, n=n_fft, dim=-1)
+    X = X[..., :input_size]
+    if crop:
+        X = X[..., size:]
+    return X.float()
+
+
+class MinimumPhaseWhiten(torch.nn.Module):
+    """Whiten timeseries with a dynamic causal minimum-phase FIR filter.
+
+    A whitening kernel is constructed from the PSD provided at call time. It
+    uses only current and previous samples. By default, the initial warm-up
+    samples that depend on zero-valued history are removed from the output,
+    along with one additional sample to match :class:`Whiten` output lengths.
+    Unlike :class:`Whiten`, it does not subtract the mean of the complete
+    input segment because that operation depends on future samples.
+
+    Args:
+        fduration:
+            Length of the causal whitening filter in seconds.
+        sample_rate:
+            Sampling rate of input timeseries in Hz.
+        highpass:
+            Optional highpass frequency in Hz. The response is constructed by
+            :func:`~ml4gw.spectral.truncate_inverse_power_spectrum`, as in
+            :class:`Whiten`.
+        lowpass:
+            Optional lowpass frequency in Hz. The response is constructed by
+            :func:`~ml4gw.spectral.truncate_inverse_power_spectrum`, as in
+            :class:`Whiten`.
+    """
+
+    def __init__(
+        self,
+        fduration: float,
+        sample_rate: float,
+        highpass: float | None = None,
+        lowpass: float | None = None,
+    ) -> None:
+        super().__init__()
+        self.fduration = fduration
+        self.sample_rate = sample_rate
+        self.highpass = highpass
+        self.lowpass = lowpass
+        self.size = int(fduration * sample_rate)
+        if self.size < 2:
+            raise ValueError(
+                "Whitening filter must contain at least two samples"
+            )
+
+    def forward(
+        self,
+        X: TimeSeries3d,
+        psd: FrequencySeries1to3d,
+        crop: bool = True,
+    ) -> TimeSeries3d:
+        """Whiten input using a PSD supplied at call time.
+
+        Args:
+            X:
+                Batch of multichannel timeseries with shape ``(B, C, T)``.
+            psd:
+                One-sided PSD with shape ``(F,)``, ``(C, F)``, or
+                ``(B, C, F)``. Unscaled physical PSDs may require double
+                precision to avoid underflow.
+            crop:
+                If ``True``, remove ``fduration * sample_rate`` samples from
+                the left edge. If ``False``, return the full timeseries,
+                including samples computed from zero-valued initial history.
+
+        Returns:
+            A ``torch.float32`` tensor with shape ``(B, C, T - L)`` when
+            cropped, where ``L = int(fduration * sample_rate)``, or
+            ``(B, C, T)`` otherwise.
+        """
+        _validate_minimum_phase_input(X, psd)
+        kernel = _minimum_phase_kernel(
+            psd,
+            self.size,
+            self.sample_rate,
+            self.highpass,
+            self.lowpass,
+        )
+        return _minimum_phase_filter(X, kernel, crop)
+
+
+class FixedMinimumPhaseWhiten(FittableSpectralTransform):
+    """Whiten timeseries with a fitted causal minimum-phase FIR filter.
+
+    This transform does not subtract the mean of the complete input segment
+    because that operation depends on future samples.
+
+    Args:
+        num_channels:
+            Number of channels to whiten.
+        fduration:
+            Length of the causal whitening filter in seconds.
+        sample_rate:
+            Sampling rate of input timeseries in Hz.
+        dtype:
+            Datatype used to store the fitted filter.
+    """
+
+    def __init__(
+        self,
+        num_channels: int,
+        fduration: float,
+        sample_rate: float,
+        dtype: torch.dtype = torch.float64,
+    ) -> None:
+        super().__init__()
+        self.num_channels = num_channels
+        self.fduration = fduration
+        self.sample_rate = sample_rate
+
+        size = int(fduration * sample_rate)
+        if size < 2:
+            raise ValueError(
+                "Whitening filter must contain at least two samples"
+            )
+        kernel = torch.zeros((num_channels, size), dtype=dtype)
+        self.register_buffer("kernel", kernel)
+
+    def fit(
+        self,
+        *background: TimeSeries1d | FrequencySeries1d,
+        fftlength: float | None = None,
+        highpass: float | None = None,
+        lowpass: float | None = None,
+        overlap: float | None = None,
+    ) -> None:
+        """Fit a minimum-phase whitening filter to background data.
+
+        Args:
+            *background:
+                One time- or frequency-domain tensor per channel. Inputs are
+                interpreted as one-sided PSDs when ``fftlength`` is ``None``;
+                otherwise Welch PSDs are estimated from the timeseries.
+                Unscaled physical PSDs may require double precision to avoid
+                underflow.
+            fftlength:
+                Length in seconds of Welch frames used for time-domain input.
+            highpass:
+                Optional highpass frequency in Hz. Applied by
+                :func:`~ml4gw.spectral.truncate_inverse_power_spectrum` before
+                minimum-phase factorization.
+            lowpass:
+                Optional lowpass frequency in Hz. Applied by
+                :func:`~ml4gw.spectral.truncate_inverse_power_spectrum` before
+                minimum-phase factorization.
+            overlap:
+                Overlap in seconds between Welch frames. Defaults to half of
+                ``fftlength``.
+        """
+        if len(background) != self.num_channels:
+            raise ValueError(
+                f"Expected to fit whitening transform on {self.num_channels} "
+                f"background timeseries, but was passed {len(background)}"
+            )
+
+        psds = []
+        for x in background:
+            if fftlength is None:
+                num_freqs = x.size(-1)
+            else:
+                num_freqs = int(fftlength * self.sample_rate) // 2 + 1
+            psds.append(
+                self.normalize_psd(
+                    x,
+                    self.sample_rate,
+                    num_freqs,
+                    fftlength,
+                    overlap,
+                )
+            )
+        psd = torch.stack(psds)
+        kernel = _minimum_phase_kernel(
+            psd,
+            self.kernel.size(-1),
+            self.sample_rate,
+            highpass,
+            lowpass,
+            validate=True,
+        )
+        self.build(kernel=kernel)
+
+    def forward(self, X: TimeSeries3d, crop: bool = True) -> TimeSeries3d:
+        """Apply the fitted causal filter.
+
+        Args:
+            X:
+                Batch of multichannel timeseries with shape ``(B, C, T)``.
+            crop:
+                If ``True``, remove ``fduration * sample_rate`` samples from
+                the left edge. If ``False``, return the full timeseries.
+
+        Returns:
+            A ``torch.float32`` tensor with shape ``(B, C, T - L)`` when
+            cropped, where ``L = int(fduration * sample_rate)``, or
+            ``(B, C, T)`` otherwise.
+        """
+        _validate_minimum_phase_input(X, num_channels=self.num_channels)
+        return _minimum_phase_filter(X, self.kernel, crop)
