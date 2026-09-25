@@ -5,7 +5,88 @@ import pytest
 import torch
 from scipy import signal
 
-from ml4gw.spectral import fast_spectral_density, spectral_density, whiten
+from ml4gw.spectral import (
+    fast_spectral_density,
+    minimum_phase_whitening_filter,
+    spectral_density,
+    whiten,
+)
+
+
+class TestMinimumPhaseWhiteningFilter:
+    def test_flat_asd_is_impulse(self):
+        asd = torch.ones(33, dtype=torch.float64)
+        kernel = minimum_phase_whitening_filter(asd)
+
+        expected = torch.zeros(64, dtype=torch.float64)
+        expected[0] = 1
+        torch.testing.assert_close(kernel, expected, rtol=0, atol=1e-12)
+
+    def test_response_has_inverse_asd_magnitude(self):
+        asd = torch.linspace(0.5, 4, 33, dtype=torch.float64).repeat(2, 1)
+        kernel = minimum_phase_whitening_filter(asd)
+        response = torch.fft.rfft(kernel, dim=-1)
+
+        torch.testing.assert_close(
+            response.abs(), asd.reciprocal(), rtol=1e-12, atol=1e-12
+        )
+
+    def test_odd_length_response(self):
+        asd = torch.linspace(0.5, 4, 33, dtype=torch.float64)
+        kernel = minimum_phase_whitening_filter(asd, n_fft=65)
+
+        assert kernel.size(-1) == 65
+        torch.testing.assert_close(
+            torch.fft.rfft(kernel).abs(),
+            asd.reciprocal(),
+            rtol=1e-12,
+            atol=1e-12,
+        )
+
+    def test_first_order_filter_matches_analytic_response(self):
+        n_fft = 256
+        coefficient = 0.8
+        omega = (
+            2
+            * torch.pi
+            * torch.arange(n_fft // 2 + 1, dtype=torch.float64)
+            / n_fft
+        )
+        expected = 1 - coefficient * torch.exp(-1j * omega)
+        asd = expected.abs().reciprocal()
+
+        kernel = minimum_phase_whitening_filter(asd)
+
+        expected_kernel = torch.zeros(n_fft, dtype=torch.float64)
+        expected_kernel[:2] = torch.tensor(
+            [1, -coefficient], dtype=torch.float64
+        )
+        torch.testing.assert_close(kernel, expected_kernel, rtol=0, atol=3e-15)
+
+    @pytest.mark.parametrize(
+        "asd",
+        [
+            torch.tensor(1.0),
+            torch.tensor([1.0]),
+            torch.tensor([1.0, 0.0]),
+            torch.tensor([1.0, torch.inf]),
+            torch.tensor([1, 2]),
+        ],
+    )
+    def test_invalid_asd(self, asd):
+        with pytest.raises(ValueError):
+            minimum_phase_whitening_filter(asd)
+
+    def test_inconsistent_fft_length(self):
+        with pytest.raises(ValueError, match="ASD length"):
+            minimum_phase_whitening_filter(torch.ones(3), n_fft=8)
+
+    def test_skip_value_validation(self):
+        asd = torch.tensor([1, 0, 2], dtype=torch.float64)
+
+        kernel = minimum_phase_whitening_filter(asd, validate=False)
+
+        assert kernel.shape == (4,)
 
 
 @pytest.fixture(params=[4, 8])

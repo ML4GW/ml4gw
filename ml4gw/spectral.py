@@ -443,6 +443,95 @@ def truncate_inverse_amplitude_spectrum(
     return 1 / (inv_asd.abs() * 2**0.5)
 
 
+def minimum_phase_whitening_filter(
+    asd: ASDTensor,
+    n_fft: int | None = None,
+    validate: bool = True,
+) -> Tensor:
+    """Construct a causal, minimum-phase whitening filter.
+
+    The filter is obtained by spectral factorization of the inverse
+    amplitude spectral density using a folded real cepstrum. Its one-sided
+    frequency response has magnitude ``1 / asd``, while its phase minimizes
+    the delay of the corresponding impulse response.
+
+    Args:
+        asd:
+            A strictly positive, finite one-sided amplitude spectral density.
+            Any leading dimensions are treated as batch dimensions.
+            Use double precision for unscaled physical ASDs whose values may
+            fall below the representable range of ``torch.float32``.
+        n_fft:
+            Length of the desired impulse response. If omitted, an even
+            length of ``2 * (asd.size(-1) - 1)`` is inferred.
+        validate:
+            If ``True``, verify that all ASD values are finite and positive.
+            Disable only when these properties are guaranteed by the caller,
+            since validating a GPU tensor synchronizes with the host.
+
+    Returns:
+        A real-valued impulse response with the same leading dimensions as
+            ``asd`` and length ``n_fft``.
+
+    Raises:
+        ValueError:
+            If the ASD shape is inconsistent with ``n_fft``, or, when
+            ``validate`` is ``True``, if it contains a non-finite or
+            non-positive value.
+
+    Notes:
+        The folded-cepstrum construction follows the
+        `zlw MPWhiteningFilter implementation`_ at commit ``b81871cd``.
+
+        .. _zlw MPWhiteningFilter implementation:
+            https://git.ligo.org/james.kennington/zlw/-/blob/b81871cdea5769bfb0a3b4ea57debbf6170d0c64/src/zlw/kernels.py
+    """
+    if asd.ndim == 0:
+        raise ValueError("ASD must have a frequency dimension")
+    if asd.size(-1) < 2:
+        raise ValueError("ASD must contain at least two frequency bins")
+    if n_fft is None:
+        n_fft = 2 * (asd.size(-1) - 1)
+    if n_fft < 2 or asd.size(-1) != n_fft // 2 + 1:
+        raise ValueError(
+            "ASD length must equal n_fft // 2 + 1, but found "
+            f"{asd.size(-1)} bins for n_fft={n_fft}"
+        )
+    if not torch.is_floating_point(asd):
+        raise ValueError("ASD must be a floating-point tensor")
+    if validate:
+        if not bool(torch.isfinite(asd).all()):
+            raise ValueError("ASD must contain only finite values")
+        if not bool((asd > 0).all()):
+            raise ValueError("ASD must contain only positive values")
+
+    log_amplitude = -torch.log(asd)
+    cepstrum = torch.fft.irfft(log_amplitude, n=n_fft, dim=-1)
+    midpoint = n_fft // 2
+    if n_fft % 2 == 0:
+        folded = torch.cat(
+            (
+                cepstrum[..., :1],
+                2 * cepstrum[..., 1:midpoint],
+                cepstrum[..., midpoint : midpoint + 1],
+                torch.zeros_like(cepstrum[..., midpoint + 1 :]),
+            ),
+            dim=-1,
+        )
+    else:
+        folded = torch.cat(
+            (
+                cepstrum[..., :1],
+                2 * cepstrum[..., 1 : midpoint + 1],
+                torch.zeros_like(cepstrum[..., midpoint + 1 :]),
+            ),
+            dim=-1,
+        )
+
+    response = torch.exp(torch.fft.rfft(folded, n=n_fft, dim=-1))
+    return torch.fft.irfft(response, n=n_fft, dim=-1)
+
+
 def normalize_by_asd(
     X: WaveformTensor,
     asd: ASDTensor,
