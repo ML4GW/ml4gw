@@ -1,3 +1,4 @@
+import warnings
 from collections.abc import Callable
 
 import torch
@@ -11,6 +12,10 @@ class GroupNorm1D(torch.nn.Module):
     """
     Custom implementation of GroupNorm which is faster than the
     out-of-the-box PyTorch version at inference time.
+
+    `num_groups` defaults to one group per channel, and is capped at
+    `num_channels`, so a single value can be used for every layer of
+    a network whose narrowest layer has fewer channels than that.
     """
 
     def __init__(
@@ -20,7 +25,7 @@ class GroupNorm1D(torch.nn.Module):
         eps: float = 1e-5,
     ):
         super().__init__()
-        num_groups = num_groups or num_channels
+        num_groups = min(num_groups or num_channels, num_channels)
         if num_channels % num_groups:
             raise ValueError("num_groups must be a factor of num_channels")
 
@@ -73,11 +78,24 @@ class GroupNorm1D(torch.nn.Module):
 class GroupNorm1DGetter:
     """
     Utility for making a NormLayer Callable that maps from
-    an integer number of channels to a torch Module. Useful
-    for command-line parameterization with jsonargparse.
+    an integer number of channels to a torch Module.
+
+    .. deprecated::
+        Use `GroupNorm1D` directly, e.g. `functools.partial(GroupNorm1D,
+        num_groups=groups)` in code, or `GroupNorm1D` as the class path
+        with `num_groups` in a jsonargparse config. jsonargparse>=4.52
+        rejects this class for a `NormLayer`.
     """
 
     def __init__(self, groups: int | None = None) -> None:
+        warnings.warn(
+            "GroupNorm1DGetter is deprecated and will be removed in a "
+            "future release. Use GroupNorm1D instead: as a class path "
+            "with `num_groups` in configs, or "
+            "functools.partial(GroupNorm1D, num_groups=...) in code.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.groups = groups
 
     def __call__(self, num_channels: int) -> torch.nn.Module:
@@ -88,15 +106,52 @@ class GroupNorm1DGetter:
         return GroupNorm1D(num_channels, num_groups)
 
 
+class GroupNorm2D(torch.nn.GroupNorm):
+    """
+    `torch.nn.GroupNorm` with the number of channels as its
+    first argument, like `GroupNorm1D`.
+
+    This lets a `NormLayer` be specified with jsonargparse by
+    pointing at this class and setting only `num_groups`:
+    jsonargparse passes the channel count as the first positional
+    argument when the layer is built. As with `GroupNorm1D`,
+    `num_groups` defaults to one group per channel and is capped
+    at `num_channels`.
+    """
+
+    def __init__(
+        self,
+        num_channels: int,
+        num_groups: int | None = None,
+        eps: float = 1e-5,
+        affine: bool = True,
+    ):
+        num_groups = min(num_groups or num_channels, num_channels)
+        super().__init__(num_groups, num_channels, eps=eps, affine=affine)
+
+
 # TODO generalize faster 1dDGroupNorm to 2D
 class GroupNorm2DGetter:
     """
     Utility for making a NormLayer Callable that maps from
-    an integer number of channels to a torch Module. Useful
-    for command-line parameterization with jsonargparse.
+    an integer number of channels to a torch Module.
+
+    .. deprecated::
+        Use `GroupNorm2D` directly, e.g. `functools.partial(GroupNorm2D,
+        num_groups=groups)` in code, or `GroupNorm2D` as the class path
+        with `num_groups` in a jsonargparse config. jsonargparse>=4.52
+        rejects this class for a `NormLayer`.
     """
 
     def __init__(self, groups: int | None = None) -> None:
+        warnings.warn(
+            "GroupNorm2DGetter is deprecated and will be removed in a "
+            "future release. Use GroupNorm2D instead: as a class path "
+            "with `num_groups` in configs, or "
+            "functools.partial(GroupNorm2D, num_groups=...) in code.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.groups = groups
 
     def __call__(self, num_channels: int) -> torch.nn.Module:
