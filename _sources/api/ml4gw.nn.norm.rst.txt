@@ -10,5 +10,6 @@ ml4gw.nn.norm
    
       GroupNorm1D
       GroupNorm1DGetter
+      GroupNorm2D
       GroupNorm2DGetter
    

@@ -63,6 +63,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ml4gw.nn.norm</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm1D"><code class="docutils literal notranslate"><span class="pre">GroupNorm1D</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm1DGetter"><code class="docutils literal notranslate"><span class="pre">GroupNorm1DGetter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm2D"><code class="docutils literal notranslate"><span class="pre">GroupNorm2D</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm2DGetter"><code class="docutils literal notranslate"><span class="pre">GroupNorm2DGetter</span></code></a></li>
 </ul>
 </li>
@@ -117,7 +118,10 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm1DGetter" title="ml4gw.nn.norm.GroupNorm1DGetter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupNorm1DGetter</span></code></a>([groups])</p></td>
 <td><p>Utility for making a NormLayer Callable that maps from an integer number of channels to a torch Module.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm2DGetter" title="ml4gw.nn.norm.GroupNorm2DGetter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupNorm2DGetter</span></code></a>([groups])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm2D" title="ml4gw.nn.norm.GroupNorm2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupNorm2D</span></code></a>(num_channels[, num_groups, eps, ...])</p></td>
+<td><p><cite>torch.nn.GroupNorm</cite> with the number of channels as its first argument, like <cite>GroupNorm1D</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.nn.norm.GroupNorm2DGetter" title="ml4gw.nn.norm.GroupNorm2DGetter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GroupNorm2DGetter</span></code></a>([groups])</p></td>
 <td><p>Utility for making a NormLayer Callable that maps from an integer number of channels to a torch Module.</p></td>
 </tr>
 </tbody>
@@ -128,6 +132,9 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Custom implementation of GroupNorm which is faster than the
 out-of-the-box PyTorch version at inference time.</p>
+<p><cite>num_groups</cite> defaults to one group per channel, and is capped at
+<cite>num_channels</cite>, so a single value can be used for every layer of
+a network whose narrowest layer has fewer channels than that.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -157,11 +164,40 @@ out-of-the-box PyTorch version at inference time.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.norm.</span></span><span class="sig-name descname"><span class="pre">GroupNorm1DGetter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.norm.GroupNorm1DGetter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Utility for making a NormLayer Callable that maps from
-an integer number of channels to a torch Module. Useful
-for command-line parameterization with jsonargparse.</p>
+an integer number of channels to a torch Module.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version Use: </span><cite>GroupNorm1D</cite> directly, e.g. <cite>functools.partial(GroupNorm1D,
+num_groups=groups)</cite> in code, or <cite>GroupNorm1D</cite> as the class path
+with <cite>num_groups</cite> in a jsonargparse config. jsonargparse&gt;=4.52
+rejects this class for a <cite>NormLayer</cite>.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>groups</strong> (<em>int</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.nn.norm.GroupNorm2D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.norm.</span></span><span class="sig-name descname"><span class="pre">GroupNorm2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.norm.GroupNorm2D" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">GroupNorm</span></code></p>
+<p><cite>torch.nn.GroupNorm</cite> with the number of channels as its
+first argument, like <cite>GroupNorm1D</cite>.</p>
+<p>This lets a <cite>NormLayer</cite> be specified with jsonargparse by
+pointing at this class and setting only <cite>num_groups</cite>:
+jsonargparse passes the channel count as the first positional
+argument when the layer is built. As with <cite>GroupNorm1D</cite>,
+<cite>num_groups</cite> defaults to one group per channel and is capped
+at <cite>num_channels</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_channels</strong> (<em>int</em>)</p></li>
+<li><p><strong>num_groups</strong> (<em>int</em>)</p></li>
+<li><p><strong>eps</strong> (<em>float</em>)</p></li>
+<li><p><strong>affine</strong> (<em>bool</em>)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -171,8 +207,13 @@ for command-line parameterization with jsonargparse.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.nn.norm.</span></span><span class="sig-name descname"><span class="pre">GroupNorm2DGetter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.nn.norm.GroupNorm2DGetter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Utility for making a NormLayer Callable that maps from
-an integer number of channels to a torch Module. Useful
-for command-line parameterization with jsonargparse.</p>
+an integer number of channels to a torch Module.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version Use: </span><cite>GroupNorm2D</cite> directly, e.g. <cite>functools.partial(GroupNorm2D,
+num_groups=groups)</cite> in code, or <cite>GroupNorm2D</cite> as the class path
+with <cite>num_groups</cite> in a jsonargparse config. jsonargparse&gt;=4.52
+rejects this class for a <cite>NormLayer</cite>.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>groups</strong> (<em>int</em><em> | </em><em>None</em>)</p>
