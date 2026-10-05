@@ -151,8 +151,8 @@
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="c1"># Check if GPU is available</span>
-<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using device: </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">"cuda"</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"cpu"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Using device: </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -173,15 +173,15 @@
 <h2>Approximating the two-moon distribution<a class="headerlink" href="#approximating-the-two-moon-distribution" title="Link to this heading"></a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Two moon distribution&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;$x$&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$y$&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"orange"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Two moon distribution"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"$x$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"$y$"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;$y$&#39;)
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, '$y$')
 </pre></div>
 </div>
 <img alt="../_images/71202849b63e412dc2332364470b5c321036998f8ba2840f805da5efd7092415.png" src="../_images/71202849b63e412dc2332364470b5c321036998f8ba2840f805da5efd7092415.png" />
@@ -226,14 +226,14 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(tensor([[0.0149, 0.0908]], device=&#39;cuda:0&#39;), tensor([[-0.0225, -0.0576]], device=&#39;cuda:0&#39;))
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(tensor([[0.0149, 0.0908]], device='cuda:0'), tensor([[-0.0225, -0.0576]], device='cuda:0'))
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span>  <span class="n">AffineAutoregressive</span><span class="p">(</span><span class="n">arn</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>  <span class="c1"># the &quot;affine&quot; part implies the linear relation between hidden dimensions</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span>  <span class="n">AffineAutoregressive</span><span class="p">(</span><span class="n">arn</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>  <span class="c1"># the "affine" part implies the linear relation between hidden dimensions</span>
 </pre></div>
 </div>
 </div>
@@ -263,7 +263,7 @@
         [-1.3134, -0.0269],
         [-0.8357, -1.3689],
         [-0.4421,  0.1139],
-        [-1.5013, -0.7086]], device=&#39;cuda:0&#39;)
+        [-1.5013, -0.7086]], device='cuda:0')
 </pre></div>
 </div>
 </div>
@@ -283,15 +283,15 @@
 <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
     <span class="n">sample_log_prob</span> <span class="o">=</span> <span class="n">flow_dist</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">example_points</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">sample</span><span class="p">,</span> <span class="n">log_prob</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">example_points</span><span class="p">,</span> <span class="n">sample_log_prob</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;log p(</span><span class="si">{</span><span class="n">sample</span><span class="si">}</span><span class="s2">) = </span><span class="si">{</span><span class="n">log_prob</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"log p(</span><span class="si">{</span><span class="n">sample</span><span class="si">}</span><span class="s2">) = </span><span class="si">{</span><span class="n">log_prob</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>log p(tensor([0., 0.], device=&#39;cuda:0&#39;)) = -1.749e+00
-log p(tensor([0., 1.], device=&#39;cuda:0&#39;)) = -2.220e+00
-log p(tensor([1., 0.], device=&#39;cuda:0&#39;)) = -2.252e+00
-log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>log p(tensor([0., 0.], device='cuda:0')) = -1.749e+00
+log p(tensor([0., 1.], device='cuda:0')) = -2.220e+00
+log p(tensor([1., 0.], device='cuda:0')) = -2.252e+00
+log p(tensor([1., 1.], device='cuda:0')) = -2.728e+00
 </pre></div>
 </div>
 </div>
@@ -312,15 +312,15 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">live_plot</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Auxiliary function to visualize the distribution&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Auxiliary function to visualize the distribution"""</span>
     <span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;proxy&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'proxy'</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-               <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Orig.&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+               <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Orig.'</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;iteration </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'iteration </span><span class="si">{}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -426,9 +426,9 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Two colored moon&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;$x$&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$y$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Two colored moon"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"$x$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"$y$"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -494,11 +494,11 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
         [-0.1096, -0.0174],
         [-0.1096, -0.0174],
         [-0.1096, -0.0174],
-        [-0.1096, -0.0174]], device=&#39;cuda:0&#39;), tensor([[-0.0531,  0.0315],
+        [-0.1096, -0.0174]], device='cuda:0'), tensor([[-0.0531,  0.0315],
         [-0.0531,  0.0315],
         [-0.0531,  0.0315],
         [-0.0531,  0.0315],
-        [-0.0531,  0.0315]], device=&#39;cuda:0&#39;))
+        [-0.0531,  0.0315]], device='cuda:0'))
 </pre></div>
 </div>
 </div>
@@ -560,7 +560,7 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 <h4>Conditional Normalizing Flow using zuko library<a class="headerlink" href="#conditional-normalizing-flow-using-zuko-library" title="Link to this heading"></a></h4>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># defining the flow model using zuko&#39;s NSF flow - Neural Spline Flow</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># defining the flow model using zuko's NSF flow - Neural Spline Flow</span>
 
 <span class="n">flow</span> <span class="o">=</span> <span class="n">zuko</span><span class="o">.</span><span class="n">flows</span><span class="o">.</span><span class="n">NSF</span><span class="p">(</span>
     <span class="n">features</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span> <span class="c1"># same as before which is 2</span>
@@ -582,7 +582,7 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([-2.9751, -2.9751, -2.9751, -2.9751, -2.9751], device=&#39;cuda:0&#39;)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor([-2.9751, -2.9751, -2.9751, -2.9751, -2.9751], device='cuda:0')
 </pre></div>
 </div>
 </div>
@@ -635,10 +635,10 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 
 <span class="c1"># Point this to whatever directory you want to house</span>
 <span class="c1"># all of the data products this notebook creates</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/tmp/data&quot;</span><span class="p">)</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/tmp/data"</span><span class="p">)</span>
 
 <span class="c1"># And this to the directory where you want to download the data</span>
-<span class="n">background_dir</span> <span class="o">=</span> <span class="n">data_dir</span> <span class="o">/</span> <span class="s2">&quot;background_data&quot;</span>
+<span class="n">background_dir</span> <span class="o">=</span> <span class="n">data_dir</span> <span class="o">/</span> <span class="s2">"background_data"</span>
 <span class="n">background_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># This is a 10000s segment on Sept 15, 2015, the day after</span>
@@ -646,13 +646,13 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
 <span class="n">segments</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="mi">1126310417</span><span class="p">,</span> <span class="mi">1126320417</span><span class="p">),</span> 
 <span class="p">]</span>
-<span class="n">ifos</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">]</span>  <span class="c1"># Hanford and Livingston</span>
+<span class="n">ifos</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">]</span>  <span class="c1"># Hanford and Livingston</span>
 <span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">2048</span>  <span class="c1"># Hz</span>
 
 <span class="k">for</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
     <span class="c1"># Download the data from GWOSC. This will take a few minutes.</span>
     <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
-    <span class="n">fname</span> <span class="o">=</span> <span class="n">background_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;background-</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">.hdf5&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">background_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"background-</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">.hdf5"</span>
     <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">continue</span>
 
@@ -660,7 +660,7 @@ log p(tensor([1., 1.], device=&#39;cuda:0&#39;)) = -2.728e+00
     <span class="k">for</span> <span class="n">ifo</span> <span class="ow">in</span> <span class="n">ifos</span><span class="p">:</span>
         <span class="n">ts_dict</span><span class="p">[</span><span class="n">ifo</span><span class="p">]</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">ifo</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">ts_dict</span> <span class="o">=</span> <span class="n">ts_dict</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
-    <span class="n">ts_dict</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;hdf5&quot;</span><span class="p">)</span>
+    <span class="n">ts_dict</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"hdf5"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -684,7 +684,7 @@ Jupyter notebooks.
 To suppress this warning, use:
 
 import warnings
-warnings.filterwarnings(&quot;ignore&quot;, &quot;Wswiglal-redir-stdio&quot;)
+warnings.filterwarnings("ignore", "Wswiglal-redir-stdio")
 import lal
 
   from lal import LIGOTimeGPS
@@ -726,13 +726,13 @@ import lal
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define priors to generate waveforms</span>
 <span class="n">prior_dict</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;chirp_mass&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span>
-    <span class="s2">&quot;mass_ratio&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
-    <span class="s2">&quot;chi1&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.999</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
-    <span class="s2">&quot;chi2&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.999</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
-    <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="n">PowerLaw</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>
-    <span class="s2">&quot;phic&quot;</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
-    <span class="s2">&quot;inclination&quot;</span><span class="p">:</span> <span class="n">Sine</span><span class="p">()</span>
+    <span class="s2">"chirp_mass"</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span>
+    <span class="s2">"mass_ratio"</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
+    <span class="s2">"chi1"</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.999</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
+    <span class="s2">"chi2"</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.999</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
+    <span class="s2">"distance"</span><span class="p">:</span> <span class="n">PowerLaw</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>
+    <span class="s2">"phic"</span><span class="p">:</span> <span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
+    <span class="s2">"inclination"</span><span class="p">:</span> <span class="n">Sine</span><span class="p">()</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -743,7 +743,7 @@ import lal
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define inference parameters for posterior estimation</span>
-<span class="n">inference_params</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">prior_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;chirp_mass&#39;</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">]}</span>
+<span class="n">inference_params</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">prior_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'chirp_mass'</span><span class="p">,</span> <span class="s1">'distance'</span><span class="p">]}</span>
 </pre></div>
 </div>
 </div>
@@ -756,7 +756,7 @@ import lal
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">,</span>
-        <span class="n">ifos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+        <span class="n">ifos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span>
         <span class="n">kernel_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
         <span class="c1"># PSD/whitening args</span>
         <span class="n">fduration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
@@ -796,7 +796,7 @@ import lal
         <span class="bp">self</span><span class="o">.</span><span class="n">ifos</span> <span class="o">=</span> <span class="n">ifos</span>
         <span class="c1"># real-time transformations defined with torch Modules</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectral_density</span> <span class="o">=</span> <span class="n">SpectralDensity</span><span class="p">(</span>
-            <span class="n">sample_rate</span><span class="p">,</span> <span class="n">fftlength</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span>
+            <span class="n">sample_rate</span><span class="p">,</span> <span class="n">fftlength</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">"median"</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">whitener</span> <span class="o">=</span> <span class="n">Whiten</span><span class="p">(</span>
             <span class="n">fduration</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">highpass</span><span class="o">=</span><span class="n">highpass</span>
@@ -832,9 +832,9 @@ import lal
         <span class="n">phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">N</span><span class="p">,))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">hc</span><span class="p">)</span>
 
         <span class="n">proj_params</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;dec&quot;</span><span class="p">:</span> <span class="n">dec</span><span class="p">,</span>
-            <span class="s2">&quot;psi&quot;</span><span class="p">:</span> <span class="n">psi</span><span class="p">,</span>
-            <span class="s2">&quot;phi&quot;</span><span class="p">:</span> <span class="n">phi</span><span class="p">,</span>
+            <span class="s2">"dec"</span><span class="p">:</span> <span class="n">dec</span><span class="p">,</span>
+            <span class="s2">"psi"</span><span class="p">:</span> <span class="n">psi</span><span class="p">,</span>
+            <span class="s2">"phi"</span><span class="p">:</span> <span class="n">phi</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="c1"># project to interferometer response</span>
         <span class="k">return</span> <span class="n">compute_observed_strain</span><span class="p">(</span>
@@ -854,17 +854,17 @@ import lal
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="c1"># attach component masses if not present</span>
-        <span class="k">if</span> <span class="s2">&quot;mass_1&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;mass_1&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;mass_2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chirp_mass_and_mass_ratio_to_components</span><span class="p">(</span>
-                <span class="n">params</span><span class="p">[</span><span class="s2">&quot;chirp_mass&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;mass_ratio&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">"mass_1"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"mass_1"</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">"mass_2"</span><span class="p">]</span> <span class="o">=</span> <span class="n">chirp_mass_and_mass_ratio_to_components</span><span class="p">(</span>
+                <span class="n">params</span><span class="p">[</span><span class="s2">"chirp_mass"</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">"mass_ratio"</span><span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;s1z&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;s1z&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;s2z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;chi1&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;chi2&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">"s1z"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"s1z"</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">"s2z"</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">"chi1"</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">"chi2"</span><span class="p">]</span>
         <span class="n">hc</span><span class="p">,</span> <span class="n">hp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveform_generator</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hc</span><span class="p">,</span> <span class="n">hp</span><span class="p">,</span> <span class="n">params</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">inject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-        <span class="c1"># break off &quot;background&quot; from target kernel and compute its PSD</span>
+        <span class="c1"># break off "background" from target kernel and compute its PSD</span>
         <span class="c1"># (in double precision since our scale is so small)</span>
         <span class="n">background</span><span class="p">,</span> <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
             <span class="n">X</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">psd_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
@@ -914,7 +914,7 @@ import lal
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">background_file</span><span class="p">,</span>
-        <span class="n">ifos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+        <span class="n">ifos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span>
         <span class="n">kernel_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
         <span class="c1"># PSD/whitening args</span>
         <span class="n">fduration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
@@ -936,11 +936,11 @@ import lal
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span>
             <span class="n">ignore</span><span class="o">=</span><span class="p">[</span>
-                <span class="s2">&quot;background_file&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;ifos&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;approximant&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;prior_dict&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;inference_params&quot;</span>
+                <span class="s2">"background_file"</span><span class="p">,</span>
+                <span class="s2">"ifos"</span><span class="p">,</span>
+                <span class="s2">"approximant"</span><span class="p">,</span>
+                <span class="s2">"prior_dict"</span><span class="p">,</span>
+                <span class="s2">"inference_params"</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">background_file</span> <span class="o">=</span> <span class="n">background_file</span>
@@ -950,7 +950,7 @@ import lal
         <span class="bp">self</span><span class="o">.</span><span class="n">inference_params</span> <span class="o">=</span> <span class="n">inference_params</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s1">&#39;fit&#39;</span> <span class="ow">or</span> <span class="n">stage</span> <span class="o">==</span> <span class="s1">&#39;validate&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s1">'fit'</span> <span class="ow">or</span> <span class="n">stage</span> <span class="o">==</span> <span class="s1">'validate'</span><span class="p">:</span>
             <span class="c1"># load background data</span>
             <span class="n">background</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">background_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -969,7 +969,7 @@ import lal
                 <span class="p">],</span>
                 <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span>
-            <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span> <span class="k">else</span> <span class="s2">"cpu"</span>
             <span class="n">common_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                 <span class="n">ifos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ifos</span><span class="p">,</span>
                 <span class="n">kernel_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">kernel_length</span><span class="p">,</span>
@@ -1008,8 +1008,8 @@ import lal
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># example usage of the datamodule</span>
-<span class="n">datamodule</span> <span class="o">=</span> <span class="n">ML4GWInferenceDatamodule</span><span class="p">(</span><span class="n">background_dir</span> <span class="o">/</span> <span class="s2">&quot;background-1126310417-10000.hdf5&quot;</span><span class="p">)</span>
-<span class="n">datamodule</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s1">&#39;validate&#39;</span><span class="p">)</span>
+<span class="n">datamodule</span> <span class="o">=</span> <span class="n">ML4GWInferenceDatamodule</span><span class="p">(</span><span class="n">background_dir</span> <span class="o">/</span> <span class="s2">"background-1126310417-10000.hdf5"</span><span class="p">)</span>
+<span class="n">datamodule</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s1">'validate'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1025,7 +1025,7 @@ import lal
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">X_inj</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;chirp_mass&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">'chirp_mass'</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -1045,7 +1045,7 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ML4GWInferenceModel</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A LFI model using ML4GW tools&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A LFI model using ML4GW tools"""</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">architecture</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
@@ -1059,7 +1059,7 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span>
-            <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;architecture&quot;</span><span class="p">,]</span>
+            <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">"architecture"</span><span class="p">,]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nn</span> <span class="o">=</span> <span class="n">architecture</span>
         <span class="c1"># build the normalizing flow</span>
@@ -1077,7 +1077,7 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
         <span class="n">params</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">strain</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">False</span>
+            <span class="s2">"train_loss"</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">loss</span>
 
@@ -1089,7 +1089,7 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
         <span class="n">params</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">strain</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="s2">&quot;valid_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span>
+            <span class="s2">"valid_loss"</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sync_dist</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">loss</span>
 
@@ -1101,15 +1101,15 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
             <span class="n">pct_start</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
             <span class="n">total_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">estimated_stepping_batches</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">scheduler_config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">)</span>
+        <span class="n">scheduler_config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="s2">"step"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">scheduler_config</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">configure_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">chkpt</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">ModelCheckpoint</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="s2">&quot;valid_loss&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;min&quot;</span><span class="p">)</span>
+        <span class="n">chkpt</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">ModelCheckpoint</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="s2">"valid_loss"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"min"</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">chkpt</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">transform_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns single autoregressive transform&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns single autoregressive transform"""</span>
         <span class="n">param_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">inference_params</span><span class="p">)</span>
         <span class="n">arn</span> <span class="o">=</span> <span class="n">ConditionalAutoRegressiveNN</span><span class="p">(</span>
             <span class="n">param_dim</span><span class="p">,</span>
@@ -1121,21 +1121,21 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
         <span class="k">return</span> <span class="n">transform</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">flow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;transforms&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Flow is not built&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"transforms"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Flow is not built"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ConditionalTransformedDistribution</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the base distribution for the flow&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the base distribution for the flow"""</span>
         <span class="k">return</span> <span class="n">Normal</span><span class="p">(</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">build_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the transform&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Build the transform"""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">num_transforms</span><span class="p">):</span>
             <span class="n">_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_block</span><span class="p">()</span>
@@ -1143,17 +1143,17 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
         <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="n">ConditionalComposeTransformModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transforms</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper `log_prob` from TransformedDistribution&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;transforms&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Flow is not built&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Wrapper `log_prob` from TransformedDistribution"""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"transforms"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Flow is not built"</span><span class="p">)</span>
         <span class="n">embedded_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_net</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
         <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">embedded_context</span><span class="p">)</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper around sample from TransformedDistribution object&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;transforms&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Flow is not built&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Wrapper around sample from TransformedDistribution object"""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"transforms"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Flow is not built"</span><span class="p">)</span>
         <span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">n</span>
         <span class="n">embedded_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_net</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
         <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">()</span>
@@ -1178,16 +1178,16 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">log_dir</span> <span class="o">=</span> <span class="s2">&quot;/tmp/pl-logs&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">log_dir</span> <span class="o">=</span> <span class="s2">"/tmp/pl-logs"</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">CSVLogger</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ml4gw-lfi-expt&quot;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">CSVLogger</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"ml4gw-lfi-expt"</span><span class="p">)</span>
 
 <span class="c1"># create a fresh instance of the model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ML4GWInferenceModel</span><span class="p">(</span>
     <span class="n">architecture</span><span class="o">=</span><span class="n">architecture</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">datamodule</span> <span class="o">=</span> <span class="n">ML4GWInferenceDatamodule</span><span class="p">(</span>
-    <span class="n">background_dir</span> <span class="o">/</span> <span class="s2">&quot;background-1126310417-10000.hdf5&quot;</span><span class="p">,</span>
+    <span class="n">background_dir</span> <span class="o">/</span> <span class="s2">"background-1126310417-10000.hdf5"</span><span class="p">,</span>
     <span class="n">batch_size</span><span class="o">=</span><span class="mi">500</span>  <span class="c1"># adjust based on your device memory</span>
 <span class="p">)</span>
 </pre></div>
@@ -1200,10 +1200,10 @@ tensor([30.0488, 28.2032, 30.3778, 25.4208, 29.7266, 29.3884, 29.9440, 28.1072,
 <span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
     <span class="n">max_epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">check_val_every_n_epoch</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;16-mixed&quot;</span><span class="p">,</span>
+    <span class="n">precision</span><span class="o">=</span><span class="s2">"16-mixed"</span><span class="p">,</span>
     <span class="n">log_every_n_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-    <span class="n">accelerator</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">accelerator</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">=</span><span class="n">datamodule</span><span class="p">)</span>
 </pre></div>
@@ -1217,7 +1217,7 @@ GPU available: True (cuda), used: True
 TPU available: False, using: 0 TPU cores
 HPU available: False, using: 0 HPUs
 The following callbacks returned in `LightningModule.configure_callbacks` will override existing callbacks passed to Trainer: ModelCheckpoint
-You are using a CUDA device (&#39;NVIDIA A40&#39;) that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision(&#39;medium&#39; | &#39;high&#39;)` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+You are using a CUDA device ('NVIDIA A40') that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision('medium' | 'high')` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
@@ -1380,13 +1380,13 @@ Loading `train_dataloader` to estimate number of stepping batches.
 
 <span class="n">data_ts</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">psd_data_ts</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">]:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloading analysis data for ifo </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Downloading analysis data for ifo </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">det</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
     <span class="n">data_ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloading psd data for ifo </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Downloading psd data for ifo </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">det</span><span class="p">))</span>
     <span class="n">psd_data</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">fetch_open_data</span><span class="p">(</span><span class="n">det</span><span class="p">,</span> <span class="n">psd_start_time</span><span class="p">,</span> <span class="n">psd_end_time</span><span class="p">)</span>
     <span class="n">psd_data</span> <span class="o">=</span> <span class="n">psd_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
     <span class="n">psd_data_ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -1414,7 +1414,7 @@ Downloading psd data for ifo L1
     <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span>
     <span class="n">fftlength</span><span class="o">=</span><span class="n">fftlength</span><span class="p">,</span>
     <span class="n">overlap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">average</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">,</span>
+    <span class="n">average</span><span class="o">=</span><span class="s2">"median"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">whiten</span> <span class="o">=</span> <span class="n">Whiten</span><span class="p">(</span>
@@ -1436,17 +1436,17 @@ Downloading psd data for ifo L1
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">times</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span> <span class="o">-</span> <span class="n">fduration</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">duration</span> <span class="o">-</span> <span class="n">fduration</span><span class="p">)))</span>
-<span class="k">for</span> <span class="n">d_whitened</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data_whitened</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;H1&#39;</span><span class="p">,</span> <span class="s1">&#39;L1&#39;</span><span class="p">]):</span>
+<span class="k">for</span> <span class="n">d_whitened</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data_whitened</span><span class="p">,</span> <span class="p">[</span><span class="s1">'H1'</span><span class="p">,</span> <span class="s1">'L1'</span><span class="p">]):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">d_whitened</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="n">det</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Whitened GW150914 data&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Whitened GW150914 data"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Whitened Strain&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Time (s)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Whitened Strain"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Whitened Strain&#39;)
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, 'Whitened Strain')
 </pre></div>
 </div>
 <img alt="../_images/fe49ad4338e5aafddd847b0c5acb20871972a267e1b84be6070cc3f063265a26.png" src="../_images/fe49ad4338e5aafddd847b0c5acb20871972a267e1b84be6070cc3f063265a26.png" />
@@ -1466,12 +1466,12 @@ Downloading psd data for ifo L1
 <span class="n">figure</span> <span class="o">=</span> <span class="n">corner</span><span class="p">(</span>
     <span class="n">samples</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
     <span class="n">labels</span><span class="o">=</span><span class="p">[</span>
-        <span class="sa">r</span><span class="s2">&quot;$M_c$&quot;</span><span class="p">,</span>
-        <span class="sa">r</span><span class="s2">&quot;$D_L$&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"$M_c$"</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"$D_L$"</span><span class="p">,</span>
     <span class="p">],</span>
     <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
     <span class="n">show_titles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">title_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">},</span>
+    <span class="n">title_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"fontsize"</span><span class="p">:</span> <span class="mi">12</span><span class="p">},</span>
 <span class="p">)</span>
 </pre></div>
 </div>
