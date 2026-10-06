@@ -212,7 +212,7 @@ class TestCosmologyDistributions:
             # Not sure that this is the ideal way to test this
             count = 0
             for _ in range(num_trials):
-                ml4gw_dist.sample((num_samples,))
+                ml4gw_samples = ml4gw_dist.sample((num_samples,))
                 bilby_samples = bilby_dist.sample(num_samples)
                 _, p_value = stats.ks_2samp(
                     ml4gw_samples.numpy(), bilby_samples
@@ -221,7 +221,7 @@ class TestCosmologyDistributions:
                     count += 1
 
             mean = num_trials * alpha
-            sigma = num_trials * alpha * (1 - alpha)
+            sigma = (num_trials * alpha * (1 - alpha)) ** 0.5
             assert abs(count - mean) < 3 * sigma
 
             # Compare log probability between ml4gw and bilby
