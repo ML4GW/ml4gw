@@ -126,7 +126,7 @@ class PowerLaw(dist.TransformedDistribution):
     signal-to-noise ratios (SNRs) from uniformly volume distributed
     sources
 
-    .. math:: p(\\rho) = 3\;\\rho_0^3 / \\rho^4
+    .. math:: p(\\rho) = 3\\rho_0^3 / \\rho^4
 
     where :math:`\\rho_0` is a representative minimum SNR
     considered for detection. See, for example,
@@ -391,3 +391,53 @@ class RateEvolution(UniformComovingVolume):
         # This is a tensor of ones if the distance type is redshift
         jacobian = torch.gradient(self.distance_grid, spacing=self.dz)[0]
         return dV_dz / jacobian * self.rate_function(self.z_grid)
+
+
+class UniformChirpDistance:
+    """
+    Sample from a distribution that uniform in chirp distance given
+    a tensor of chirp masses.
+
+    Chirp distance is defined as
+
+    .. math:: d_c = d_L (M_{ref} / M_c) ^{5 / 6}
+
+    Where :math:`d_L` is the luminosity distance, :math:`M_c` is the
+    chirp mass, and :math:`M_{ref}` is a fixed chirp mass used for
+    reference in the scaling.
+
+    Calling this object with a tensor of chirp masses will return a
+    :meth:`torch.distributions.Uniform` object instantiated with
+    minima and maxima tensors defined as the scale factor
+    :math:`(M_{ref} / M_c) ^{5 / 6}` multiplied by the fixed
+    minimum and maximum used to create this class. Sampling from
+    this distribution will return a tensor of luminosity distance
+    values that are uniform in chirp distance.
+
+    Args:
+        minimum: Minimum luminosity distance
+        maximum: Maximum luminosity distance
+        reference_chirp_mass: Chirp mass value to use for reference
+
+    Return:
+        A :meth:`torch.distributions.Distribution` object. Sampling
+        from this object produces luminosity distances that are
+        uniform in chirp distance.
+    """
+
+    def __init__(
+        self,
+        minimum: float,
+        maximum: float,
+        reference_chirp_mass: float = 1.4,
+    ) -> None:
+        self.minimum = minimum
+        self.maximum = maximum
+        self.reference_chirp_mass = reference_chirp_mass
+
+    def __call__(self, chirp_mass: Tensor) -> dist.Distribution:
+        scale = (chirp_mass / self.reference_chirp_mass) ** (5 / 6)
+        return dist.Uniform(
+            scale * self.minimum,
+            scale * self.maximum,
+        )
