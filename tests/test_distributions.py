@@ -7,6 +7,7 @@ from astropy.cosmology import Planck18
 from bilby.core.utils.random import seed as bilby_seed
 from bilby.gw.prior import UniformComovingVolume, UniformSourceFrame
 from scipy import optimize, stats
+from torch.distributions import Uniform
 
 from ml4gw import distributions
 
@@ -132,6 +133,31 @@ def test_delta_function(seed_everything):
     sampler = distributions.DeltaFunction(peak=20)
     samples = sampler.sample((10,))
     assert (samples == 20).all()
+
+
+def test_uniform_chirp_distance(seed_everything):
+    reference_chirp_mass = 1.4
+    num_samples = 10_000
+    minimum = 100
+    maximum = 1000
+    chirp_mass = Uniform(10, 100).sample((num_samples,))
+    sampler = distributions.UniformChirpDistance(
+        minimum,
+        maximum,
+        reference_chirp_mass,
+    )(chirp_mass)
+    luminosity_distance = sampler.sample()
+    assert len(luminosity_distance) == num_samples
+
+    scale = (chirp_mass / reference_chirp_mass) ** (5 / 6)
+    chirp_distance = luminosity_distance * scale
+
+    scaled_min = (minimum * scale).min()
+    scaled_max = (maximum * scale).max()
+    reference_dist = Uniform(scaled_min, scaled_max).sample((num_samples,))
+    _, p_value = stats.ks_2samp(chirp_distance.numpy(), reference_dist.numpy())
+
+    assert p_value < 0.05
 
 
 class TestCosmologyDistributions:
