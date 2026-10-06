@@ -400,7 +400,7 @@ class UniformChirpDistance:
 
     Chirp distance is defined as
 
-    .. math:: d_c = d_L (M_{ref} / M_c) ^{5 / 6}
+    .. math:: d_c = d_L (M_{ref} / M_c)^{5 / 6}
 
     Where :math:`d_L` is the luminosity distance, :math:`M_c` is the
     chirp mass, and :math:`M_{ref}` is a fixed chirp mass used for
@@ -409,14 +409,14 @@ class UniformChirpDistance:
     Calling this object with a tensor of chirp masses will return a
     :meth:`torch.distributions.Uniform` object instantiated with
     minima and maxima tensors defined as the scale factor
-    :math:`(M_{ref} / M_c) ^{5 / 6}` multiplied by the fixed
+    :math:`(M_c / M_{ref})^{5 / 6}` multiplied by the fixed
     minimum and maximum used to create this class. Sampling from
     this distribution will return a tensor of luminosity distance
     values that are uniform in chirp distance.
 
     Args:
-        minimum: Minimum luminosity distance
-        maximum: Maximum luminosity distance
+        minimum: Minimum chirp distance
+        maximum: Maximum chirp distance
         reference_chirp_mass: Chirp mass value to use for reference
 
     Return:

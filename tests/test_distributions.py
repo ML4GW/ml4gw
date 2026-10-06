@@ -150,14 +150,14 @@ def test_uniform_chirp_distance(seed_everything):
     assert len(luminosity_distance) == num_samples
 
     scale = (chirp_mass / reference_chirp_mass) ** (5 / 6)
-    chirp_distance = luminosity_distance * scale
+    chirp_distance = luminosity_distance / scale
 
-    scaled_min = (minimum * scale).min()
-    scaled_max = (maximum * scale).max()
-    reference_dist = Uniform(scaled_min, scaled_max).sample((num_samples,))
-    _, p_value = stats.ks_2samp(chirp_distance.numpy(), reference_dist.numpy())
+    assert (chirp_distance >= minimum).all()
+    assert (chirp_distance <= maximum).all()
 
-    assert p_value < 0.05
+    reference = stats.uniform(loc=minimum, scale=maximum - minimum)
+    _, p_value = stats.kstest(chirp_distance.numpy(), reference.cdf)
+    assert p_value > 1e-3
 
 
 class TestCosmologyDistributions:
