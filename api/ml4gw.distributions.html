@@ -81,6 +81,12 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.RateEvolution"><code class="docutils literal notranslate"><span class="pre">RateEvolution</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.Sine"><code class="docutils literal notranslate"><span class="pre">Sine</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.UniformChirpDistance"><code class="docutils literal notranslate"><span class="pre">UniformChirpDistance</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformChirpDistance.arg_constraints"><code class="docutils literal notranslate"><span class="pre">UniformChirpDistance.arg_constraints</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformChirpDistance.log_prob"><code class="docutils literal notranslate"><span class="pre">UniformChirpDistance.log_prob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformChirpDistance.sample"><code class="docutils literal notranslate"><span class="pre">UniformChirpDistance.sample()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume.arg_constraints"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume.arg_constraints</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume.log_prob"><code class="docutils literal notranslate"><span class="pre">UniformComovingVolume.log_prob()</span></code></a></li>
@@ -156,7 +162,10 @@ from the corresponding distribution.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.distributions.Sine" title="ml4gw.distributions.Sine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sine</span></code></a>([low, high, validate_args])</p></td>
 <td><p>Sine distribution based on <code class="docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UniformComovingVolume</span></code></a>(minimum, maximum[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ml4gw.distributions.UniformChirpDistance" title="ml4gw.distributions.UniformChirpDistance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UniformChirpDistance</span></code></a>(chirp_mass, minimum, ...)</p></td>
+<td><p>Joint distribution over chirp mass and luminosity distance that is uniform in chirp distance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ml4gw.distributions.UniformComovingVolume" title="ml4gw.distributions.UniformComovingVolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UniformComovingVolume</span></code></a>(minimum, maximum[, ...])</p></td>
 <td><p>Sample either redshift, comoving distance, or luminosity distance such that they are uniform in comoving volume, assuming a flat lambda-CDM cosmology.</p></td>
 </tr>
 </tbody>
@@ -285,7 +294,7 @@ This could be used, for example, as a universal distribution of
 signal-to-noise ratios (SNRs) from uniformly volume distributed
 sources</p>
 <div class="math notranslate nohighlight">
-\[p(\rho) = 3\;\rho_0^3 / \rho^4\]</div>
+\[p(\rho) = 3\rho_0^3 / \rho^4\]</div>
 <p>where <span class="math notranslate nohighlight">\(\rho_0\)</span> is a representative minimum SNR
 considered for detection. See, for example,
 <a class="reference external" href="https://arxiv.org/abs/1102.5421">Schutz (2011)</a>.
@@ -343,6 +352,75 @@ and returns the rate evolution factor.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformChirpDistance">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ml4gw.distributions.</span></span><span class="sig-name descname"><span class="pre">UniformChirpDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chirp_mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_chirp_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.UniformChirpDistance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Distribution</span></code></p>
+<p>Joint distribution over chirp mass and luminosity distance
+that is uniform in chirp distance.</p>
+<p>Chirp distance is defined as</p>
+<div class="math notranslate nohighlight">
+\[d_c = d_L (M_{ref} / M_c)^{5 / 6}\]</div>
+<p>where <span class="math notranslate nohighlight">\(d_L\)</span> is the luminosity distance, <span class="math notranslate nohighlight">\(M_c\)</span> is the
+chirp mass, and <span class="math notranslate nohighlight">\(M_{ref}\)</span> is a fixed chirp mass used for
+reference in the scaling.</p>
+<p>Samples are generated by drawing <span class="math notranslate nohighlight">\(M_c\)</span> from
+<code class="docutils literal notranslate"><span class="pre">chirp_mass</span></code> and, independently, <span class="math notranslate nohighlight">\(d_c\)</span> uniformly
+between <code class="docutils literal notranslate"><span class="pre">minimum</span></code> and <code class="docutils literal notranslate"><span class="pre">maximum</span></code>, then setting
+<span class="math notranslate nohighlight">\(d_L = d_c (M_c / M_{ref})^{5 / 6}\)</span>. The joint
+density is</p>
+<div class="math notranslate nohighlight">
+\[\log p(M_c, d_L) = \log p(M_c)
+- \log(d_{max} - d_{min})
+- \frac{5}{6} \log(M_c / M_{ref})\]</div>
+<p>for <span class="math notranslate nohighlight">\(d_{min} \leq d_c \leq d_{max}\)</span>, and
+<span class="math notranslate nohighlight">\(-\infty\)</span> otherwise.</p>
+<p>Each sample is a pair along the last dimension, with the chirp
+mass at index 0 and the luminosity distance at index 1. The
+same layout is expected by <a class="reference internal" href="#ml4gw.distributions.UniformChirpDistance.log_prob" title="ml4gw.distributions.UniformChirpDistance.log_prob"><code class="xref py py-meth docutils literal notranslate"><span class="pre">log_prob()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chirp_mass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distribution</span></code></span>) -- Distribution of chirp masses</p></li>
+<li><p><strong>minimum</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Minimum chirp distance</p></li>
+<li><p><strong>maximum</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Maximum chirp distance</p></li>
+<li><p><strong>reference_chirp_mass</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) -- Chirp mass value to use for reference</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformChirpDistance.arg_constraints">
+<span class="sig-name descname"><span class="pre">arg_constraints</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#ml4gw.distributions.UniformChirpDistance.arg_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformChirpDistance.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.UniformChirpDistance.log_prob" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>value</strong> (<em>Tensor</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ml4gw.distributions.UniformChirpDistance.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ml4gw.distributions.UniformChirpDistance.sample" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sample_shape</strong> (<em>Size</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">

@@ -15,5 +15,6 @@ ml4gw.distributions
       PowerLaw
       RateEvolution
       Sine
+      UniformChirpDistance
       UniformComovingVolume
    
