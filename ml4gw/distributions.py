@@ -449,7 +449,7 @@ class UniformChirpDistance(dist.Distribution):
             event_shape=torch.Size([2]), validate_args=validate_args
         )
 
-    def conditional(self, chirp_mass: Tensor) -> dist.Uniform:
+    def _conditional(self, chirp_mass: Tensor) -> dist.Uniform:
         """
         The distribution of luminosity distance conditioned on
         the given chirp masses, :math:`p(d_L | M_c)`.
@@ -471,11 +471,17 @@ class UniformChirpDistance(dist.Distribution):
     def sample(self, sample_shape: torch.Size = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         chirp_mass = self.chirp_mass.sample(sample_shape)
-        luminosity_distance = self.conditional(chirp_mass).sample()
+        luminosity_distance = self._conditional(chirp_mass).sample()
         return torch.stack([chirp_mass, luminosity_distance], dim=-1)
 
     def log_prob(self, value: Tensor) -> Tensor:
+        if value.shape[-1:] != (2,):
+            raise ValueError(
+                "Expected value with shape (..., 2), with chirp mass "
+                "at index 0 and luminosity distance at index 1 of the "
+                f"last dimension, got shape {tuple(value.shape)}"
+            )
         chirp_mass, luminosity_distance = value[..., 0], value[..., 1]
-        return self.chirp_mass.log_prob(chirp_mass) + self.conditional(
+        return self.chirp_mass.log_prob(chirp_mass) + self._conditional(
             chirp_mass
         ).log_prob(luminosity_distance)

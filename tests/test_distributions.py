@@ -203,6 +203,9 @@ def test_uniform_chirp_distance_log_prob():
     torch.testing.assert_close(log_prob[in_bounds], expected[in_bounds])
     assert (log_prob[~in_bounds] == -torch.inf).all()
 
+    with pytest.raises(ValueError, match="Expected value with shape"):
+        distribution.log_prob(value[:, :1])
+
 
 def test_uniform_chirp_distance_delta_limit(seed_everything):
     """
