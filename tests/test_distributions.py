@@ -160,6 +160,33 @@ def test_uniform_chirp_distance(seed_everything):
     assert p_value > 1e-3
 
 
+def test_uniform_chirp_distance_log_prob():
+    reference_chirp_mass = 1.4
+    minimum = 100
+    maximum = 1000
+    distribution = distributions.UniformChirpDistance(
+        minimum, maximum, reference_chirp_mass
+    )
+
+    chirp_mass = torch.tensor([1.4, 10.0, 10.0, 10.0, 50.0])
+    scale = (chirp_mass / reference_chirp_mass) ** (5 / 6)
+
+    # in bounds, in bounds, below minimum, above maximum, in bounds
+    chirp_distance = torch.tensor([500.0, 100.0, 99.0, 1001.0, 999.0])
+    luminosity_distance = chirp_distance * scale
+
+    log_prob = distribution.log_prob(luminosity_distance, chirp_mass)
+    assert log_prob.shape == chirp_mass.shape
+
+    expected = -torch.log(scale * (maximum - minimum))
+    in_bounds = torch.tensor([True, True, False, False, True])
+    torch.testing.assert_close(log_prob[in_bounds], expected[in_bounds])
+    assert (log_prob[~in_bounds] == -torch.inf).all()
+
+    with pytest.raises(ValueError, match="same shape"):
+        distribution.log_prob(luminosity_distance[:, None], chirp_mass)
+
+
 class TestCosmologyDistributions:
     # bilby randomness currently comes into play in
     # only this test, so set the seed separately from

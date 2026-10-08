@@ -395,7 +395,7 @@ class RateEvolution(UniformComovingVolume):
 
 class UniformChirpDistance:
     """
-    Sample from a distribution that uniform in chirp distance given
+    Sample from a distribution that is uniform in chirp distance given
     a tensor of chirp masses.
 
     Chirp distance is defined as
@@ -440,4 +440,34 @@ class UniformChirpDistance:
         return dist.Uniform(
             scale * self.minimum,
             scale * self.maximum,
+            validate_args=False,
         )
+
+    def log_prob(
+        self, luminosity_distance: Tensor, chirp_mass: Tensor
+    ) -> Tensor:
+        """
+        Compute the log probability of luminosity distances
+        conditioned on the corresponding chirp masses,
+        :math:`\\log p(d_L | M_c)`. Values outside of the
+        support for their chirp mass return ``-inf``.
+
+        Args:
+            luminosity_distance:
+                Tensor of luminosity distances
+            chirp_mass:
+                Tensor of chirp masses, where element ``i`` is the
+                chirp mass of the sample with luminosity distance
+                ``luminosity_distance[i]``.
+
+        Returns:
+            Tensor of log probabilities with the same shape
+            as the inputs
+        """
+        if luminosity_distance.shape != chirp_mass.shape:
+            raise ValueError(
+                "luminosity_distance and chirp_mass must have the same "
+                f"shape, got {tuple(luminosity_distance.shape)} and "
+                f"{tuple(chirp_mass.shape)}"
+            )
+        return self(chirp_mass).log_prob(luminosity_distance)
