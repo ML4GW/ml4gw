@@ -140,18 +140,25 @@ def test_uniform_chirp_distance(seed_everything):
     num_samples = 10_000
     minimum = 100
     maximum = 1000
-    chirp_mass = Uniform(10, 100).sample((num_samples,))
-    sampler = distributions.UniformChirpDistance(
+    chirp_mass_low, chirp_mass_high = 10, 100
+    distribution = distributions.UniformChirpDistance(
+        Uniform(chirp_mass_low, chirp_mass_high),
         minimum,
         maximum,
         reference_chirp_mass,
-    )(chirp_mass)
-    luminosity_distance = sampler.sample()
-    assert len(luminosity_distance) == num_samples
+    )
+    samples = distribution.sample((num_samples,))
+    assert samples.shape == (num_samples, 2)
+    chirp_mass, luminosity_distance = samples[:, 0], samples[:, 1]
+
+    reference = stats.uniform(
+        loc=chirp_mass_low, scale=chirp_mass_high - chirp_mass_low
+    )
+    _, p_value = stats.kstest(chirp_mass.numpy(), reference.cdf)
+    assert p_value > 1e-3
 
     scale = (chirp_mass / reference_chirp_mass) ** (5 / 6)
     chirp_distance = luminosity_distance / scale
-
     assert (chirp_distance >= minimum).all()
     assert (chirp_distance <= maximum).all()
 
@@ -159,32 +166,76 @@ def test_uniform_chirp_distance(seed_everything):
     _, p_value = stats.kstest(chirp_distance.numpy(), reference.cdf)
     assert p_value > 1e-3
 
+    # chirp distance should be independent of chirp mass
+    median = chirp_mass.median()
+    _, p_value = stats.ks_2samp(
+        chirp_distance[chirp_mass < median].numpy(),
+        chirp_distance[chirp_mass >= median].numpy(),
+    )
+    assert p_value > 1e-3
+
 
 def test_uniform_chirp_distance_log_prob():
     reference_chirp_mass = 1.4
     minimum = 100
     maximum = 1000
+    chirp_mass_prior = Uniform(1, 100, validate_args=False)
     distribution = distributions.UniformChirpDistance(
-        minimum, maximum, reference_chirp_mass
+        chirp_mass_prior, minimum, maximum, reference_chirp_mass
     )
 
-    chirp_mass = torch.tensor([1.4, 10.0, 10.0, 10.0, 50.0])
+    # in bounds, in bounds, below minimum, above maximum,
+    # in bounds, chirp mass outside of its prior
+    chirp_mass = torch.tensor([1.4, 10.0, 10.0, 10.0, 50.0, 200.0])
+    chirp_distance = torch.tensor([500.0, 100.0, 99.0, 1001.0, 999.0, 500.0])
+
     scale = (chirp_mass / reference_chirp_mass) ** (5 / 6)
-
-    # in bounds, in bounds, below minimum, above maximum, in bounds
-    chirp_distance = torch.tensor([500.0, 100.0, 99.0, 1001.0, 999.0])
     luminosity_distance = chirp_distance * scale
+    value = torch.stack([chirp_mass, luminosity_distance], dim=-1)
 
-    log_prob = distribution.log_prob(luminosity_distance, chirp_mass)
+    log_prob = distribution.log_prob(value)
     assert log_prob.shape == chirp_mass.shape
 
-    expected = -torch.log(scale * (maximum - minimum))
-    in_bounds = torch.tensor([True, True, False, False, True])
+    expected = chirp_mass_prior.log_prob(chirp_mass) - torch.log(
+        scale * (maximum - minimum)
+    )
+    in_bounds = torch.tensor([True, True, False, False, True, False])
     torch.testing.assert_close(log_prob[in_bounds], expected[in_bounds])
     assert (log_prob[~in_bounds] == -torch.inf).all()
 
-    with pytest.raises(ValueError, match="same shape"):
-        distribution.log_prob(luminosity_distance[:, None], chirp_mass)
+
+def test_uniform_chirp_distance_delta_limit(seed_everything):
+    """
+    With equal minimum and maximum, every sample has the same chirp
+    distance, so luminosity distance is solely a function of chirp
+    mass. For a uniform chirp mass prior, the density of d_L is a
+    power law with index 1/5.
+    """
+    reference_chirp_mass = 1.4
+    num_samples = 10_000
+    chirp_distance = 500.0
+    chirp_mass_low, chirp_mass_high = 1.0, 3.0
+    chirp_mass_prior = Uniform(chirp_mass_low, chirp_mass_high)
+
+    distribution = distributions.UniformChirpDistance(
+        chirp_mass_prior,
+        chirp_distance,
+        chirp_distance,
+        reference_chirp_mass,
+    )
+    luminosity_distance = distribution.sample((num_samples,))[:, 1]
+
+    def to_distance(chirp_mass):
+        return chirp_distance * (chirp_mass / reference_chirp_mass) ** (5 / 6)
+
+    low = to_distance(chirp_mass_low)
+    high = to_distance(chirp_mass_high)
+
+    def cdf(x):
+        return (x**1.2 - low**1.2) / (high**1.2 - low**1.2)
+
+    _, p_value = stats.kstest(luminosity_distance.numpy(), cdf)
+    assert p_value > 1e-3
 
 
 class TestCosmologyDistributions:
