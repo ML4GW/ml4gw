@@ -72,7 +72,7 @@ def test_qtile(
     ).all()
     assert np.allclose(
         torch_qtile(X, norm).numpy(),
-        gwpy_qtile.transform(X, norm, 0),
+        gwpy_qtile.transform(X, norm=norm, epoch=0),
         rtol=1e-3,
     )
 
@@ -153,7 +153,9 @@ def test_singleqtransform(
 
     qtransform.compute_qtiles(X, norm)
     torch_qtiles = qtransform.qtiles
-    gwpy_qtiles = [qtile.transform(fseries, norm, 0) for qtile in qplane]
+    gwpy_qtiles = [
+        qtile.transform(fseries, norm=norm, epoch=0) for qtile in qplane
+    ]
 
     for t, g in zip(torch_qtiles, gwpy_qtiles, strict=True):
         assert np.allclose(t.numpy(), g, rtol=1e-3)
