@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ..norm import GroupNorm2DGetter, NormLayer
+from ..norm import GroupNorm2D, NormLayer
 
 
 def convN(
@@ -245,7 +245,7 @@ class ResNet2D(nn.Module):
         super().__init__()
         # default to using InstanceNorm if no
         # norm layer is provided explicitly
-        self._norm_layer = norm_layer or GroupNorm2DGetter()
+        self._norm_layer = norm_layer or GroupNorm2D
 
         self.inplanes = 64
         self.dilation = 1

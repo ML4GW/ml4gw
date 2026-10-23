@@ -7,6 +7,7 @@ from astropy.cosmology import Planck18
 from bilby.core.utils.random import seed as bilby_seed
 from bilby.gw.prior import UniformComovingVolume, UniformSourceFrame
 from scipy import optimize, stats
+from torch.distributions import Uniform
 
 from ml4gw import distributions
 
@@ -134,6 +135,112 @@ def test_delta_function(seed_everything):
     assert (samples == 20).all()
 
 
+def test_uniform_chirp_distance(seed_everything):
+    reference_chirp_mass = 1.4
+    num_samples = 10_000
+    minimum = 100
+    maximum = 1000
+    chirp_mass_low, chirp_mass_high = 10, 100
+    distribution = distributions.UniformChirpDistance(
+        Uniform(chirp_mass_low, chirp_mass_high),
+        minimum,
+        maximum,
+        reference_chirp_mass,
+    )
+    samples = distribution.sample((num_samples,))
+    assert samples.shape == (num_samples, 2)
+    chirp_mass, luminosity_distance = samples[:, 0], samples[:, 1]
+
+    reference = stats.uniform(
+        loc=chirp_mass_low, scale=chirp_mass_high - chirp_mass_low
+    )
+    _, p_value = stats.kstest(chirp_mass.numpy(), reference.cdf)
+    assert p_value > 1e-3
+
+    scale = (chirp_mass / reference_chirp_mass) ** (5 / 6)
+    chirp_distance = luminosity_distance / scale
+    assert (chirp_distance >= minimum).all()
+    assert (chirp_distance <= maximum).all()
+
+    reference = stats.uniform(loc=minimum, scale=maximum - minimum)
+    _, p_value = stats.kstest(chirp_distance.numpy(), reference.cdf)
+    assert p_value > 1e-3
+
+    # chirp distance should be independent of chirp mass
+    median = chirp_mass.median()
+    _, p_value = stats.ks_2samp(
+        chirp_distance[chirp_mass < median].numpy(),
+        chirp_distance[chirp_mass >= median].numpy(),
+    )
+    assert p_value > 1e-3
+
+
+def test_uniform_chirp_distance_log_prob():
+    reference_chirp_mass = 1.4
+    minimum = 100
+    maximum = 1000
+    chirp_mass_prior = Uniform(1, 100, validate_args=False)
+    distribution = distributions.UniformChirpDistance(
+        chirp_mass_prior, minimum, maximum, reference_chirp_mass
+    )
+
+    # in bounds, in bounds, below minimum, above maximum,
+    # in bounds, chirp mass outside of its prior
+    chirp_mass = torch.tensor([1.4, 10.0, 10.0, 10.0, 50.0, 200.0])
+    chirp_distance = torch.tensor([500.0, 100.0, 99.0, 1001.0, 999.0, 500.0])
+
+    scale = (chirp_mass / reference_chirp_mass) ** (5 / 6)
+    luminosity_distance = chirp_distance * scale
+    value = torch.stack([chirp_mass, luminosity_distance], dim=-1)
+
+    log_prob = distribution.log_prob(value)
+    assert log_prob.shape == chirp_mass.shape
+
+    expected = chirp_mass_prior.log_prob(chirp_mass) - torch.log(
+        scale * (maximum - minimum)
+    )
+    in_bounds = torch.tensor([True, True, False, False, True, False])
+    torch.testing.assert_close(log_prob[in_bounds], expected[in_bounds])
+    assert (log_prob[~in_bounds] == -torch.inf).all()
+
+    with pytest.raises(ValueError, match="Expected value with shape"):
+        distribution.log_prob(value[:, :1])
+
+
+def test_uniform_chirp_distance_delta_limit(seed_everything):
+    """
+    With equal minimum and maximum, every sample has the same chirp
+    distance, so luminosity distance is solely a function of chirp
+    mass. For a uniform chirp mass prior, the density of d_L is a
+    power law with index 1/5.
+    """
+    reference_chirp_mass = 1.4
+    num_samples = 10_000
+    chirp_distance = 500.0
+    chirp_mass_low, chirp_mass_high = 1.0, 3.0
+    chirp_mass_prior = Uniform(chirp_mass_low, chirp_mass_high)
+
+    distribution = distributions.UniformChirpDistance(
+        chirp_mass_prior,
+        chirp_distance,
+        chirp_distance,
+        reference_chirp_mass,
+    )
+    luminosity_distance = distribution.sample((num_samples,))[:, 1]
+
+    def to_distance(chirp_mass):
+        return chirp_distance * (chirp_mass / reference_chirp_mass) ** (5 / 6)
+
+    low = to_distance(chirp_mass_low)
+    high = to_distance(chirp_mass_high)
+
+    def cdf(x):
+        return (x**1.2 - low**1.2) / (high**1.2 - low**1.2)
+
+    _, p_value = stats.kstest(luminosity_distance.numpy(), cdf)
+    assert p_value > 1e-3
+
+
 class TestCosmologyDistributions:
     # bilby randomness currently comes into play in
     # only this test, so set the seed separately from
@@ -186,7 +293,7 @@ class TestCosmologyDistributions:
             # Not sure that this is the ideal way to test this
             count = 0
             for _ in range(num_trials):
-                ml4gw_dist.sample((num_samples,))
+                ml4gw_samples = ml4gw_dist.sample((num_samples,))
                 bilby_samples = bilby_dist.sample(num_samples)
                 _, p_value = stats.ks_2samp(
                     ml4gw_samples.numpy(), bilby_samples
@@ -195,7 +302,7 @@ class TestCosmologyDistributions:
                     count += 1
 
             mean = num_trials * alpha
-            sigma = num_trials * alpha * (1 - alpha)
+            sigma = (num_trials * alpha * (1 - alpha)) ** 0.5
             assert abs(count - mean) < 3 * sigma
 
             # Compare log probability between ml4gw and bilby
