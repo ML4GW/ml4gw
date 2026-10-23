@@ -16,6 +16,7 @@ updates:
           - "torchaudio"
           - "numpy"
           - "scipy"
+          - "h5py"
 
       documentation:
         applies-to: version-updates
