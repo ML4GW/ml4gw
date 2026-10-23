@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11, <3.15"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -1330,7 +1330,7 @@ wheels = [
 
 [[package]]
 name = "gwpy"
-version = "3.0.14"
+version = "4.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy" },
@@ -1351,9 +1351,9 @@ dependencies = [
     { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/05/cd/bb165e47b18cd255c1ee1fcd59802544d8de57566b449cfdaf848b69108f/gwpy-3.0.14.tar.gz", hash = "sha256:bf25d19763c9128f515144349d3f70925a8334bbd22950c01d35bb954f323f52", size = 1543294, upload-time = "2026-01-16T13:02:28.432Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/ca/41c5c1d0760451b3e002cac87a92da122d302cda66e6f55485c7f02f77cf/gwpy-4.1.0.tar.gz", hash = "sha256:f77342063a55515f1c49056aea89e052e3a4e615ee5c504ac1f6c64a68e709de", size = 1639390, upload-time = "2026-10-13T11:39:19.494Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2c/46/c893a66bd97f08ddf4a7cfde52cc58fb8e2c83acfa915f3c02c00f0aa721/gwpy-3.0.14-py3-none-any.whl", hash = "sha256:f61ed9d4b3eba7f9f534f72f03956f158ed7f9101726b5387c29fe57ce45c77e", size = 1395825, upload-time = "2026-01-16T13:02:26.55Z" },
+    { url = "https://files.pythonhosted.org/packages/71/9b/d85f3ca7c5d7565b1d51c64c91171582b1c0d29397e9867381cd41fe33eb/gwpy-4.1.0-py3-none-any.whl", hash = "sha256:06c1bc310b2c53e7fbcf93e0b422aa89aa50832ba77ba58b38de66c884b82108", size = 1571085, upload-time = "2026-10-13T11:39:17.344Z" },
 ]
 
 [[package]]
@@ -2407,6 +2407,7 @@ wheels = [
 [[package]]
 name = "ml4gw"
 source = { editable = "." }
+default-groups = ["dev", "docs"]
 dependencies = [
     { name = "h5py" },
     { name = "jaxtyping" },
@@ -2422,6 +2423,7 @@ dependencies = [
 dev = [
     { name = "bilby" },
     { name = "coverage", extra = ["toml"] },
+    { name = "gwpy" },
     { name = "jsonargparse", extra = ["signatures"] },
     { name = "lalsuite" },
     { name = "prek" },
@@ -2441,6 +2443,9 @@ docs = [
     { name = "sphinx-rtd-theme" },
     { name = "torchmetrics" },
 ]
+gwpy = [
+    { name = "gwpy" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -2456,6 +2461,7 @@ requires-dist = [
 dev = [
     { name = "bilby", specifier = "~=2.1" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.6.10,<8" },
+    { name = "gwpy", specifier = "~=4.0" },
     { name = "jsonargparse", extras = ["signatures"], specifier = ">=4.0" },
     { name = "lalsuite", specifier = "~=7.0" },
     { name = "prek", specifier = ">=0.1" },
@@ -2464,7 +2470,7 @@ dev = [
     { name = "pytest-repeat", specifier = ">=0.9.3,<0.10" },
 ]
 docs = [
-    { name = "gwpy", specifier = "~=3.0" },
+    { name = "gwpy", specifier = "~=4.0" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "lightning", specifier = ">=2.4,<2.7" },
     { name = "myst-nb", specifier = ">=1.3.0" },
@@ -2475,6 +2481,7 @@ docs = [
     { name = "sphinx-rtd-theme", specifier = ">=2.0.0,<4" },
     { name = "torchmetrics", specifier = ">=1.6,<1.10" },
 ]
+gwpy = [{ name = "gwpy", specifier = "~=4.0" }]
 
 [[package]]
 name = "mpmath"
