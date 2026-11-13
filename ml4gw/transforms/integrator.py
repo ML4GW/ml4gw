@@ -16,7 +16,7 @@ class TophatIntegrator(torch.nn.Module):
     Args:
         sample_rate (int):
             Sampling rate (Hz) of the input timeseries.
-        integration_length (int):
+        integration_length (float):
             Integration window length in seconds.
 
     Shape:
@@ -28,7 +28,7 @@ class TophatIntegrator(torch.nn.Module):
             Integrated timeseries with the same length as the input.
     """
 
-    def __init__(self, sample_rate: int, integration_length: int):
+    def __init__(self, sample_rate: int, integration_length: float):
         super().__init__()
         self.sample_rate = sample_rate
         self.integration_length = integration_length

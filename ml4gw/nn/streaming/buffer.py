@@ -14,52 +14,26 @@ class StreamBuffer(torch.nn.Module):
     for processing continuous data streams in chunks.
 
     Args:
-        psd_length:
-            Length, in seconds, of the data at the start of each
-            stream used to estimate the PSD.
-        kernel_length:
-            Length, in seconds, of each kernel passed to the model.
-        fduration:
-            The length of the whitening filter's impulse
-            response, in seconds.
-        sample_rate:
-            Sampling rate of input timeseries in Hz.
-        inference_sampling_rate:
-            Rate, in Hz, at which kernels are sampled from the
-            streams, and so at which the model produces outputs.
+        state_size:
+            Number of trailing samples kept as state between updates.
+            For streams passed to a :class:`StreamWhitener`, this is
+            its ``state_size``.
 
     Example:
         .. code-block:: python
 
             >>> import torch
             >>> from ml4gw.nn.streaming import StreamBuffer
-            >>> buffer = StreamBuffer(
-            ...     psd_length=64, kernel_length=8, fduration=1,
-            ...     sample_rate=2048, inference_sampling_rate=16
-            ... )
+            >>> buffer = StreamBuffer(state_size=1024)
             >>> # (streams, channels, samples)
-            >>> update = torch.randn(4, 2, 16384)
+            >>> update = torch.randn(4, 2, 256)
             >>> state = buffer.get_initial_state(4, 2)
             >>> x, new_state = buffer(update, state)
     """
 
-    def __init__(
-        self,
-        psd_length: float,
-        kernel_length: float,
-        fduration: float,
-        sample_rate: float,
-        inference_sampling_rate: float,
-    ) -> None:
+    def __init__(self, state_size: int) -> None:
         super().__init__()
-        # Calculate total state length accounting for PSD, kernel, and filter
-        state_length = kernel_length + fduration + psd_length
-        # Subtract one stride. An update brings batch_size strides of new
-        # samples, but only batch_size - 1 strides separate the first and
-        # last kernels, so state plus update is exactly the data needed.
-        state_length -= 1 / inference_sampling_rate
-        # Convert to number of samples at the given sample rate
-        self.state_size = int(state_length * sample_rate)
+        self.state_size = state_size
 
     def get_initial_state(
         self,
