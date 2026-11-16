@@ -5,6 +5,7 @@ import pytest
 import torch
 from astropy import units as u
 from torch.autograd import gradcheck
+from typecheck import no_typecheck
 
 import ml4gw.waveforms as waveforms
 from ml4gw.waveforms.conversion import (
@@ -114,8 +115,11 @@ def test_taylor_f2(
 
     # Test that a difference in the length of a
     # parameter tensor raises an error
-    with pytest.raises(ValueError, match="Tensors must have same batch size"):
-        torch_freqs = torch.arange(100)
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match="Tensors must have same batch size"),
+    ):
+        torch_freqs = torch.arange(100.0)
         waveforms.TaylorF2()(
             torch_freqs,
             chirp_mass[1:],
@@ -243,8 +247,11 @@ def test_phenom_d(
 
     # Test that a difference in the length of a
     # parameter tensor raises an error
-    with pytest.raises(ValueError, match="Tensors must have same batch size"):
-        torch_freqs = torch.arange(100)
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match="Tensors must have same batch size"),
+    ):
+        torch_freqs = torch.arange(100.0)
         waveforms.IMRPhenomD()(
             torch_freqs,
             chirp_mass[1:],
@@ -353,8 +360,11 @@ def test_phenom_deco_bbh_limit(
 
     # Test that a difference in the length of a
     # parameter tensor raises an error
-    with pytest.raises(ValueError, match="Tensors must have same batch size"):
-        torch_freqs = torch.arange(100)
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match="Tensors must have same batch size"),
+    ):
+        torch_freqs = torch.arange(100.0)
         waveforms.IMRPhenomD()(
             torch_freqs,
             chirp_mass[1:],
@@ -455,8 +465,8 @@ def test_phenom_p(
 ):
     chirp_mass = torch.tensor([chirp_mass], dtype=FLOAT64)
     mass_ratio = torch.tensor([mass_ratio], dtype=FLOAT64)
-    chi1x, chi1y, chi1z = [torch.tensor(c, dtype=FLOAT64) for c in chi1]
-    chi2x, chi2y, chi2z = [torch.tensor(c, dtype=FLOAT64) for c in chi2]
+    chi1x, chi1y, chi1z = [torch.tensor([c], dtype=FLOAT64) for c in chi1]
+    chi2x, chi2y, chi2z = [torch.tensor([c], dtype=FLOAT64) for c in chi2]
     distance = torch.tensor([distance], dtype=FLOAT64)
     theta_jn = torch.tensor([theta_jn], dtype=FLOAT64)
     phase = torch.tensor([phase], dtype=FLOAT64)
@@ -466,7 +476,7 @@ def test_phenom_p(
     )
 
     # Test `tc = None`
-    torch_freqs = torch.arange(100)
+    torch_freqs = torch.arange(100.0)
     hc_ml4gw, hp_ml4gw = waveforms.IMRPhenomPv2()(
         torch_freqs,
         chirp_mass,

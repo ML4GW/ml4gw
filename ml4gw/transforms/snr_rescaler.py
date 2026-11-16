@@ -1,7 +1,7 @@
 import torch
 
 from ..gw import compute_network_snr
-from ..types import BatchTensor, TimeSeries2d, WaveformTensor
+from ..types import BatchTensor, TimeSeries1d, WaveformTensor
 from .transform import FittableSpectralTransform
 
 
@@ -42,7 +42,7 @@ class SnrRescaler(FittableSpectralTransform):
 
     def fit(
         self,
-        *background: TimeSeries2d,
+        *background: TimeSeries1d,
         fftlength: float | None = None,
         overlap: float | None = None,
     ):

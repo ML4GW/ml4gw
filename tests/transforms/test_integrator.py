@@ -1,5 +1,6 @@
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.transforms.integrator import LeakyIntegrator, TophatIntegrator
 
@@ -90,7 +91,10 @@ def test_leaky_integrator():
         ),
     )
 
-    with pytest.raises(ValueError, match="Must be 'count' or 'score'"):
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match="Must be 'count' or 'score'"),
+    ):
         LeakyIntegrator(
             threshold=0.5,
             decay=1.0,

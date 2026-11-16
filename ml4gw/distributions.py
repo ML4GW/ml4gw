@@ -10,7 +10,6 @@ from collections.abc import Callable
 
 import torch
 import torch.distributions as dist
-from jaxtyping import Float
 from torch import Tensor
 
 from ml4gw.constants import C
@@ -30,8 +29,8 @@ class Cosine(dist.Distribution):
 
     def __init__(
         self,
-        low: float = -math.pi / 2,
-        high: float = math.pi / 2,
+        low: float | Tensor = -math.pi / 2,
+        high: float | Tensor = math.pi / 2,
         validate_args=None,
     ):
         batch_shape = torch.Size()
@@ -40,12 +39,12 @@ class Cosine(dist.Distribution):
         self.high = torch.as_tensor(high)
         self.norm = 1 / (torch.sin(self.high) - torch.sin(self.low))
 
-    def rsample(self, sample_shape: torch.Size = None) -> Tensor:
+    def rsample(self, sample_shape: tuple[int, ...] | None = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         u = torch.rand(sample_shape, device=self.low.device)
         return torch.arcsin(u / self.norm + torch.sin(self.low))
 
-    def log_prob(self, value: float) -> Float[Tensor, ""]:
+    def log_prob(self, value: float | Tensor) -> Tensor:
         value = torch.as_tensor(value)
         inside_range = (value >= self.low) & (value <= self.high)
         return (value.cos() * inside_range).log()
@@ -173,7 +172,7 @@ class DeltaFunction(dist.Distribution):
         super().__init__(batch_shape, validate_args=validate_args)
         self.peak = torch.as_tensor(peak)
 
-    def rsample(self, sample_shape: torch.Size = None) -> Tensor:
+    def rsample(self, sample_shape: tuple[int, ...] | None = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         return self.peak * torch.ones(
             sample_shape, device=self.peak.device, dtype=torch.float32
@@ -341,7 +340,7 @@ class UniformComovingVolume(dist.Distribution):
         t = (x_query - x0) / (x1 - x0)
         return y0 + t * (y1 - y0)
 
-    def rsample(self, sample_shape: torch.Size = None) -> Tensor:
+    def rsample(self, sample_shape: tuple[int, ...] | None = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         u = torch.rand(sample_shape, device=self.minimum.device)
         return self._linear_interp_1d(self.cdf, self.distance_grid, u)
@@ -468,7 +467,7 @@ class UniformChirpDistance(dist.Distribution):
             validate_args=False,
         )
 
-    def sample(self, sample_shape: torch.Size = None) -> Tensor:
+    def sample(self, sample_shape: tuple[int, ...] | None = None) -> Tensor:
         sample_shape = sample_shape or torch.Size()
         chirp_mass = self.chirp_mass.sample(sample_shape)
         luminosity_distance = self._conditional(chirp_mass).sample()

@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import torch
 from scipy import signal
+from typecheck import no_typecheck
 
 from ml4gw.transforms.spectral import SpectralDensity
 
@@ -162,7 +163,7 @@ def test_spectral_density(
     compare_against_numpy(torch_result, np.sqrt(scipy_result), num_bad=1)
 
     # test error raised if window incorrect shape
-    with pytest.raises(ValueError) as exc_info:
+    with no_typecheck(), pytest.raises(ValueError) as exc_info:
         window = torch.hann_window(1)
         transform = SpectralDensity(
             sample_rate,
@@ -181,13 +182,13 @@ def y_ndim(request):
 
 def _shape_checks(ndim, y_ndim, x, y, transform):
     # verify that time dimensions must match
-    with pytest.raises(ValueError) as exc_info:
+    with no_typecheck(), pytest.raises(ValueError) as exc_info:
         transform(x, y[..., :-1])
     assert str(exc_info.value).startswith("Time dimensions")
 
     # verify that y can't have more dims than x
     if y_ndim == 0:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             transform(x, y[None])
         assert str(exc_info.value).startswith("Can't compute")
 
@@ -198,14 +199,14 @@ def _shape_checks(ndim, y_ndim, x, y, transform):
     # the same dimensionality, their shapes must
     # fully match
     if ndim > 1 and y_ndim == 0:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             transform(x, y[:-1])
         assert str(exc_info.value).startswith("If x and y tensors")
 
     # verify for 3D x's that 2D y's must have the same batch
     # dimension, and that y cannot be 1D
     if ndim == 3 and y_ndim == 1:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             transform(x, y[:-1])
         assert str(exc_info.value).startswith("If x is a 3D tensor")
 

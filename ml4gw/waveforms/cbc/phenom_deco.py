@@ -1,8 +1,7 @@
 import torch
-from jaxtyping import Float
 
 from ...constants import MTSUN_SI
-from ...types import BatchTensor, FrequencySeries1d
+from ...types import BatchTensor, FrequencyDomainWaveform, FrequencySeries1d
 from .phenom_d import IMRPhenomD
 
 
@@ -107,7 +106,7 @@ class IMRPhenomDECO(IMRPhenomD):
         distance: BatchTensor,
         phic: BatchTensor,
         f_ref: float,
-    ) -> Float[FrequencySeries1d, " batch"]:
+    ) -> FrequencyDomainWaveform:
 
         total_mass = chirp_mass * (1 + mass_ratio) ** 1.2 / mass_ratio**0.6
         mass_1 = total_mass / (1 + mass_ratio)

@@ -6,12 +6,26 @@ windows.
 """
 
 import torch
-from jaxtyping import Float, Int64
+from jaxtyping import Float, Int64, Shaped
 from torch import Tensor
 
-from ..types import TimeSeries1d, TimeSeries1to3d, TimeSeries2d, TimeSeries3d
+from ..types import TimeSeries1to3d
 
-BatchTimeSeriesTensor = Float[Tensor, "batch time"] | TimeSeries3d
+# The sliced tensors can be of any data type
+ShapedTimeSeries1to3d = (
+    Shaped[Tensor, " time"]
+    | Shaped[Tensor, "channel time"]
+    | Shaped[Tensor, "batch channel time"]
+)
+BatchTimeSeriesTensor = (
+    Shaped[Tensor, "batch {kernel_size}"]
+    | Shaped[Tensor, "batch channel {kernel_size}"]
+)
+UnfoldedTensor = (
+    Float[Tensor, "window {window_size}"]
+    | Float[Tensor, "window channel {window_size}"]
+    | Float[Tensor, "window batch channel {window_size}"]
+)
 
 
 def unfold_windows(
@@ -19,11 +33,7 @@ def unfold_windows(
     window_size: int,
     stride: int,
     drop_last: bool = True,
-) -> (
-    Float[TimeSeries1d, " window"]
-    | Float[TimeSeries2d, " window"]
-    | Float[TimeSeries3d, " window"]
-):
+) -> UnfoldedTensor | tuple[UnfoldedTensor, Tensor]:
     """Unfold a timeseries into windows
 
     Args:
@@ -93,7 +103,7 @@ def unfold_windows(
 
 
 def slice_kernels(
-    x: TimeSeries1to3d,
+    x: ShapedTimeSeries1to3d,
     idx: Int64[Tensor, "..."],
     kernel_size: int,
 ) -> BatchTimeSeriesTensor:
@@ -237,13 +247,19 @@ def slice_kernels(
 
 
 def sample_kernels(
-    X: TimeSeries1to3d,
+    X: ShapedTimeSeries1to3d,
     kernel_size: int,
     N: int | None = None,
     max_center_offset: int | None = None,
     coincident: bool = True,
     return_idx: bool = False,
-) -> BatchTimeSeriesTensor:
+) -> (
+    BatchTimeSeriesTensor
+    | tuple[
+        BatchTimeSeriesTensor,
+        Int64[Tensor, " batch"] | Int64[Tensor, "batch channel"],
+    ]
+):
     """Randomly sample kernels from a single or multichannel timeseries
 
     For a tensor representing one or multiple channels of

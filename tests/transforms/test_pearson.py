@@ -1,5 +1,6 @@
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.transforms import ShiftedPearsonCorrelation
 
@@ -77,11 +78,14 @@ def test_shifted_pearson_correlation(transform, max_shift):
 def test_shifted_pearson_shape_errors(transform):
     x = torch.randn(2, 2, 2048)
 
-    with pytest.raises(ValueError, match="up to 3 dimensions"):
+    with no_typecheck(), pytest.raises(ValueError, match="up to 3 dimensions"):
         transform(x[None], x[None])
 
     with pytest.raises(ValueError, match="more dimensions"):
         transform(x[0], x)
 
-    with pytest.raises(ValueError, match="same size along last"):
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match="same size along last"),
+    ):
         transform(x, x[..., :-1])

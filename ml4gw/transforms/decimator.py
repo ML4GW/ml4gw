@@ -179,7 +179,7 @@ class Decimator(torch.nn.Module):
             idx = torch.cat((idx, new_idx))
         return idx
 
-    def split_by_schedule(self, X: torch.Tensor) -> tuple[torch.Tensor, ...]:
+    def split_by_schedule(self, X: torch.Tensor) -> list[torch.Tensor]:
         r"""
         Split and decimate a timeseries into segments according to the
         schedule.

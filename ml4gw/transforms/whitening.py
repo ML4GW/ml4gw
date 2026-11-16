@@ -2,10 +2,11 @@ import torch
 
 from .. import spectral
 from ..types import (
+    ASDTensor,
     FrequencySeries1d,
-    FrequencySeries1to3d,
     TimeSeries1d,
     TimeSeries3d,
+    WhitenedTimeSeries3d,
 )
 from .transform import FittableSpectralTransform
 
@@ -71,11 +72,11 @@ class Whiten(torch.nn.Module):
     def forward(
         self,
         X: TimeSeries3d,
-        asd: FrequencySeries1to3d,
+        asd: ASDTensor,
         crop: bool = True,
         highpass: float | None = None,
         lowpass: float | None = None,
-    ) -> TimeSeries3d:
+    ) -> WhitenedTimeSeries3d:
         """
         Whiten a batch of multichannel timeseries by a
         background amplitude spectral density.
@@ -264,7 +265,9 @@ class FixedWhiten(FittableSpectralTransform):
         fduration = torch.Tensor([fduration])
         self.build(asd=asd, fduration=fduration)
 
-    def forward(self, X: TimeSeries3d, crop: bool = True) -> TimeSeries3d:
+    def forward(
+        self, X: TimeSeries3d, crop: bool = True
+    ) -> WhitenedTimeSeries3d:
         """
         Whiten the input timeseries tensor using the
         ASD fit by the ``.fit`` method, which must be
@@ -299,7 +302,7 @@ class FixedWhiten(FittableSpectralTransform):
 
 def _validate_minimum_phase_input(
     X: TimeSeries3d,
-    asd: FrequencySeries1to3d | None = None,
+    asd: ASDTensor | None = None,
     num_channels: int | None = None,
 ) -> None:
     if X.ndim != 3:
@@ -327,7 +330,7 @@ def _validate_minimum_phase_input(
 
 
 def _minimum_phase_kernel(
-    asd: FrequencySeries1to3d,
+    asd: ASDTensor,
     size: int,
     sample_rate: float,
     highpass: float | None = None,
@@ -385,7 +388,7 @@ def _minimum_phase_filter(
     X: TimeSeries3d,
     kernel: torch.Tensor,
     crop: bool,
-) -> TimeSeries3d:
+) -> WhitenedTimeSeries3d:
     """Apply a causal FIR as a linear convolution in the frequency domain."""
     size = kernel.size(-1)
     input_size = X.size(-1)
@@ -458,9 +461,9 @@ class MinimumPhaseWhiten(torch.nn.Module):
     def forward(
         self,
         X: TimeSeries3d,
-        asd: FrequencySeries1to3d,
+        asd: ASDTensor,
         crop: bool = True,
-    ) -> TimeSeries3d:
+    ) -> WhitenedTimeSeries3d:
         """Whiten input using an ASD supplied at call time.
 
         Args:
@@ -591,7 +594,9 @@ class FixedMinimumPhaseWhiten(FittableSpectralTransform):
         )
         self.build(kernel=kernel)
 
-    def forward(self, X: TimeSeries3d, crop: bool = True) -> TimeSeries3d:
+    def forward(
+        self, X: TimeSeries3d, crop: bool = True
+    ) -> WhitenedTimeSeries3d:
         """Apply the fitted causal filter.
 
         Args:

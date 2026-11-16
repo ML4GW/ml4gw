@@ -1,7 +1,7 @@
 import torch
 
 from ..spectral import spectral_density
-from ..types import FrequencySeries1to3d, TimeSeries1to3d
+from ..types import ASDTensor, TimeSeries1to3d
 
 
 class FittableTransform(torch.nn.Module):
@@ -47,7 +47,7 @@ class FittableSpectralTransform(FittableTransform):
         num_freqs: int,
         fftlength: float | None = None,
         overlap: float | None = None,
-    ) -> FrequencySeries1to3d:
+    ) -> ASDTensor:
         # if we specified an FFT length, convert
         # the (assumed) time-domain data to the
         # frequency domain

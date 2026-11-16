@@ -1,9 +1,10 @@
 import torch
 from jaxtyping import Float
+from torch import Tensor
 
 from ...constants import MPC_SEC, MTSUN_SI, PI
 from ...constants import EulerGamma as GAMMA
-from ...types import BatchTensor, FrequencySeries1d
+from ...types import BatchTensor, FrequencyDomainWaveform, FrequencySeries1d
 from ..conversion import chirp_mass_and_mass_ratio_to_components
 
 
@@ -90,7 +91,7 @@ class TaylorF2(torch.nn.Module):
         distance: BatchTensor,
         phic: BatchTensor,
         f_ref: float,
-    ) -> Float[FrequencySeries1d, " batch"]:
+    ) -> FrequencyDomainWaveform:
         mass1_s = mass1 * MTSUN_SI
         mass2_s = mass2 * MTSUN_SI
         M_s = mass1_s + mass2_s
@@ -111,12 +112,12 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_amplitude(
         self,
-        Mf: BatchTensor,
+        Mf: Float[Tensor, "batch frequency"],
         mass1: BatchTensor,
         mass2: BatchTensor,
         eta: BatchTensor,
         distance: BatchTensor,
-    ) -> Float[FrequencySeries1d, " batch"]:
+    ) -> Float[Tensor, "batch frequency"]:
         mass1_s = mass1 * MTSUN_SI
         mass2_s = mass2 * MTSUN_SI
         v = (PI * Mf) ** (1.0 / 3.0)
@@ -138,12 +139,14 @@ class TaylorF2(torch.nn.Module):
 
     def taylorf2_phase(
         self,
-        Mf: BatchTensor,
+        Mf: Float[Tensor, "batch frequency"],
         mass1: BatchTensor,
         mass2: BatchTensor,
         chi1: BatchTensor,
         chi2: BatchTensor,
-    ) -> Float[FrequencySeries1d, " batch"]:
+    ) -> tuple[
+        Float[Tensor, "batch frequency"], Float[Tensor, "batch frequency"]
+    ]:
         """
         Calculate the inspiral phase for the TaylorF2.
         """

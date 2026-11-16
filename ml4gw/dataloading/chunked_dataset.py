@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 
 import torch
 
@@ -60,7 +60,7 @@ class ChunkedTimeSeriesDataset(torch.utils.data.IterableDataset):
     def __len__(self) -> int:
         return len(self.chunk_it) * self.batches_per_chunk
 
-    def __iter__(self) -> WaveformTensor:
+    def __iter__(self) -> Iterator[WaveformTensor]:
         it = iter(self.chunk_it)
         chunk = next(it)
         num_chunks, num_channels, chunk_size = chunk.shape

@@ -1,5 +1,6 @@
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.transforms.heterodyne import Heterodyne
 
@@ -112,7 +113,7 @@ def test_single_chirp_mass():
 
 
 def test_invalid_return_type_init():
-    with pytest.raises(ValueError):
+    with no_typecheck(), pytest.raises(ValueError):
         Heterodyne(
             sample_rate=2048,
             kernel_length=4,

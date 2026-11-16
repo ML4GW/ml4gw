@@ -1,5 +1,5 @@
 import torch
-from jaxtyping import Float
+from jaxtyping import Float, Shaped
 from torch import Tensor
 
 from .. import gw
@@ -11,7 +11,7 @@ from ..types import BatchTensor
 class WaveformSampler(torch.nn.Module):
     def __init__(
         self,
-        parameters: Float[Tensor, "batch num_params"] | None = None,
+        parameters: Shaped[Tensor, "batch num_params"] | None = None,
         **polarizations: Float[Tensor, "batch time"],
     ):
         super().__init__()

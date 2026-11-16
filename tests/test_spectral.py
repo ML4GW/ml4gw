@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import torch
 from scipy import signal
+from typecheck import no_typecheck
 
 from ml4gw.spectral import (
     fast_spectral_density,
@@ -74,7 +75,7 @@ class TestMinimumPhaseWhiteningFilter:
         ],
     )
     def test_invalid_asd(self, asd):
-        with pytest.raises(ValueError):
+        with no_typecheck(), pytest.raises(ValueError):
             minimum_phase_whitening_filter(asd)
 
     def test_inconsistent_fft_length(self):
@@ -196,7 +197,7 @@ def test_fast_spectral_density(
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             fsd(torch.Tensor(x[None]))
         assert str(exc_info.value).startswith("Can't compute spectral")
 
@@ -208,13 +209,13 @@ def y_ndim(request):
 
 def _shape_checks(ndim, y_ndim, x, y, f):
     # verify that time dimensions must match
-    with pytest.raises(ValueError) as exc_info:
+    with no_typecheck(), pytest.raises(ValueError) as exc_info:
         f(x, y=y[..., :-1])
     assert str(exc_info.value).startswith("Time dimensions")
 
     # verify that y can't have more dims than x
     if y_ndim == 0:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             f(x, y=y[None])
         assert str(exc_info.value).startswith("Can't compute")
 
@@ -225,14 +226,14 @@ def _shape_checks(ndim, y_ndim, x, y, f):
     # the same dimensionality, their shapes must
     # fully match
     if ndim > 1 and y_ndim == 0:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             f(x, y=y[:-1])
         assert str(exc_info.value).startswith("If x and y tensors")
 
     # verify for 3D x's that 2D y's must have the same batch
     # dimension, and that y cannot be 1D
     if ndim == 3 and y_ndim == 1:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             f(x, y=y[:-1])
         assert str(exc_info.value).startswith("If x is a 3D tensor")
 
@@ -407,7 +408,7 @@ def test_spectral_density(
 
     # make sure we catch any calls with too many dimensions
     if ndim == 3:
-        with pytest.raises(ValueError) as exc_info:
+        with no_typecheck(), pytest.raises(ValueError) as exc_info:
             sd(torch.Tensor(x[None]))
         assert str(exc_info.value).startswith("Can't compute spectral")
 

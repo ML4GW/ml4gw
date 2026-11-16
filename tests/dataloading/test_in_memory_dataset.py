@@ -3,6 +3,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.dataloading.in_memory_dataset import InMemoryDataset
 
@@ -83,7 +84,7 @@ def test_in_memory_dataset_coincident_deterministic(
     X, y = Xy
     if y is not None:
         # ensure that y has to be same length as x in time
-        with pytest.raises(ValueError) as exc:
+        with no_typecheck(), pytest.raises(ValueError) as exc:
             dataset = InMemoryDataset(
                 X,
                 kernel_size,
