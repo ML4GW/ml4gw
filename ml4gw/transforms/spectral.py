@@ -65,6 +65,7 @@ class SpectralDensity(torch.nn.Module):
 
         super().__init__()
 
+        self.sample_rate = sample_rate
         self.nperseg = int(fftlength * sample_rate)
         self.nstride = self.nperseg - int(overlap * sample_rate)
 

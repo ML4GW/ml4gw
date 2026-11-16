@@ -14,26 +14,28 @@ class StreamBuffer(torch.nn.Module):
     for processing continuous data streams in chunks.
 
     Args:
-        state_size:
-            Number of trailing samples kept as state between updates.
-            For streams passed to a :class:`StreamWhitener`, this is
-            its ``state_size``.
+        input_size:
+            Number of samples returned by each call.
+        update_size:
+            Number of new samples in each update.
 
     Example:
         .. code-block:: python
 
             >>> import torch
             >>> from ml4gw.nn.streaming import StreamBuffer
-            >>> buffer = StreamBuffer(state_size=1024)
+            >>> buffer = StreamBuffer(input_size=1280, update_size=256)
             >>> # (streams, channels, samples)
             >>> update = torch.randn(4, 2, 256)
             >>> state = buffer.get_initial_state(4, 2)
             >>> x, new_state = buffer(update, state)
     """
 
-    def __init__(self, state_size: int) -> None:
+    def __init__(self, input_size: int, update_size: int) -> None:
         super().__init__()
-        self.state_size = state_size
+        # Keep all but one update of each call's samples so that the
+        # state plus the next update is exactly ``input_size`` samples
+        self.state_size = input_size - update_size
 
     def get_initial_state(
         self,
@@ -49,7 +51,10 @@ class StreamBuffer(torch.nn.Module):
         self,
         update: Float[Tensor, "stream channel time1"],
         state: Float[Tensor, "stream channel time2"] | None = None,
-    ) -> tuple[Tensor, Tensor]:
+    ) -> tuple[
+        Float[Tensor, "stream channel time3"],
+        Float[Tensor, "stream channel time2"],
+    ]:
         """
         Concatenate new update with state and extract sliding window.
 
