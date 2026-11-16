@@ -1,9 +1,8 @@
 import torch
-from jaxtyping import Float
+from jaxtyping import Float, Int
 from torch import Tensor
 
 from ...transforms import SpectralDensity
-from ...types import FrequencySeries3d, TimeSeries3d
 from ...utils.slicing import unfold_windows
 
 
@@ -98,8 +97,11 @@ class StreamWhitener(torch.nn.Module):
     def whiten(
         self,
         x: Float[Tensor, "stream channel time"],
-        psd_source: Tensor | None = None,
-    ) -> tuple[TimeSeries3d, FrequencySeries3d]:
+        psd_source: Int[Tensor, " stream"] | None = None,
+    ) -> tuple[
+        Float[Tensor, "stream channel time2"],
+        Float[Tensor, "stream channel frequency"],
+    ]:
         """
         Split data into PSD estimation and whitening segments, then
         whiten the second with the PSD of the first.
@@ -138,8 +140,8 @@ class StreamWhitener(torch.nn.Module):
         return whitened.to(x.dtype), asd
 
     def unfold(
-        self, whitened: TimeSeries3d
-    ) -> Float[Tensor, "kernel channel time"]:
+        self, whitened: Float[Tensor, "stream channel time"]
+    ) -> Float[Tensor, "kernel channel time2"]:
         """
         Unfold the whitened streams into kernels, and transpose/flatten
         so that the ordering goes stream by stream and different streams'
@@ -154,8 +156,8 @@ class StreamWhitener(torch.nn.Module):
     def forward(
         self,
         x: Float[Tensor, "stream channel time"],
-        psd_source: Tensor | None = None,
-    ) -> Float[Tensor, "kernel channel time"]:
+        psd_source: Int[Tensor, " stream"] | None = None,
+    ) -> Float[Tensor, "kernel channel time2"]:
         """
         Estimate PSD, whiten data, and unfold kernels.
 

@@ -1,5 +1,5 @@
 import torch
-from jaxtyping import Float
+from jaxtyping import Float, Int
 from torch import Tensor
 
 from .buffer import StreamBuffer
@@ -103,7 +103,7 @@ class StreamRunner(torch.nn.Module):
     def step(
         self,
         update: Float[Tensor, "stream channel time"],
-        psd_source: Tensor | None = None,
+        psd_source: Int[Tensor, " stream"] | None = None,
     ) -> StreamOutput | tuple[StreamOutput, ...]:
         """
         Send a batch update with several streams through the model.
@@ -152,7 +152,7 @@ class StreamRunner(torch.nn.Module):
     def run(
         self,
         data: Float[Tensor, "stream channel time"],
-        psd_source: Tensor | None = None,
+        psd_source: Int[Tensor, " stream"] | None = None,
     ) -> StreamOutput | tuple[StreamOutput, ...]:
         """
         Run inference on every stream of a sequence at once.
