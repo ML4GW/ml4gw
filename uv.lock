@@ -2471,7 +2471,7 @@ dev = [
     { name = "jsonargparse", extras = ["signatures"], specifier = ">=4.0" },
     { name = "lalsuite", specifier = "~=7.0" },
     { name = "prek", specifier = ">=0.1" },
-    { name = "pytest", specifier = ">=7,<10" },
+    { name = "pytest", specifier = ">=8,<10" },
     { name = "pytest-benchmark", specifier = ">=4.0" },
     { name = "pytest-repeat", specifier = ">=0.9.3,<0.10" },
 ]

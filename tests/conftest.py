@@ -3,8 +3,29 @@ import random
 import numpy as np
 import pytest
 import torch
+from jaxtyping import TypeCheckError
 from scipy.special import erfinv
 from torch.distributions import Uniform
+
+TYPECHECK_HINT = """\
+The tests check every call against ml4gw's type hints (see tests/typecheck.py).
+If this test passes invalid input on purpose, wrap the call in no_typecheck():
+
+    from typecheck import no_typecheck
+
+    with no_typecheck(), pytest.raises(ValueError):
+        ...
+
+Otherwise, either the input or the type hint is wrong."""
+
+
+# Explain type-check failures
+@pytest.hookimpl(wrapper=True)
+def pytest_runtest_makereport(item, call):
+    report = yield
+    if call.excinfo is not None and call.excinfo.errisinstance(TypeCheckError):
+        report.sections.append(("type checking", TYPECHECK_HINT))
+    return report
 
 
 # If a fixture is doing anything random,
