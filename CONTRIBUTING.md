@@ -60,6 +60,22 @@ uvx prek run --all-files
 which will apply the necessary formatting, or indicate the issue for you to fix
 if an automatic fix is not possible.
 
+## Type checking in tests
+
+The test suite uses [jaxtyping](https://docs.kidger.site/jaxtyping/) and
+[beartype](https://beartype.readthedocs.io/) to check every `ml4gw` against
+its type hints. These checks aren't active at runtime; the purpose of checking
+during testing is to ensure the documented types are accurate. If a test passes
+invalid input deliberately to check that an error in `ml4gw` raises, the type
+checker's error will raise first, obscuring that test. Type checking should be
+turned off for that call with `no_typecheck()`:
+```python
+from typecheck import no_typecheck
+
+with no_typecheck(), pytest.raises(ValueError):
+    SpectralDensity(sample_rate, fftlength, window=torch.hann_window(1))
+```
+
 ## Test coverage
 
 Every pull request runs the unit tests on Python 3.10, 3.11, and 3.12 and uploads a

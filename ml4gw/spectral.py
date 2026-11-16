@@ -21,8 +21,10 @@ from torch import Tensor
 from .types import (
     ASDTensor,
     FrequencySeries1to3d,
+    SpectrumTensor,
     TimeSeries1to3d,
-    WaveformTensor,
+    TimeSeries3d,
+    WhitenedTimeSeries3d,
 )
 
 
@@ -96,11 +98,11 @@ def fast_spectral_density(
     x: TimeSeries1to3d,
     nperseg: int,
     nstride: int,
-    window: Float[Tensor, " {nperseg//2+1}"],
-    scale: float,
+    window: Float[Tensor, " {nperseg}"],
+    scale: float | Float[Tensor, ""],
     average: str = "median",
-    y: TimeSeries1to3d | None = None,
-) -> FrequencySeries1to3d:
+    y: TimeSeries1to3d | Float[Tensor, "batch time"] | None = None,
+) -> SpectrumTensor:
     """
     Compute the power spectral density of a multichannel
     timeseries or a batch of multichannel timeseries, or
@@ -126,7 +128,7 @@ def fast_spectral_density(
             Stride between FFT windows
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length ``nperseg // 2 + 1``.
+            FFT computation. Should have length ``nperseg``.
         scale:
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
@@ -258,8 +260,8 @@ def spectral_density(
     x: TimeSeries1to3d,
     nperseg: int,
     nstride: int,
-    window: Float[Tensor, " {nperseg//2+1}"],
-    scale: float,
+    window: Float[Tensor, " {nperseg}"],
+    scale: float | Float[Tensor, ""],
     average: str = "median",
 ) -> FrequencySeries1to3d:
     """
@@ -282,7 +284,7 @@ def spectral_density(
             Stride between FFT windows
         window:
             Window array to multiply by each FFT window before
-            FFT computation. Should have length ``nperseg // 2 + 1``.
+            FFT computation. Should have length ``nperseg``.
         scale:
             Scale factor to multiply the FFT'd data by, related to
             desired units for output tensor (e.g. letting this equal
@@ -355,7 +357,7 @@ def spectral_density(
 
 def truncate_inverse_amplitude_spectrum(
     asd: ASDTensor,
-    fduration: Float[Tensor, " time"] | float,
+    fduration: Float[Tensor, " window"] | float,
     sample_rate: float,
     highpass: float | None = None,
     lowpass: float | None = None,
@@ -533,7 +535,7 @@ def minimum_phase_whitening_filter(
 
 
 def normalize_by_asd(
-    X: WaveformTensor,
+    X: TimeSeries3d,
     asd: ASDTensor,
     sample_rate: float,
     pad: int,
@@ -558,14 +560,14 @@ def normalize_by_asd(
 
 
 def whiten(
-    X: WaveformTensor,
+    X: TimeSeries3d,
     asd: ASDTensor,
-    fduration: Float[Tensor, " time"] | float,
+    fduration: Float[Tensor, " window"] | float,
     sample_rate: float,
     highpass: float | None = None,
     lowpass: float | None = None,
     crop: bool = True,
-) -> WaveformTensor:
+) -> WhitenedTimeSeries3d:
     """
     Whiten a batch of timeseries using the specified
     background one-sided amplitude spectral densities (ASDs),

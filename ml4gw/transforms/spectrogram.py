@@ -133,7 +133,7 @@ class MultiResolutionSpectrogram(torch.nn.Module):
 
     def forward(
         self, X: TimeSeries3d
-    ) -> Float[Tensor, "batch channel frequency time"]:
+    ) -> Float[Tensor, "batch channel frequency time2"]:
         """
         Calculate spectrograms of the input tensor and
         combine them into a single spectrogram

@@ -4,6 +4,7 @@ import lal
 import lalsimulation
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw import spectral
 from ml4gw.spectral import spectral_density
@@ -421,13 +422,19 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
         transform = self.get_transform()
         X = torch.randn(4, self.num_channels, 1024)
         asd = torch.ones(2 * self.size + 1)
-        with pytest.raises(ValueError, match="expected input with shape"):
+        with (
+            no_typecheck(),
+            pytest.raises(ValueError, match="expected input with shape"),
+        ):
             transform(X[0], asd)
-        with pytest.raises(ValueError, match="one, two, or three dimensions"):
+        with (
+            no_typecheck(),
+            pytest.raises(ValueError, match="one, two, or three dimensions"),
+        ):
             transform(X, asd.repeat(2, 2, 2, 1))
-        with pytest.raises(ValueError, match="channels"):
+        with no_typecheck(), pytest.raises(ValueError, match="channels"):
             transform(X, asd.repeat(self.num_channels + 1, 1))
-        with pytest.raises(ValueError, match="batch size"):
+        with no_typecheck(), pytest.raises(ValueError, match="batch size"):
             transform(X, asd.repeat(X.size(0) + 1, self.num_channels, 1))
         with pytest.raises(ValueError, match="Not enough timeseries"):
             transform(X[..., : self.size - 1], asd)
@@ -435,7 +442,10 @@ class TestMinimumPhaseWhiten(MinimumPhaseWhitenTest):
             transform(X[..., : self.size], asd)
         with pytest.raises(ValueError, match="at least two frequency bins"):
             transform(X, torch.ones(1))
-        with pytest.raises(ValueError, match="floating-point tensor"):
+        with (
+            no_typecheck(),
+            pytest.raises(ValueError, match="floating-point tensor"),
+        ):
             transform(X, torch.ones(2 * self.size + 1, dtype=torch.int64))
 
     def test_upsamples_short_asd_before_factorization(self):

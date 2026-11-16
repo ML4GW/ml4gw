@@ -4,6 +4,7 @@ import lalsimulation
 import numpy as np
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw import gw as injection
 
@@ -77,7 +78,10 @@ def bilby_get_ifo_response(ifos, batch_size):
 
 
 def test_get_invalid_ifo_geometry():
-    with pytest.raises(ValueError, match=r"Z1 is not recognized as an inter*"):
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match=r"Z1 is not recognized as an inter*"),
+    ):
         injection.get_ifo_geometry("Z1")
 
 
@@ -315,26 +319,27 @@ def test_compute_ifo_snr(_get_waveforms_from_lalsimulation, highpass, lowpass):
 
     backgrounds = psd.data.data[: len(hp.data.data) // 2 + 1]
     backgrounds = torch.sqrt(torch.from_numpy(backgrounds))
-    hp_torch = torch.from_numpy(hp.data.data)
-    hc_torch = torch.from_numpy(hc.data.data)
+    # (batch, num_ifos, time)
+    hp_torch = torch.from_numpy(hp.data.data)[None, None]
+    hc_torch = torch.from_numpy(hc.data.data)[None, None]
 
     num_freqs = hp_torch.shape[-1] // 2 + 1
-    with pytest.raises(ValueError) as exc:
+    with no_typecheck(), pytest.raises(ValueError) as exc:
         snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
             hp_torch,
             backgrounds,
             sample_rate=sample_rate,
-            highpass=torch.ones(num_freqs - 1),
+            highpass=torch.ones(num_freqs - 1, dtype=torch.bool),
             lowpass=lowpass,
         )
     assert str(exc.value).startswith("Can't apply highpass")
-    with pytest.raises(ValueError) as exc:
+    with no_typecheck(), pytest.raises(ValueError) as exc:
         snr_hp_compute_ifo_snr = injection.compute_ifo_snr(
             hp_torch,
             backgrounds,
             sample_rate=sample_rate,
             highpass=highpass,
-            lowpass=torch.ones(num_freqs - 1),
+            lowpass=torch.ones(num_freqs - 1, dtype=torch.bool),
         )
     assert str(exc.value).startswith("Can't apply lowpass")
 
@@ -420,9 +425,9 @@ def test_compute_network_snr(_get_waveforms_from_lalsimulation):
             torch.sqrt(torch.from_numpy(background_2)),
         )
     )
-    hp_torch = torch.from_numpy(hp.data.data)
+    hp_torch = torch.from_numpy(hp.data.data)[None]
     # repeat same signal in two backgrounds
-    hp_torch = hp_torch.repeat((2, 1))
+    hp_torch = hp_torch.repeat((1, 2, 1))
     snr_hp_compute_network_snr = injection.compute_network_snr(
         hp_torch, backgrounds, sample_rate=sample_rate
     )
@@ -456,13 +461,13 @@ def test_reweight_snrs(_get_waveforms_from_lalsimulation):
             torch.sqrt(torch.from_numpy(background_2)),
         )
     )
-    hp_torch = torch.from_numpy(hp.data.data)
+    hp_torch = torch.from_numpy(hp.data.data)[None]
     # repeat same signal in two backgrounds
-    hp_torch = hp_torch.repeat((2, 1))
+    hp_torch = hp_torch.repeat((1, 2, 1))
 
     target_network_snr = torch.tensor(
         [
-            10,
+            10.0,
         ]
     )
     reweighted_response = injection.reweight_snrs(

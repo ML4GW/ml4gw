@@ -9,6 +9,7 @@ from ml4gw.nn.resnet.resnet_2d import (
     ResNet2D,
     conv1,
 )
+from typecheck import no_typecheck
 
 
 @pytest.fixture(params=[3, 8])
@@ -153,7 +154,7 @@ def test_resnet(
         nn = architecture(
             in_channels, layers, kernel_size, stride_type=stride_type
         )
-    with pytest.raises(ValueError):
+    with no_typecheck(), pytest.raises(ValueError):
         stride_type = ["strife"] * (len(layers) - 1)
         nn = architecture(
             in_channels, layers, kernel_size, stride_type=stride_type

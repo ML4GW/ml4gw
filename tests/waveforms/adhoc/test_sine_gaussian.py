@@ -18,12 +18,12 @@ def duration(request):
 
 @pytest.fixture(params=[10.0, 55.0])
 def quality(request):
-    return torch.tensor(request.param, dtype=torch.float64)
+    return torch.tensor([request.param], dtype=torch.float64)
 
 
 @pytest.fixture(params=[100.0, 800.0])
 def frequency(request):
-    return torch.tensor(request.param, dtype=torch.float64)
+    return torch.tensor([request.param], dtype=torch.float64)
 
 
 # for amplitudes above ~7e-20, the difference between torch imp
@@ -31,17 +31,17 @@ def frequency(request):
 # discrep must be from numerical issues?
 @pytest.fixture(params=[1e-22, 7e-20])
 def hrss(request):
-    return torch.tensor(request.param, dtype=torch.float64)
+    return torch.tensor([request.param], dtype=torch.float64)
 
 
 @pytest.fixture(params=[0.0, np.pi / 2.0])
 def phase(request):
-    return torch.tensor(request.param, dtype=torch.float64)
+    return torch.tensor([request.param], dtype=torch.float64)
 
 
 @pytest.fixture(params=[0.0, 0.5, 1.0])
 def eccentricity(request):
-    return torch.tensor(request.param, dtype=torch.float64)
+    return torch.tensor([request.param], dtype=torch.float64)
 
 
 def test_sine_gaussian(

@@ -21,7 +21,7 @@ def norm(request):
     return request.param
 
 
-@pytest.fixture(params=[[64, 64], [64, 128]])
+@pytest.fixture(params=[(64, 64), (64, 128)])
 def spectrogram_shape(request):
     return request.param
 
@@ -112,12 +112,12 @@ def test_singleqtransform(
         assert np.allclose(t.numpy(), g, rtol=1e-3)
 
     transformed = qtransform(X, norm)
-    assert list(transformed.shape[-2:]) == spectrogram_shape
+    assert tuple(transformed.shape[-2:]) == spectrogram_shape
 
 
 def test_compute_qtiles_invalid_norm():
     qtransform = SingleQTransform(
-        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+        1, 1024, (64, 64), 12, frange=[0, torch.inf], mismatch=0.2
     )
     X = torch.randn(1024)
     with pytest.raises(ValueError, match="Invalid normalisation"):
@@ -126,7 +126,7 @@ def test_compute_qtiles_invalid_norm():
 
 def test_compute_qtiles_2d_input():
     qtransform = SingleQTransform(
-        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+        1, 1024, (64, 64), 12, frange=[0, torch.inf], mismatch=0.2
     )
     X = torch.randn(2, 1024)
     qtransform.compute_qtiles(X, norm=None)
@@ -135,7 +135,7 @@ def test_compute_qtiles_2d_input():
 
 def test_get_max_energy_invalid_dimension():
     qtransform = SingleQTransform(
-        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+        1, 1024, (64, 64), 12, frange=[0, torch.inf], mismatch=0.2
     )
     X = torch.randn(1024)
     qtransform.compute_qtiles(X, norm="median")
@@ -173,7 +173,7 @@ def test_get_qs(
 
 def test_get_max_energy_dimensions_and_fsearch():
     qtransform = SingleQTransform(
-        1, 1024, [64, 64], 12, frange=[0, torch.inf], mismatch=0.2
+        1, 1024, (64, 64), 12, frange=[0, torch.inf], mismatch=0.2
     )
 
     # pure tone at 200 Hz concentrates energy in that frequency band

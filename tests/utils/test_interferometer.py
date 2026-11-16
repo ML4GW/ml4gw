@@ -1,5 +1,6 @@
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.utils.interferometer import InterferometerGeometry
 
@@ -25,8 +26,11 @@ def test_arms_are_unit_vectors(name):
 
 @pytest.mark.parametrize("name", ["E1", "GEO600", "h1", ""])
 def test_invalid_name_raises(name):
-    with pytest.raises(
-        ValueError, match="is not recognized as an interferometer"
+    with (
+        no_typecheck(),
+        pytest.raises(
+            ValueError, match="is not recognized as an interferometer"
+        ),
     ):
         InterferometerGeometry(name)
 

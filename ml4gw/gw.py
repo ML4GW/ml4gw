@@ -10,7 +10,7 @@ Specifically code from
 """  # noqa E501
 
 import torch
-from jaxtyping import Float
+from jaxtyping import Bool, Float
 from torch import Tensor
 
 from .constants import C
@@ -24,6 +24,9 @@ from .types import (
     WaveformTensor,
 )
 from .utils.interferometer import InterferometerGeometry
+
+# A mask over the frequency bins of the FFT of ``responses``.
+FrequencyMask = Bool[Tensor, " {responses.shape[-1]//2+1}"]
 
 
 def outer(x: VectorGeometry, y: VectorGeometry) -> TensorGeometry:
@@ -273,8 +276,8 @@ def compute_ifo_snr(
     responses: WaveformTensor,
     asd: ASDTensor,
     sample_rate: float,
-    highpass: float | Float[Tensor, " frequency"] | None = None,
-    lowpass: float | Float[Tensor, " frequency"] | None = None,
+    highpass: float | FrequencyMask | None = None,
+    lowpass: float | FrequencyMask | None = None,
 ) -> Float[Tensor, "batch num_ifos"]:
     """Compute the SNRs of a batch of interferometer responses
 
@@ -397,8 +400,8 @@ def compute_network_snr(
     responses: WaveformTensor,
     asd: ASDTensor,
     sample_rate: float,
-    highpass: float | Float[Tensor, " frequency"] | None = None,
-    lowpass: float | Float[Tensor, " frequency"] | None = None,
+    highpass: float | FrequencyMask | None = None,
+    lowpass: float | FrequencyMask | None = None,
 ) -> BatchTensor:
     """
     Compute the total SNR from a gravitational waveform
@@ -457,8 +460,8 @@ def reweight_snrs(
     target_snrs: float | BatchTensor,
     asd: ASDTensor,
     sample_rate: float,
-    highpass: float | Float[Tensor, " frequency"] | None = None,
-    lowpass: float | Float[Tensor, " frequency"] | None = None,
+    highpass: float | FrequencyMask | None = None,
+    lowpass: float | FrequencyMask | None = None,
 ) -> WaveformTensor:
     """Scale interferometer responses such that they have a desired SNR
 

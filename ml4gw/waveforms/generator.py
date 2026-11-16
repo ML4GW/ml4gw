@@ -8,7 +8,7 @@ from torch import Tensor
 
 from ..constants import MSUN
 from ..transforms import IIRFilter
-from ..types import BatchTensor
+from ..types import BatchTensor, FrequencyDomainWaveform
 from .cbc import utils
 
 EXTRA_TIME_FRACTION = (
@@ -95,7 +95,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
 
         See https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/conditioning_subroutines.py?ref_type=heads#L10
         """  # noqa: E501
-        order = 8.0
+        order = 8
         w1 = np.tan(np.pi * (self.f_min) / self.sample_rate)
         attenuation = 0.99
         wc = w1 * (1.0 / attenuation**0.5 - 1) ** (1.0 / (2.0 * order))
@@ -108,14 +108,14 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
             ftype="butterworth",
         )
 
-    def get_frequencies(self, df: float):
+    def get_frequencies(self, df: float | Float[Tensor, ""]):
         """Get the frequencies from 0 to nyquist for corresponding df"""
         num_freqs = int(self.nyquist / df) + 1
         return torch.linspace(0, self.nyquist, num_freqs)
 
     def generate_conditioned_fd_waveform(
-        self, **parameters: dict[str, BatchTensor]
-    ) -> tuple[Float[Tensor, "{N} samples"], Float[Tensor, "{N} samples"]]:
+        self, **parameters: BatchTensor
+    ) -> tuple[FrequencyDomainWaveform, FrequencyDomainWaveform]:
         """
         Generate a conditioned frequency domain waveform from a
         frequency-domain approximant.
@@ -319,7 +319,7 @@ class TimeDomainCBCWaveformGenerator(torch.nn.Module):
     def forward(
         self,
         **parameters,
-    ) -> tuple[Float[Tensor, "{N} samples"], Float[Tensor, "{N} samples"]]:
+    ) -> tuple[Float[Tensor, "batch time"], Float[Tensor, "batch time"]]:
         """
         Generates a time-domain waveform from a frequency-domain approximant.
         Conditioning is based onhttps://git.ligo.org/lscsoft/lalsuite/-/blob/master/lalsimulation/python/lalsimulation/gwsignal/core/waveform_conditioning.py?ref_type=heads#L248

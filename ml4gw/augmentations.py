@@ -4,7 +4,7 @@ for augmenting timeseries data during training
 """
 
 import torch
-from jaxtyping import Float
+from jaxtyping import Float, Shaped
 from torch import Tensor
 
 
@@ -47,8 +47,8 @@ class SignalReverser(torch.nn.Module):
         self.prob = prob
 
     def forward(
-        self, X: Float[Tensor, "*batch time"]
-    ) -> Float[Tensor, "*batch time"]:
+        self, X: Shaped[Tensor, "*batch time"]
+    ) -> Shaped[Tensor, "*batch time"]:
         mask = torch.rand(size=X.shape[:-1]) < self.prob
         X[mask] = X[mask].flip(-1)
         return X

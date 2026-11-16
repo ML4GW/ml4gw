@@ -1,5 +1,6 @@
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.nn.ssm.s4d import S4D, S4DKernel, S4Model
 
@@ -77,5 +78,8 @@ def test_s4d_invalid_dropout_raises():
     with pytest.raises(ValueError, match="dropout must be"):
         S4D(d_model=4, d_state=16, dropout=1.5)
 
-    with pytest.raises(ValueError, match="dropout must be a float"):
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match="dropout must be a float"),
+    ):
         S4D(d_model=4, d_state=16, dropout=None)

@@ -1,5 +1,6 @@
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.nn.norm import (
     GroupNorm1D,
@@ -60,9 +61,9 @@ def test_matches_torch(norm_and_shape, num_groups, factor):
 
 def test_group_norm_1d_input_shape():
     norm = GroupNorm1D(4)
-    with pytest.raises(ValueError):
+    with no_typecheck(), pytest.raises(ValueError):
         norm(torch.randn(4, 1024))
-    with pytest.raises(ValueError):
+    with no_typecheck(), pytest.raises(ValueError):
         norm(torch.randn(1, 4, 16, 1024))
 
 

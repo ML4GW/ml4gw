@@ -1,5 +1,6 @@
 import warnings
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from os import PathLike
 
 import h5py
 import numpy as np
@@ -58,7 +59,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
 
     def __init__(
         self,
-        fnames: Sequence[str],
+        fnames: Sequence[str | PathLike],
         channels: Sequence[str],
         kernel_size: int,
         batch_size: int,
@@ -192,7 +193,7 @@ class Hdf5TimeSeriesDataset(torch.utils.data.IterableDataset):
                     x[b, c] = f[self.channels[c]][i : i + self.kernel_size]
         return torch.Tensor(x)
 
-    def __iter__(self) -> WaveformTensor:
+    def __iter__(self) -> Iterator[WaveformTensor]:
         worker_info = torch.utils.data.get_worker_info()
         if worker_info is None:
             num_batches = self.batches_per_epoch

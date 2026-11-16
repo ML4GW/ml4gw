@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.transforms.waveforms import WaveformProjector, WaveformSampler
 
@@ -25,7 +26,7 @@ def test_waveform_sampler(num_waveforms):
     # test that instantiating with different numbers of waveforms
     # for each polarization raises an error
     wrong = {str(i): torch.randn(i + 2, 1024) for i in range(2)}
-    with pytest.raises(ValueError) as exc:
+    with no_typecheck(), pytest.raises(ValueError) as exc:
         WaveformSampler(**wrong)
     assert str(exc.value).startswith("Polarization")
 
@@ -73,7 +74,7 @@ def test_waveform_sampler(num_waveforms):
             for i in range(num_parameters)
         ]
     )
-    with pytest.raises(ValueError) as exc:
+    with no_typecheck(), pytest.raises(ValueError) as exc:
         waveform_sampler = WaveformSampler(parameters=wrong, **waveforms)
     assert str(exc.value).startswith("Waveform parameters")
 

@@ -3,7 +3,7 @@ from jaxtyping import Float
 from torch import Tensor
 
 from ..spectral import fast_spectral_density, spectral_density
-from ..types import FrequencySeries1to3d, TimeSeries1to3d
+from ..types import SpectrumTensor, TimeSeries1to3d
 
 
 class SpectralDensity(torch.nn.Module):
@@ -92,8 +92,10 @@ class SpectralDensity(torch.nn.Module):
         self.fast = fast
 
     def forward(
-        self, x: TimeSeries1to3d, y: TimeSeries1to3d | None = None
-    ) -> FrequencySeries1to3d:
+        self,
+        x: TimeSeries1to3d,
+        y: TimeSeries1to3d | Float[Tensor, "batch time"] | None = None,
+    ) -> SpectrumTensor:
         if self.fast:
             return fast_spectral_density(
                 x,

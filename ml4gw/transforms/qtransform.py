@@ -1,12 +1,13 @@
 import math
 import warnings
+from collections.abc import Sequence
 
 import torch
 import torch.nn.functional as F
 from jaxtyping import Float
 from torch import Tensor
 
-from ..types import TimeSeries1to3d, TimeSeries3d
+from ..types import TimeSeries1to3d
 from .spline_interpolation import SplineInterpolate1D
 
 """
@@ -297,7 +298,9 @@ class SingleQTransform(torch.nn.Module):
         return torch.unique(freqs)
 
     def get_max_energy(
-        self, fsearch_range: list[float] = None, dimension: str = "both"
+        self,
+        fsearch_range: Sequence[float] | None = None,
+        dimension: str = "both",
     ):
         """
         Gets the maximum energy value among the QTiles. The maximum can
@@ -344,7 +347,7 @@ class SingleQTransform(torch.nn.Module):
     def compute_qtiles(
         self,
         X: TimeSeries1to3d,
-        norm: str = "median",
+        norm: str | None = "median",
     ) -> None:
         """
         Take the FFT of the input timeseries and calculate the transform
@@ -367,7 +370,7 @@ class SingleQTransform(torch.nn.Module):
 
         self.qtiles = results
 
-    def interpolate(self) -> TimeSeries3d:
+    def interpolate(self) -> Float[Tensor, "*batch frequency time"]:
         if self.qtiles is None:
             raise RuntimeError(
                 "Q-tiles must first be computed with .compute_qtiles()"
@@ -411,7 +414,7 @@ class SingleQTransform(torch.nn.Module):
     def forward(
         self,
         X: TimeSeries1to3d,
-        norm: str = "median",
+        norm: str | None = "median",
     ):
         """
         Compute the Q-tiles and interpolate
@@ -528,7 +531,7 @@ class QScan(torch.nn.Module):
         self,
         X: TimeSeries1to3d,
         fsearch_range: list[float] = None,
-        norm: str = "median",
+        norm: str | None = "median",
     ):
         """
         Compute the set of QTiles for each Q transform and determine which

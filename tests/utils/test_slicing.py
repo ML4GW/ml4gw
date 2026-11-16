@@ -3,6 +3,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 import torch
+from typecheck import no_typecheck
 
 from ml4gw.utils import slicing
 
@@ -149,7 +150,7 @@ def test_slice_kernels(kernel_size, num_channels):
     # ensure >3D slice raises error
     idx = idx[:, 0]
     X = X[None]
-    with pytest.raises(ValueError) as exc:
+    with no_typecheck(), pytest.raises(ValueError) as exc:
         slicing.slice_kernels(X, idx, kernel_size)
     assert str(exc.value).startswith("Can't slice kernels from tensor")
 
@@ -294,7 +295,10 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
     X = torch.stack([X + i * 1000 for i in range(batch_size)])
 
     # Ensure ndim <= 3 is enforced
-    with pytest.raises(ValueError, match=r"Can't sample kernels from tensor*"):
+    with (
+        no_typecheck(),
+        pytest.raises(ValueError, match=r"Can't sample kernels from tensor*"),
+    ):
         slicing.sample_kernels(X[None], kernel_size, N)
 
     # make sure that we enforce that we have enough data to sample
@@ -325,16 +329,12 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
         and kernel_size <= 2 * abs(max_center_offset)
     ):
         with pytest.raises(ValueError):
-            slicing.sample_kernels(
-                X, kernel_size, N, max_center_offset, coincident
-            )
+            slicing.sample_kernels(X, kernel_size, N, max_center_offset)
         return
 
     return_value = 7 * torch.arange(batch_size)
     with patch("torch.randint", return_value=return_value) as mock:
-        result = slicing.sample_kernels(
-            X, kernel_size, N, max_center_offset, coincident
-        )
+        result = slicing.sample_kernels(X, kernel_size, N, max_center_offset)
     assert result.shape == (batch_size, num_channels, kernel_size)
     result = result.cpu().numpy()
 
@@ -350,13 +350,8 @@ def test_sample_kernels_3D(kernel_size, num_channels, max_center_offset, N):
 
     for i, sample in enumerate(result):
         for j, channel in enumerate(sample):
-            if coincident:
-                start = i * 1007 + j * 100
-                stop = start + kernel_size
-            else:
-                start = i * 1007 + j * 101
-                stop = start + kernel_size
-
+            start = i * 1007 + j * 100
+            stop = start + kernel_size
             assert (channel == np.arange(start, stop)).all()
 
 

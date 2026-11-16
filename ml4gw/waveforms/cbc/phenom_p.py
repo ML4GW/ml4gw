@@ -4,11 +4,11 @@ https://github.com/tedwards2412/ripple/blob/main/src/ripplegw/waveforms/IMRPheno
 """
 
 import torch
-from jaxtyping import Float
+from jaxtyping import Complex, Float
 from torch import Tensor
 
 from ...constants import MPC_SEC, MTSUN_SI, PI
-from ...types import BatchTensor, FrequencySeries1d
+from ...types import BatchTensor, FrequencyDomainWaveform, FrequencySeries1d
 from ..conversion import (
     chirp_mass_and_mass_ratio_to_components,
     rotate_y,
@@ -199,17 +199,17 @@ class IMRPhenomPv2(IMRPhenomD):
     def PhenomPCoreTwistUp(
         self,
         fHz: FrequencySeries1d,
-        hPhenom: BatchTensor,
+        hPhenom: FrequencyDomainWaveform,
         eta: BatchTensor,
         chi1_l: BatchTensor,
         chi2_l: BatchTensor,
         chip: BatchTensor,
         M: BatchTensor,
         angcoeffs: dict[str, BatchTensor],
-        Y2m: BatchTensor,
+        Y2m: Complex[Tensor, "5 batch"],
         alphaoffset: BatchTensor,
         epsilonoffset: BatchTensor,
-    ) -> tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[FrequencyDomainWaveform, FrequencyDomainWaveform]:
         assert angcoeffs is not None
         assert Y2m is not None
         f = fHz * MTSUN_SI * M.unsqueeze(1)  # Frequency in geometric units
@@ -433,9 +433,9 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def L2PNR(
         self,
-        v: BatchTensor,
+        v: BatchTensor | Float[Tensor, "frequency batch"],
         eta: BatchTensor,
-    ) -> BatchTensor:
+    ) -> BatchTensor | Float[Tensor, "frequency batch"]:
         eta2 = eta**2
         x = v**2
         x2 = x**2
@@ -632,11 +632,13 @@ class IMRPhenomPv2(IMRPhenomD):
 
     def WignerdCoefficients(
         self,
-        v: BatchTensor,
+        v: Float[Tensor, "frequency batch"],
         SL: BatchTensor,
         eta: BatchTensor,
         Sp: BatchTensor,
-    ) -> tuple[BatchTensor, BatchTensor]:
+    ) -> tuple[
+        Float[Tensor, "batch frequency"], Float[Tensor, "batch frequency"]
+    ]:
         # We define the shorthand s := Sp / (L + SL)
         L = self.L2PNR(v, eta)
         s = (Sp / (L + SL)).mT
@@ -817,7 +819,9 @@ class IMRPhenomPv2(IMRPhenomD):
         ) / (1.0 - Erad)
         return fRD / M_s, fdamp / M_s
 
-    def get_Amp0(self, fM_s: BatchTensor, eta: BatchTensor) -> BatchTensor:
+    def get_Amp0(
+        self, fM_s: Float[Tensor, "batch frequency"], eta: BatchTensor
+    ) -> Float[Tensor, "batch frequency"]:
         Amp0 = (
             (2.0 / 3.0 * eta.unsqueeze(1)) ** (1.0 / 2.0)
             * (fM_s) ** (-7.0 / 6.0)

@@ -1,7 +1,8 @@
 import itertools
+from collections.abc import Iterator
 
 import torch
-from jaxtyping import Float
+from jaxtyping import Shaped
 from torch import Tensor
 
 from ..utils.slicing import slice_kernels
@@ -76,9 +77,9 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
     def __init__(
         self,
-        X: Float[Tensor, "channels time"],
+        X: Shaped[Tensor, "channels time"],
         kernel_size: int,
-        y: Float[Tensor, " time"] | None = None,
+        y: Shaped[Tensor, " time"] | None = None,
         batch_size: int = 32,
         stride: int = 1,
         batches_per_epoch: int | None = None,
@@ -208,10 +209,10 @@ class InMemoryDataset(torch.utils.data.IterableDataset):
 
     def __iter__(
         self,
-    ) -> (
-        Float[Tensor, "batch channel time"]
-        | tuple[Float[Tensor, "batch channel time"], Float[Tensor, " batch"]]
-    ):
+    ) -> Iterator[
+        Shaped[Tensor, "batch channel time"]
+        | tuple[Shaped[Tensor, "batch channel time"], Shaped[Tensor, " batch"]]
+    ]:
         indices = self.init_indices()
         for i in range(len(self)):
             # slice the array of _indices_ we'll be using to
