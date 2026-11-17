@@ -1,11 +1,17 @@
 import random
 
+import jaxtyping
 import numpy as np
 import pytest
 import torch
 from jaxtyping import TypeCheckError
 from scipy.special import erfinv
 from torch.distributions import Uniform
+
+# Install type checker hook prior to tests. Doing it here rather than with
+# --jaxtyping-packages in addopts in the pyproject.toml so that this doesn't
+# get applied to benchmarks.
+jaxtyping.install_import_hook("ml4gw", "typecheck.checker")
 
 TYPECHECK_HINT = """\
 The tests check every call against ml4gw's type hints (see tests/typecheck.py).

@@ -100,7 +100,6 @@ addopts = [
     "--benchmark-warmup-iterations=5",
     "--benchmark-sort=mean",
     "--benchmark-max-time=2.0",
-    "--jaxtyping-packages=ml4gw,typecheck.checker",
 ]
 
 [tool.coverage.run]
