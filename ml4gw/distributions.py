@@ -24,6 +24,10 @@ class Cosine(dist.Distribution):
     Cosine distribution based on
     ``torch.distributions.TransformedDistribution``
     (see `documentation <https://docs.pytorch.org/docs/stable/distributions.html#transformeddistribution>`_).
+
+    Arguments:
+        low: Lower bound on angle. Minimum value of -pi/2.
+        high: Upper bound on angle. Maximum value of pi/2.
     """  # noqa E501
 
     arg_constraints = {}
@@ -34,6 +38,13 @@ class Cosine(dist.Distribution):
         high: float = math.pi / 2,
         validate_args=None,
     ):
+        if low < -math.pi / 2 or high > math.pi / 2:
+            raise ValueError(
+                "Cosine distribution only supports angles between "
+                f"-pi/2 and pi/2; got low={low}, high={high}"
+            )
+        if low >= high:
+            raise ValueError("Lower bound must be less than upper bound")
         batch_shape = torch.Size()
         super().__init__(batch_shape, validate_args=validate_args)
         self.low = torch.as_tensor(low)
@@ -48,13 +59,17 @@ class Cosine(dist.Distribution):
     def log_prob(self, value: float) -> Float[Tensor, ""]:
         value = torch.as_tensor(value)
         inside_range = (value >= self.low) & (value <= self.high)
-        return (value.cos() * inside_range).log()
+        return (value.cos() * self.norm * inside_range).log()
 
 
 class Sine(dist.TransformedDistribution):
     """
     Sine distribution based on
     ``torch.distributions.TransformedDistribution``.
+
+    Arguments:
+        low: Lower bound on angle. Minimum value of 0.
+        high: Upper bound on angle. Maximum value of pi.
     """
 
     def __init__(
@@ -63,6 +78,13 @@ class Sine(dist.TransformedDistribution):
         high: float = math.pi,
         validate_args=None,
     ):
+        if low < 0 or high > math.pi:
+            raise ValueError(
+                "Sine distribution only supports angles between "
+                f"0 and pi; got low={low}, high={high}"
+            )
+        if low >= high:
+            raise ValueError("Lower bound must be less than upper bound")
         low = torch.as_tensor(low)
         high = torch.as_tensor(high)
         base_dist = Cosine(
