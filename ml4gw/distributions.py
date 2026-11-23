@@ -43,6 +43,8 @@ class Cosine(dist.Distribution):
                 "Cosine distribution only supports angles between "
                 f"-pi/2 and pi/2; got low={low}, high={high}"
             )
+        if low >= high:
+            raise ValueError("Lower bound must be less than upper bound")
         batch_shape = torch.Size()
         super().__init__(batch_shape, validate_args=validate_args)
         self.low = torch.as_tensor(low)
@@ -81,6 +83,8 @@ class Sine(dist.TransformedDistribution):
                 "Sine distribution only supports angles between "
                 f"0 and pi; got low={low}, high={high}"
             )
+        if low >= high:
+            raise ValueError("Lower bound must be less than upper bound")
         low = torch.as_tensor(low)
         high = torch.as_tensor(high)
         base_dist = Cosine(

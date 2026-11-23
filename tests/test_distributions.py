@@ -78,6 +78,15 @@ def test_sine(seed_everything):
     integral = torch.trapz(probs, angles)
     assert integral == pytest.approx(1, rel=1e-2)
 
+    with pytest.raises(
+        ValueError, match=r"Sine distribution only supports angles between"
+    ):
+        distributions.Sine(-3, 5)
+    with pytest.raises(
+        ValueError, match=r"Lower bound must be less than upper bound"
+    ):
+        distributions.Sine(5, -3)
+
 
 def test_cosine(seed_everything):
     sampler = distributions.Cosine()
@@ -99,6 +108,15 @@ def test_cosine(seed_everything):
     probs = torch.exp(log_probs)
     integral = torch.trapz(probs, angles)
     assert integral == pytest.approx(1, rel=1e-2)
+
+    with pytest.raises(
+        ValueError, match=r"Cosine distribution only supports angles between"
+    ):
+        distributions.Cosine(-3, 5)
+    with pytest.raises(
+        ValueError, match=r"Lower bound must be less than upper bound"
+    ):
+        distributions.Cosine(5, -3)
 
 
 def test_power_law(seed_everything):
