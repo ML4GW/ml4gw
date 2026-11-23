@@ -61,13 +61,22 @@ def test_sine(seed_everything):
     samples = sampler.sample((10,))
     assert len(samples) == 10
     assert ((0 <= samples) & (samples <= math.pi)).all()
+    # test correct normalization
+    eps = 1e-6
+    angles = torch.linspace(0 + eps, math.pi - eps, 1000)
+    log_probs = sampler.log_prob(angles)
+    probs = torch.exp(log_probs)
+    integral = torch.trapz(probs, angles)
+    assert integral == pytest.approx(1, rel=1e-2)
 
-    sampler = distributions.Sine(-3, 5)
-    samples = sampler.sample((100,))
-    assert len(samples) == 100
-    assert ((-3 <= samples) & (samples <= 5)).all()
-
-    assert torch.all(sampler.log_prob(torch.tensor([-4, 6])) == float("-inf"))
+    # test normalization on limited angle range
+    low, high = torch.pi / 4, torch.pi / 2
+    sampler = distributions.Sine(low, high)
+    angles = torch.linspace(low + eps, high - eps, 1000)
+    log_probs = sampler.log_prob(angles)
+    probs = torch.exp(log_probs)
+    integral = torch.trapz(probs, angles)
+    assert integral == pytest.approx(1, rel=1e-2)
 
 
 def test_cosine(seed_everything):
@@ -76,12 +85,20 @@ def test_cosine(seed_everything):
     assert len(samples) == 10
     assert ((-math.pi / 2 <= samples) & (samples <= math.pi / 2)).all()
 
-    sampler = distributions.Cosine(-3, 5)
-    samples = sampler.sample((100,))
-    assert len(samples) == 100
-    assert ((-3 <= samples) & (samples <= 5)).all()
+    # test correct normalization
+    eps = 1e-6
+    angles = torch.linspace(-math.pi / 2 + eps, math.pi / 2 - eps, 1000)
+    log_probs = sampler.log_prob(angles)
+    probs = torch.exp(log_probs)
+    integral = torch.trapz(probs, angles)
+    assert integral == pytest.approx(1, rel=1e-2)
 
-    assert torch.all(sampler.log_prob(torch.tensor([-4, 6])) == float("-inf"))
+    sampler = distributions.Cosine(0, math.pi / 2)
+    angles = torch.linspace(0, math.pi / 2 - eps, 1000)
+    log_probs = sampler.log_prob(angles)
+    probs = torch.exp(log_probs)
+    integral = torch.trapz(probs, angles)
+    assert integral == pytest.approx(1, rel=1e-2)
 
 
 def test_power_law(seed_everything):
